@@ -59,6 +59,105 @@ button {
   min-height: 100vh;
 }
 
+.auth-locked .app-shell {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: linear-gradient(135deg, #f7fafc 0%, #eef3f8 100%);
+}
+
+.login-screen[hidden] {
+  display: none;
+}
+
+.login-card {
+  width: min(430px, 100%);
+  display: grid;
+  gap: 14px;
+  padding: 30px;
+  border: 1px solid #dbe3ed;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(20, 32, 50, 0.16);
+}
+
+.login-card img {
+  width: 220px;
+  max-width: 100%;
+  height: auto;
+}
+
+.login-card h1,
+.login-card p {
+  margin: 0;
+}
+
+.login-card label {
+  display: grid;
+  gap: 6px;
+  color: #4b5563;
+  font-weight: 700;
+}
+
+.login-card input {
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid #cfd7e3;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.login-feedback {
+  min-height: 20px;
+  color: #b42318;
+  font-weight: 700;
+}
+
+.professional-session [data-admin-only] {
+  display: none;
+}
+
+.session-chip {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 2px 10px;
+  min-width: 150px;
+  padding: 8px 10px;
+  border: 1px solid #dbe3ed;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.session-chip span {
+  color: #1f2937;
+  font-weight: 800;
+}
+
+.session-chip small {
+  color: #687386;
+}
+
+.session-chip button {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #cfd7e3;
+  border-radius: 6px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -269,7 +368,7 @@ button {
   right: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: 222px minmax(0, 1fr);
+  grid-template-columns: 222px minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
   min-height: 78px;

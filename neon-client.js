@@ -23,8 +23,35 @@
 
   window.PhysiofitData = {
     enabled: true,
+    session: JSON.parse(localStorage.getItem("physiofit-auth-session") || "null"),
+    setSession(session) {
+      this.session = session;
+      if (session) localStorage.setItem("physiofit-auth-session", JSON.stringify(session));
+      else localStorage.removeItem("physiofit-auth-session");
+    },
+    authHeaders() {
+      return this.session?.token ? { Authorization: `Bearer ${this.session.token}` } : {};
+    },
     async health() {
       return request("/db-health");
+    },
+    async login(username, password) {
+      const data = await request("/auth", {
+        method: "POST",
+        body: JSON.stringify({ username, password }),
+      });
+      this.setSession(data);
+      return data;
+    },
+    async listUsers() {
+      return request("/auth-users", { headers: this.authHeaders() });
+    },
+    async updateUser(userId, payload) {
+      return request("/auth-users", {
+        method: "PATCH",
+        headers: this.authHeaders(),
+        body: JSON.stringify({ userId, ...payload }),
+      });
     },
     async loadState(key = "production") {
       try {

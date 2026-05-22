@@ -453,6 +453,7 @@ let state = loadState();
 let remoteStateReady = false;
 let applyingRemoteState = false;
 let remoteSaveTimer = null;
+let authSession = window.PhysiofitData?.session || null;
 let activePaymentFilter = "all";
 let agendaMode = "week";
 let currentWeekStart = parseLocalDate(demoToday);
@@ -3239,9 +3240,126 @@ function renderSettings() {
   Object.entries(state.settings).forEach(([key, value]) => {
     if (form.elements[key]) form.elements[key].value = value;
   });
+  renderAccessUsers();
+}
+
+function currentUser() {
+  return authSession?.user || null;
+}
+
+function isAdminSession() {
+  return currentUser()?.role === "Administrador";
+}
+
+function canAccessView(view) {
+  if (!currentUser()) return false;
+  if (isAdminSession()) return true;
+  return ["dashboard", "agenda", "records"].includes(view);
+}
+
+function applyAuthSession() {
+  const user = currentUser();
+  document.body.classList.toggle("auth-locked", !user);
+  document.body.classList.toggle("professional-session", Boolean(user && !isAdminSession()));
+  document.querySelector("#loginScreen").hidden = Boolean(user);
+  document.querySelector("#sessionChip").hidden = !user;
+  document.querySelector("#sessionUserName").textContent = user?.name || "Usuario";
+  document.querySelector("#sessionUserRole").textContent = user?.role || "";
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+  const feedback = document.querySelector("#loginFeedback");
+  feedback.textContent = "";
+
+  try {
+    const username = document.querySelector("#loginUsername").value.trim();
+    const password = document.querySelector("#loginPassword").value;
+    authSession = await window.PhysiofitData.login(username, password);
+    document.querySelector("#loginPassword").value = "";
+    applyAuthSession();
+    switchView(canAccessView(currentView()) ? currentView() : "dashboard");
+    toast(`Bem-vindo, ${currentUser().name}.`);
+  } catch (error) {
+    feedback.textContent = error.message || "Nao foi possivel entrar.";
+  }
+}
+
+function logout() {
+  authSession = null;
+  window.PhysiofitData?.setSession(null);
+  applyAuthSession();
+}
+
+function currentView() {
+  return document.querySelector(".view.active")?.id?.replace(/View$/, "") || "dashboard";
+}
+
+async function renderAccessUsers() {
+  const table = document.querySelector("#accessUsersTable");
+  if (!table || !isAdminSession()) return;
+
+  table.innerHTML = `<tr><td colspan="5"><div class="empty-state">Carregando usuarios...</div></td></tr>`;
+
+  try {
+    const users = await window.PhysiofitData.listUsers();
+    table.innerHTML = users.length
+      ? users
+          .map(
+            (user) => `
+              <tr>
+                <td><div class="patient-name"><strong>${user.name}</strong><span>${user.username}${user.email ? ` · ${user.email}` : ""}</span></div></td>
+                <td>${user.role}</td>
+                <td><span class="status-pill ${statusClass(user.status)}">${user.status}</span></td>
+                <td>${user.has_password ? "Configurada" : "Pendente"}</td>
+                <td>
+                  <div class="row-actions">
+                    <button class="row-action-button edit-icon-button" data-set-password="${user.id}" type="button" title="Definir senha">Senha</button>
+                    <button class="row-action-button ${user.status === "Ativo" ? "delete-icon-button" : "edit-icon-button"}" data-toggle-user="${user.id}" data-user-status="${user.status === "Ativo" ? "Inativo" : "Ativo"}" type="button">${user.status === "Ativo" ? "Bloquear" : "Ativar"}</button>
+                  </div>
+                </td>
+              </tr>
+            `,
+          )
+          .join("")
+      : `<tr><td colspan="5"><div class="empty-state">Nenhum usuario encontrado.</div></td></tr>`;
+  } catch (error) {
+    table.innerHTML = `<tr><td colspan="5"><div class="empty-state">${error.message}</div></td></tr>`;
+  }
+}
+
+async function setUserPassword(userId) {
+  const password = window.prompt("Digite a nova senha para este usuario:");
+  if (!password) return;
+  if (password.length < 6) {
+    toast("Use uma senha com pelo menos 6 caracteres.");
+    return;
+  }
+
+  try {
+    await window.PhysiofitData.updateUser(userId, { password });
+    await renderAccessUsers();
+    toast("Senha atualizada.");
+  } catch (error) {
+    toast(error.message || "Nao foi possivel atualizar a senha.");
+  }
+}
+
+async function toggleUserStatus(userId, status) {
+  try {
+    await window.PhysiofitData.updateUser(userId, { status });
+    await renderAccessUsers();
+    toast(status === "Ativo" ? "Usuario ativado." : "Usuario bloqueado.");
+  } catch (error) {
+    toast(error.message || "Nao foi possivel atualizar o usuario.");
+  }
 }
 
 function switchView(view) {
+  if (!canAccessView(view)) {
+    view = "dashboard";
+    if (currentUser()) toast("Seu perfil nao tem acesso a essa tela.");
+  }
   document.querySelectorAll(".view").forEach((element) => element.classList.remove("active"));
   document.querySelector(`#${view}View`).classList.add("active");
   openMenuGroup(menuGroupByView[view]);
@@ -3480,6 +3598,12 @@ document.addEventListener("click", (event) => {
   const deleteLeadButton = event.target.closest("[data-delete-lead]");
   if (deleteLeadButton) deleteLead(deleteLeadButton.dataset.deleteLead);
 
+  const setPasswordButton = event.target.closest("[data-set-password]");
+  if (setPasswordButton) setUserPassword(setPasswordButton.dataset.setPassword);
+
+  const toggleUserButton = event.target.closest("[data-toggle-user]");
+  if (toggleUserButton) toggleUserStatus(toggleUserButton.dataset.toggleUser, toggleUserButton.dataset.userStatus);
+
   const issueInvoiceButton = event.target.closest("[data-issue-invoice]");
   if (issueInvoiceButton) issueFiscalInvoice(issueInvoiceButton.dataset.issueInvoice);
 
@@ -3675,6 +3799,9 @@ document.querySelector("#settingsForm").addEventListener("submit", (event) => {
   saveState();
   toast("Configurações salvas.");
 });
+document.querySelector("#loginForm")?.addEventListener("submit", handleLogin);
+document.querySelector("#logoutButton")?.addEventListener("click", logout);
+document.querySelector("#refreshUsersButton")?.addEventListener("click", renderAccessUsers);
 
 document.querySelector("#copyPortalButton").addEventListener("click", async () => {
   await navigator.clipboard?.writeText("https://studioflow.local/agendar");
@@ -3688,5 +3815,6 @@ document.querySelector("#seedButton")?.addEventListener("click", () => {
   toast("Dados exemplo restaurados.");
 });
 
+applyAuthSession();
 render();
 hydrateStateFromNeon();

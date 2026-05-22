@@ -6,7 +6,19 @@
     <title>StudioFlow Pilates</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body class="auth-locked">
+    <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
+      <form class="login-card" id="loginForm">
+        <img src="assets/physiofit-logo.jpeg" alt="Physiofit Studio" />
+        <h1>Acesso ao sistema</h1>
+        <p>Entre com seu usuário e senha para continuar.</p>
+        <label>Usuário ou e-mail<input id="loginUsername" autocomplete="username" required /></label>
+        <label>Senha<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
+        <button class="primary-button success-button" type="submit">Entrar</button>
+        <span id="loginFeedback" class="login-feedback" role="alert"></span>
+        <small>Administrador inicial: usuário <strong>admin</strong>, senha <strong>Admin@123</strong>.</small>
+      </form>
+    </section>
     <div class="app-shell">
       <main class="workspace">
         <header class="topbar">
@@ -24,7 +36,7 @@
               </button>
             </div>
 
-            <div class="top-menu-group" data-menu-wrapper="crm">
+            <div class="top-menu-group" data-menu-wrapper="crm" data-admin-only>
               <button class="top-menu-button" data-view="crm" type="button">
                 <span class="menu-icon menu-icon-crm" aria-hidden="true"></span>
                 <span><strong>CRM</strong><small>Leads</small></span>
@@ -41,7 +53,7 @@
               </div>
             </div>
 
-            <div class="top-menu-group" data-menu-wrapper="registers">
+            <div class="top-menu-group" data-menu-wrapper="registers" data-admin-only>
               <button class="top-menu-button" data-top-menu-toggle="registers" type="button">
                 <span class="menu-icon menu-icon-registers" aria-hidden="true"></span>
                 <span><strong>Cadastros</strong><small>Dados base</small></span>
@@ -56,7 +68,7 @@
               </div>
             </div>
 
-            <div class="top-menu-group" data-menu-wrapper="finance">
+            <div class="top-menu-group" data-menu-wrapper="finance" data-admin-only>
               <button class="top-menu-button" data-top-menu-toggle="finance" type="button">
                 <span class="menu-icon menu-icon-finance" aria-hidden="true"></span>
                 <span><strong>Financeiro</strong><small>Cobranças</small></span>
@@ -82,7 +94,7 @@
               </div>
             </div>
 
-            <div class="top-menu-group" data-menu-wrapper="settings">
+            <div class="top-menu-group" data-menu-wrapper="settings" data-admin-only>
               <button class="top-menu-button" data-top-menu-toggle="settings" type="button">
                 <span class="menu-icon menu-icon-settings" aria-hidden="true"></span>
                 <span><strong>Configurações</strong><small>Estúdio</small></span>
@@ -92,6 +104,11 @@
               </div>
             </div>
           </nav>
+          <div class="session-chip" id="sessionChip" hidden>
+            <span id="sessionUserName">Usuário</span>
+            <small id="sessionUserRole">Perfil</small>
+            <button id="logoutButton" type="button">Sair</button>
+          </div>
         </header>
 
         <section class="view active" id="dashboardView" aria-labelledby="viewTitle">
@@ -1376,6 +1393,29 @@
                   <div class="portal-preview">
                     <p>Compartilhe este link em site, Instagram ou WhatsApp para novos agendamentos.</p>
                     <button class="ghost-button" id="copyPortalButton" type="button">Copiar link</button>
+                  </div>
+                </section>
+                <section class="panel access-panel">
+                  <div class="panel-heading">
+                    <div>
+                      <p class="eyebrow">Acesso</p>
+                      <h2>Usuários e senhas</h2>
+                    </div>
+                    <button class="ghost-button" id="refreshUsersButton" type="button">Atualizar</button>
+                  </div>
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Usuário</th>
+                          <th>Perfil</th>
+                          <th>Status</th>
+                          <th>Senha</th>
+                          <th>Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody id="accessUsersTable"></tbody>
+                    </table>
                   </div>
                 </section>
               </div>

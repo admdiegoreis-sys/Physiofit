@@ -5,7 +5,7 @@
   "description": "Sistema de gestao para studio de pilates, fisioterapia e funcional.",
   "scripts": {
     "build": "node scripts/create-env.js",
-    "check": "node --check app.js && node --check studio-data.js && node --check neon-client.js && node --check netlify/functions/db-health.mjs && node --check netlify/functions/records.mjs && node --check netlify/functions/app-state.mjs"
+    "check": "node --check app.js && node --check studio-data.js && node --check neon-client.js && node --check netlify/functions/db-health.mjs && node --check netlify/functions/records.mjs && node --check netlify/functions/app-state.mjs && node --check netlify/functions/auth.mjs && node --check netlify/functions/auth-users.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0"

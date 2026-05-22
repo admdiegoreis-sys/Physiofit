@@ -6,6 +6,20 @@ create table if not exists public.app_state (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.auth_users (
+  id text primary key,
+  professional_id text,
+  name text not null,
+  username text not null unique,
+  email text,
+  role text not null default 'Profissional',
+  status text not null default 'Ativo',
+  password_hash text,
+  must_change_password boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.studios (
   id text primary key default gen_random_uuid()::text,
   name text not null,
