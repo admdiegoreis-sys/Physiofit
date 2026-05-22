@@ -8,6 +8,7 @@ export const allowedTables = new Set([
   "financial_movements",
   "fiscal_invoices",
   "leads",
+  "lead_inbox",
   "modalities",
   "plans",
   "professionals",

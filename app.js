@@ -515,6 +515,10 @@ const menuGroupByView = {
   settings: "settings",
 };
 
+const leadStatuses = ["Novo lead", "Contato iniciado", "Respondido", "Visita agendada", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
+const leadChannels = ["WhatsApp", "Instagram", "E-mail", "Formulário do site", "Anúncio", "Presencial", "Atendimento presencial", "Outro"];
+const leadOrigins = ["WhatsApp", "Instagram", "Google", "Indicação", "Formulário do site", "Anúncio", "Presencial", "Parceria", "Outro"];
+
 const modalSchemas = {
   lead: {
     title: "Novo lead",
@@ -523,11 +527,15 @@ const modalSchemas = {
       { name: "name", label: "Nome", type: "text" },
       { name: "phone", label: "Telefone", type: "tel" },
       { name: "email", label: "Email", type: "email", required: false },
-      { name: "origin", label: "Origem", type: "select", options: ["Instagram", "Google", "Indicação", "WhatsApp", "Site", "Parceria", "Outro"], value: "Instagram" },
+      { name: "instagram", label: "Instagram", type: "text", required: false },
+      { name: "origin", label: "Origem do lead", type: "select", options: leadOrigins, value: "Instagram" },
+      { name: "entryChannel", label: "Canal de entrada", type: "select", options: leadChannels, value: "WhatsApp" },
       { name: "interest", label: "Interesse", type: "select", options: ["Pilates", "Fisioterapia", "RPG", "Funcional", "Avaliação", "Outro"], value: "Pilates" },
-      { name: "status", label: "Status", type: "select", options: ["Novo lead", "Primeiro contato", "Sem resposta", "Aula experimental agendada", "Aula experimental realizada", "Proposta enviada", "Fechado", "Perdido"], value: "Novo lead" },
+      { name: "status", label: "Status", type: "select", options: leadStatuses, value: "Novo lead" },
+      { name: "entryDate", label: "Data de entrada", type: "date", value: demoToday },
+      { name: "visitDate", label: "Data da visita", type: "date", value: "", required: false },
       { name: "ownerId", label: "Responsável", type: "professionalOptional" },
-      { name: "firstContactDate", label: "Primeiro contato", type: "date", value: demoToday },
+      { name: "initialMessage", label: "Mensagem inicial", type: "textarea", value: "", required: false },
       { name: "nextFollowUpDate", label: "Próximo follow-up", type: "date", value: demoToday },
       { name: "lossReason", label: "Motivo de perda", type: "select", options: ["", "Preço", "Horário incompatível", "Não respondeu", "Fechou com concorrente", "Desistiu", "Outro"], value: "", required: false },
       { name: "notes", label: "Observações", type: "textarea", value: "", required: false },
@@ -538,6 +546,30 @@ const modalSchemas = {
       const normalized = normalizeLead({ ...current, id: editingLeadId || uid("l"), ...values }, state.leads.length);
       if (editingLeadId) state.leads = state.leads.map((item) => (item.id === editingLeadId ? normalized : item));
       else state.leads.unshift(normalized);
+    },
+  },
+  leadVisit: {
+    title: "Visita presencial",
+    submit: "Registrar visita",
+    fields: [
+      { name: "name", label: "Nome", type: "text" },
+      { name: "phone", label: "Telefone", type: "tel" },
+      { name: "email", label: "Email", type: "email", required: false },
+      { name: "interest", label: "Interesse", type: "select", options: ["Pilates", "Fisioterapia", "RPG", "Funcional", "Avaliação", "Outro"], value: "Pilates" },
+      { name: "visitDate", label: "Data da visita", type: "date", value: demoToday },
+      { name: "ownerId", label: "Responsável", type: "professionalOptional" },
+      { name: "notes", label: "Observações", type: "textarea", value: "", required: false },
+    ],
+    handler: (values) => {
+      state.leads.unshift(normalizeLead({
+        id: uid("l"),
+        ...values,
+        origin: "Presencial",
+        entryChannel: "Atendimento presencial",
+        status: "Visita realizada",
+        entryDate: values.visitDate || demoToday,
+        history: `Visita presencial registrada em ${dateLabel(values.visitDate || demoToday)}.`,
+      }, state.leads.length));
     },
   },
   appointment: {
@@ -867,15 +899,28 @@ function normalizeProfessional(item, index) {
 
 function normalizeLead(item, index) {
   const defaults = seedLeads[index % seedLeads.length] ?? seedLeads[0] ?? {};
+  const legacyStatus = {
+    "Primeiro contato": "Contato iniciado",
+    "Sem resposta": "Contato iniciado",
+    "Aula experimental agendada": "Visita agendada",
+    "Aula experimental realizada": "Visita realizada",
+    Fechado: "Matriculado",
+  };
+  const status = legacyStatus[item.status || defaults.status] || item.status || defaults.status || "Novo lead";
   return {
     id: item.id || defaults.id || uid("l"),
     name: item.name || defaults.name || "",
     phone: item.phone || defaults.phone || "",
     email: item.email || defaults.email || "",
+    instagram: item.instagram || defaults.instagram || "",
     origin: item.origin || defaults.origin || "Outro",
+    entryChannel: item.entryChannel || item.channel || defaults.entryChannel || defaults.channel || item.origin || "WhatsApp",
+    initialMessage: item.initialMessage || item.message || defaults.initialMessage || defaults.message || "",
     interest: item.interest || defaults.interest || "Pilates",
-    status: item.status || defaults.status || "Novo lead",
+    status,
     ownerId: item.ownerId || defaults.ownerId || "",
+    entryDate: item.entryDate || defaults.entryDate || item.firstContactDate || defaults.firstContactDate || demoToday,
+    visitDate: item.visitDate || defaults.visitDate || "",
     firstContactDate: item.firstContactDate || defaults.firstContactDate || demoToday,
     nextFollowUpDate: item.nextFollowUpDate || defaults.nextFollowUpDate || demoToday,
     lossReason: item.lossReason || defaults.lossReason || "",
@@ -1540,12 +1585,11 @@ function renderCrm() {
   const leads = state.leads
     .filter((item) => statusFilter === "all" || item.status === statusFilter)
     .filter((item) => ownerFilter === "all" || item.ownerId === ownerFilter)
-    .filter((item) => originFilter === "all" || item.origin === originFilter)
-    .filter((item) => !term || normalizedText([item.name, item.phone, item.email, item.origin, item.interest, item.status, item.notes].join(" ")).includes(term))
+    .filter((item) => originFilter === "all" || item.origin === originFilter || item.entryChannel === originFilter)
+    .filter((item) => !term || normalizedText([item.name, item.phone, item.email, item.instagram, item.origin, item.entryChannel, item.interest, item.status, item.initialMessage, item.notes].join(" ")).includes(term))
     .sort((a, b) => dateValue(a.nextFollowUpDate) - dateValue(b.nextFollowUpDate));
 
-  const statuses = ["Novo lead", "Primeiro contato", "Sem resposta", "Aula experimental agendada", "Aula experimental realizada", "Proposta enviada", "Fechado", "Perdido"];
-  document.querySelector("#crmFunnel").innerHTML = statuses
+  document.querySelector("#crmFunnel").innerHTML = leadStatuses
     .map((status) => {
       const count = state.leads.filter((item) => item.status === status).length;
       return `<article class="crm-stage"><strong>${count}</strong><span>${status}</span></article>`;
@@ -1560,29 +1604,31 @@ function renderCrm() {
               <td>
                 <div class="row-actions">
                   <button class="row-action-button edit-icon-button" data-edit-lead="${lead.id}" type="button" title="Editar lead" aria-label="Editar lead">Ed</button>
-                  <button class="row-action-button edit-icon-button" data-schedule-lead="${lead.id}" type="button" title="Agendar experimental" aria-label="Agendar experimental">Ag</button>
-                  <button class="row-action-button edit-icon-button" data-convert-lead="${lead.id}" type="button" title="Converter em paciente" aria-label="Converter em paciente">Ok</button>
+                  <button class="row-action-button edit-icon-button" data-schedule-lead="${lead.id}" type="button" title="Agendar visita" aria-label="Agendar visita">Ag</button>
+                  <button class="row-action-button edit-icon-button" data-convert-lead="${lead.id}" type="button" title="Converter em aluno" aria-label="Converter em aluno">Ok</button>
                   <button class="row-action-button delete-icon-button" data-delete-lead="${lead.id}" type="button" title="Excluir lead" aria-label="Excluir lead">&times;</button>
                 </div>
               </td>
-              <td><div class="patient-name"><strong>${lead.name.toUpperCase()}</strong><span>${lead.phone || "-"} · ${lead.email || "-"}</span></div></td>
+              <td><div class="patient-name"><strong>${lead.name.toUpperCase()}</strong><span>${lead.phone || "-"} · ${lead.email || lead.instagram || "-"}</span></div></td>
+              <td>${lead.entryChannel || "-"}</td>
               <td>${lead.origin}</td>
               <td>${lead.interest}</td>
               <td><span class="status-pill ${leadStatusClass(lead.status)}">${lead.status}</span></td>
               <td>${professionalName(lead.ownerId)}</td>
-              <td>${dateLabel(lead.nextFollowUpDate)}</td>
+              <td>${dateLabel(lead.entryDate)}${lead.visitDate ? ` / ${dateLabel(lead.visitDate)}` : ""}</td>
               <td>${lead.lossReason || "-"}</td>
             </tr>
           `,
         )
         .join("")
-    : `<tr><td colspan="8"><div class="empty-state">Nenhum lead encontrado.</div></td></tr>`;
+    : `<tr><td colspan="9"><div class="empty-state">Nenhum lead encontrado.</div></td></tr>`;
+
 }
 
 function leadStatusClass(status) {
-  if (status === "Fechado") return "ativo";
-  if (status === "Perdido" || status === "Sem resposta") return "atrasado";
-  if (status.includes("experimental") || status === "Proposta enviada") return "pendente";
+  if (status === "Matriculado") return "ativo";
+  if (status === "Perdido") return "atrasado";
+  if (["Visita agendada", "Visita realizada", "Proposta enviada"].includes(status)) return "pendente";
   return "aguardando";
 }
 
@@ -1618,13 +1664,14 @@ function scheduleLead(leadId) {
     sessionKind: "Experimental",
   };
   state.appointments.push(appointment);
-  lead.status = "Aula experimental agendada";
+  lead.status = "Visita agendada";
+  lead.visitDate = appointment.date;
   lead.linkedStudentId = studentId;
   lead.linkedAppointmentId = appointment.id;
   lead.history = `${lead.history || ""}\nExperimental agendada para ${dateLabel(appointment.date)} às ${appointment.time}.`.trim();
   saveState();
   render();
-  toast("Experimental agendada a partir do CRM.");
+  toast("Visita agendada a partir da Central de Leads.");
 }
 
 function convertLead(leadId) {
@@ -1650,7 +1697,7 @@ function convertLead(leadId) {
     student.membership = "Matriculado";
     student.plan = lead.interest;
   }
-  lead.status = "Fechado";
+  lead.status = "Matriculado";
   lead.linkedStudentId = student.id;
   lead.history = `${lead.history || ""}\nLead convertido em paciente em ${dateLabel(demoToday)}.`.trim();
   saveState();
@@ -3371,6 +3418,7 @@ function switchView(view) {
   activeParent?.classList.add("active");
   document.querySelectorAll("[data-agenda-mode-target]").forEach((button) => button.classList.toggle("active", view === "agenda" && button.dataset.agendaModeTarget === agendaMode));
   closeTopMenus();
+  document.body.classList.remove("mobile-menu-open");
   document.querySelector("#viewTitle").textContent = viewTitles[view];
 }
 
@@ -3524,6 +3572,12 @@ function toast(message) {
 }
 
 document.addEventListener("click", (event) => {
+  const mobileMenuToggle = event.target.closest("#mobileMenuToggle");
+  if (mobileMenuToggle) {
+    document.body.classList.toggle("mobile-menu-open");
+    return;
+  }
+
   const topMenuToggle = event.target.closest("[data-top-menu-toggle]");
   if (topMenuToggle) {
     const group = topMenuToggle.closest(".top-menu-group");

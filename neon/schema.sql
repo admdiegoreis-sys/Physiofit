@@ -20,6 +20,16 @@ create table if not exists public.auth_users (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.lead_inbox (
+  id text primary key default gen_random_uuid()::text,
+  source text not null,
+  payload jsonb not null,
+  lead_id text,
+  status text not null default 'Recebido',
+  received_at timestamptz not null default now(),
+  converted_at timestamptz
+);
+
 create table if not exists public.studios (
   id text primary key default gen_random_uuid()::text,
   name text not null,
@@ -102,24 +112,23 @@ create table if not exists public.plans (
 
 create table if not exists public.leads (
   id text primary key default gen_random_uuid()::text,
-  studio_id text references public.studios(id) on delete cascade,
-  student_id text references public.students(id),
-  name text not null,
-  phone text,
+  nome text not null,
+  telefone text,
   email text,
-  origin text not null,
-  interest text not null,
+  instagram text,
+  origem_lead text not null default 'Outro',
+  canal_entrada text not null default 'Manual',
+  mensagem_inicial text,
+  interesse text,
   status text not null default 'Novo lead',
-  owner_id text references public.professionals(id),
-  first_contact_date date,
-  next_follow_up_date date,
-  loss_reason text,
-  notes text,
-  history text,
+  data_entrada date not null default current_date,
+  data_visita date,
+  responsavel text,
+  observacoes text,
+  historico jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
 create table if not exists public.enrollments (
   id text primary key default gen_random_uuid()::text,
   studio_id text references public.studios(id) on delete cascade,

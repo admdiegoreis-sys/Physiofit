@@ -9,20 +9,21 @@
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
       <form class="login-card" id="loginForm">
-        <img src="assets/physiofit-logo.jpeg" alt="Physiofit Studio" />
+        <img src="assets/physiofit-logo-white.jpeg" alt="Physiofit Studio" />
         <h1>Acesso ao sistema</h1>
         <p>Entre com seu usuário e senha para continuar.</p>
         <label>Usuário ou e-mail<input id="loginUsername" autocomplete="username" required /></label>
         <label>Senha<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
         <button class="primary-button success-button" type="submit">Entrar</button>
         <span id="loginFeedback" class="login-feedback" role="alert"></span>
-        <small>Administrador inicial: usuário <strong>admin</strong>, senha <strong>Admin@123</strong>.</small>
+        <small>Use as credenciais fornecidas pelo administrador do estudio.</small>
       </form>
     </section>
     <div class="app-shell">
       <main class="workspace">
         <header class="topbar">
           <div class="topbar-left">
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menu">☰</button>
             <button class="brand top-brand logo-brand" data-view-target="dashboard" type="button" aria-label="Physiofit Studio - início">
               <img src="assets/physiofit-logo-white.jpeg" alt="Physiofit Studio" />
             </button>
@@ -39,7 +40,7 @@
             <div class="top-menu-group" data-menu-wrapper="crm" data-admin-only>
               <button class="top-menu-button" data-view="crm" type="button">
                 <span class="menu-icon menu-icon-crm" aria-hidden="true"></span>
-                <span><strong>CRM</strong><small>Leads</small></span>
+                <span><strong>Leads</strong><small>Captação</small></span>
               </button>
             </div>
 
@@ -211,9 +212,12 @@
             <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Comercial</p>
-                <h2>CRM / Captação</h2>
+                <h2>Central de Captação de Leads</h2>
               </div>
-              <button class="primary-button success-button" data-open-modal="lead" type="button">Novo Lead</button>
+              <div class="module-actions">
+                <button class="ghost-button" data-open-modal="leadVisit" type="button">Visita presencial</button>
+                <button class="primary-button success-button" data-open-modal="lead" type="button">Novo Lead</button>
+              </div>
             </div>
 
             <div class="crm-funnel" id="crmFunnel"></div>
@@ -222,29 +226,30 @@
               <select id="leadStatusFilter" aria-label="Filtrar leads por status">
                 <option value="all">Todos os status</option>
                 <option>Novo lead</option>
-                <option>Primeiro contato</option>
-                <option>Sem resposta</option>
-                <option>Aula experimental agendada</option>
-                <option>Aula experimental realizada</option>
+                <option>Contato iniciado</option>
+                <option>Respondido</option>
+                <option>Visita agendada</option>
+                <option>Visita realizada</option>
                 <option>Proposta enviada</option>
-                <option>Fechado</option>
+                <option>Matriculado</option>
                 <option>Perdido</option>
               </select>
               <select id="leadOriginFilter" aria-label="Filtrar leads por origem">
                 <option value="all">Todas as origens</option>
-                <option>Instagram</option>
-                <option>Google</option>
-                <option>Indica??o</option>
                 <option>WhatsApp</option>
-                <option>Site</option>
-                <option>Parceria</option>
+                <option>Instagram</option>
+                <option>E-mail</option>
+                <option>Formulário do site</option>
+                <option>Anúncio</option>
+                <option>Presencial</option>
+                <option>Indicação</option>
                 <option>Outro</option>
               </select>
-              <select id="leadOwnerFilter" aria-label="Filtrar leads por respons?vel">
-                <option value="all">Todos os respons?veis</option>
+              <select id="leadOwnerFilter" aria-label="Filtrar leads por responsável">
+                <option value="all">Todos os responsáveis</option>
               </select>
               <div class="patient-search-row crm-search-row">
-                <input id="leadSearch" type="search" placeholder="Buscar por nome, telefone, origem ou interesse" />
+                <input id="leadSearch" type="search" placeholder="Buscar por nome, telefone, canal, origem ou interesse" />
                 <button class="action-button blue" id="leadSearchButton" type="button">Buscar</button>
               </div>
             </div>
@@ -253,13 +258,14 @@
               <table>
                 <thead>
                   <tr>
-                    <th>A??es</th>
+                    <th>Ações</th>
                     <th>Lead</th>
+                    <th>Canal</th>
                     <th>Origem</th>
                     <th>Interesse</th>
                     <th>Status</th>
-                    <th>Respons?vel</th>
-                    <th>Pr?ximo follow-up</th>
+                    <th>Responsável</th>
+                    <th>Entrada / visita</th>
                     <th>Motivo de perda</th>
                   </tr>
                 </thead>
@@ -1053,7 +1059,7 @@
                   <option value="all">Modalidades</option>
                 </select>
                 <div class="patient-search-row fiscal-search-row">
-                  <input id="fiscalSearch" type="search" placeholder="Buscar por aluno, CPF, servi?o ou nota" />
+                  <input id="fiscalSearch" type="search" placeholder="Buscar por aluno, CPF, serviço ou nota" />
                   <button class="action-button blue" id="fiscalSearchButton" type="button">Buscar</button>
                 </div>
               </div>
@@ -1061,13 +1067,13 @@
                 <table>
                   <thead>
                     <tr>
-                      <th>A??es</th>
+                      <th>Ações</th>
                       <th>Tomador</th>
-                      <th>Servi?o</th>
-                      <th>Compet?ncia</th>
+                      <th>Serviço</th>
+                      <th>Competência</th>
                       <th>Valor</th>
                       <th>Status</th>
-                      <th>N?mero / RPS</th>
+                      <th>Número / RPS</th>
                       <th>Retorno</th>
                     </tr>
                   </thead>

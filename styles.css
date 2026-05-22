@@ -91,9 +91,12 @@ button {
 }
 
 .login-card img {
-  width: 220px;
+  width: 260px;
   max-width: 100%;
   height: auto;
+  display: block;
+  padding: 6px 0;
+  background: #fff;
 }
 
 .login-card h1,
@@ -395,6 +398,18 @@ button {
   align-items: center;
   gap: 14px;
   min-width: 0;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  width: 42px;
+  min-height: 42px;
+  border: 1px solid #d8e0eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+  font-size: 1.3rem;
+  font-weight: 900;
 }
 
 .top-brand {
@@ -2505,7 +2520,7 @@ tr:last-child td {
   }
 
   .topbar {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: stretch;
   }
 
@@ -2615,7 +2630,7 @@ tr:last-child td {
 
 @media (max-width: 720px) {
   .workspace {
-    padding: 210px 0 18px;
+    padding: 92px 0 18px;
   }
 
   .topbar,
@@ -2630,20 +2645,57 @@ tr:last-child td {
   }
 
   .topbar {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    min-height: 72px;
+    padding: 10px 12px;
   }
 
   .topbar-left {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-grid;
+    place-items: center;
   }
 
   .top-menu {
-    display: grid;
+    position: fixed;
+    top: 74px;
+    left: 12px;
+    right: 12px;
+    z-index: 80;
+    display: none;
+    max-height: calc(100vh - 96px);
+    padding: 10px;
+    overflow: auto;
     grid-template-columns: 1fr;
+    border: 1px solid #dbe3ed;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+  }
+
+  .mobile-menu-open .top-menu {
+    display: grid;
+  }
+
+  .top-menu-panel {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    margin-top: 6px;
+    box-shadow: none;
   }
 
   .top-menu-button {
     width: 100%;
+  }
+
+  .session-chip {
+    min-width: 0;
+    padding: 6px 8px;
   }
 
   .module-body {
