@@ -14,7 +14,7 @@ create table if not exists public.profiles (
   auth_user_id uuid,
   name text not null,
   email text,
-  role text not null default 'Recepção',
+  role text not null default 'Recepcao',
   status text not null default 'Ativo',
   created_at timestamptz not null default now()
 );
@@ -135,6 +135,18 @@ create table if not exists public.appointments (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.suppliers (
+  id uuid primary key default gen_random_uuid(),
+  studio_id uuid references public.studios(id) on delete cascade,
+  name text not null,
+  document text,
+  email text,
+  phone text,
+  category text,
+  status text not null default 'Ativo',
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.chart_accounts (
   id uuid primary key default gen_random_uuid(),
   studio_id uuid references public.studios(id) on delete cascade,
@@ -150,6 +162,7 @@ create table if not exists public.financial_movements (
   id uuid primary key default gen_random_uuid(),
   studio_id uuid references public.studios(id) on delete cascade,
   student_id uuid references public.students(id),
+  supplier_id uuid references public.suppliers(id),
   supplier_name text,
   chart_account_id uuid references public.chart_accounts(id),
   direction text not null,
@@ -197,31 +210,7 @@ create table if not exists public.clinical_records (
   created_at timestamptz not null default now()
 );
 
-alter table public.studios enable row level security;
-alter table public.profiles enable row level security;
-alter table public.students enable row level security;
-alter table public.professionals enable row level security;
-alter table public.modalities enable row level security;
-alter table public.plans enable row level security;
-alter table public.leads enable row level security;
-alter table public.enrollments enable row level security;
-alter table public.appointments enable row level security;
-alter table public.chart_accounts enable row level security;
-alter table public.financial_movements enable row level security;
-alter table public.fiscal_invoices enable row level security;
-alter table public.clinical_records enable row level security;
-
--- Para desenvolvimento inicial. Antes de produção com login, substituir por políticas por perfil/studio.
-create policy "dev_read_all_studios" on public.studios for select using (true);
-create policy "dev_read_all_profiles" on public.profiles for select using (true);
-create policy "dev_read_all_students" on public.students for select using (true);
-create policy "dev_read_all_professionals" on public.professionals for select using (true);
-create policy "dev_read_all_modalities" on public.modalities for select using (true);
-create policy "dev_read_all_plans" on public.plans for select using (true);
-create policy "dev_read_all_leads" on public.leads for select using (true);
-create policy "dev_read_all_enrollments" on public.enrollments for select using (true);
-create policy "dev_read_all_appointments" on public.appointments for select using (true);
-create policy "dev_read_all_chart_accounts" on public.chart_accounts for select using (true);
-create policy "dev_read_all_financial_movements" on public.financial_movements for select using (true);
-create policy "dev_read_all_fiscal_invoices" on public.fiscal_invoices for select using (true);
-create policy "dev_read_all_clinical_records" on public.clinical_records for select using (true);
+create index if not exists idx_students_studio_name on public.students (studio_id, name);
+create index if not exists idx_appointments_date on public.appointments (studio_id, appointment_date, start_time);
+create index if not exists idx_financial_competence on public.financial_movements (studio_id, competence_date);
+create index if not exists idx_financial_paid on public.financial_movements (studio_id, paid_date);

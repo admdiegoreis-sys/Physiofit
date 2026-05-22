@@ -1,92 +1,108 @@
-# Publicação Online - Software Pilates
+# Publicacao Online - Physiofit Studio
 
-Este projeto está preparado para publicação como site estático no Netlify, com código versionado no GitHub e banco Supabase.
+Este projeto esta preparado para publicacao no Netlify, com codigo no GitHub e banco Postgres no Neon.
 
 ## 1. GitHub
 
-1. Criar um novo repositório no GitHub, por exemplo:
-   `software-pilates-physiofit`
-2. No terminal, dentro desta pasta, executar:
+Repositorio usado:
 
-```powershell
-git init
-git branch -M main
-git add .
-git commit -m "Preparar software pilates para deploy"
-git remote add origin https://github.com/SEU-USUARIO/software-pilates-physiofit.git
-git push -u origin main
+```text
+admdiegoreis-sys/Physiofit
 ```
 
-## 2. Supabase
+O Netlify deve ser conectado a esse repositorio para fazer deploy automatico sempre que houver push na branch `main`.
 
-1. Criar um projeto novo no Supabase.
-2. Abrir `SQL Editor`.
-3. Executar o arquivo:
-   `supabase/schema.sql`
-4. Copiar:
-   - `Project URL`
-   - `anon public key`
+## 2. Neon
 
-Esses dados são públicos para uso no navegador. Nunca usar a `service_role key` no frontend.
+1. No painel do Neon, abra o projeto criado.
+2. Acesse `SQL Editor`.
+3. Execute o arquivo:
+
+```text
+neon/schema.sql
+```
+
+4. Em `Connect`, copie a connection string do banco.
+
+Importante: a connection string do Neon contem usuario e senha. Ela nao deve ser colocada em `index.html`, `app.js`, `env.js` ou qualquer arquivo publico.
 
 ## 3. Netlify
 
-1. Entrar em Netlify.
-2. Criar novo projeto a partir do GitHub.
-3. Selecionar o repositório do sistema.
-4. Configurar:
-   - Build command: `node scripts/create-env.js`
-   - Publish directory: `.`
-5. Em `Site configuration > Environment variables`, criar:
+1. Crie um novo site a partir do GitHub.
+2. Selecione o repositorio `admdiegoreis-sys/Physiofit`.
+3. Configure:
 
 ```text
-SUPABASE_URL=https://SEU-PROJETO.supabase.co
-SUPABASE_ANON_KEY=sua-chave-anon-public
+Build command: node scripts/create-env.js
+Publish directory: .
+```
+
+4. Em `Site configuration > Environment variables`, crie:
+
+```text
+DATABASE_URL=postgresql://usuario:senha@host/neondb?sslmode=require
 APP_ENV=production
 ```
 
-6. Fazer o deploy.
+Nao crie `DATABASE_URL` como variavel publica no frontend. Ela deve ficar apenas no ambiente do Netlify, para ser usada pelas Functions.
 
-## 4. Como Funciona O Build
+## 4. Como Funciona
 
-O Netlify roda `node scripts/create-env.js`.
+O navegador carrega `neon-client.js`, que chama as APIs:
 
-Esse comando cria o arquivo `env.js` com as variáveis do Supabase:
-
-```js
-window.PHYSIOFIT_ENV = {
-  supabaseUrl: "...",
-  supabaseAnonKey: "...",
-  appEnv: "production"
-};
+```text
+/.netlify/functions/db-health
+/.netlify/functions/records
 ```
 
-O arquivo `env.js` não deve ser commitado. Ele está no `.gitignore`.
+Essas Functions rodam no servidor do Netlify e acessam o Neon com `process.env.DATABASE_URL`.
 
-## 5. Estado Atual Da Integração
+## 5. Teste De Conexao
 
-O app já carrega o cliente Supabase e detecta se a configuração existe.
+Depois do deploy, abra:
 
-Enquanto a persistência completa não for migrada, o sistema continua funcionando com dados locais do navegador e com a base importada em `studio-data.js`.
+```text
+https://SEU-SITE.netlify.app/.netlify/functions/db-health
+```
 
-Próxima etapa técnica:
+Resposta esperada:
 
-1. Criar login por perfil.
-2. Migrar leitura/gravação dos módulos para Supabase:
-   - CRM;
+```json
+{
+  "ok": true,
+  "provider": "neon"
+}
+```
+
+## 6. Estado Atual Da Integracao
+
+O projeto ja tem:
+
+- estrutura de banco no Neon;
+- Netlify Functions para testar conexao;
+- endpoint generico para leitura, inclusao, edicao e exclusao;
+- cliente frontend preparado para chamar as Functions.
+
+Proxima etapa tecnica:
+
+1. Migrar cada modulo do `studio-data.js`/localStorage para as tabelas do Neon.
+2. Comecar por cadastros essenciais:
    - alunos;
-   - agenda;
-   - matrículas;
-   - financeiro;
-   - NFS-e;
-   - prontuário.
-3. Substituir as políticas temporárias por regras por usuário e estúdio.
+   - profissionais;
+   - modalidades;
+   - planos;
+   - matriculas.
+3. Depois migrar agenda e financeiro.
+4. Por fim, criar login e permissoes por perfil.
 
-## 6. Validação Local
+## 7. Validacao Local
+
+Sem Netlify CLI, rode apenas a validacao de sintaxe:
 
 ```powershell
 node scripts/create-env.js
-npm run check
+node --check app.js
+node --check neon-client.js
+node --check netlify/functions/db-health.mjs
+node --check netlify/functions/records.mjs
 ```
-
-Depois abrir `index.html` no navegador.

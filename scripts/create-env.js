@@ -4,8 +4,7 @@ const path = require("node:path");
 const outputPath = path.join(__dirname, "..", "env.js");
 
 const publicConfig = {
-  supabaseUrl: process.env.SUPABASE_URL || "",
-  supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
+  apiBaseUrl: process.env.API_BASE_URL || "/.netlify/functions",
   appEnv: process.env.APP_ENV || "local",
 };
 
