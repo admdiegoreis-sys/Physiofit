@@ -26,6 +26,25 @@
     async health() {
       return request("/db-health");
     },
+    async loadState(key = "production") {
+      try {
+        const data = await request(`/app-state?key=${encodeURIComponent(key)}`);
+        return { data, error: null };
+      } catch (error) {
+        return { data: null, error };
+      }
+    },
+    async saveState(data, key = "production") {
+      try {
+        const result = await request(`/app-state?key=${encodeURIComponent(key)}`, {
+          method: "PUT",
+          body: JSON.stringify({ data }),
+        });
+        return { data: result, error: null };
+      } catch (error) {
+        return { data: null, error };
+      }
+    },
     async select(table, columns = "*", params = {}) {
       const search = new URLSearchParams({ table, columns, ...params });
 

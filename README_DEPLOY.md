@@ -53,6 +53,7 @@ O navegador carrega `neon-client.js`, que chama as APIs:
 ```text
 /.netlify/functions/db-health
 /.netlify/functions/records
+/.netlify/functions/app-state
 ```
 
 Essas Functions rodam no servidor do Netlify e acessam o Neon com `process.env.DATABASE_URL`.
@@ -81,11 +82,14 @@ O projeto ja tem:
 - estrutura de banco no Neon;
 - Netlify Functions para testar conexao;
 - endpoint generico para leitura, inclusao, edicao e exclusao;
+- endpoint `app-state` para persistir a base operacional completa no Neon;
 - cliente frontend preparado para chamar as Functions.
+
+Na primeira abertura do sistema publicado, se ainda nao existir estado salvo no Neon, o app envia a base real atual para `app_state`. Depois disso, alteracoes feitas no sistema passam a ser salvas novamente no Neon.
 
 Proxima etapa tecnica:
 
-1. Migrar cada modulo do `studio-data.js`/localStorage para as tabelas do Neon.
+1. Normalizar cada modulo do `app_state` para as tabelas especificas do Neon.
 2. Comecar por cadastros essenciais:
    - alunos;
    - profissionais;

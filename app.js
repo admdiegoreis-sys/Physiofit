@@ -450,6 +450,9 @@ function professionalIdByName(name) {
 }
 
 let state = loadState();
+let remoteStateReady = false;
+let applyingRemoteState = false;
+let remoteSaveTimer = null;
 let activePaymentFilter = "all";
 let agendaMode = "week";
 let currentWeekStart = parseLocalDate(demoToday);
@@ -1067,6 +1070,48 @@ function fixPortugueseText(value) {
 
 function saveState() {
   localStorage.setItem(storageKey, JSON.stringify(state));
+  queueRemoteStateSave();
+}
+
+function queueRemoteStateSave() {
+  if (!remoteStateReady || applyingRemoteState || !window.PhysiofitData?.saveState) return;
+
+  window.clearTimeout(remoteSaveTimer);
+  remoteSaveTimer = window.setTimeout(async () => {
+    const { error } = await window.PhysiofitData.saveState(state);
+    if (error) console.warn("Nao foi possivel sincronizar com o Neon.", error);
+  }, 600);
+}
+
+async function hydrateStateFromNeon() {
+  if (!window.PhysiofitData?.loadState || !window.PhysiofitData?.saveState) return;
+
+  const { data, error } = await window.PhysiofitData.loadState();
+
+  if (error) {
+    console.warn("Neon indisponivel. Usando dados locais.", error);
+    return;
+  }
+
+  if (data?.data) {
+    applyingRemoteState = true;
+    state = normalizeState(data.data);
+    localStorage.setItem(storageKey, JSON.stringify(state));
+    applyingRemoteState = false;
+    remoteStateReady = true;
+    render();
+    toast("Dados sincronizados com o Neon.");
+    return;
+  }
+
+  remoteStateReady = true;
+  const result = await window.PhysiofitData.saveState(state);
+  if (result.error) {
+    console.warn("Nao foi possivel fazer a carga inicial no Neon.", result.error);
+    return;
+  }
+
+  toast("Carga inicial enviada para o Neon.");
 }
 
 function uid(prefix) {
@@ -3644,3 +3689,4 @@ document.querySelector("#seedButton")?.addEventListener("click", () => {
 });
 
 render();
+hydrateStateFromNeon();

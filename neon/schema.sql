@@ -1,7 +1,13 @@
 create extension if not exists "pgcrypto";
 
+create table if not exists public.app_state (
+  key text primary key,
+  data jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.studios (
-  id uuid primary key default gen_random_uuid(),
+  id text primary key default gen_random_uuid()::text,
   name text not null,
   document text,
   phone text,
@@ -9,9 +15,9 @@ create table if not exists public.studios (
 );
 
 create table if not exists public.profiles (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
-  auth_user_id uuid,
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
+  auth_user_id text,
   name text not null,
   email text,
   role text not null default 'Recepcao',
@@ -20,8 +26,8 @@ create table if not exists public.profiles (
 );
 
 create table if not exists public.students (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
   name text not null,
   cpf text,
   rg text,
@@ -39,8 +45,8 @@ create table if not exists public.students (
 );
 
 create table if not exists public.professionals (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
   name text not null,
   document text,
   email text,
@@ -53,8 +59,8 @@ create table if not exists public.professionals (
 );
 
 create table if not exists public.modalities (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
   name text not null,
   max_patients integer default 1,
   single_value numeric(12,2) default 0,
@@ -64,9 +70,9 @@ create table if not exists public.modalities (
 );
 
 create table if not exists public.plans (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
-  modality_id uuid references public.modalities(id),
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
+  modality_id text references public.modalities(id),
   name text not null,
   plan_type text not null,
   sessions integer default 0,
@@ -81,16 +87,16 @@ create table if not exists public.plans (
 );
 
 create table if not exists public.leads (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
-  student_id uuid references public.students(id),
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
+  student_id text references public.students(id),
   name text not null,
   phone text,
   email text,
   origin text not null,
   interest text not null,
   status text not null default 'Novo lead',
-  owner_id uuid references public.professionals(id),
+  owner_id text references public.professionals(id),
   first_contact_date date,
   next_follow_up_date date,
   loss_reason text,
@@ -101,11 +107,11 @@ create table if not exists public.leads (
 );
 
 create table if not exists public.enrollments (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
-  student_id uuid references public.students(id) on delete cascade,
-  plan_id uuid references public.plans(id),
-  professional_id uuid references public.professionals(id),
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
+  student_id text references public.students(id) on delete cascade,
+  plan_id text references public.plans(id),
+  professional_id text references public.professionals(id),
   start_date date not null,
   end_date date,
   due_day integer,
@@ -118,11 +124,11 @@ create table if not exists public.enrollments (
 );
 
 create table if not exists public.appointments (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
-  student_id uuid references public.students(id),
-  professional_id uuid references public.professionals(id),
-  modality_id uuid references public.modalities(id),
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
+  student_id text references public.students(id),
+  professional_id text references public.professionals(id),
+  modality_id text references public.modalities(id),
   appointment_date date not null,
   start_time time not null,
   end_time time not null,
@@ -136,8 +142,8 @@ create table if not exists public.appointments (
 );
 
 create table if not exists public.suppliers (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
   name text not null,
   document text,
   email text,
@@ -148,8 +154,8 @@ create table if not exists public.suppliers (
 );
 
 create table if not exists public.chart_accounts (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
   name text not null,
   dre_structure text,
   dfc_group text,
@@ -159,12 +165,12 @@ create table if not exists public.chart_accounts (
 );
 
 create table if not exists public.financial_movements (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
-  student_id uuid references public.students(id),
-  supplier_id uuid references public.suppliers(id),
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
+  student_id text references public.students(id),
+  supplier_id text references public.suppliers(id),
   supplier_name text,
-  chart_account_id uuid references public.chart_accounts(id),
+  chart_account_id text references public.chart_accounts(id),
   direction text not null,
   status text not null default 'Aberto',
   competence_date date,
@@ -178,10 +184,10 @@ create table if not exists public.financial_movements (
 );
 
 create table if not exists public.fiscal_invoices (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
-  financial_movement_id uuid references public.financial_movements(id),
-  student_id uuid references public.students(id),
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
+  financial_movement_id text references public.financial_movements(id),
+  student_id text references public.students(id),
   number text,
   rps text,
   service text,
@@ -200,10 +206,10 @@ create table if not exists public.fiscal_invoices (
 );
 
 create table if not exists public.clinical_records (
-  id uuid primary key default gen_random_uuid(),
-  studio_id uuid references public.studios(id) on delete cascade,
-  student_id uuid references public.students(id) on delete cascade,
-  professional_id uuid references public.professionals(id),
+  id text primary key default gen_random_uuid()::text,
+  studio_id text references public.studios(id) on delete cascade,
+  student_id text references public.students(id) on delete cascade,
+  professional_id text references public.professionals(id),
   record_date date not null,
   title text not null,
   note text,
