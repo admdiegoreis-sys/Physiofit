@@ -1,0 +1,9 @@
+node_modules/
+.netlify/
+env.js
+.env
+.env.*
+!.env.example
+*.log
+Thumbs.db
+desktop.ini

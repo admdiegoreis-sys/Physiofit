@@ -1,0 +1,1406 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudioFlow Pilates</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <main class="workspace">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="brand top-brand logo-brand" data-view-target="dashboard" type="button" aria-label="Physiofit Studio - início">
+              <img src="assets/physiofit-logo-white.jpeg" alt="Physiofit Studio" />
+            </button>
+            <h1 id="viewTitle" class="sr-only">Painel de controle</h1>
+          </div>
+          <nav class="top-menu" aria-label="Menu principal">
+            <div class="top-menu-group" data-menu-wrapper="dashboard">
+              <button class="top-menu-button active" data-view="dashboard" type="button">
+                <span class="menu-icon menu-icon-dashboard" aria-hidden="true"></span>
+                <span><strong>Início</strong><small>Resumo</small></span>
+              </button>
+            </div>
+
+            <div class="top-menu-group" data-menu-wrapper="crm">
+              <button class="top-menu-button" data-view="crm" type="button">
+                <span class="menu-icon menu-icon-crm" aria-hidden="true"></span>
+                <span><strong>CRM</strong><small>Leads</small></span>
+              </button>
+            </div>
+
+            <div class="top-menu-group" data-menu-wrapper="sessions">
+              <button class="top-menu-button" data-top-menu-toggle="sessions" type="button">
+                <span class="menu-icon menu-icon-agenda" aria-hidden="true"></span>
+                <span><strong>Agenda</strong><small>Sessões</small></span>
+              </button>
+              <div class="top-menu-panel">
+                <button class="top-menu-option" data-view="agenda" data-agenda-mode-target="week" type="button">Calendário</button>
+              </div>
+            </div>
+
+            <div class="top-menu-group" data-menu-wrapper="registers">
+              <button class="top-menu-button" data-top-menu-toggle="registers" type="button">
+                <span class="menu-icon menu-icon-registers" aria-hidden="true"></span>
+                <span><strong>Cadastros</strong><small>Dados base</small></span>
+              </button>
+              <div class="top-menu-panel">
+                <button class="top-menu-option" data-view="students" type="button">Alunos/Pacientes</button>
+                <button class="top-menu-option" data-view="enrollments" type="button">Matrículas</button>
+                <button class="top-menu-option" data-view="professionals" type="button">Profissionais</button>
+                <button class="top-menu-option" data-view="suppliers" type="button">Fornecedores</button>
+                <button class="top-menu-option" data-view="modalities" type="button">Modalidades</button>
+                <button class="top-menu-option" data-view="plans" type="button">Planos</button>
+              </div>
+            </div>
+
+            <div class="top-menu-group" data-menu-wrapper="finance">
+              <button class="top-menu-button" data-top-menu-toggle="finance" type="button">
+                <span class="menu-icon menu-icon-finance" aria-hidden="true"></span>
+                <span><strong>Financeiro</strong><small>Cobranças</small></span>
+              </button>
+              <div class="top-menu-panel">
+                <button class="top-menu-option" data-view="monthlyPayments" type="button">Mensalidades</button>
+                <button class="top-menu-option" data-view="fiscal" type="button">NFS-e</button>
+                <button class="top-menu-option" data-view="accounts" type="button">Contas a Pagar/Receber</button>
+                <button class="top-menu-option" data-view="cashFlow" type="button">Fluxo de Caixa</button>
+                <button class="top-menu-option" data-view="dre" type="button">DRE</button>
+                <button class="top-menu-option" data-view="chartAccounts" type="button">Plano de Contas</button>
+                <button class="top-menu-option" data-view="finance" type="button">Recebimentos e Cobranças</button>
+              </div>
+            </div>
+
+            <div class="top-menu-group" data-menu-wrapper="records">
+              <button class="top-menu-button" data-top-menu-toggle="records" type="button">
+                <span class="menu-icon menu-icon-records" aria-hidden="true"></span>
+                <span><strong>Prontuário</strong><small>Evolução</small></span>
+              </button>
+              <div class="top-menu-panel">
+                <button class="top-menu-option" data-view="records" type="button">Prontuário e Presenças</button>
+              </div>
+            </div>
+
+            <div class="top-menu-group" data-menu-wrapper="settings">
+              <button class="top-menu-button" data-top-menu-toggle="settings" type="button">
+                <span class="menu-icon menu-icon-settings" aria-hidden="true"></span>
+                <span><strong>Configurações</strong><small>Estúdio</small></span>
+              </button>
+              <div class="top-menu-panel">
+                <button class="top-menu-option" data-view="settings" type="button">Configurações</button>
+              </div>
+            </div>
+          </nav>
+        </header>
+
+        <section class="view active" id="dashboardView" aria-labelledby="viewTitle">
+          <div class="executive-hero">
+            <div>
+              <p class="eyebrow">Resumo executivo</p>
+              <h2>Visão geral do estúdio</h2>
+              <span id="executiveSummary">Carregando indicadores...</span>
+            </div>
+            <div class="executive-actions">
+              <button class="primary-button" data-view-target="agenda" type="button">Abrir agenda</button>
+              <button class="ghost-button" data-view-target="students" type="button">Ver pacientes</button>
+            </div>
+          </div>
+
+          <div class="metric-grid">
+            <article class="metric">
+              <strong id="activeStudentsMetric">0</strong>
+              <small>com plano vigente</small>
+            </article>
+            <article class="metric">
+              <strong id="todayClassesMetric">0</strong>
+              <small>agenda operacional</small>
+            </article>
+            <article class="metric">
+              <strong id="monthRevenueMetric">R$ 0</strong>
+              <small>pagamentos recebidos</small>
+            </article>
+            <article class="metric">
+              <strong id="openInvoicesMetric">R$ 0</strong>
+              <small>cobranças pendentes</small>
+            </article>
+            <article class="metric">
+              <strong id="occupancyMetric">0%</strong>
+              <small>capacidade estimada</small>
+            </article>
+            <article class="metric">
+              <strong id="activeProfessionalsMetric">0</strong>
+              <small>disponíveis na agenda</small>
+            </article>
+            <article class="metric">
+              <strong id="activePlansMetric">0</strong>
+              <small>ofertas comerciais</small>
+            </article>
+            <article class="metric">
+              <strong id="confirmedRateMetric">0%</strong>
+              <small>aulas confirmadas</small>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Hoje</p>
+                  <h2>Próximas aulas</h2>
+                </div>
+                <button class="ghost-button" data-view-target="agenda" type="button">Ver agenda</button>
+              </div>
+              <div class="timeline" id="todayTimeline"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Atenção</p>
+                  <h2>Pendências</h2>
+                </div>
+              </div>
+              <div class="alert-list" id="alertsList"></div>
+            </section>
+          </div>
+
+          <div class="dashboard-grid dashboard-grid-secondary">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Financeiro</p>
+                  <h2>Resumo de recebimentos</h2>
+                </div>
+                <button class="ghost-button" data-view-target="finance" type="button">Ver financeiro</button>
+              </div>
+              <div class="finance-summary" id="dashboardFinanceSummary"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Operação</p>
+                  <h2>Modalidades e agenda</h2>
+                </div>
+              </div>
+              <div class="dashboard-list" id="modalitySummaryList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="crmView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-header compact-header">
+              <div>
+                <p class="eyebrow">Comercial</p>
+                <h2>CRM / Captação</h2>
+              </div>
+              <button class="primary-button success-button" data-open-modal="lead" type="button">Novo Lead</button>
+            </div>
+
+            <div class="crm-funnel" id="crmFunnel"></div>
+
+            <div class="patient-toolbar crm-toolbar">
+              <select id="leadStatusFilter" aria-label="Filtrar leads por status">
+                <option value="all">Todos os status</option>
+                <option>Novo lead</option>
+                <option>Primeiro contato</option>
+                <option>Sem resposta</option>
+                <option>Aula experimental agendada</option>
+                <option>Aula experimental realizada</option>
+                <option>Proposta enviada</option>
+                <option>Fechado</option>
+                <option>Perdido</option>
+              </select>
+              <select id="leadOriginFilter" aria-label="Filtrar leads por origem">
+                <option value="all">Todas as origens</option>
+                <option>Instagram</option>
+                <option>Google</option>
+                <option>Indica??o</option>
+                <option>WhatsApp</option>
+                <option>Site</option>
+                <option>Parceria</option>
+                <option>Outro</option>
+              </select>
+              <select id="leadOwnerFilter" aria-label="Filtrar leads por respons?vel">
+                <option value="all">Todos os respons?veis</option>
+              </select>
+              <div class="patient-search-row crm-search-row">
+                <input id="leadSearch" type="search" placeholder="Buscar por nome, telefone, origem ou interesse" />
+                <button class="action-button blue" id="leadSearchButton" type="button">Buscar</button>
+              </div>
+            </div>
+
+            <div class="table-wrap crm-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>A??es</th>
+                    <th>Lead</th>
+                    <th>Origem</th>
+                    <th>Interesse</th>
+                    <th>Status</th>
+                    <th>Respons?vel</th>
+                    <th>Pr?ximo follow-up</th>
+                    <th>Motivo de perda</th>
+                  </tr>
+                </thead>
+                <tbody id="leadsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="agendaView" aria-labelledby="viewTitle">
+          <div class="agenda-module">
+            <div class="agenda-titlebar">
+              <h2>Agenda</h2>
+              <div class="agenda-actions">
+                <button class="action-button blue" data-open-modal="appointment" type="button">Experimental</button>
+                <button class="action-button green" data-open-modal="appointment" type="button">Avulsa</button>
+                <button class="action-button purple" data-open-modal="block" type="button">Bloqueio</button>
+              </div>
+            </div>
+
+            <div class="agenda-filters">
+              <select id="modalityFilter">
+                <option value="all">Modalidades</option>
+                <option>Pilates aparelho</option>
+                <option>Pilates solo</option>
+                <option>Fisioterapia</option>
+                <option>Reposição</option>
+              </select>
+              <select id="sessionFilter">
+                <option value="all">Todas Sessões/Atendimentos</option>
+                <option>Experimental</option>
+                <option>Avulso</option>
+                <option>Mensalidade</option>
+              </select>
+              <select id="statusFilter">
+                <option value="all">Todas Ativas</option>
+                <option>Confirmada</option>
+                <option>Aguardando</option>
+                <option>Concluída</option>
+              </select>
+              <select id="roomFilter">
+                <option value="all">Salas</option>
+                <option>Sala Reformer</option>
+                <option>Sala Cadillac</option>
+                <option>Sala Clínica</option>
+                <option>Sala Solo</option>
+              </select>
+              <select id="teacherFilter">
+                <option value="all">-- [ Profissional ] --</option>
+                <option>Marina</option>
+                <option>Lucas</option>
+                <option>Renata</option>
+              </select>
+              <select id="groupFilter">
+                <option>Agrupado Dia/Semana/Mês</option>
+                <option>Por profissional</option>
+                <option>Por sala</option>
+              </select>
+              <div class="agenda-search-row">
+                <input id="agendaSearch" type="search" placeholder="Buscar por Nome ou Email Aluno/Paciente" />
+                <button class="action-button blue" id="agendaSearchButton" type="button">Buscar</button>
+              </div>
+              <button class="action-button navy agenda-list-toggle" id="agendaListToggle" type="button">Agenda em Lista</button>
+            </div>
+
+            <div class="calendar-shell">
+              <div class="calendar-top">
+                <div class="calendar-nav">
+                  <button class="nav-square" id="prevWeek" type="button">&lt;</button>
+                  <button class="nav-square" id="nextWeek" type="button">&gt;</button>
+                  <button class="today-button" id="todayButton" type="button">Hoje</button>
+                </div>
+                <h2 id="calendarRange">11 - 15 de mai. de 2026</h2>
+                <div class="calendar-modes" role="group" aria-label="Modo da agenda">
+                  <button class="mode-button active" data-agenda-mode="week" type="button">Semana</button>
+                  <button class="mode-button" data-agenda-mode="day" type="button">Dia</button>
+                  <button class="mode-button" data-agenda-mode="month" type="button">Mês</button>
+                </div>
+              </div>
+              <div id="scheduleBoard"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="studentsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastros</p>
+                <h2>Pacientes</h2>
+              </div>
+              <div class="module-actions">
+                <button class="primary-button success-button" id="newPatientButton" type="button">Novo Paciente</button>
+                <button class="ghost-button" type="button">Exportar</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <div class="patient-toolbar">
+                <select id="studentStatusFilter" aria-label="Filtrar por status">
+                  <option value="all">Todos</option>
+                  <option value="Ativo" selected>Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                </select>
+                <select id="studentLimitFilter" aria-label="Limite de pacientes">
+                  <option value="50">Limitar em 50</option>
+                  <option value="100">Limitar em 100</option>
+                  <option value="all">Todos os registros</option>
+                </select>
+                <div class="patient-search-row">
+                  <input id="studentSearch" type="search" placeholder="Nome, CPF, celular, email ou responsáveis" />
+                  <button class="action-button blue" id="studentSearchButton" type="button">Buscar</button>
+                </div>
+              </div>
+              <div class="table-wrap patients-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Paciente</th>
+                      <th>Status</th>
+                      <th>Email / Celular</th>
+                      <th>CPF</th>
+                      <th>Data Nasc.</th>
+                    </tr>
+                  </thead>
+                  <tbody id="studentsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="patientEditorView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastro</p>
+                <h2 id="patientEditorTitle">Paciente</h2>
+              </div>
+              <div class="module-actions">
+                <button class="ghost-button" id="backToPatientsButton" type="button">Voltar</button>
+                <button class="primary-button success-button" form="patientEditorForm" type="submit">Salvar cadastro</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <div class="patient-editor-tabs" role="tablist" aria-label="Abas do cadastro do paciente">
+                <button class="patient-tab active" data-patient-tab="personal" type="button">Dados pessoais</button>
+                <button class="patient-tab" data-patient-tab="contact" type="button">Contato e endereço</button>
+                <button class="patient-tab" data-patient-tab="registration" type="button">Matrícula</button>
+                <button class="patient-tab" data-patient-tab="clinical" type="button">Saúde / prontuário</button>
+                <button class="patient-tab" data-patient-tab="responsibles" type="button">Responsáveis</button>
+              </div>
+
+              <form id="patientEditorForm" class="patient-editor-form">
+                <section class="patient-tab-panel active" data-patient-panel="personal">
+                  <div class="form-section-heading">
+                    <h3>Identificação</h3>
+                  </div>
+                  <div class="editor-grid">
+                    <label class="wide">Nome completo<input name="name" required /></label>
+                    <label>CPF<input name="cpf" /></label>
+                    <label>Data de nascimento<input name="birthDate" type="date" /></label>
+                    <label>Sexo
+                      <select name="gender">
+                        <option value="F">Feminino</option>
+                        <option value="M">Masculino</option>
+                      </select>
+                    </label>
+                    <label>Status
+                      <select name="status">
+                        <option>Ativo</option>
+                        <option>Inativo</option>
+                      </select>
+                    </label>
+                    <label>Profissão<input name="profession" /></label>
+                    <label>Origem do cadastro<input name="origin" placeholder="Instagram, indicação, site..." /></label>
+                  </div>
+                </section>
+
+                <section class="patient-tab-panel" data-patient-panel="contact">
+                  <div class="form-section-heading">
+                    <h3>Contato e endereço</h3>
+                  </div>
+                  <div class="editor-grid">
+                    <label>Email<input name="email" type="email" /></label>
+                    <label>Celular<input name="phone" /></label>
+                    <label>Telefone alternativo<input name="alternatePhone" /></label>
+                    <label>CEP<input name="zip" /></label>
+                    <label class="wide">Endereço<input name="address" /></label>
+                    <label>Número<input name="addressNumber" /></label>
+                    <label>Bairro<input name="neighborhood" /></label>
+                    <label>Cidade<input name="city" /></label>
+                    <label>UF<input name="stateCode" maxlength="2" /></label>
+                  </div>
+                </section>
+
+                <section class="patient-tab-panel" data-patient-panel="registration">
+                  <div class="form-section-heading">
+                    <h3>Matrícula e plano</h3>
+                  </div>
+                  <div class="editor-grid">
+                    <label>Matrícula
+                      <select name="membership">
+                        <option>Matriculado</option>
+                        <option>Matrículas</option>
+                        <option>Matr. Cancel.</option>
+                        <option>Avulsa</option>
+                      </select>
+                    </label>
+                    <label>Plano
+                      <select name="plan" data-plan-select>
+                        <option>Mensal 2x semana</option>
+                        <option>Mensal livre</option>
+                        <option>Fisioterapia</option>
+                        <option>Experimental</option>
+                        <option>Aula avulsa</option>
+                      </select>
+                    </label>
+                    <label>Data da matrícula<input name="registrationDate" type="date" /></label>
+                    <label>Última presença<input name="lastPresence" type="date" /></label>
+                    <label class="wide">Observações comerciais<textarea name="commercialNotes" rows="4"></textarea></label>
+                  </div>
+                </section>
+
+                <section class="patient-tab-panel" data-patient-panel="clinical">
+                  <div class="form-section-heading">
+                    <h3>Saúde / prontuário</h3>
+                  </div>
+                  <div class="editor-grid">
+                    <label class="wide">Objetivo do paciente<textarea name="clinicalGoal" rows="3"></textarea></label>
+                    <label class="wide">Restrições / dores / contraindicações<textarea name="restrictions" rows="3"></textarea></label>
+                    <label class="wide">Medicamentos / observações de saúde<textarea name="medication" rows="3"></textarea></label>
+                    <label>Altura<input name="height" placeholder="Ex.: 1,70" /></label>
+                    <label>Peso<input name="weight" placeholder="Ex.: 68 kg" /></label>
+                  </div>
+                </section>
+
+                <section class="patient-tab-panel" data-patient-panel="responsibles">
+                  <div class="form-section-heading">
+                    <h3>Responsáveis e emergência</h3>
+                  </div>
+                  <div class="editor-grid">
+                    <label class="wide">Responsável financeiro<input name="responsible" /></label>
+                    <label>Contato do responsável<input name="responsiblePhone" /></label>
+                    <label>Contato de emergência<input name="emergencyContact" /></label>
+                    <label>Telefone de emergência<input name="emergencyPhone" /></label>
+                    <label class="wide">Observações gerais<textarea name="notes" rows="4"></textarea></label>
+                  </div>
+                </section>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="professionalsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastros</p>
+                <h2>Profissionais</h2>
+              </div>
+              <button class="primary-button success-button" id="newProfessionalButton" type="button">Novo Profissional</button>
+            </div>
+            <div class="module-body">
+              <div class="patient-toolbar">
+                <select id="professionalStatusFilter" aria-label="Filtrar profissionais por status">
+                  <option value="all">Todos</option>
+                  <option value="Ativo" selected>Ativos</option>
+                  <option value="Inativo">Inativos</option>
+                </select>
+                <div class="patient-search-row professionals-search-row">
+                  <input id="professionalSearch" type="search" placeholder="Buscar por professores/instrutores" />
+                  <button class="action-button blue" id="professionalSearchButton" type="button">Buscar</button>
+                </div>
+              </div>
+              <div class="table-wrap professionals-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Nome</th>
+                      <th>Email</th>
+                      <th>Celular</th>
+                      <th>Máx. Pacientes</th>
+                      <th>Cor</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="professionalsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="professionalEditorView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastro</p>
+                <h2 id="professionalEditorTitle">Profissional</h2>
+              </div>
+              <div class="module-actions">
+                <button class="ghost-button" id="backToProfessionalsButton" type="button">Voltar</button>
+                <button class="primary-button success-button" form="professionalEditorForm" type="submit">Salvar profissional</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <div class="professional-summary-card">
+                <h2 id="professionalSummaryName">Profissional</h2>
+                <strong id="professionalSummaryDocument">CREFITO: -</strong>
+                <span id="professionalSummaryPhone">Celular: -</span>
+              </div>
+
+              <div class="professional-editor-tabs" role="tablist" aria-label="Abas do cadastro do profissional">
+                <button class="professional-tab active" data-professional-tab="register" type="button">Cadastro</button>
+                <button class="professional-tab" data-professional-tab="modalities" type="button">Vincular Modalidades</button>
+                <button class="professional-tab" data-professional-tab="signature" type="button">Assinatura Virtual</button>
+                <button class="professional-tab" data-professional-tab="linked" type="button">Matrículas Vinculadas</button>
+              </div>
+
+              <form id="professionalEditorForm" class="patient-editor-form">
+                <section class="professional-tab-panel active" data-professional-panel="register">
+                  <div class="form-section-heading">
+                    <h3>Dados do profissional</h3>
+                  </div>
+                  <div class="editor-grid">
+                    <label class="wide">Nome completo<input name="name" required /></label>
+                    <label>Email<input name="email" type="email" /></label>
+                    <label>Celular<input name="phone" /></label>
+                    <label>CREFITO / Documento<input name="document" /></label>
+                    <label>Função<input name="role" /></label>
+                    <label>Máx. pacientes<input name="maxPatients" type="number" min="1" max="30" /></label>
+                    <label>Status
+                      <select name="status">
+                        <option>Ativo</option>
+                        <option>Inativo</option>
+                      </select>
+                    </label>
+                    <label>Cor da agenda<input name="color" type="color" /></label>
+                    <label class="wide">Observações<textarea name="notes" rows="4"></textarea></label>
+                  </div>
+                </section>
+
+                <section class="professional-tab-panel" data-professional-panel="modalities">
+                  <div class="form-section-heading">
+                    <h3>Modalidades e comissão</h3>
+                  </div>
+                  <div class="editor-grid">
+                    <label class="wide">Modalidades vinculadas<input name="modalities" placeholder="Pilates, Fisioterapia, Avaliação" /></label>
+                    <label>Comissão (%)<input name="commission" type="number" min="0" max="100" /></label>
+                    <label>Valor hora<input name="hourValue" placeholder="R$ 0,00" /></label>
+                    <label class="wide">Dados de comissão<textarea name="commissionNotes" rows="4"></textarea></label>
+                  </div>
+                </section>
+
+                <section class="professional-tab-panel" data-professional-panel="signature">
+                  <div class="form-section-heading">
+                    <h3>Assinatura virtual</h3>
+                  </div>
+                  <div class="editor-grid">
+                    <label class="wide">Nome para assinatura<input name="signatureName" /></label>
+                    <label>Registro profissional<input name="signatureDocument" /></label>
+                    <label>Status da assinatura
+                      <select name="signatureStatus">
+                        <option>Não configurada</option>
+                        <option>Configurada</option>
+                      </select>
+                    </label>
+                    <label class="wide">Texto de rodapé da assinatura<textarea name="signatureFooter" rows="4"></textarea></label>
+                  </div>
+                </section>
+              </form>
+
+              <section class="professional-tab-panel" data-professional-panel="linked">
+                <div class="linked-enrollments-toolbar">
+                  <select id="linkedEnrollmentFilter">
+                    <option>Matrículas Ativas</option>
+                    <option>Todas as Matrículas</option>
+                    <option>Matrículas Canceladas</option>
+                  </select>
+                  <label class="transfer-check"><input id="transferProfessionalCheck" type="checkbox" /> Transferir Profissional</label>
+                </div>
+                <div class="table-wrap linked-enrollments-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Nome Pacientes</th>
+                        <th>Data Inscrição</th>
+                        <th>Valor Matrícula</th>
+                        <th>Forma Pagamento</th>
+                        <th>Modalidade</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="linkedEnrollmentsTable"></tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="enrollmentsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastros</p>
+                <h2>Matr?culas <span class="title-note">[Assinaturas]</span></h2>
+              </div>
+              <div class="title-actions">
+                <button class="primary-button success-button" data-open-modal="enrollment" type="button">Nova Matr?cula</button>
+                <button class="secondary-button" type="button">Exportar</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <div class="patient-toolbar enrollment-toolbar">
+                <select id="enrollmentModalityFilter">
+                  <option value="all">Modalidades</option>
+                </select>
+                <select id="enrollmentStatusFilter">
+                  <option value="activeAndExpired">Ativos e Vencidos</option>
+                  <option value="Ativa">Ativos</option>
+                  <option value="Pendente">Pendentes</option>
+                  <option value="Suspensa">Suspensas</option>
+                  <option value="Cancelada">Canceladas</option>
+                  <option value="all">Todas</option>
+                </select>
+                <select id="enrollmentLimitFilter">
+                  <option value="50">Limitar em 50</option>
+                  <option value="100">Limitar em 100</option>
+                  <option value="all">Todas</option>
+                </select>
+                <select id="enrollmentRoomFilter">
+                  <option value="all">-[Sala]-</option>
+                </select>
+                <select id="enrollmentProfessionalFilter">
+                  <option value="all">-- [ Profissional ] --</option>
+                </select>
+                <select id="enrollmentPlanTypeFilter">
+                  <option value="all">-[Tipo Plano]-</option>
+                </select>
+                <select id="enrollmentDateFilter">
+                  <option value="registration">Data de Matr?cula</option>
+                  <option value="due">Data de Vencimento</option>
+                </select>
+                <div class="patient-search-row">
+                  <input id="enrollmentSearch" type="search" placeholder="Buscar por Nome de Alunos/Pacientes e Respons?veis" />
+                  <button class="action-button blue" id="enrollmentSearchButton" type="button">Buscar</button>
+                  <button class="action-button light-blue" type="button">Avan?ado</button>
+                </div>
+              </div>
+              <div class="table-wrap enrollments-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>A?es</th>
+                      <th>Paciente</th>
+                      <th>Profissional</th>
+                      <th>Modalidade<br />Sala</th>
+                      <th>Data<br />Matr?cula</th>
+                      <th>Dia<br />Venc.</th>
+                      <th>Valor<br />Mensalidade</th>
+                      <th>Plano /<br />Contrato</th>
+                      <th>Vencimento</th>
+                      <th>Sess?es</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="enrollmentsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="suppliersView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastros</p>
+                <h2>Fornecedores</h2>
+              </div>
+              <button class="primary-button success-button" data-open-modal="supplier" type="button">Novo Fornecedor</button>
+            </div>
+            <div class="module-body">
+              <div class="patient-toolbar">
+                <select id="supplierStatusFilter">
+                  <option value="Ativo">Ativos</option>
+                  <option value="Inativo">Inativos</option>
+                  <option value="all">Todos</option>
+                </select>
+                <div class="patient-search-row">
+                  <input id="supplierSearch" type="search" placeholder="Buscar por fornecedor, CPF/CNPJ ou telefone" />
+                  <button class="action-button blue" id="supplierSearchButton" type="button">Buscar</button>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Ações</th>
+                      <th>Fornecedor</th>
+                      <th>CPF/CNPJ</th>
+                      <th>Tipo</th>
+                      <th>Lançamentos</th>
+                      <th>Total Pago</th>
+                      <th>Último Movimento</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="suppliersTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="modalitiesView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastros</p>
+                <h2>Modalidades / Serviços</h2>
+              </div>
+              <button class="primary-button success-button" id="newModalityButton" type="button">Nova Modalidade</button>
+            </div>
+            <div class="module-body">
+              <div class="patient-toolbar">
+                <select id="modalityStatusListFilter" aria-label="Filtrar modalidades por status">
+                  <option value="all">Todos</option>
+                  <option value="Ativo" selected>Ativos</option>
+                  <option value="Inativo">Inativos</option>
+                </select>
+                <div class="patient-search-row professionals-search-row">
+                  <input id="modalitySearch" type="search" placeholder="Buscar por Modalidades" />
+                  <button class="action-button blue" id="modalitySearchButton" type="button">Buscar</button>
+                </div>
+              </div>
+              <div class="table-wrap modalities-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Modalidade / Serviço</th>
+                      <th>Máx. Pacientes</th>
+                      <th>Wellhub / TotalPass</th>
+                      <th>Valor Exp<br />Avulsa/Livre</th>
+                      <th>Cadastrado em</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="modalitiesTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="modalityEditorView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastro</p>
+                <h2 id="modalityEditorTitle">Modalidade / Serviço</h2>
+              </div>
+              <div class="module-actions">
+                <button class="ghost-button" id="backToModalitiesButton" type="button">Voltar</button>
+                <button class="primary-button success-button" form="modalityEditorForm" type="submit">Salvar modalidade</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <form id="modalityEditorForm" class="patient-editor-form">
+                <div class="form-section-heading">
+                  <h3>Dados da modalidade</h3>
+                </div>
+                <div class="editor-grid">
+                  <label class="wide">Nome da modalidade / serviço<input name="name" required /></label>
+                  <label>Máx. pacientes<input name="maxPatients" type="number" min="1" max="30" /></label>
+                  <label>Status
+                    <select name="status">
+                      <option>Ativo</option>
+                      <option>Inativo</option>
+                    </select>
+                  </label>
+                  <label>Cor<input name="color" type="color" /></label>
+                  <label>Valor experimental<input name="experimentalValue" type="number" min="0" step="0.01" /></label>
+                  <label>Valor avulsa/livre<input name="singleValue" type="number" min="0" step="0.01" /></label>
+                  <label><span>Wellhub</span><select name="wellhub"><option value="false">Não</option><option value="true">Sim</option></select></label>
+                  <label><span>TotalPass</span><select name="totalPass"><option value="false">Não</option><option value="true">Sim</option></select></label>
+                  <label class="wide">Observações<textarea name="notes" rows="4"></textarea></label>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="plansView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastros</p>
+                <h2>Planos</h2>
+              </div>
+              <button class="primary-button success-button" id="newPlanButton" type="button">Inserir Plano</button>
+            </div>
+            <div class="module-body">
+              <div class="patient-toolbar">
+                <select id="planStatusFilter" aria-label="Filtrar planos por status">
+                  <option value="all">Todos</option>
+                  <option value="Ativo" selected>Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                </select>
+                <div class="patient-search-row professionals-search-row">
+                  <input id="planSearch" type="search" placeholder="Buscar por Planos" />
+                  <button class="action-button blue" id="planSearchButton" type="button">Buscar</button>
+                </div>
+              </div>
+              <div class="table-wrap plans-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Plano</th>
+                      <th>Modalidade</th>
+                      <th>Tipo de Plano</th>
+                      <th>Valor</th>
+                      <th>Matrículas Vinculadas</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="plansTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="planEditorView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Cadastro</p>
+                <h2 id="planEditorTitle">Plano</h2>
+              </div>
+              <div class="module-actions">
+                <button class="ghost-button" id="backToPlansButton" type="button">Voltar</button>
+                <button class="primary-button success-button" form="planEditorForm" type="submit">Salvar plano</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <form id="planEditorForm" class="patient-editor-form">
+                <div class="form-section-heading">
+                  <h3>Dados do plano</h3>
+                </div>
+                <div class="editor-grid">
+                  <label class="wide">Nome do plano<input name="name" required /></label>
+                  <label>Modalidade
+                    <select name="modalityId" data-modality-select required></select>
+                  </label>
+                  <label>Tipo de plano
+                    <select name="type">
+                      <option>Mensalidade</option>
+                      <option>Pacote de Sessão</option>
+                      <option>Avulsa / Livre</option>
+                      <option>Trimestralidade</option>
+                      <option>Semestralidade</option>
+                    </select>
+                  </label>
+                  <label>Valor<input name="value" type="number" min="0" step="0.01" /></label>
+                  <label>Sessões inclusas<input name="sessions" type="number" min="0" /></label>
+                  <label>Matrículas vinculadas<input name="linkedEnrollments" type="number" min="0" /></label>
+                  <label>Status
+                    <select name="status">
+                      <option>Ativo</option>
+                      <option>Inativo</option>
+                    </select>
+                  </label>
+                  <label class="wide">Observações<textarea name="notes" rows="4"></textarea></label>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="monthlyPaymentsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Financeiro / Mensalidades</h2>
+              </div>
+              <button class="ghost-button" type="button">Imprimir / Salvar</button>
+            </div>
+            <div class="module-body">
+              <div class="monthly-toolbar">
+                <button class="nav-square" id="prevMonthlyPeriod" type="button">&lt;</button>
+                <select id="monthlyPeriodFilter" aria-label="Período de mensalidades">
+                  <option value="2026-05" selected>maio/2026</option>
+                  <option value="2026-04">abril/2026</option>
+                  <option value="2026-06">junho/2026</option>
+                </select>
+                <button class="nav-square" id="nextMonthlyPeriod" type="button">&gt;</button>
+                <select id="monthlyPaidFilter">
+                  <option value="all">Ver Pago?</option>
+                  <option value="Pago">Pagos</option>
+                  <option value="Atrasado">Atrasados</option>
+                  <option value="Aguardando">Em dia</option>
+                  <option value="Cortesia">Cortesia</option>
+                </select>
+                <select id="monthlyMembershipFilter">
+                  <option value="all">Matrículas Ativas/Finalizados</option>
+                  <option value="Ativo">Ativas</option>
+                  <option value="Inativo">Finalizadas</option>
+                </select>
+                <select id="monthlyModalityFilter">
+                  <option value="all">Modalidades</option>
+                </select>
+                <select id="monthlyInvoiceFilter">
+                  <option value="all">Notas Fiscais</option>
+                  <option>Com nota</option>
+                  <option>Sem nota</option>
+                </select>
+                <select id="monthlyReceiptFilter">
+                  <option value="all">- [Recebimento] -</option>
+                  <option>Pix</option>
+                  <option>Cartão de Débito</option>
+                  <option>Cartão de Crédito</option>
+                  <option>Cortesia</option>
+                </select>
+                <select id="monthlyTeacherFilter">
+                  <option value="all">-- [ Professor(a)/Instrutor(a) ] --</option>
+                </select>
+                <select id="monthlyExternalFilter">
+                  <option value="all">-- [ Pag. Externo ] --</option>
+                  <option>Asaas</option>
+                  <option>Manual</option>
+                </select>
+                <div class="patient-search-row monthly-search-row">
+                  <input id="monthlySearch" type="search" placeholder="Buscar pelo nome Aluno/Paciente" />
+                  <button class="action-button blue" id="monthlySearchButton" type="button">Buscar</button>
+                </div>
+              </div>
+
+              <div class="table-wrap monthly-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Nome Paciente</th>
+                      <th>Vencimento</th>
+                      <th>Status</th>
+                      <th>Matrícula</th>
+                      <th>Data Pagamento</th>
+                      <th>Valor Receber</th>
+                      <th>Valor Recebido</th>
+                    </tr>
+                  </thead>
+                  <tbody id="monthlyPaymentsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="fiscalView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Emissão de NFS-e</h2>
+              </div>
+              <div class="title-actions">
+                <button class="primary-button" id="issueSelectedInvoicesButton" type="button">Emitir pendentes</button>
+                <button class="ghost-button" type="button">Exportar</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <div class="fiscal-summary" id="fiscalSummary"></div>
+              <div class="accounts-toolbar fiscal-toolbar">
+                <select id="fiscalStatusFilter">
+                  <option value="all">Todos os status</option>
+                  <option>Pendente</option>
+                  <option>Enviada</option>
+                  <option>Autorizada</option>
+                  <option>Rejeitada</option>
+                  <option>Cancelada</option>
+                </select>
+                <select id="fiscalModalityFilter">
+                  <option value="all">Modalidades</option>
+                </select>
+                <div class="patient-search-row fiscal-search-row">
+                  <input id="fiscalSearch" type="search" placeholder="Buscar por aluno, CPF, servi?o ou nota" />
+                  <button class="action-button blue" id="fiscalSearchButton" type="button">Buscar</button>
+                </div>
+              </div>
+              <div class="table-wrap fiscal-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>A??es</th>
+                      <th>Tomador</th>
+                      <th>Servi?o</th>
+                      <th>Compet?ncia</th>
+                      <th>Valor</th>
+                      <th>Status</th>
+                      <th>N?mero / RPS</th>
+                      <th>Retorno</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fiscalTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="accountsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Contas a Pagar/Receber</h2>
+              </div>
+              <div class="title-actions">
+                <button class="primary-button" data-open-modal="account" type="button">Adicionar Conta</button>
+                <button class="ghost-button" id="importXmlButton" type="button">Importar XML</button>
+                <button class="ghost-button" type="button">Imprimir / Salvar</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <input id="xmlFileInput" type="file" accept=".xml,text/xml,application/xml" hidden />
+              <div class="accounts-toolbar">
+                <select id="accountPeriodType">
+                  <option>Mês/Ano Competência</option>
+                  <option>Data de Vencimento</option>
+                  <option>Data de Baixa</option>
+                </select>
+                <input id="accountDateRange" type="text" value="01/05/2026 - 31/05/2026" aria-label="Período" />
+                <select id="accountMonthFilter">
+                  <option value="2026-05">maio/2026</option>
+                  <option value="2026-04">abril/2026</option>
+                  <option value="2026-06">junho/2026</option>
+                </select>
+                <select id="accountDirectionFilter">
+                  <option value="all">Pagar/Receber</option>
+                  <option value="Pagar">Pagar</option>
+                  <option value="Receber">Receber</option>
+                </select>
+                <select id="accountStatusFilter">
+                  <option value="all">Todos (Pagos e Não Pagos)</option>
+                  <option value="Aberto">Em aberto</option>
+                  <option value="Pago">Pagos</option>
+                  <option value="Recebido">Recebidos</option>
+                  <option value="Atrasado">Atrasados</option>
+                </select>
+                <select id="accountModalityFilter">
+                  <option value="all">Modalidades</option>
+                </select>
+                <select id="accountProfessionalFilter">
+                  <option value="all">-- [ Professor(a)/Instrutor(a) ] --</option>
+                </select>
+                <select id="accountChartFilter">
+                  <option value="all">-- Plano de contas --</option>
+                </select>
+                <select id="accountSupplierFilter">
+                  <option value="all">Fornecedores</option>
+                </select>
+                <div class="patient-search-row accounts-search-row">
+                  <input id="accountSearch" type="search" placeholder="Buscar por aluno, fornecedor ou descrição" />
+                  <button class="action-button blue" id="accountSearchButton" type="button">Buscar</button>
+                </div>
+              </div>
+
+              <div class="table-wrap accounts-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Competência</th>
+                      <th>Previsão</th>
+                      <th>Vencimento</th>
+                      <th>Baixa</th>
+                      <th>Valor</th>
+                      <th>Descrição</th>
+                      <th>Paciente/Fornecedor</th>
+                      <th>Plano de contas</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="accountsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="cashFlowView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Fluxo de Caixa</h2>
+              </div>
+              <button class="ghost-button" type="button">Exportar</button>
+            </div>
+            <div class="module-body">
+              <div class="cashflow-summary" id="cashFlowSummary"></div>
+              <div class="table-wrap cashflow-table-wrap">
+                <table class="cashflow-grid-table">
+                  <thead id="cashFlowHead">
+                    <tr>
+                      <th>Atividade</th>
+                      <th>Plano de contas</th>
+                      <th>Entradas</th>
+                      <th>Saídas</th>
+                      <th>Saldo</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cashFlowTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="dreView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>DRE - Demonstração de Resultado</h2>
+              </div>
+              <button class="ghost-button" type="button">Exportar</button>
+            </div>
+            <div class="module-body">
+              <div class="cashflow-summary" id="dreSummary"></div>
+              <div class="table-wrap cashflow-table-wrap dre-table-wrap">
+                <table class="cashflow-grid-table dre-grid-table">
+                  <thead id="dreHead"></thead>
+                  <tbody id="dreTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="chartAccountsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Plano de Contas</h2>
+              </div>
+              <button class="primary-button" data-open-modal="chartAccount" type="button">Nova Conta Contábil</button>
+            </div>
+            <div class="module-body">
+              <div class="patient-search-row chart-search-row">
+                <input id="chartAccountSearch" type="search" placeholder="Buscar por código, conta ou atividade" />
+                <button class="action-button blue" id="chartAccountSearchButton" type="button">Buscar</button>
+              </div>
+              <div class="table-wrap chart-accounts-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Código</th>
+                      <th>Conta</th>
+                      <th>Estrutura DRE</th>
+                      <th>Atividade</th>
+                      <th>Natureza</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="chartAccountsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="financeView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Recebimentos e cobranças</h2>
+              </div>
+              <button class="primary-button" data-open-modal="payment" type="button">Nova cobrança</button>
+            </div>
+            <div class="module-body">
+              <div class="toolbar">
+                <div class="segmented" role="group" aria-label="Filtro financeiro">
+                  <button class="segment active" data-payment-filter="all" type="button">Todos</button>
+                  <button class="segment" data-payment-filter="Pago" type="button">Pagos</button>
+                  <button class="segment" data-payment-filter="Pendente" type="button">Pendentes</button>
+                  <button class="segment" data-payment-filter="Atrasado" type="button">Atrasados</button>
+                </div>
+              </div>
+              <div class="finance-layout">
+                <section class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <p class="eyebrow">Fluxo de caixa</p>
+                      <h2>Mensalidades e pacotes</h2>
+                    </div>
+                  </div>
+                  <div class="payment-list" id="paymentList"></div>
+                </section>
+                <section class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <p class="eyebrow">Resumo</p>
+                      <h2>Saúde financeira</h2>
+                    </div>
+                  </div>
+                  <div class="finance-summary" id="financeSummary"></div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="recordsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Prontuário</p>
+                <h2>Evolução e presenças</h2>
+              </div>
+              <button class="primary-button" data-open-modal="record" type="button">Novo registro</button>
+            </div>
+            <div class="module-body">
+              <div class="attendance-summary" id="attendanceSummary"></div>
+              <div class="records-layout">
+                <section class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <p class="eyebrow">Evolução</p>
+                      <h2>Histórico clínico</h2>
+                    </div>
+                  </div>
+                  <div class="record-list" id="recordList"></div>
+                </section>
+                <section class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <p class="eyebrow">Presença</p>
+                      <h2>Check-ins recentes</h2>
+                    </div>
+                  </div>
+                  <div class="checkin-list" id="checkinList"></div>
+                </section>
+              </div>
+              <section class="panel attendance-panel">
+                <div class="panel-heading">
+                  <div>
+                    <p class="eyebrow">Reposição</p>
+                    <h2>Créditos e faltas</h2>
+                  </div>
+                </div>
+                <div class="table-wrap attendance-table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Aluno/Paciente</th>
+                        <th>Créditos</th>
+                        <th>Faltas</th>
+                        <th>Cancelamentos</th>
+                        <th>Última presença</th>
+                        <th>Risco</th>
+                      </tr>
+                    </thead>
+                    <tbody id="attendanceTable"></tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="settingsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Configurações</p>
+                <h2>Parâmetros do estúdio</h2>
+              </div>
+            </div>
+            <div class="module-body">
+              <div class="settings-grid">
+                <section class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <p class="eyebrow">Estúdio</p>
+                      <h2>Parâmetros principais</h2>
+                    </div>
+                  </div>
+                  <form id="settingsForm" class="form-grid">
+                    <label>
+                      Nome do estúdio
+                      <input name="studioName" required />
+                    </label>
+                    <label>
+                      WhatsApp
+                      <input name="whatsapp" required />
+                    </label>
+                    <label>
+                      Limite por turma
+                      <input name="classLimit" type="number" min="1" max="30" required />
+                    </label>
+                    <label>
+                      Lembrete automático
+                      <select name="reminder">
+                        <option>24 horas antes</option>
+                        <option>2 horas antes</option>
+                        <option>Manualmente</option>
+                      </select>
+                    </label>
+                    <button class="primary-button" type="submit">Salvar configurações</button>
+                  </form>
+                </section>
+                <section class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <p class="eyebrow">Portal</p>
+                      <h2>Link para alunos</h2>
+                    </div>
+                  </div>
+                  <div class="portal-preview">
+                    <p>Compartilhe este link em site, Instagram ou WhatsApp para novos agendamentos.</p>
+                    <button class="ghost-button" id="copyPortalButton" type="button">Copiar link</button>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header">
+          <h2 id="modalTitle">Cadastro</h2>
+          <button class="icon-button" id="closeModal" type="button" aria-label="Fechar">x</button>
+        </div>
+        <form id="modalForm" class="modal-body"></form>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="env.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="studio-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

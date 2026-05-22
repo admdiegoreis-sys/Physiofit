@@ -1,0 +1,10 @@
+{
+  "name": "physiofit-studio-pilates",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema de gestão para studio de pilates, fisioterapia e funcional.",
+  "scripts": {
+    "build": "node scripts/create-env.js",
+    "check": "node --check app.js && node --check studio-data.js && node --check supabase-client.js"
+  }
+}
