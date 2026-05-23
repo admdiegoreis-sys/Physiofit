@@ -61,6 +61,13 @@ export async function handler(event) {
       return json(200, rows[0] || null);
     }
 
+    if (event.httpMethod === "DELETE") {
+      if (!id) return json(400, { error: "ID do lead e obrigatorio." });
+      await sql`update public.lead_inbox set lead_id = null, status = 'Recebido' where lead_id = ${id}`;
+      const rows = await sql`delete from public.leads where id = ${id} returning id`;
+      return json(200, { ok: true, deleted: rows[0]?.id || null });
+    }
+
     return json(405, { error: "Metodo nao permitido." });
   } catch (error) {
     return json(500, { error: error.message });
