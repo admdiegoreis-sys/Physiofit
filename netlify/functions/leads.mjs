@@ -6,13 +6,20 @@ function parseBody(event) {
   return JSON.parse(event.body);
 }
 
+function getLeadId(event) {
+  if (event.queryStringParameters?.id) return event.queryStringParameters.id;
+  const source = `${event.rawUrl || ""} ${event.path || ""}`;
+  const match = source.match(/\/api\/leads\/([^/?\s]+)/i);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
 export async function handler(event) {
   if (event.httpMethod === "OPTIONS") return json(204, {});
 
   try {
     const sql = getSql();
     await ensureLeadTables(sql);
-    const id = event.queryStringParameters?.id;
+    const id = getLeadId(event);
 
     if (event.httpMethod === "GET") {
       const rows = id
