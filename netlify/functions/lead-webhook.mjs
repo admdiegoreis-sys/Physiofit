@@ -6,7 +6,7 @@ function parseBody(event) {
   return JSON.parse(event.body);
 }
 
-export async function handler(event) {
+export async function processLeadWebhook(event, sourceOverride = "") {
   if (event.httpMethod === "OPTIONS") return json(204, {});
   if (event.httpMethod !== "POST") return json(405, { error: "Metodo nao permitido." });
 
@@ -14,7 +14,7 @@ export async function handler(event) {
     const sql = getSql();
     await ensureLeadTables(sql);
 
-    const source = event.queryStringParameters?.source || "generico";
+    const source = sourceOverride || event.queryStringParameters?.source || "generico";
     const payload = parseBody(event);
     const lead = normalizeLeadPayload({ ...payload, canal_entrada: payload.canal_entrada || source });
 
@@ -44,4 +44,8 @@ export async function handler(event) {
   } catch (error) {
     return json(500, { error: error.message });
   }
+}
+
+export async function handler(event) {
+  return processLeadWebhook(event);
 }
