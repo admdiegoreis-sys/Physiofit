@@ -110,3 +110,55 @@ node --check neon-client.js
 node --check netlify/functions/db-health.mjs
 node --check netlify/functions/records.mjs
 ```
+
+## 8. WhatsApp Com WAHA
+
+Para captar leads automaticamente pelo WhatsApp, use o WAHA Core conectado ao endpoint:
+
+```text
+https://physiofitstudio.netlify.app/api/webhooks/whatsapp
+```
+
+Fluxo:
+
+1. O WAHA recebe uma mensagem no WhatsApp conectado.
+2. Envia o evento para o endpoint acima.
+3. O sistema grava a mensagem bruta em `lead_inbox`.
+4. Se a mensagem for de uma pessoa, cria um registro em `leads` com canal `whatsapp`.
+
+Eventos ignorados:
+
+- mensagens enviadas pelo proprio estudio;
+- mensagens de grupos.
+
+Variaveis opcionais para envio futuro de mensagens pelo sistema:
+
+```text
+WAHA_BASE_URL=https://seu-servidor-waha.com
+WAHA_SESSION=default
+WAHA_API_KEY=
+```
+
+Com essas variaveis no Netlify, o endpoint abaixo fica preparado para envio:
+
+```text
+POST https://physiofitstudio.netlify.app/api/whatsapp/send
+```
+
+Exemplo de corpo:
+
+```json
+{
+  "telefone": "+5562999999999",
+  "mensagem": "Ola! Recebemos seu contato e vamos te atender por aqui."
+}
+```
+
+Exemplo de configuracao do webhook no WAHA:
+
+```json
+{
+  "url": "https://physiofitstudio.netlify.app/api/webhooks/whatsapp",
+  "events": ["message"]
+}
+```

@@ -31,6 +31,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/whatsapp/send"
+  to = "/.netlify/functions/whatsapp-send"
+  status = 200
+
+[[redirects]]
   from = "/api/webhooks/:source"
   to = "/.netlify/functions/lead-webhook?source=:source"
   status = 200

@@ -17,15 +17,16 @@ export async function processLeadWebhook(event, sourceOverride = "") {
     const source = sourceOverride || event.queryStringParameters?.source || "generico";
     const payload = parseBody(event);
     const lead = normalizeLeadPayload({ ...payload, canal_entrada: payload.canal_entrada || source });
+    const inboxStatus = lead.skip ? "Ignorado" : "Recebido";
 
     const inboxRows = await sql`
       insert into public.lead_inbox (source, payload, status)
-      values (${source}, ${JSON.stringify(payload)}::jsonb, 'Recebido')
+      values (${source}, ${JSON.stringify(payload)}::jsonb, ${inboxStatus})
       returning *
     `;
 
     let createdLead = null;
-    if (lead.nome || lead.telefone || lead.email || lead.instagram) {
+    if (!lead.skip && (lead.nome || lead.telefone || lead.email || lead.instagram)) {
       const leadRows = await sql`
         insert into public.leads (nome, telefone, email, instagram, origem_lead, canal_entrada, mensagem_inicial, interesse, status, data_entrada, data_visita, responsavel, observacoes, historico)
         values (${lead.nome || "Lead sem nome"}, ${lead.telefone}, ${lead.email}, ${lead.instagram}, ${lead.origem_lead}, ${lead.canal_entrada}, ${lead.mensagem_inicial}, ${lead.interesse}, ${lead.status}, ${lead.data_entrada}, ${lead.data_visita}, ${lead.responsavel}, ${lead.observacoes}, ${JSON.stringify([{ at: new Date().toISOString(), event: `Recebido via webhook ${source}` }])}::jsonb)
@@ -38,6 +39,8 @@ export async function processLeadWebhook(event, sourceOverride = "") {
     return json(202, {
       ok: true,
       source,
+      skipped: Boolean(lead.skip),
+      skipReason: lead.skipReason || "",
       inbox: inboxRows[0],
       lead: createdLead,
     });

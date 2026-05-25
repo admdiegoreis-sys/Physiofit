@@ -1,5 +1,45 @@
 export const leadStatuses = ["Novo lead", "Contato iniciado", "Respondido", "Visita agendada", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
 
+function phoneFromChatId(value = "") {
+  const [chatId] = String(value).split("@");
+  const digits = chatId.replace(/\D/g, "");
+  return digits ? `+${digits}` : "";
+}
+
+function wahaLeadPayload(payload = {}) {
+  const event = payload.event || "";
+  const message = payload.payload;
+  if (!event.startsWith("message") || !message) return null;
+
+  if (message.fromMe) {
+    return { skip: true, skipReason: "Mensagem enviada pelo proprio estudio." };
+  }
+
+  if (String(message.from || "").includes("@g.us")) {
+    return { skip: true, skipReason: "Mensagem de grupo ignorada." };
+  }
+
+  const senderName = payload.contact?.name || payload.contact?.pushName || message._data?.notifyName || message.pushName || "";
+  const phone = phoneFromChatId(message.from || message.chatId || message.participant);
+  const body = message.body || message.text || message.caption || "";
+
+  return {
+    nome: payload.nome || payload.name || senderName || "Lead WhatsApp",
+    telefone: payload.telefone || payload.phone || phone,
+    email: payload.email || "",
+    instagram: payload.instagram || "",
+    origem_lead: payload.origem_lead || payload.origin || "WhatsApp",
+    canal_entrada: payload.canal_entrada || "whatsapp",
+    mensagem_inicial: payload.mensagem_inicial || payload.initialMessage || body,
+    interesse: payload.interesse || payload.interest || "",
+    status: payload.status || "Novo lead",
+    data_entrada: payload.data_entrada || payload.entryDate || new Date().toISOString().slice(0, 10),
+    data_visita: payload.data_visita || payload.visitDate || null,
+    responsavel: payload.responsavel || payload.ownerId || payload.owner || "",
+    observacoes: payload.observacoes || payload.notes || `WAHA ${payload.session || "default"} · ${event}`,
+  };
+}
+
 export async function ensureLeadTables(sql) {
   await sql`
     create table if not exists public.leads (
@@ -77,6 +117,10 @@ export async function ensureLeadTables(sql) {
 }
 
 export function normalizeLeadPayload(payload = {}) {
+  const wahaPayload = wahaLeadPayload(payload);
+  if (wahaPayload?.skip) return wahaPayload;
+  if (wahaPayload) payload = wahaPayload;
+
   const status = leadStatuses.includes(payload.status) ? payload.status : "Novo lead";
 
   return {
