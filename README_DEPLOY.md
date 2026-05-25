@@ -124,12 +124,24 @@ Fluxo:
 1. O WAHA recebe uma mensagem no WhatsApp conectado.
 2. Envia o evento para o endpoint acima.
 3. O sistema grava a mensagem bruta em `lead_inbox`.
-4. Se a mensagem for de uma pessoa, cria um registro em `leads` com canal `whatsapp`.
+4. O sistema procura o telefone nos alunos/pacientes cadastrados.
+5. Se encontrar aluno, grava como `Aluno existente` em `whatsapp_interactions` e nao cria lead.
+6. Se nao encontrar aluno, procura lead existente com o mesmo telefone.
+7. Se encontrar lead, adiciona a mensagem ao historico desse lead e grava como `Lead existente`.
+8. Se nao encontrar aluno nem lead, cria um novo registro em `leads` com canal `whatsapp`.
 
 Eventos ignorados:
 
 - mensagens enviadas pelo proprio estudio;
 - mensagens de grupos.
+
+Classificacoes gravadas em `whatsapp_interactions`:
+
+- `Novo lead`;
+- `Lead existente`;
+- `Aluno existente`;
+- `Ignorado`;
+- `Mensagem sem contato`.
 
 Variaveis opcionais para envio futuro de mensagens pelo sistema:
 

@@ -30,6 +30,19 @@ create table if not exists public.lead_inbox (
   converted_at timestamptz
 );
 
+create table if not exists public.whatsapp_interactions (
+  id text primary key default gen_random_uuid()::text,
+  source text not null default 'whatsapp',
+  phone text,
+  contact_name text,
+  message text,
+  classification text not null,
+  student_id text,
+  lead_id text,
+  payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.studios (
   id text primary key default gen_random_uuid()::text,
   name text not null,

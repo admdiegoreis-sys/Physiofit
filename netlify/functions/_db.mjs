@@ -9,6 +9,7 @@ export const allowedTables = new Set([
   "fiscal_invoices",
   "leads",
   "lead_inbox",
+  "whatsapp_interactions",
   "modalities",
   "plans",
   "professionals",

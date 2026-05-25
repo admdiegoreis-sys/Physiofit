@@ -1,8 +1,12 @@
 export const leadStatuses = ["Novo lead", "Contato iniciado", "Respondido", "Visita agendada", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
 
+export function phoneDigits(value = "") {
+  return String(value).replace(/\D/g, "");
+}
+
 function phoneFromChatId(value = "") {
   const [chatId] = String(value).split("@");
-  const digits = chatId.replace(/\D/g, "");
+  const digits = phoneDigits(chatId);
   return digits ? `+${digits}` : "";
 }
 
@@ -112,6 +116,21 @@ export async function ensureLeadTables(sql) {
       status text not null default 'Recebido',
       received_at timestamptz not null default now(),
       converted_at timestamptz
+    )
+  `;
+
+  await sql`
+    create table if not exists public.whatsapp_interactions (
+      id text primary key default gen_random_uuid()::text,
+      source text not null default 'whatsapp',
+      phone text,
+      contact_name text,
+      message text,
+      classification text not null,
+      student_id text,
+      lead_id text,
+      payload jsonb not null default '{}'::jsonb,
+      created_at timestamptz not null default now()
     )
   `;
 }
