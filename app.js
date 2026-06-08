@@ -763,7 +763,7 @@ function chartAccountFields() {
     { name: "package", label: "Pacote", type: "select", options: ["Receitas", "Custos", "Despesas Comerciais", "Despesas com Pessoal", "Despesas com Infraestrutura", "Despesas com Tecnologia", "Despesas Gerais", "Despesas Tributárias", "Despesas Financeiras", "Imposto de Renda", "Capex", "Investimentos", "Aporte", "Empr?stimos", "Adiantamentos", "Transitório"], value: "Despesas Gerais" },
     { name: "dfcDescription", label: "Descricao DFC", type: "text", value: "Despesas" },
     { name: "dfcGroup", label: "Grupo DFC", type: "select", options: ["Atividades Operacionais", "Atividades de Investimento", "Atividades de Financiamento", "Transitório"], value: "Atividades Operacionais" },
-    { name: "activity", label: "Atividade", type: "select", options: ["Operacional", "Investimento", "Financiamento", "Transitório"], value: "Operacional" },
+    { name: "activity", label: "ESTRUTURA DFC", type: "select", options: ["Operacional", "Investimento", "Financiamento", "Transitório"], value: "Operacional" },
     { name: "nature", label: "Natureza", type: "select", options: ["Receita", "Despesa", "Patrimonial", "Entrada", "Saida"], value: "Despesa" },
     { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
   ];
