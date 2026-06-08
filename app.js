@@ -274,19 +274,19 @@ const seedChartAccounts = [
   {"id": "pc73", "code": "9.01", "name": "Distribuição de Lucros", "dreGroup": "Patrimonial", "dfcDescription": "Distribuição de Lucros", "dfcGroup": "Atividades de Financiamento", "package": "Adiantamentos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc74", "code": "9.02", "name": "Distribuição de Lucros - Obra", "dreGroup": "Patrimonial", "dfcDescription": "Distribuição de Lucros - Obra", "dfcGroup": "Atividades de Financiamento", "package": "Adiantamentos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc75", "code": "9.03", "name": "Distribuição de Lucros - Outros", "dreGroup": "Patrimonial", "dfcDescription": "Distribuição de Lucros - Outros", "dfcGroup": "Atividades de Financiamento", "package": "Adiantamentos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
-  {"id": "pc76", "code": "11", "name": "Transferência Entre Contras", "dreGroup": "Patrimonial", "dfcDescription": "Transferência Entre Contras", "dfcGroup": "Transitório", "package": "Transitório", "activity": "Transitório", "nature": "Patrimonial", "status": "Ativo"}
+  {"id": "pc76", "code": "11", "name": "Transferência entre Contas", "dreGroup": "Patrimonial", "dfcDescription": "Transferência entre Contas", "dfcGroup": "Transitório", "package": "Transitório", "activity": "Transitório", "nature": "Patrimonial", "status": "Ativo"}
 ];
 
 const seedAccounts = [
   { id: "cp1", direction: "Pagar", status: "Pago", competenceDate: "2025-01-02", forecastDate: "2025-01-02", dueDate: "2025-01-02", paidDate: "2025-01-02", amount: 47, description: "Não Identificado", person: "BRUNO BORGES BOTELHO", document: "709.620.251-00", modalityId: "", teacherId: "", chartAccountId: "pc25", paymentMethod: "Itau", bankLaunch: "SISPAG PIX QR-CODE" },
-  { id: "cp2", direction: "Pagar", status: "Pago", competenceDate: "2025-01-02", forecastDate: "2025-01-02", dueDate: "2025-01-02", paidDate: "2025-01-02", amount: 30, description: "Distribuicao de Lucros", person: "DAIANNE PEREIRA DE SOUZA", document: "015.038.751-21", modalityId: "", teacherId: "", chartAccountId: "pc22", paymentMethod: "Itau", bankLaunch: "PIX ENVIADO DAIANNE PERE" },
-  { id: "cp3", direction: "Pagar", status: "Pago", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 118, description: "Tarifa Bancaria", person: "TAR PLANO ADAPT 1 12/24", document: "", modalityId: "", teacherId: "", chartAccountId: "pc21", paymentMethod: "Itau", bankLaunch: "TAR PLANO ADAPT 1 12/24" },
-  { id: "cp4", direction: "Receber", status: "Recebido", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 0.13, description: "Rendimento Aplicacao", person: "REND PAGO APLIC AUT MAIS", document: "", modalityId: "", teacherId: "", chartAccountId: "pc24", paymentMethod: "Itau", bankLaunch: "REND PAGO APLIC AUT MAIS" },
-  { id: "cp5", direction: "Pagar", status: "Pago", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 5150, description: "Distribuicao de Lucros - Obra", person: "CERRADO PEDRAS", document: "04.602.806/0001-00", modalityId: "", teacherId: "", chartAccountId: "pc23", paymentMethod: "Itau", bankLaunch: "PIX ENVIADO CERRADO PEDR" },
-  { id: "cp6", direction: "Receber", status: "Recebido", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 265, description: "Venda de Servico - Pilates", person: "IRACEMA MARIA MACEDO E SILVA", document: "853.957.301-68", modalityId: "m3", teacherId: "", chartAccountId: "pc1", paymentMethod: "Itau", bankLaunch: "PIX TRANSF IRACEMA03/01" },
-  { id: "cp7", direction: "Receber", status: "Recebido", competenceDate: "2025-01-06", forecastDate: "2025-01-06", dueDate: "2025-01-06", paidDate: "2025-01-06", amount: 930, description: "Venda de Servico - Pilates", person: "DINHEIRO/PIX", document: "", modalityId: "m3", teacherId: "", chartAccountId: "pc1", paymentMethod: "Itau", bankLaunch: "PIX QRS" },
-  { id: "cp8", direction: "Pagar", status: "Pago", competenceDate: "2025-01-06", forecastDate: "2025-01-06", dueDate: "2025-01-06", paidDate: "2025-01-06", amount: 50, description: "Prestador de Servico - Funcional", person: "LUCAS SIRQUEIRA DE JESUS", document: "701.234.981-63", modalityId: "m2", teacherId: "t4", chartAccountId: "pc10", paymentMethod: "Itau", bankLaunch: "PIX ENVIADO LUCAS SIRQUE" },
-  { id: "cp9", direction: "Pagar", status: "Aberto", competenceDate: "2026-05-10", forecastDate: "2026-05-18", dueDate: "2026-05-18", paidDate: "", amount: 620, description: "Compra de acessorios e materiais", person: "Fornecedor Pilates Pro", document: "22.222.222/0001-22", modalityId: "", teacherId: "", chartAccountId: "pc20", paymentMethod: "Boleto" },
+  { id: "cp2", direction: "Pagar", status: "Pago", competenceDate: "2025-01-02", forecastDate: "2025-01-02", dueDate: "2025-01-02", paidDate: "2025-01-02", amount: 30, description: "Distribuição de Lucros", person: "DAIANNE PEREIRA DE SOUZA", document: "015.038.751-21", modalityId: "", teacherId: "", chartAccountId: "pc22", paymentMethod: "Itaú", bankLaunch: "PIX ENVIADO DAIANNE PERE" },
+  { id: "cp3", direction: "Pagar", status: "Pago", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 118, description: "Tarifa Bancária", person: "TAR PLANO ADAPT 1 12/24", document: "", modalityId: "", teacherId: "", chartAccountId: "pc21", paymentMethod: "Itaú", bankLaunch: "TAR PLANO ADAPT 1 12/24" },
+  { id: "cp4", direction: "Receber", status: "Recebido", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 0.13, description: "Rendimento Aplicação", person: "REND PAGO APLIC AUT MAIS", document: "", modalityId: "", teacherId: "", chartAccountId: "pc24", paymentMethod: "Itaú", bankLaunch: "REND PAGO APLIC AUT MAIS" },
+  { id: "cp5", direction: "Pagar", status: "Pago", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 5150, description: "Distribuição de Lucros - Obra", person: "CERRADO PEDRAS", document: "04.602.806/0001-00", modalityId: "", teacherId: "", chartAccountId: "pc23", paymentMethod: "Itaú", bankLaunch: "PIX ENVIADO CERRADO PEDR" },
+  { id: "cp6", direction: "Receber", status: "Recebido", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 265, description: "Venda de Serviço - Pilates", person: "IRACEMA MARIA MACEDO E SILVA", document: "853.957.301-68", modalityId: "m3", teacherId: "", chartAccountId: "pc1", paymentMethod: "Itaú", bankLaunch: "PIX TRANSF IRACEMA03/01" },
+  { id: "cp7", direction: "Receber", status: "Recebido", competenceDate: "2025-01-06", forecastDate: "2025-01-06", dueDate: "2025-01-06", paidDate: "2025-01-06", amount: 930, description: "Venda de Serviço - Pilates", person: "DINHEIRO/PIX", document: "", modalityId: "m3", teacherId: "", chartAccountId: "pc1", paymentMethod: "Itaú", bankLaunch: "PIX QRS" },
+  { id: "cp8", direction: "Pagar", status: "Pago", competenceDate: "2025-01-06", forecastDate: "2025-01-06", dueDate: "2025-01-06", paidDate: "2025-01-06", amount: 50, description: "Prestador de Serviço - Funcional", person: "LUCAS SIRQUEIRA DE JESUS", document: "701.234.981-63", modalityId: "m2", teacherId: "t4", chartAccountId: "pc10", paymentMethod: "Itaú", bankLaunch: "PIX ENVIADO LUCAS SIRQUE" },
+  { id: "cp9", direction: "Pagar", status: "Aberto", competenceDate: "2026-05-10", forecastDate: "2026-05-18", dueDate: "2026-05-18", paidDate: "", amount: 620, description: "Compra de acessórios e materiais", person: "Fornecedor Pilates Pro", document: "22.222.222/0001-22", modalityId: "", teacherId: "", chartAccountId: "pc20", paymentMethod: "Boleto" },
   { id: "cp10", direction: "Receber", status: "Aberto", competenceDate: "2026-05-03", forecastDate: "2026-05-03", dueDate: "2026-05-20", paidDate: "", amount: 310, description: "Mensalidade: Claudia Morais Sena", person: "Claudia Morais Sena", document: "190.478.351-15", modalityId: "m2", teacherId: "t3", chartAccountId: "pc1", paymentMethod: "Pix" },
 ];
 
@@ -542,7 +542,7 @@ const modalSchemas = {
     fields: [
       { name: "name", label: "Nome", type: "text" },
       { name: "phone", label: "Telefone", type: "tel" },
-      { name: "email", label: "Email", type: "email", required: false },
+      { name: "email", label: "E-mail", type: "email", required: false },
       { name: "instagram", label: "Instagram", type: "text", required: false },
       { name: "origin", label: "Origem do lead", type: "select", options: leadOrigins, value: "Instagram" },
       { name: "entryChannel", label: "Canal de entrada", type: "select", options: leadChannels, value: "WhatsApp" },
@@ -570,7 +570,7 @@ const modalSchemas = {
     fields: [
       { name: "name", label: "Nome", type: "text" },
       { name: "phone", label: "Telefone", type: "tel" },
-      { name: "email", label: "Email", type: "email", required: false },
+      { name: "email", label: "E-mail", type: "email", required: false },
       { name: "interest", label: "Interesse", type: "select", options: ["Pilates", "Fisioterapia", "RPG", "Funcional", "Avaliação", "Outro"], value: "Pilates" },
       { name: "visitDate", label: "Data da visita", type: "date", value: demoToday },
       { name: "ownerId", label: "Responsável", type: "professionalOptional" },
@@ -621,11 +621,11 @@ const modalSchemas = {
     },
   },
   student: {
-    title: "Novo paciente",
-    submit: "Salvar paciente",
+    title: "Novo aluno",
+    submit: "Salvar aluno",
     fields: [
       { name: "name", label: "Nome completo", type: "text" },
-      { name: "email", label: "Email", type: "email" },
+      { name: "email", label: "E-mail", type: "email" },
       { name: "phone", label: "Telefone", type: "tel" },
       { name: "cpf", label: "CPF", type: "text" },
       { name: "birthDate", label: "Data de nascimento", type: "date" },
@@ -642,7 +642,7 @@ const modalSchemas = {
       { name: "name", label: "Razão social / Nome", type: "text" },
       { name: "document", label: "CPF/CNPJ", type: "text", value: "" },
       { name: "supplierType", label: "Tipo", type: "select", options: ["Pessoa jurídica", "Pessoa física", "Sem documento"], value: "Pessoa jurídica" },
-      { name: "email", label: "Email", type: "email", value: "" },
+      { name: "email", label: "E-mail", type: "email", value: "" },
       { name: "phone", label: "Telefone", type: "tel", value: "" },
       { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
       { name: "notes", label: "Observações", type: "textarea", value: "" },
@@ -724,8 +724,8 @@ const modalSchemas = {
     fields: [
       { name: "direction", label: "Pagar/Receber", type: "select", options: ["Pagar", "Receber"], value: "Pagar" },
       { name: "status", label: "Status", type: "select", options: ["Aberto", "Pago", "Recebido", "Atrasado"], value: "Aberto" },
-      { name: "competenceDate", label: "Competencia", type: "date", value: demoToday },
-      { name: "forecastDate", label: "Previsao", type: "date", value: demoToday },
+      { name: "competenceDate", label: "Competência", type: "date", value: demoToday },
+      { name: "forecastDate", label: "Previsão", type: "date", value: demoToday },
       { name: "dueDate", label: "Vencimento", type: "date", value: demoToday },
       { name: "paidDate", label: "Baixa", type: "date", value: demoToday },
       { name: "amount", label: "Valor", type: "number", value: 0 },
@@ -736,7 +736,7 @@ const modalSchemas = {
       { name: "chartAccountId", label: "Plano de contas", type: "chartAccount" },
       { name: "modalityId", label: "Modalidade", type: "modalityId" },
       { name: "teacherId", label: "Profissional", type: "professionalOptional" },
-      { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartao de debito", "Cartao de credito", "Boleto", "Transferencia", "Dinheiro"], value: "Pix" },
+      { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Transferência", "Dinheiro"], value: "Pix" },
     ],
     handler: (values) => {
       const supplier = supplierById(values.supplierId);
@@ -1218,6 +1218,10 @@ function fixPortugueseText(value) {
     ["A?es", "Ações"],
     ["Avan?ado", "Avançado"],
     ["Usu?rio", "Usuário"],
+    ["cont?bil", "contábil"],
+    ["codigo", "código"],
+    ["Credito", "Crédito"],
+    ["credito", "crédito"],
     ["N?o", "Não"],
     ["Pessoa f?sica", "Pessoa física"],
     ["Pessoa jur?dica", "Pessoa jurídica"],
@@ -1651,7 +1655,7 @@ function renderProfessionalOptions() {
   const teacherFilter = document.querySelector("#teacherFilter");
   if (teacherFilter) {
     const selected = teacherFilter.value || "all";
-    teacherFilter.innerHTML = `<option value="all">-- [ Profissional ] --</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
+    teacherFilter.innerHTML = `<option value="all">Profissional</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
     teacherFilter.value = state.professionals.some((item) => item.id === selected) ?selected : "all";
   }
   const leadOwnerFilter = document.querySelector("#leadOwnerFilter");
@@ -1696,21 +1700,21 @@ function renderEnrollmentOptions() {
   const professionalFilter = document.querySelector("#enrollmentProfessionalFilter");
   if (professionalFilter) {
     const selected = professionalFilter.value || "all";
-    professionalFilter.innerHTML = `<option value="all">-- [ Profissional ] --</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
+    professionalFilter.innerHTML = `<option value="all">Profissional</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
     professionalFilter.value = selected === "all" || activeProfessionals().some((item) => item.id === selected) ?selected : "all";
   }
   const roomFilter = document.querySelector("#enrollmentRoomFilter");
   if (roomFilter) {
     const rooms = [...new Set(state.enrollments.map((item) => item.room).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
     const selected = roomFilter.value || "all";
-    roomFilter.innerHTML = `<option value="all">-[Sala]-</option>${rooms.map((room) => `<option value="${room}">${room}</option>`).join("")}`;
+    roomFilter.innerHTML = `<option value="all">Sala</option>${rooms.map((room) => `<option value="${room}">${room}</option>`).join("")}`;
     roomFilter.value = selected === "all" || rooms.includes(selected) ?selected : "all";
   }
   const typeFilter = document.querySelector("#enrollmentPlanTypeFilter");
   if (typeFilter) {
     const types = [...new Set(state.plans.map((item) => item.type).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
     const selected = typeFilter.value || "all";
-    typeFilter.innerHTML = `<option value="all">-[Tipo Plano]-</option>${types.map((type) => `<option value="${type}">${type}</option>`).join("")}`;
+    typeFilter.innerHTML = `<option value="all">Tipo de plano</option>${types.map((type) => `<option value="${type}">${type}</option>`).join("")}`;
     typeFilter.value = selected === "all" || types.includes(selected) ?selected : "all";
   }
 }
@@ -1725,7 +1729,7 @@ function renderMonthlyOptions() {
   const teacherFilter = document.querySelector("#monthlyTeacherFilter");
   if (teacherFilter) {
     const selected = teacherFilter.value || "all";
-    teacherFilter.innerHTML = `<option value="all">-- [ Professor(a)/Instrutor(a) ] --</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
+    teacherFilter.innerHTML = `<option value="all">Professor</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
     teacherFilter.value = selected === "all" || activeProfessionals().some((item) => item.id === selected) ?selected : "all";
   }
 }
@@ -1740,13 +1744,13 @@ function renderAccountOptions() {
   const professionalFilter = document.querySelector("#accountProfessionalFilter");
   if (professionalFilter) {
     const selected = professionalFilter.value || "all";
-    professionalFilter.innerHTML = `<option value="all">-- [ Professor(a)/Instrutor(a) ] --</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
+    professionalFilter.innerHTML = `<option value="all">Professor</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
     professionalFilter.value = selected === "all" || activeProfessionals().some((item) => item.id === selected) ?selected : "all";
   }
   const chartFilter = document.querySelector("#accountChartFilter");
   if (chartFilter) {
     const selected = chartFilter.value || "all";
-    chartFilter.innerHTML = `<option value="all">-- Plano de contas --</option>${activeChartAccounts().map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("")}`;
+    chartFilter.innerHTML = `<option value="all">Plano de contas</option>${activeChartAccounts().map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("")}`;
     chartFilter.value = selected === "all" || activeChartAccounts().some((item) => item.id === selected) ?selected : "all";
   }
   const supplierFilter = document.querySelector("#accountSupplierFilter");
@@ -3498,7 +3502,7 @@ function createEmptyProfessional() {
     status: "Ativo",
     maxPatients: 6,
     color: "#5e91b8",
-    role: "Instrutor(a)",
+    role: "Instrutor",
     document: "",
     notes: "",
     modalities: "",
@@ -3699,9 +3703,9 @@ function renderRecords() {
           `,
         )
         .join("")
-    : `<div class="empty-state">Nenhum registro clinico cadastrado.</div>`;
+    : `<div class="empty-state">Nenhum registro clínico cadastrado.</div>`;
 
-  const checkins = state.appointments.filter((item) => item.status === "Concluida" || item.status === "Concluída" || item.status === "Compareceu").sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));
+  const checkins = state.appointments.filter((item) => item.status === "Concluída" || item.status === "Compareceu").sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));
   const missed = state.appointments.filter((item) => item.status === "Faltou");
   const canceled = state.appointments.filter((item) => item.status === "Cancelada");
   const credits = state.students.reduce((sum, item) => sum + replacementBalance(item.id), 0);
@@ -3734,7 +3738,7 @@ function renderRecords() {
       const studentMissed = studentAppointments.filter((item) => item.status === "Faltou").length;
       const studentCanceled = studentAppointments.filter((item) => item.status === "Cancelada").length;
       const lastPresence = studentAppointments
-        .filter((item) => item.status === "Concluida" || item.status === "Concluída" || item.status === "Compareceu")
+        .filter((item) => item.status === "Concluída" || item.status === "Compareceu")
         .sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`))[0]?.date || studentItem.lastPresence || "";
       const creditBalance = replacementBalance(studentItem.id);
       const risk = studentMissed >= 2 || creditBalance >= 3 ? "Alto" : studentMissed || creditBalance ? "Médio" : "Baixo";
@@ -3754,7 +3758,7 @@ function renderRecords() {
         <td><span class="status-pill ${retentionRiskClass(row.risk)}">${row.risk}</span></td>
       </tr>
     `).join("")
-    : `<tr><td colspan="6"><div class="empty-state">Nenhum credito ou falta pendente.</div></td></tr>`;
+    : `<tr><td colspan="6"><div class="empty-state">Nenhum crédito ou falta pendente.</div></td></tr>`;
 }
 
 function replacementBalance(studentId) {
@@ -4204,7 +4208,7 @@ document.addEventListener("click", (event) => {
     }
     if (scheduleAction.dataset.action === "replacement" && appointment) {
       if (replacementBalance(appointment.studentId) <= 0 && !appointment.replacementUsed) {
-        toast("Aluno sem credito de reposicao disponivel.");
+        toast("Aluno sem crédito de reposição disponível.");
         return;
       }
       appointment.status = "Reposta";
@@ -4243,6 +4247,111 @@ document.querySelector("#modalForm").addEventListener("change", (event) => {
   if (form.elements.document && !form.elements.document.value) form.elements.document.value = supplier.document;
 });
 
+function setControlValue(id, value) {
+  const control = document.querySelector(`#${id}`);
+  if (!control) return;
+  control.value = value;
+}
+
+function clearScheduleFilters() {
+  setControlValue("agendaSearch", "");
+  setControlValue("modalityFilter", "all");
+  setControlValue("sessionFilter", "all");
+  setControlValue("statusFilter", "all");
+  setControlValue("roomFilter", "all");
+  setControlValue("teacherFilter", "all");
+  renderSchedule();
+}
+
+function clearCrmFilters() {
+  setControlValue("leadSearch", "");
+  setControlValue("leadStatusFilter", "all");
+  setControlValue("leadOwnerFilter", "all");
+  setControlValue("leadOriginFilter", "all");
+  renderCrm();
+}
+
+function clearStudentFilters() {
+  setControlValue("studentSearch", "");
+  setControlValue("studentStatusFilter", "Ativo");
+  setControlValue("studentLimitFilter", "50");
+  renderStudents();
+}
+
+function clearProfessionalFilters() {
+  setControlValue("professionalSearch", "");
+  setControlValue("professionalStatusFilter", "Ativo");
+  renderProfessionals();
+}
+
+function clearSupplierFilters() {
+  setControlValue("supplierSearch", "");
+  setControlValue("supplierStatusFilter", "Ativo");
+  renderSuppliers();
+}
+
+function clearModalityFilters() {
+  setControlValue("modalitySearch", "");
+  setControlValue("modalityStatusListFilter", "Ativo");
+  renderModalities();
+}
+
+function clearPlanFilters() {
+  setControlValue("planSearch", "");
+  setControlValue("planStatusFilter", "Ativo");
+  renderPlans();
+}
+
+function clearEnrollmentFilters() {
+  setControlValue("enrollmentSearch", "");
+  setControlValue("enrollmentStatusFilter", "activeAndExpired");
+  setControlValue("enrollmentModalityFilter", "all");
+  setControlValue("enrollmentLimitFilter", "50");
+  setControlValue("enrollmentRoomFilter", "all");
+  setControlValue("enrollmentProfessionalFilter", "all");
+  setControlValue("enrollmentPlanTypeFilter", "all");
+  setControlValue("enrollmentDateFilter", "registration");
+  renderEnrollments();
+}
+
+function clearMonthlyFilters() {
+  setControlValue("monthlySearch", "");
+  setControlValue("monthlyPaidFilter", "all");
+  setControlValue("monthlyMembershipFilter", "all");
+  setControlValue("monthlyModalityFilter", "all");
+  setControlValue("monthlyInvoiceFilter", "all");
+  setControlValue("monthlyReceiptFilter", "all");
+  setControlValue("monthlyTeacherFilter", "all");
+  setControlValue("monthlyExternalFilter", "all");
+  renderMonthlyPayments();
+}
+
+function clearFiscalFilters() {
+  setControlValue("fiscalSearch", "");
+  setControlValue("fiscalStatusFilter", "all");
+  setControlValue("fiscalModalityFilter", "all");
+  renderFiscalInvoices();
+}
+
+function clearAccountFilters() {
+  setControlValue("accountSearch", "");
+  setControlValue("accountPeriodType", "Mês/Ano Competência");
+  setControlValue("accountDateRange", "01/05/2026 - 31/05/2026");
+  setControlValue("accountMonthFilter", "2026-05");
+  setControlValue("accountDirectionFilter", "all");
+  setControlValue("accountStatusFilter", "all");
+  setControlValue("accountModalityFilter", "all");
+  setControlValue("accountProfessionalFilter", "all");
+  setControlValue("accountChartFilter", "all");
+  setControlValue("accountSupplierFilter", "all");
+  renderAccounts();
+}
+
+function clearChartAccountFilters() {
+  setControlValue("chartAccountSearch", "");
+  renderChartAccounts();
+}
+
 ["agendaSearch", "globalStudentSearch", "modalityFilter", "sessionFilter", "statusFilter", "roomFilter", "teacherFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderSchedule);
   document.querySelector(`#${id}`)?.addEventListener("change", renderSchedule);
@@ -4254,6 +4363,7 @@ document.querySelector("#modalForm").addEventListener("change", (event) => {
 });
 
 document.querySelector("#leadSearchButton")?.addEventListener("click", renderCrm);
+document.querySelector("#leadClearFiltersButton")?.addEventListener("click", clearCrmFilters);
 
 document.querySelector("#prevWeek").addEventListener("click", () => {
   currentWeekStart = addDays(currentWeekStart, agendaMode === "day" ?-1 : -7);
@@ -4271,6 +4381,7 @@ document.querySelector("#todayButton").addEventListener("click", () => {
 });
 
 document.querySelector("#agendaSearchButton").addEventListener("click", renderSchedule);
+document.querySelector("#agendaClearFiltersButton")?.addEventListener("click", clearScheduleFilters);
 document.querySelector("#agendaListToggle").addEventListener("click", () => {
   setAgendaMode(agendaMode === "list" ?"week" : "list");
 });
@@ -4285,6 +4396,7 @@ document.querySelectorAll("[data-payment-filter]").forEach((button) => {
 
 document.querySelector("#studentSearch").addEventListener("input", renderStudents);
 document.querySelector("#studentSearchButton").addEventListener("click", renderStudents);
+document.querySelector("#studentClearFiltersButton")?.addEventListener("click", clearStudentFilters);
 document.querySelector("#studentStatusFilter").addEventListener("change", renderStudents);
 document.querySelector("#studentLimitFilter").addEventListener("change", renderStudents);
 document.querySelector("#newPatientButton").addEventListener("click", () => openPatientEditor());
@@ -4295,6 +4407,7 @@ document.querySelector("#patientEditorForm").addEventListener("submit", (event) 
 });
 document.querySelector("#professionalSearch").addEventListener("input", renderProfessionals);
 document.querySelector("#professionalSearchButton").addEventListener("click", renderProfessionals);
+document.querySelector("#professionalClearFiltersButton")?.addEventListener("click", clearProfessionalFilters);
 document.querySelector("#professionalStatusFilter").addEventListener("change", renderProfessionals);
 document.querySelector("#newProfessionalButton").addEventListener("click", () => openProfessionalEditor());
 document.querySelector("#backToProfessionalsButton").addEventListener("click", () => switchView("professionals"));
@@ -4304,9 +4417,11 @@ document.querySelector("#professionalEditorForm").addEventListener("submit", (ev
 });
 document.querySelector("#supplierSearch")?.addEventListener("input", renderSuppliers);
 document.querySelector("#supplierSearchButton")?.addEventListener("click", renderSuppliers);
+document.querySelector("#supplierClearFiltersButton")?.addEventListener("click", clearSupplierFilters);
 document.querySelector("#supplierStatusFilter")?.addEventListener("change", renderSuppliers);
 document.querySelector("#modalitySearch").addEventListener("input", renderModalities);
 document.querySelector("#modalitySearchButton").addEventListener("click", renderModalities);
+document.querySelector("#modalityClearFiltersButton")?.addEventListener("click", clearModalityFilters);
 document.querySelector("#modalityStatusListFilter").addEventListener("change", renderModalities);
 document.querySelector("#newModalityButton").addEventListener("click", () => openModalityEditor());
 document.querySelector("#backToModalitiesButton").addEventListener("click", () => switchView("modalities"));
@@ -4316,6 +4431,7 @@ document.querySelector("#modalityEditorForm").addEventListener("submit", (event)
 });
 document.querySelector("#planSearch").addEventListener("input", renderPlans);
 document.querySelector("#planSearchButton").addEventListener("click", renderPlans);
+document.querySelector("#planClearFiltersButton")?.addEventListener("click", clearPlanFilters);
 document.querySelector("#planStatusFilter").addEventListener("change", renderPlans);
 document.querySelector("#newPlanButton").addEventListener("click", () => openPlanEditor());
 document.querySelector("#backToPlansButton").addEventListener("click", () => switchView("plans"));
@@ -4328,17 +4444,20 @@ document.querySelector("#planEditorForm").addEventListener("submit", (event) => 
   document.querySelector(`#${id}`)?.addEventListener("change", renderEnrollments);
 });
 document.querySelector("#enrollmentSearchButton")?.addEventListener("click", renderEnrollments);
+document.querySelector("#enrollmentClearFiltersButton")?.addEventListener("click", clearEnrollmentFilters);
 ["monthlySearch", "monthlyPaidFilter", "monthlyMembershipFilter", "monthlyModalityFilter", "monthlyInvoiceFilter", "monthlyReceiptFilter", "monthlyTeacherFilter", "monthlyExternalFilter", "monthlyPeriodFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderMonthlyPayments);
   document.querySelector(`#${id}`)?.addEventListener("change", renderMonthlyPayments);
 });
 document.querySelector("#monthlySearchButton")?.addEventListener("click", renderMonthlyPayments);
+document.querySelector("#monthlyClearFiltersButton")?.addEventListener("click", clearMonthlyFilters);
 
 ["fiscalSearch", "fiscalStatusFilter", "fiscalModalityFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderFiscalInvoices);
   document.querySelector(`#${id}`)?.addEventListener("change", renderFiscalInvoices);
 });
 document.querySelector("#fiscalSearchButton")?.addEventListener("click", renderFiscalInvoices);
+document.querySelector("#fiscalClearFiltersButton")?.addEventListener("click", clearFiscalFilters);
 document.querySelector("#issueSelectedInvoicesButton")?.addEventListener("click", issuePendingFiscalInvoices);
 
 ["accountSearch", "accountPeriodType", "accountDateRange", "accountMonthFilter", "accountDirectionFilter", "accountStatusFilter", "accountModalityFilter", "accountProfessionalFilter", "accountChartFilter", "accountSupplierFilter"].forEach((id) => {
@@ -4346,8 +4465,10 @@ document.querySelector("#issueSelectedInvoicesButton")?.addEventListener("click"
   document.querySelector(`#${id}`)?.addEventListener("change", renderAccounts);
 });
 document.querySelector("#accountSearchButton")?.addEventListener("click", renderAccounts);
+document.querySelector("#accountClearFiltersButton")?.addEventListener("click", clearAccountFilters);
 document.querySelector("#chartAccountSearch")?.addEventListener("input", renderChartAccounts);
 document.querySelector("#chartAccountSearchButton")?.addEventListener("click", renderChartAccounts);
+document.querySelector("#chartAccountClearFiltersButton")?.addEventListener("click", clearChartAccountFilters);
 document.querySelector("#importXmlButton")?.addEventListener("click", () => document.querySelector("#xmlFileInput")?.click());
 document.querySelector("#xmlFileInput")?.addEventListener("change", importXmlAccount);
 document.querySelector("#processOfxButton")?.addEventListener("click", processOfxFile);

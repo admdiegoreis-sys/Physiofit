@@ -16,7 +16,7 @@
         <label>Senha<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
         <button class="primary-button success-button" type="submit">Entrar</button>
         <span id="loginFeedback" class="login-feedback" role="alert"></span>
-        <small>Use as credenciais fornecidas pelo administrador do estudio.</small>
+        <small>Use as credenciais fornecidas pelo administrador do estúdio.</small>
       </form>
     </section>
     <div class="app-shell">
@@ -122,7 +122,7 @@
             </div>
             <div class="executive-actions">
               <button class="primary-button" data-view-target="agenda" type="button">Abrir agenda</button>
-              <button class="ghost-button" data-view-target="students" type="button">Ver pacientes</button>
+              <button class="ghost-button" data-view-target="students" type="button">Ver alunos</button>
             </div>
           </div>
 
@@ -252,6 +252,7 @@
               <div class="patient-search-row crm-search-row">
                 <input id="leadSearch" type="search" placeholder="Buscar por nome, telefone, canal, origem ou interesse" />
                 <button class="action-button blue" id="leadSearchButton" type="button">Buscar</button>
+                <button class="action-button clear-filter-button" id="leadClearFiltersButton" type="button">Limpar filtros</button>
               </div>
             </div>
 
@@ -296,13 +297,13 @@
                 <option>Reposição</option>
               </select>
               <select id="sessionFilter">
-                <option value="all">Todas Sessões/Atendimentos</option>
+                <option value="all">Todas as sessões</option>
                 <option>Experimental</option>
                 <option>Avulso</option>
                 <option>Mensalidade</option>
               </select>
               <select id="statusFilter">
-                <option value="all">Todas Ativas</option>
+                <option value="all">Todas as ativas</option>
                 <option>Confirmada</option>
                 <option>Aguardando</option>
                 <option>Concluída</option>
@@ -315,19 +316,20 @@
                 <option>Sala Solo</option>
               </select>
               <select id="teacherFilter">
-                <option value="all">-- [ Profissional ] --</option>
+                <option value="all">Profissional</option>
                 <option>Marina</option>
                 <option>Lucas</option>
                 <option>Renata</option>
               </select>
               <select id="groupFilter">
-                <option>Agrupado Dia/Semana/Mês</option>
+                <option>Agrupado por dia/semana/mês</option>
                 <option>Por profissional</option>
                 <option>Por sala</option>
               </select>
               <div class="agenda-search-row">
-                <input id="agendaSearch" type="search" placeholder="Buscar por Nome ou Email Aluno/Paciente" />
+                <input id="agendaSearch" type="search" placeholder="Buscar por nome ou e-mail do aluno" />
                 <button class="action-button blue" id="agendaSearchButton" type="button">Buscar</button>
+                <button class="action-button clear-filter-button" id="agendaClearFiltersButton" type="button">Limpar filtros</button>
               </div>
               <button class="action-button navy agenda-list-toggle" id="agendaListToggle" type="button">Agenda em Lista</button>
             </div>
@@ -376,8 +378,9 @@
                   <option value="all">Todos os registros</option>
                 </select>
                 <div class="patient-search-row">
-                  <input id="studentSearch" type="search" placeholder="Nome, CPF, celular, email ou responsáveis" />
+                  <input id="studentSearch" type="search" placeholder="Nome, CPF, celular, e-mail ou responsáveis" />
                   <button class="action-button blue" id="studentSearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="studentClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
               <div class="table-wrap patients-table-wrap">
@@ -387,7 +390,7 @@
                       <th></th>
                       <th>Paciente</th>
                       <th>Status</th>
-                      <th>Email / Celular</th>
+                      <th>E-mail / Celular</th>
                       <th>CPF</th>
                       <th>Data Nasc.</th>
                     </tr>
@@ -451,7 +454,7 @@
                     <h3>Contato e endereço</h3>
                   </div>
                   <div class="editor-grid">
-                    <label>Email<input name="email" type="email" /></label>
+                    <label>E-mail<input name="email" type="email" /></label>
                     <label>Celular<input name="phone" /></label>
                     <label>Telefone alternativo<input name="alternatePhone" /></label>
                     <label>CEP<input name="zip" /></label>
@@ -540,6 +543,7 @@
                 <div class="patient-search-row professionals-search-row">
                   <input id="professionalSearch" type="search" placeholder="Buscar por professores/instrutores" />
                   <button class="action-button blue" id="professionalSearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="professionalClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
               <div class="table-wrap professionals-table-wrap">
@@ -548,7 +552,7 @@
                     <tr>
                       <th></th>
                       <th>Nome</th>
-                      <th>Email</th>
+                      <th>E-mail</th>
                       <th>Celular</th>
                       <th>Máx. Pacientes</th>
                       <th>Cor</th>
@@ -585,7 +589,7 @@
                 <button class="professional-tab active" data-professional-tab="register" type="button">Cadastro</button>
                 <button class="professional-tab" data-professional-tab="modalities" type="button">Vincular Modalidades</button>
                 <button class="professional-tab" data-professional-tab="signature" type="button">Assinatura Virtual</button>
-                <button class="professional-tab" data-professional-tab="linked" type="button">Matrículas Vinculadas</button>
+                <button class="professional-tab" data-professional-tab="linked" type="button">Matrículas vinculadas</button>
               </div>
 
               <form id="professionalEditorForm" class="patient-editor-form">
@@ -595,7 +599,7 @@
                   </div>
                   <div class="editor-grid">
                     <label class="wide">Nome completo<input name="name" required /></label>
-                    <label>Email<input name="email" type="email" /></label>
+                    <label>E-mail<input name="email" type="email" /></label>
                     <label>Celular<input name="phone" /></label>
                     <label>CREFITO / Documento<input name="document" /></label>
                     <label>Função<input name="role" /></label>
@@ -655,7 +659,7 @@
                     <thead>
                       <tr>
                         <th></th>
-                        <th>Nome Pacientes</th>
+                        <th>Aluno</th>
                         <th>Data Inscrição</th>
                         <th>Valor Matrícula</th>
                         <th>Forma Pagamento</th>
@@ -702,22 +706,23 @@
                   <option value="all">Todas</option>
                 </select>
                 <select id="enrollmentRoomFilter">
-                  <option value="all">-[Sala]-</option>
+                  <option value="all">Sala</option>
                 </select>
                 <select id="enrollmentProfessionalFilter">
-                  <option value="all">-- [ Profissional ] --</option>
+                  <option value="all">Profissional</option>
                 </select>
                 <select id="enrollmentPlanTypeFilter">
-                  <option value="all">-[Tipo Plano]-</option>
+                  <option value="all">Tipo de plano</option>
                 </select>
                 <select id="enrollmentDateFilter">
                   <option value="registration">Data de Matrícula</option>
                   <option value="due">Data de Vencimento</option>
                 </select>
                 <div class="patient-search-row">
-                  <input id="enrollmentSearch" type="search" placeholder="Buscar por Nome de Alunos/Pacientes e Responsáveis" />
+                  <input id="enrollmentSearch" type="search" placeholder="Buscar por nome do aluno ou responsável" />
                   <button class="action-button blue" id="enrollmentSearchButton" type="button">Buscar</button>
                   <button class="action-button light-blue" type="button">Avançado</button>
+                  <button class="action-button clear-filter-button" id="enrollmentClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
               <div class="table-wrap enrollments-table-wrap">
@@ -763,6 +768,7 @@
                 <div class="patient-search-row">
                   <input id="supplierSearch" type="search" placeholder="Buscar por fornecedor, CPF/CNPJ ou telefone" />
                   <button class="action-button blue" id="supplierSearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="supplierClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
               <div class="table-wrap">
@@ -803,8 +809,9 @@
                   <option value="Inativo">Inativos</option>
                 </select>
                 <div class="patient-search-row professionals-search-row">
-                  <input id="modalitySearch" type="search" placeholder="Buscar por Modalidades" />
+                  <input id="modalitySearch" type="search" placeholder="Buscar por modalidade" />
                   <button class="action-button blue" id="modalitySearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="modalityClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
               <div class="table-wrap modalities-table-wrap">
@@ -882,8 +889,9 @@
                   <option value="Inativo">Inativo</option>
                 </select>
                 <div class="patient-search-row professionals-search-row">
-                  <input id="planSearch" type="search" placeholder="Buscar por Planos" />
+                  <input id="planSearch" type="search" placeholder="Buscar por plano" />
                   <button class="action-button blue" id="planSearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="planClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
               <div class="table-wrap plans-table-wrap">
@@ -895,7 +903,7 @@
                       <th>Modalidade</th>
                       <th>Tipo de Plano</th>
                       <th>Valor</th>
-                      <th>Matrículas Vinculadas</th>
+                      <th>Matrículas vinculadas</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -999,16 +1007,17 @@
                   <option>Cortesia</option>
                 </select>
                 <select id="monthlyTeacherFilter">
-                  <option value="all">-- [ Professor(a)/Instrutor(a) ] --</option>
+                  <option value="all">Professor</option>
                 </select>
                 <select id="monthlyExternalFilter">
-                  <option value="all">-- [ Pag. Externo ] --</option>
+                  <option value="all">Pagamento externo</option>
                   <option>Asaas</option>
                   <option>Manual</option>
                 </select>
                 <div class="patient-search-row monthly-search-row">
                   <input id="monthlySearch" type="search" placeholder="Buscar pelo nome Aluno/Paciente" />
                   <button class="action-button blue" id="monthlySearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="monthlyClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
 
@@ -1017,7 +1026,7 @@
                   <thead>
                     <tr>
                       <th></th>
-                      <th>Nome Paciente</th>
+                      <th>Aluno</th>
                       <th>Vencimento</th>
                       <th>Status</th>
                       <th>Matrícula</th>
@@ -1062,6 +1071,7 @@
                 <div class="patient-search-row fiscal-search-row">
                   <input id="fiscalSearch" type="search" placeholder="Buscar por aluno, CPF, serviço ou nota" />
                   <button class="action-button blue" id="fiscalSearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="fiscalClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
               <div class="table-wrap fiscal-table-wrap">
@@ -1128,10 +1138,10 @@
                   <option value="all">Modalidades</option>
                 </select>
                 <select id="accountProfessionalFilter">
-                  <option value="all">-- [ Professor(a)/Instrutor(a) ] --</option>
+                  <option value="all">Professor</option>
                 </select>
                 <select id="accountChartFilter">
-                  <option value="all">-- Plano de contas --</option>
+                  <option value="all">Plano de contas</option>
                 </select>
                 <select id="accountSupplierFilter">
                   <option value="all">Fornecedores</option>
@@ -1139,6 +1149,7 @@
                 <div class="patient-search-row accounts-search-row">
                   <input id="accountSearch" type="search" placeholder="Buscar por aluno, fornecedor ou descrição" />
                   <button class="action-button blue" id="accountSearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="accountClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
 
@@ -1286,6 +1297,7 @@
               <div class="patient-search-row chart-search-row">
                 <input id="chartAccountSearch" type="search" placeholder="Buscar por código, conta ou atividade" />
                 <button class="action-button blue" id="chartAccountSearchButton" type="button">Buscar</button>
+                <button class="action-button clear-filter-button" id="chartAccountClearFiltersButton" type="button">Limpar filtros</button>
               </div>
               <div class="table-wrap chart-accounts-table-wrap">
                 <table>
