@@ -24,105 +24,105 @@ const seedProfessionals = [
 ];
 
 const seedSupplierRows = [
-  "DAIANNE PEREIRA DE SOUZA|015.038.751-21|Pessoa f?sica|144|78090.04|2026-05-04",
-  "REGINALDO BRAZ DA ROCHA|167.471.191-34|Pessoa f?sica|19|38321.09|2026-05-09",
-  "ANA CAROLINA DOS SANTOS REGES|752.335.251-00|Pessoa f?sica|32|36144.52|2026-05-08",
-  "LUCAS SIRQUEIRA DE JESUS|701.234.981-63|Pessoa f?sica|20|25802.84|2026-05-08",
-  "ROSANA BORGES DE ABREU|016.979.751-19|Pessoa f?sica|36|25556.72|2026-05-10",
+  "DAIANNE PEREIRA DE SOUZA|015.038.751-21|Pessoa física|144|78090.04|2026-05-04",
+  "REGINALDO BRAZ DA ROCHA|167.471.191-34|Pessoa física|19|38321.09|2026-05-09",
+  "ANA CAROLINA DOS SANTOS REGES|752.335.251-00|Pessoa física|32|36144.52|2026-05-08",
+  "LUCAS SIRQUEIRA DE JESUS|701.234.981-63|Pessoa física|20|25802.84|2026-05-08",
+  "ROSANA BORGES DE ABREU|016.979.751-19|Pessoa física|36|25556.72|2026-05-10",
   "BANCO ITAU||Sem documento|17|23399.31|2026-05-27",
-  "KAMILA COSTA|001.182.201-52|Pessoa f?sica|17|17323.00|2025-09-22",
-  "SIMPLES NACIONAL|00.394.460/0058-87|Pessoa jur?dica|14|16679.87|2026-03-20",
-  "DARF|00.394.460/0058-87|Pessoa jur?dica|21|16102.18|2026-05-08",
-  "GABRIELLA EMELLY DE BESSA MACIEL|033.764.061-03|Pessoa f?sica|12|14229.84|2026-05-08",
-  "CEF MATRIZ|00.360.305/0001-04|Pessoa jur?dica|21|11090.81|2026-05-10",
-  "EQUATORIAL GOIAS DISTR ENER SA|01.543.032/0001-04|Pessoa jur?dica|16|7693.84|2026-05-15",
-  "MARIANA PRADO ASSESSORIA CONTABIL|53.930.601/0001-60|Pessoa jur?dica|19|7260.54|2026-05-09",
-  "REDECARD INSTITUICAO DE PAGAMENTO S.A.|01.425.787/0001-04|Pessoa jur?dica|15|6247.98|2026-03-31",
-  "WILLIAN NEVES DOS SANTOS|961.952.821-20|Pessoa f?sica|1|5500.00|2025-01-10",
-  "CERRADO PEDRAS|04.602.806/0001-00|Pessoa jur?dica|1|5150.00|2025-01-03",
-  "TT COMUNICA|44.942.250/0001-16|Pessoa jur?dica|7|4550.00|2025-07-14",
-  "ESTER SUZANE DE MOURA SANTOS|711.055.751-01|Pessoa f?sica|6|4136.49|2026-05-08",
-  "IZABELLA VIANA VIEIRA|700.050.911-28|Pessoa f?sica|6|3955.84|2026-05-08",
-  "FELIPE FRANCA PEDROSO|026.894.511-07|Pessoa f?sica|1|3108.62|2025-01-06",
-  "ARGA FIXA|12.821.805/0001-85|Pessoa jur?dica|1|3000.00|2025-01-06",
-  "MARIA DE FATIMA PEREIRA|508.733.931-04|Pessoa f?sica|10|2945.00|2026-05-09",
-  "EDSON DE SOUZA HILARIO|364.117.601-87|Pessoa f?sica|1|2900.00|2026-04-27",
-  "RECEITA FEDERAL|00.394.460/0058-87|Pessoa jur?dica|2|2814.68|2026-05-27",
-  "VERISURE BRASIL|11.660.106/0001-38|Pessoa jur?dica|9|2469.01|2026-05-15",
-  "DIEGO REIS SILVA|015.683.991-11|Pessoa f?sica|15|2211.73|2026-05-09",
-  "ELLO TINTAS|07.531.461/0001-30|Pessoa jur?dica|2|2119.00|2026-04-16",
-  "REDEMOB CONSORCIO|10.636.142/0001-01|Pessoa jur?dica|5|1980.90|2026-05-09",
+  "KAMILA COSTA|001.182.201-52|Pessoa física|17|17323.00|2025-09-22",
+  "SIMPLES NACIONAL|00.394.460/0058-87|Pessoa jurídica|14|16679.87|2026-03-20",
+  "DARF|00.394.460/0058-87|Pessoa jurídica|21|16102.18|2026-05-08",
+  "GABRIELLA EMELLY DE BESSA MACIEL|033.764.061-03|Pessoa física|12|14229.84|2026-05-08",
+  "CEF MATRIZ|00.360.305/0001-04|Pessoa jurídica|21|11090.81|2026-05-10",
+  "EQUATORIAL GOIAS DISTR ENER SA|01.543.032/0001-04|Pessoa jurídica|16|7693.84|2026-05-15",
+  "MARIANA PRADO ASSESSORIA CONTABIL|53.930.601/0001-60|Pessoa jurídica|19|7260.54|2026-05-09",
+  "REDECARD INSTITUICAO DE PAGAMENTO S.A.|01.425.787/0001-04|Pessoa jurídica|15|6247.98|2026-03-31",
+  "WILLIAN NEVES DOS SANTOS|961.952.821-20|Pessoa física|1|5500.00|2025-01-10",
+  "CERRADO PEDRAS|04.602.806/0001-00|Pessoa jurídica|1|5150.00|2025-01-03",
+  "TT COMUNICA|44.942.250/0001-16|Pessoa jurídica|7|4550.00|2025-07-14",
+  "ESTER SUZANE DE MOURA SANTOS|711.055.751-01|Pessoa física|6|4136.49|2026-05-08",
+  "IZABELLA VIANA VIEIRA|700.050.911-28|Pessoa física|6|3955.84|2026-05-08",
+  "FELIPE FRANCA PEDROSO|026.894.511-07|Pessoa física|1|3108.62|2025-01-06",
+  "ARGA FIXA|12.821.805/0001-85|Pessoa jurídica|1|3000.00|2025-01-06",
+  "MARIA DE FATIMA PEREIRA|508.733.931-04|Pessoa física|10|2945.00|2026-05-09",
+  "EDSON DE SOUZA HILARIO|364.117.601-87|Pessoa física|1|2900.00|2026-04-27",
+  "RECEITA FEDERAL|00.394.460/0058-87|Pessoa jurídica|2|2814.68|2026-05-27",
+  "VERISURE BRASIL|11.660.106/0001-38|Pessoa jurídica|9|2469.01|2026-05-15",
+  "DIEGO REIS SILVA|015.683.991-11|Pessoa física|15|2211.73|2026-05-09",
+  "ELLO TINTAS|07.531.461/0001-30|Pessoa jurídica|2|2119.00|2026-04-16",
+  "REDEMOB CONSORCIO|10.636.142/0001-01|Pessoa jurídica|5|1980.90|2026-05-09",
   "TIM CELULAR SA||Sem documento|17|1880.12|2026-05-09",
-  "IMPERCIA|02.062.017/0001-07|Pessoa jur?dica|1|1625.00|2025-01-03",
-  "MARIANNA PARREIRA DA SILVA 04682784196|44.510.180/0001-27|Pessoa jur?dica|2|1600.00|2026-04-22",
-  "CENTRO DE I E ESCOLA CIEE|61.600.839/0001-55|Pessoa jur?dica|4|1432.00|2026-05-15",
-  "SANEAGO|01.616.929/0001-02|Pessoa jur?dica|14|1409.70|2026-05-15",
-  "GOIANIA PREFEITURA MUNICIPAL GABINETE DO PREFEITO|01.612.092/0001-23|Pessoa jur?dica|2|1217.55|2026-04-16",
-  "MERCADO PAGO INSTITUICAO DE PAGAMENTO LTDA|10.573.521/0001-91|Pessoa jur?dica|6|1188.62|2026-04-17",
-  "SHPP BRASIL INSTITUICAO DE PAGAMENTO E SERVICOS DE PAGAMENTOS LTDA|38.372.267/0001-82|Pessoa jur?dica|4|1188.40|2026-04-17",
-  "PJBANK PAGAMENTOS S A 1|18.191.228/0001-71|Pessoa jur?dica|5|998.05|2025-05-21",
-  "VERISURE BRASIL MONITORAMENTO PROCESSADO POR ADYE|14.796.606/0001-90|Pessoa jur?dica|3|887.74|2025-07-14",
-  "GOIANIA-TESOURO|01.612.092/0001-23|Pessoa jur?dica|3|867.79|2026-05-15",
-  "SOLAR|33.319.245/0001-35|Pessoa jur?dica|1|843.69|2025-01-06",
-  "SCOTT DESENVOLVIMENTO DE SOFTWARE|32.527.206/0001-60|Pessoa jur?dica|4|835.20|2025-11-07",
-  "HELLEN MARIA NASCIMENTO DE OLIVEIRA|053.709.401-69|Pessoa f?sica|2|810.00|2025-11-24",
-  "TIM CELULAR SA|02.421.421/0001-11|Pessoa jur?dica|18|714.59|2026-03-23",
-  "SANDRA SILVA COSTA|032.570.446-58|Pessoa f?sica|1|670.50|2025-11-18",
-  "PM GOIANIA-FMS|01.612.092/0001-23|Pessoa jur?dica|1|516.54|2025-06-30",
+  "IMPERCIA|02.062.017/0001-07|Pessoa jurídica|1|1625.00|2025-01-03",
+  "MARIANNA PARREIRA DA SILVA 04682784196|44.510.180/0001-27|Pessoa jurídica|2|1600.00|2026-04-22",
+  "CENTRO DE I E ESCOLA CIEE|61.600.839/0001-55|Pessoa jurídica|4|1432.00|2026-05-15",
+  "SANEAGO|01.616.929/0001-02|Pessoa jurídica|14|1409.70|2026-05-15",
+  "GOIANIA PREFEITURA MUNICIPAL GABINETE DO PREFEITO|01.612.092/0001-23|Pessoa jurídica|2|1217.55|2026-04-16",
+  "MERCADO PAGO INSTITUICAO DE PAGAMENTO LTDA|10.573.521/0001-91|Pessoa jurídica|6|1188.62|2026-04-17",
+  "SHPP BRASIL INSTITUICAO DE PAGAMENTO E SERVICOS DE PAGAMENTOS LTDA|38.372.267/0001-82|Pessoa jurídica|4|1188.40|2026-04-17",
+  "PJBANK PAGAMENTOS S A 1|18.191.228/0001-71|Pessoa jurídica|5|998.05|2025-05-21",
+  "VERISURE BRASIL MONITORAMENTO PROCESSADO POR ADYE|14.796.606/0001-90|Pessoa jurídica|3|887.74|2025-07-14",
+  "GOIANIA-TESOURO|01.612.092/0001-23|Pessoa jurídica|3|867.79|2026-05-15",
+  "SOLAR|33.319.245/0001-35|Pessoa jurídica|1|843.69|2025-01-06",
+  "SCOTT DESENVOLVIMENTO DE SOFTWARE|32.527.206/0001-60|Pessoa jurídica|4|835.20|2025-11-07",
+  "HELLEN MARIA NASCIMENTO DE OLIVEIRA|053.709.401-69|Pessoa física|2|810.00|2025-11-24",
+  "TIM CELULAR SA|02.421.421/0001-11|Pessoa jurídica|18|714.59|2026-03-23",
+  "SANDRA SILVA COSTA|032.570.446-58|Pessoa física|1|670.50|2025-11-18",
+  "PM GOIANIA-FMS|01.612.092/0001-23|Pessoa jurídica|1|516.54|2025-06-30",
   "CLARO CELULAR S.A||Sem documento|15|469.70|2026-03-10",
-  "32.642.830 BRUNO SILVA LIMA|32.642.830/0001-09|Pessoa jur?dica|1|400.00|2025-04-25",
-  "ECOENTULHO|11.071.934/0001-30|Pessoa jur?dica|1|360.00|2025-01-09",
-  "SUPERMERCADO PRATIKO|07.099.190/0001-95|Pessoa jur?dica|7|314.51|2025-09-02",
-  "AMAZON.COM.BR|15.436.940/0001-03|Pessoa jur?dica|1|274.91|2026-04-17",
-  "PHYSIOFIT STUDIO LTDA|21.530.469/0001-02|Pessoa jur?dica|1|269.32|2025-09-10",
-  "IRACEMA MARIA DE MACEDO E SILVA|853.957.301-68|Pessoa f?sica|1|265.00|2025-05-09",
-  "ADRIANA MISSIAS DE ANDRADE|895.018.701-97|Pessoa f?sica|2|260.00|2025-11-17",
-  "FLAVIO VELOZO DE ANDRADE GOMES|873.632.161-34|Pessoa f?sica|1|250.00|2025-03-24",
-  "EDMILSON JOSE DA SILVA|499.573.254-34|Pessoa f?sica|1|240.00|2025-08-12",
-  "MARCELEY MIGUEL DA SILVA|422.963.581-87|Pessoa f?sica|1|218.10|2025-01-20",
-  "63.395.888 JUCENILDO DA CRUZ PEREIRA|63.395.888/0001-29|Pessoa jur?dica|1|200.00|2026-04-16",
-  "R&P SOLUCOES DIGITAL|48.502.102/0001-31|Pessoa jur?dica|1|200.00|2025-05-20",
-  "TRIATO PETIT|47.116.088/0001-75|Pessoa jur?dica|1|200.00|2026-04-20",
-  "EMBALAGENS VIEIRA LTDA|53.566.932/0001-62|Pessoa jur?dica|1|197.00|2025-11-17",
-  "CLAUDIA MARTINS SILVERIO|791.572.621-87|Pessoa f?sica|1|190.00|2025-07-25",
-  "ROCHA SERVICOS E DETIZACAO LTDA|04.431.503/0001-72|Pessoa jur?dica|1|190.00|2025-10-06",
-  "PAULO HENRIQUE DA SILVA SOARES|049.501.111-83|Pessoa f?sica|1|184.60|2025-04-16",
-  "POLLYANA QUINTINO ESTEVAO DOS SANTOS|704.958.041-42|Pessoa f?sica|1|180.00|2025-01-23",
-  "WASHINGTON RODRIGUES PEREIRA|004.635.951-65|Pessoa f?sica|1|180.00|2025-01-30",
-  "CREFITO 19|55.556.485/0001-96|Pessoa jur?dica|1|179.25|2025-04-09",
-  "ORIONPAG|57.903.453/0001-45|Pessoa jur?dica|1|160.40|2025-07-07",
-  "MS MULT-SERVI|32.642.830/0001-09|Pessoa jur?dica|1|150.00|2025-10-14",
-  "EDUZZ TECNOLOGIA LTDA|09.573.540/0001-39|Pessoa jur?dica|1|147.00|2025-01-31",
-  "LOPANE - PADARIA & EMPORIO|47.571.044/0001-35|Pessoa jur?dica|1|142.72|2025-03-31",
-  "JOSE FELIX DOS SANTOS|492.345.951-49|Pessoa f?sica|1|130.00|2026-01-08",
-  "GOIANIA-TESOURO|00.161.209/2000-12|Pessoa jur?dica|1|129.70|2025-03-18",
-  "EXATA IMPRESSAO RAPIDA|32.144.394/0001-48|Pessoa jur?dica|1|125.00|2026-01-30",
-  "VALDIVINO NUNES DE MORAIS|377.283.501-53|Pessoa f?sica|1|125.00|2025-07-16",
-  "PHYSIOFIT STUDIO|21.530.469/0001-02|Pessoa jur?dica|3|115.00|2026-03-20",
-  "MYSHOP|11.156.936/0001-22|Pessoa jur?dica|1|110.00|2025-07-17",
-  "REDE EMPORIO CASA LOPES|52.101.439/0001-04|Pessoa jur?dica|1|100.00|2025-04-11",
-  "LARA JORDANA ARAUJO BORGES|086.493.221-90|Pessoa f?sica|1|90.00|2025-12-02",
-  "LUZIA CRUVINEL DE OLIVEIRA|396.964.481-04|Pessoa f?sica|1|90.00|2026-04-29",
-  "DSE DISTRIBUIDORA SANTA EMILIA|22.690.666/0001-51|Pessoa jur?dica|1|89.80|2025-09-11",
-  "INSTITUTO MUNDO FISIO|17.958.336/0001-64|Pessoa jur?dica|1|85.00|2025-09-30",
-  "GILDEAN A DA SILVA|33.649.347/0002-08|Pessoa jur?dica|1|84.96|2025-01-13",
-  "CLAUDIO EDMUNDO SILVA|788.125.341-04|Pessoa f?sica|1|70.00|2025-08-15",
-  "TRADIO|42.971.425/0001-98|Pessoa jur?dica|1|66.49|2025-02-21",
-  "DRS GESTAO FINANCEIRA|38.498.027/0001-29|Pessoa jur?dica|1|60.89|2026-01-20",
-  "ADAILTON BATISTA DA SILVA|11.539.874/0001-38|Pessoa jur?dica|1|60.00|2025-02-04",
-  "ATACADAO COSTA|27.289.076/0001-35|Pessoa jur?dica|1|59.82|2025-09-09",
-  "SUELENE MARIA BARBOSA DANTAS 39504441149|44.710.443/0001-41|Pessoa jur?dica|1|56.90|2025-03-24",
-  "MERCADO GLORIA|02.122.276/0001-78|Pessoa jur?dica|1|56.41|2025-02-12",
-  "MERCADINHO ON.LINE|31.140.487/0001-31|Pessoa jur?dica|1|50.95|2025-01-07",
-  "MARCELO MENDONCA MOITINHO|429.598.701-82|Pessoa f?sica|1|50.00|2026-04-23",
-  "BRUNO BORGES BOTELHO|709.620.251-00|Pessoa f?sica|1|47.00|2025-01-02",
-  "RAIFRAN DE SOUSA MOTA SILVA|021.329.521-08|Pessoa f?sica|1|35.00|2025-08-07",
-  "FERRAGISTA COMANDO|16.528.773/0001-85|Pessoa jur?dica|2|30.80|2025-06-25",
-  "ANTONIO MORENO LEOBAS 56581920134|35.892.382/0001-90|Pessoa jur?dica|1|20.00|2025-01-27",
-  "BRUNO GONCALVES DIAS MORENO|272.963.038-40|Pessoa f?sica|1|20.00|2025-03-21",
-  "DROGARIA PRO SAUDE|04.357.074/0001-30|Pessoa jur?dica|1|15.99|2025-10-08",
-  "MEGAPANE PANIFICADORA E LANCHONETE|09.630.883/0001-98|Pessoa jur?dica|1|11.00|2025-03-17",
-  "SANDY CHAVES DE SOUSA|810.008.801-25|Pessoa f?sica|1|10.00|2025-10-29",
+  "32.642.830 BRUNO SILVA LIMA|32.642.830/0001-09|Pessoa jurídica|1|400.00|2025-04-25",
+  "ECOENTULHO|11.071.934/0001-30|Pessoa jurídica|1|360.00|2025-01-09",
+  "SUPERMERCADO PRATIKO|07.099.190/0001-95|Pessoa jurídica|7|314.51|2025-09-02",
+  "AMAZON.COM.BR|15.436.940/0001-03|Pessoa jurídica|1|274.91|2026-04-17",
+  "PHYSIOFIT STUDIO LTDA|21.530.469/0001-02|Pessoa jurídica|1|269.32|2025-09-10",
+  "IRACEMA MARIA DE MACEDO E SILVA|853.957.301-68|Pessoa física|1|265.00|2025-05-09",
+  "ADRIANA MISSIAS DE ANDRADE|895.018.701-97|Pessoa física|2|260.00|2025-11-17",
+  "FLAVIO VELOZO DE ANDRADE GOMES|873.632.161-34|Pessoa física|1|250.00|2025-03-24",
+  "EDMILSON JOSE DA SILVA|499.573.254-34|Pessoa física|1|240.00|2025-08-12",
+  "MARCELEY MIGUEL DA SILVA|422.963.581-87|Pessoa física|1|218.10|2025-01-20",
+  "63.395.888 JUCENILDO DA CRUZ PEREIRA|63.395.888/0001-29|Pessoa jurídica|1|200.00|2026-04-16",
+  "R&P SOLUCOES DIGITAL|48.502.102/0001-31|Pessoa jurídica|1|200.00|2025-05-20",
+  "TRIATO PETIT|47.116.088/0001-75|Pessoa jurídica|1|200.00|2026-04-20",
+  "EMBALAGENS VIEIRA LTDA|53.566.932/0001-62|Pessoa jurídica|1|197.00|2025-11-17",
+  "CLAUDIA MARTINS SILVERIO|791.572.621-87|Pessoa física|1|190.00|2025-07-25",
+  "ROCHA SERVICOS E DETIZACAO LTDA|04.431.503/0001-72|Pessoa jurídica|1|190.00|2025-10-06",
+  "PAULO HENRIQUE DA SILVA SOARES|049.501.111-83|Pessoa física|1|184.60|2025-04-16",
+  "POLLYANA QUINTINO ESTEVAO DOS SANTOS|704.958.041-42|Pessoa física|1|180.00|2025-01-23",
+  "WASHINGTON RODRIGUES PEREIRA|004.635.951-65|Pessoa física|1|180.00|2025-01-30",
+  "CREFITO 19|55.556.485/0001-96|Pessoa jurídica|1|179.25|2025-04-09",
+  "ORIONPAG|57.903.453/0001-45|Pessoa jurídica|1|160.40|2025-07-07",
+  "MS MULT-SERVI|32.642.830/0001-09|Pessoa jurídica|1|150.00|2025-10-14",
+  "EDUZZ TECNOLOGIA LTDA|09.573.540/0001-39|Pessoa jurídica|1|147.00|2025-01-31",
+  "LOPANE - PADARIA & EMPORIO|47.571.044/0001-35|Pessoa jurídica|1|142.72|2025-03-31",
+  "JOSE FELIX DOS SANTOS|492.345.951-49|Pessoa física|1|130.00|2026-01-08",
+  "GOIANIA-TESOURO|00.161.209/2000-12|Pessoa jurídica|1|129.70|2025-03-18",
+  "EXATA IMPRESSAO RAPIDA|32.144.394/0001-48|Pessoa jurídica|1|125.00|2026-01-30",
+  "VALDIVINO NUNES DE MORAIS|377.283.501-53|Pessoa física|1|125.00|2025-07-16",
+  "PHYSIOFIT STUDIO|21.530.469/0001-02|Pessoa jurídica|3|115.00|2026-03-20",
+  "MYSHOP|11.156.936/0001-22|Pessoa jurídica|1|110.00|2025-07-17",
+  "REDE EMPORIO CASA LOPES|52.101.439/0001-04|Pessoa jurídica|1|100.00|2025-04-11",
+  "LARA JORDANA ARAUJO BORGES|086.493.221-90|Pessoa física|1|90.00|2025-12-02",
+  "LUZIA CRUVINEL DE OLIVEIRA|396.964.481-04|Pessoa física|1|90.00|2026-04-29",
+  "DSE DISTRIBUIDORA SANTA EMILIA|22.690.666/0001-51|Pessoa jurídica|1|89.80|2025-09-11",
+  "INSTITUTO MUNDO FISIO|17.958.336/0001-64|Pessoa jurídica|1|85.00|2025-09-30",
+  "GILDEAN A DA SILVA|33.649.347/0002-08|Pessoa jurídica|1|84.96|2025-01-13",
+  "CLAUDIO EDMUNDO SILVA|788.125.341-04|Pessoa física|1|70.00|2025-08-15",
+  "TRADIO|42.971.425/0001-98|Pessoa jurídica|1|66.49|2025-02-21",
+  "DRS GESTAO FINANCEIRA|38.498.027/0001-29|Pessoa jurídica|1|60.89|2026-01-20",
+  "ADAILTON BATISTA DA SILVA|11.539.874/0001-38|Pessoa jurídica|1|60.00|2025-02-04",
+  "ATACADAO COSTA|27.289.076/0001-35|Pessoa jurídica|1|59.82|2025-09-09",
+  "SUELENE MARIA BARBOSA DANTAS 39504441149|44.710.443/0001-41|Pessoa jurídica|1|56.90|2025-03-24",
+  "MERCADO GLORIA|02.122.276/0001-78|Pessoa jurídica|1|56.41|2025-02-12",
+  "MERCADINHO ON.LINE|31.140.487/0001-31|Pessoa jurídica|1|50.95|2025-01-07",
+  "MARCELO MENDONCA MOITINHO|429.598.701-82|Pessoa física|1|50.00|2026-04-23",
+  "BRUNO BORGES BOTELHO|709.620.251-00|Pessoa física|1|47.00|2025-01-02",
+  "RAIFRAN DE SOUSA MOTA SILVA|021.329.521-08|Pessoa física|1|35.00|2025-08-07",
+  "FERRAGISTA COMANDO|16.528.773/0001-85|Pessoa jurídica|2|30.80|2025-06-25",
+  "ANTONIO MORENO LEOBAS 56581920134|35.892.382/0001-90|Pessoa jurídica|1|20.00|2025-01-27",
+  "BRUNO GONCALVES DIAS MORENO|272.963.038-40|Pessoa física|1|20.00|2025-03-21",
+  "DROGARIA PRO SAUDE|04.357.074/0001-30|Pessoa jurídica|1|15.99|2025-10-08",
+  "MEGAPANE PANIFICADORA E LANCHONETE|09.630.883/0001-98|Pessoa jurídica|1|11.00|2025-03-17",
+  "SANDY CHAVES DE SOUSA|810.008.801-25|Pessoa física|1|10.00|2025-10-29",
 ];
 
 const seedSuppliers = seedSupplierRows.map((row, index) => {
@@ -163,7 +163,7 @@ const seedPlans = [
   { id: "pl12", name: "Funcional -Semestral - 1x na semana", modalityId: "m2", type: "Semestralidade", value: 870, linkedEnrollments: 3, sessions: 24, status: "Ativo", notes: "" },
   { id: "pl13", name: "Novo - Plano Familiar 1x", modalityId: "m3", type: "Mensalidade", value: 180, linkedEnrollments: 0, sessions: 4, status: "Ativo", notes: "" },
   { id: "pl14", name: "Novo - Plano Familiar 2x", modalityId: "m3", type: "Mensalidade", value: 290, linkedEnrollments: 4, sessions: 8, status: "Ativo", notes: "" },
-  { id: "pl15", name: "Novo - Fisioterapia pacote - 10 Sess?es", modalityId: "m1", type: "Pacote de Sessão", value: 1430, linkedEnrollments: 1, sessions: 10, status: "Ativo", notes: "" },
+  { id: "pl15", name: "Novo - Fisioterapia pacote - 10 Sessões", modalityId: "m1", type: "Pacote de Sessão", value: 1430, linkedEnrollments: 1, sessions: 10, status: "Ativo", notes: "" },
   { id: "pl16", name: "Novo - Funcional Mensal - 1x por semana", modalityId: "m2", type: "Mensalidade", value: 160, linkedEnrollments: 1, sessions: 4, status: "Ativo", notes: "" },
   { id: "pl17", name: "Novo - Funcional Mensal - 2x por semana", modalityId: "m2", type: "Mensalidade", value: 220, linkedEnrollments: 10, sessions: 8, status: "Ativo", notes: "" },
   { id: "pl18", name: "Novo - Funcional Mensal - 3x por semana", modalityId: "m2", type: "Mensalidade", value: 300, linkedEnrollments: 4, sessions: 12, status: "Ativo", notes: "" },
@@ -222,7 +222,7 @@ const seedChartAccounts = [
   {"id": "pc21", "code": "5.01.05", "name": "INSS", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas com Pessoal", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc22", "code": "5.01.06", "name": "FGTS", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas com Pessoal", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc23", "code": "5.01.07", "name": "Rescisão Trabalhista", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas com Pessoal", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
-  {"id": "pc24", "code": "5.01.08", "name": "Plano de Sáude", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas com Pessoal", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
+  {"id": "pc24", "code": "5.01.08", "name": "Plano de Saúde", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas com Pessoal", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc25", "code": "5.02.01", "name": "Água e Esgoto", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas com Infraestrutura", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc26", "code": "5.02.02", "name": "Aluguéis", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas com Infraestrutura", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc27", "code": "5.05.01", "name": "IPTU", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas com Infraestrutura", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
@@ -253,15 +253,15 @@ const seedChartAccounts = [
   {"id": "pc52", "code": "5.05.03", "name": "Taxas Federais", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas Tributárias", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc53", "code": "5.06.01", "name": "Juros S/Cheque Especial", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas Financeiras", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc54", "code": "5.06.02", "name": "Tarifa Bancária", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas Financeiras", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
-  {"id": "pc55", "code": "5.06.03", "name": "Tarifas de Cartão Cr?dito", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas Financeiras", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
+  {"id": "pc55", "code": "5.06.03", "name": "Tarifas de Cartão Crédito", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas Financeiras", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc56", "code": "5.06.04", "name": "Pagamento Cartão de Crédito", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas Financeiras", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
-  {"id": "pc57", "code": "5.06.05", "name": "Juros Empr?stimos", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas Financeiras", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
+  {"id": "pc57", "code": "5.06.05", "name": "Juros Empréstimos", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas Financeiras", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc58", "code": "7.01.01", "name": "IR/CSLL", "dreGroup": "(-) IR/CSLL", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Imposto de Renda", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc59", "code": "999", "name": "Não Identificado", "dreGroup": "(-) Despesas", "dfcDescription": "Despesas", "dfcGroup": "Atividades Operacionais", "package": "Despesas Gerais", "activity": "Operacional", "nature": "Despesa", "status": "Ativo"},
   {"id": "pc60", "code": "8.01", "name": "Instalações", "dreGroup": "Patrimonial", "dfcDescription": "Instalações", "dfcGroup": "Atividades de Investimento", "package": "Capex", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc61", "code": "8.02", "name": "Máquinas e Equipamentos", "dreGroup": "Patrimonial", "dfcDescription": "Máquinas e Equipamentos", "dfcGroup": "Atividades de Investimento", "package": "Capex", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc62", "code": "8.03", "name": "Computadores e Periféricos", "dreGroup": "Patrimonial", "dfcDescription": "Computadores e Periféricos", "dfcGroup": "Atividades de Investimento", "package": "Capex", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
-  {"id": "pc63", "code": "8.04", "name": "M?veis e Utensílios", "dreGroup": "Patrimonial", "dfcDescription": "M?veis e Utensílios", "dfcGroup": "Atividades de Investimento", "package": "Capex", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
+  {"id": "pc63", "code": "8.04", "name": "Móveis e Utensílios", "dreGroup": "Patrimonial", "dfcDescription": "Móveis e Utensílios", "dfcGroup": "Atividades de Investimento", "package": "Capex", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc64", "code": "8.05", "name": "Veículos", "dreGroup": "Patrimonial", "dfcDescription": "Veículos", "dfcGroup": "Atividades de Investimento", "package": "Capex", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc65", "code": "8.06", "name": "Venda de Imobilizado", "dreGroup": "Patrimonial", "dfcDescription": "Venda de Imobilizado", "dfcGroup": "Atividades de Investimento", "package": "Capex", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc66", "code": "12.01", "name": "Consórcio", "dreGroup": "Patrimonial", "dfcDescription": "Consórcio", "dfcGroup": "Atividades de Investimento", "package": "Investimentos", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
@@ -269,16 +269,16 @@ const seedChartAccounts = [
   {"id": "pc68", "code": "12.02", "name": "Resgate Aplicação", "dreGroup": "Patrimonial", "dfcDescription": "Resgate Aplicação", "dfcGroup": "Atividades de Investimento", "package": "Investimentos", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc69", "code": "12.04", "name": "Rendimento Aplicação", "dreGroup": "Patrimonial", "dfcDescription": "Rendimento Aplicação", "dfcGroup": "Atividades de Investimento", "package": "Investimentos", "activity": "Investimento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc70", "code": "10.01", "name": "Aporte Capital", "dreGroup": "Patrimonial", "dfcDescription": "Aporte Capital", "dfcGroup": "Atividades de Financiamento", "package": "Aporte", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
-  {"id": "pc71", "code": "10.02", "name": "Empréstimo Contratado", "dreGroup": "Patrimonial", "dfcDescription": "Empréstimo Contratado", "dfcGroup": "Atividades de Financiamento", "package": "Empr?stimos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
-  {"id": "pc72", "code": "10.03", "name": "Pagamento de Empréstimo", "dreGroup": "Patrimonial", "dfcDescription": "Pagamento de Empréstimo", "dfcGroup": "Atividades de Financiamento", "package": "Empr?stimos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
+  {"id": "pc71", "code": "10.02", "name": "Empréstimo Contratado", "dreGroup": "Patrimonial", "dfcDescription": "Empréstimo Contratado", "dfcGroup": "Atividades de Financiamento", "package": "Empréstimos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
+  {"id": "pc72", "code": "10.03", "name": "Pagamento de Empréstimo", "dreGroup": "Patrimonial", "dfcDescription": "Pagamento de Empréstimo", "dfcGroup": "Atividades de Financiamento", "package": "Empréstimos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc73", "code": "9.01", "name": "Distribuição de Lucros", "dreGroup": "Patrimonial", "dfcDescription": "Distribuição de Lucros", "dfcGroup": "Atividades de Financiamento", "package": "Adiantamentos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc74", "code": "9.02", "name": "Distribuição de Lucros - Obra", "dreGroup": "Patrimonial", "dfcDescription": "Distribuição de Lucros - Obra", "dfcGroup": "Atividades de Financiamento", "package": "Adiantamentos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
   {"id": "pc75", "code": "9.03", "name": "Distribuição de Lucros - Outros", "dreGroup": "Patrimonial", "dfcDescription": "Distribuição de Lucros - Outros", "dfcGroup": "Atividades de Financiamento", "package": "Adiantamentos", "activity": "Financiamento", "nature": "Patrimonial", "status": "Ativo"},
-  {"id": "pc76", "code": "11", "name": "Transferência Entre Contras", "dreGroup": "Patrimonial", "dfcDescription": "Transferência Entre Contras", "dfcGroup": "Transitório", "package": "Transitório", "activity": "Transit?rio", "nature": "Patrimonial", "status": "Ativo"}
+  {"id": "pc76", "code": "11", "name": "Transferência Entre Contras", "dreGroup": "Patrimonial", "dfcDescription": "Transferência Entre Contras", "dfcGroup": "Transitório", "package": "Transitório", "activity": "Transitório", "nature": "Patrimonial", "status": "Ativo"}
 ];
 
 const seedAccounts = [
-  { id: "cp1", direction: "Pagar", status: "Pago", competenceDate: "2025-01-02", forecastDate: "2025-01-02", dueDate: "2025-01-02", paidDate: "2025-01-02", amount: 47, description: "Nao Identificado", person: "BRUNO BORGES BOTELHO", document: "709.620.251-00", modalityId: "", teacherId: "", chartAccountId: "pc25", paymentMethod: "Itau", bankLaunch: "SISPAG PIX QR-CODE" },
+  { id: "cp1", direction: "Pagar", status: "Pago", competenceDate: "2025-01-02", forecastDate: "2025-01-02", dueDate: "2025-01-02", paidDate: "2025-01-02", amount: 47, description: "Não Identificado", person: "BRUNO BORGES BOTELHO", document: "709.620.251-00", modalityId: "", teacherId: "", chartAccountId: "pc25", paymentMethod: "Itau", bankLaunch: "SISPAG PIX QR-CODE" },
   { id: "cp2", direction: "Pagar", status: "Pago", competenceDate: "2025-01-02", forecastDate: "2025-01-02", dueDate: "2025-01-02", paidDate: "2025-01-02", amount: 30, description: "Distribuicao de Lucros", person: "DAIANNE PEREIRA DE SOUZA", document: "015.038.751-21", modalityId: "", teacherId: "", chartAccountId: "pc22", paymentMethod: "Itau", bankLaunch: "PIX ENVIADO DAIANNE PERE" },
   { id: "cp3", direction: "Pagar", status: "Pago", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 118, description: "Tarifa Bancaria", person: "TAR PLANO ADAPT 1 12/24", document: "", modalityId: "", teacherId: "", chartAccountId: "pc21", paymentMethod: "Itau", bankLaunch: "TAR PLANO ADAPT 1 12/24" },
   { id: "cp4", direction: "Receber", status: "Recebido", competenceDate: "2025-01-03", forecastDate: "2025-01-03", dueDate: "2025-01-03", paidDate: "2025-01-03", amount: 0.13, description: "Rendimento Aplicacao", person: "REND PAGO APLIC AUT MAIS", document: "", modalityId: "", teacherId: "", chartAccountId: "pc24", paymentMethod: "Itau", bankLaunch: "REND PAGO APLIC AUT MAIS" },
@@ -623,54 +623,54 @@ const modalSchemas = {
     title: "Novo fornecedor",
     submit: "Salvar fornecedor",
     fields: [
-      { name: "name", label: "Razao social / Nome", type: "text" },
+      { name: "name", label: "Razão social / Nome", type: "text" },
       { name: "document", label: "CPF/CNPJ", type: "text", value: "" },
-      { name: "supplierType", label: "Tipo", type: "select", options: ["Pessoa jur?dica", "Pessoa f?sica", "Sem documento"], value: "Pessoa jur?dica" },
+      { name: "supplierType", label: "Tipo", type: "select", options: ["Pessoa jurídica", "Pessoa física", "Sem documento"], value: "Pessoa jurídica" },
       { name: "email", label: "Email", type: "email", value: "" },
       { name: "phone", label: "Telefone", type: "tel", value: "" },
       { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
-      { name: "notes", label: "Observa?es", type: "textarea", value: "" },
+      { name: "notes", label: "Observações", type: "textarea", value: "" },
     ],
     handler: (values) => state.suppliers.push(normalizeSupplier({ id: uid("f"), ...values }, state.suppliers.length)),
   },
   enrollment: {
-    title: "Matr?cula",
-    submit: "Salvar matr?cula",
+    title: "Matrícula",
+    submit: "Salvar matrícula",
     fields: [
       { name: "studentId", label: "Aluno/Paciente", type: "student" },
       { name: "planId", label: "Plano", type: "planId" },
       { name: "modalityId", label: "Modalidade", type: "modalityId" },
       { name: "professionalId", label: "Profissional", type: "professionalOptional" },
-      { name: "startDate", label: "Data da matr?cula", type: "date", value: demoToday },
+      { name: "startDate", label: "Data da matrícula", type: "date", value: demoToday },
       { name: "endDate", label: "Data final", type: "date", value: "2026-12-31" },
       { name: "dueDay", label: "Dia do vencimento", type: "number", value: 10 },
-      { name: "firstPaymentDate", label: "Data do 1? pagamento", type: "date", value: demoToday, required: false },
-      { name: "registrationFee", label: "Taxa de matr?cula", type: "number", value: 0, required: false },
-      { name: "dueNotice", label: "Aviso de vencimento", type: "select", options: ["Sim", "N?o"], value: "Sim" },
-      { name: "sessionReminder", label: "Lembrete de sess?o", type: "select", options: ["Sim", "N?o"], value: "Sim" },
-      { name: "planType", label: "Tipo de plano", type: "select", options: ["Aula avulsa", "Mensalidade", "Trimestralidade", "Semestralidade", "Pacote de sess?o"], value: "Mensalidade" },
+      { name: "firstPaymentDate", label: "Data do 1º pagamento", type: "date", value: demoToday, required: false },
+      { name: "registrationFee", label: "Taxa de matrícula", type: "number", value: 0, required: false },
+      { name: "dueNotice", label: "Aviso de vencimento", type: "select", options: ["Sim", "Não"], value: "Sim" },
+      { name: "sessionReminder", label: "Lembrete de sessão", type: "select", options: ["Sim", "Não"], value: "Sim" },
+      { name: "planType", label: "Tipo de plano", type: "select", options: ["Aula avulsa", "Mensalidade", "Trimestralidade", "Semestralidade", "Pacote de sessão"], value: "Mensalidade" },
       { name: "monthlyValue", label: "Valor da mensalidade", type: "number", value: 0 },
-      { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cart?o de D?bito", "Cart?o de Cr?dito", "Boleto", "Dinheiro", "Transfer?ncia"], value: "Pix" },
-      { name: "autoRenew", label: "Renova??o autom?tica", type: "select", options: ["Sim", "N?o"], value: "Sim" },
-      { name: "room", label: "Sala", type: "select", options: ["Sala Reformer", "Sala Cadillac", "Sala Cl?nica", "Sala Solo", "Sala Funcional"], value: "Sala Reformer", required: false },
-      { name: "freeSchedule", label: "Hor?rio livre", type: "select", options: ["N?o", "Sim"], value: "N?o" },
-      { name: "sessions", label: "Sess?es por semana", type: "number", value: 1 },
-      { name: "sessionType", label: "Tipo de sess?o", type: "select", options: ["Presencial", "Domic?lio", "Online"], value: "Presencial" },
-      { name: "attendanceType", label: "Forma de atendimento", type: "select", options: ["Particular", "Conv?nio", "Cortesia"], value: "Particular" },
+      { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Dinheiro", "Transferência"], value: "Pix" },
+      { name: "autoRenew", label: "Renovação automática", type: "select", options: ["Sim", "Não"], value: "Sim" },
+      { name: "room", label: "Sala", type: "select", options: ["Sala Reformer", "Sala Cadillac", "Sala Clínica", "Sala Solo", "Sala Funcional"], value: "Sala Reformer", required: false },
+      { name: "freeSchedule", label: "Horário livre", type: "select", options: ["Não", "Sim"], value: "Não" },
+      { name: "sessions", label: "Sessões por semana", type: "number", value: 1 },
+      { name: "sessionType", label: "Tipo de sessão", type: "select", options: ["Presencial", "Domicílio", "Online"], value: "Presencial" },
+      { name: "attendanceType", label: "Forma de atendimento", type: "select", options: ["Particular", "Convênio", "Cortesia"], value: "Particular" },
       { name: "mondayTime", label: "Segunda-feira", type: "time", value: "", required: false },
-      { name: "tuesdayTime", label: "Ter?a-feira", type: "time", value: "", required: false },
+      { name: "tuesdayTime", label: "Terça-feira", type: "time", value: "", required: false },
       { name: "wednesdayTime", label: "Quarta-feira", type: "time", value: "", required: false },
       { name: "thursdayTime", label: "Quinta-feira", type: "time", value: "", required: false },
       { name: "fridayTime", label: "Sexta-feira", type: "time", value: "", required: false },
-      { name: "saturdayTime", label: "S?bado", type: "time", value: "", required: false },
-      { name: "financialNotes", label: "Observa??o financeira", type: "textarea", value: "", required: false },
-      { name: "contractTemplate", label: "Contrato", type: "select", options: ["Contrato de matr?cula", "Termo avulso", "Sem contrato"], value: "Contrato de matr?cula" },
-      { name: "contractStatus", label: "Assinatura do contrato", type: "select", options: ["N?o enviado", "Pendente", "Assinado"], value: "Pendente" },
-      { name: "signatureStatus", label: "Assinatura virtual", type: "select", options: ["N?o enviada", "Pendente", "Assinada"], value: "Pendente" },
-      { name: "lockStartDate", label: "In?cio f?rias/trancamento", type: "date", value: "", required: false },
-      { name: "lockEndDate", label: "Fim f?rias/trancamento", type: "date", value: "", required: false },
+      { name: "saturdayTime", label: "Sábado", type: "time", value: "", required: false },
+      { name: "financialNotes", label: "Observação financeira", type: "textarea", value: "", required: false },
+      { name: "contractTemplate", label: "Contrato", type: "select", options: ["Contrato de matrícula", "Termo avulso", "Sem contrato"], value: "Contrato de matrícula" },
+      { name: "contractStatus", label: "Assinatura do contrato", type: "select", options: ["Não enviado", "Pendente", "Assinado"], value: "Pendente" },
+      { name: "signatureStatus", label: "Assinatura virtual", type: "select", options: ["Não enviada", "Pendente", "Assinada"], value: "Pendente" },
+      { name: "lockStartDate", label: "Início férias/trancamento", type: "date", value: "", required: false },
+      { name: "lockEndDate", label: "Fim férias/trancamento", type: "date", value: "", required: false },
       { name: "status", label: "Status", type: "select", options: ["Ativa", "Pendente", "Suspensa", "Cancelada"], value: "Ativa" },
-      { name: "notes", label: "Observa??es gerais", type: "textarea", value: "", required: false },
+      { name: "notes", label: "Observações gerais", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
       const plan = state.plans.find((item) => item.id === values.planId);
@@ -713,7 +713,7 @@ const modalSchemas = {
       { name: "dueDate", label: "Vencimento", type: "date", value: demoToday },
       { name: "paidDate", label: "Baixa", type: "date", value: demoToday },
       { name: "amount", label: "Valor", type: "number", value: 0 },
-      { name: "description", label: "Descricao", type: "text", value: "Nova conta" },
+      { name: "description", label: "Descrição", type: "text", value: "Nova conta" },
       { name: "supplierId", label: "Fornecedor", type: "supplier" },
       { name: "person", label: "Paciente/Fornecedor", type: "text", value: "" },
       { name: "document", label: "CPF/CNPJ", type: "text", value: "" },
@@ -737,7 +737,7 @@ const modalSchemas = {
     },
   },
   chartAccount: {
-    title: "Conta cont?bil",
+    title: "Conta contábil",
     submit: "Salvar plano de contas",
     fields: chartAccountFields(),
     handler: saveChartAccountModal,
@@ -757,11 +757,11 @@ const modalSchemas = {
 
 function chartAccountFields() {
   return [
-    { name: "code", label: "C?digo", type: "text", value: "" },
+    { name: "code", label: "Código", type: "text", value: "" },
     { name: "name", label: "Conta", type: "text", value: "" },
     { name: "dreGroup", label: "Estrutura DRE", type: "select", options: ["(+) Faturamento Bruto", "(-) Impostos sob Venda", "(-) Custos", "(-) Despesas", "(-) IR/CSLL", "Patrimonial"], value: "(-) Despesas" },
-    { name: "package", label: "Pacote", type: "select", options: ["Receitas", "Custos", "Despesas Comerciais", "Despesas com Pessoal", "Despesas com Infraestrutura", "Despesas com Tecnologia", "Despesas Gerais", "Despesas Tributárias", "Despesas Financeiras", "Imposto de Renda", "Capex", "Investimentos", "Aporte", "Empr?stimos", "Adiantamentos", "Transitório"], value: "Despesas Gerais" },
-    { name: "dfcDescription", label: "Descricao DFC", type: "text", value: "Despesas" },
+    { name: "package", label: "Pacote", type: "select", options: ["Receitas", "Custos", "Despesas Comerciais", "Despesas com Pessoal", "Despesas com Infraestrutura", "Despesas com Tecnologia", "Despesas Gerais", "Despesas Tributárias", "Despesas Financeiras", "Imposto de Renda", "Capex", "Investimentos", "Aporte", "Empréstimos", "Adiantamentos", "Transitório"], value: "Despesas Gerais" },
+    { name: "dfcDescription", label: "Descrição DFC", type: "text", value: "Despesas" },
     { name: "dfcGroup", label: "Grupo DFC", type: "select", options: ["Atividades Operacionais", "Atividades de Investimento", "Atividades de Financiamento", "Transitório"], value: "Atividades Operacionais" },
     { name: "activity", label: "ESTRUTURA DFC", type: "select", options: ["Operacional", "Investimento", "Financiamento", "Transitório"], value: "Operacional" },
     { name: "nature", label: "Natureza", type: "select", options: ["Receita", "Despesa", "Patrimonial", "Entrada", "Saida"], value: "Despesa" },
@@ -937,7 +937,7 @@ function normalizeSupplier(item, index) {
     id: item.id || defaults.id || uid("f"),
     name: defaults.name || "",
     document: defaults.document || "",
-    supplierType: defaults.supplierType || "Pessoa jur?dica",
+    supplierType: defaults.supplierType || "Pessoa jurídica",
     email: "",
     phone: "",
     status: "Ativo",
@@ -1102,16 +1102,62 @@ function normalizeAppointmentTeacher(item) {
 }
 
 function fixPortugueseText(value) {
-  const replacements = {
-    Reposicao: "Reposi?o",
-    "Sala Clinica": "Sala Cl?nica",
-    Concluida: "Conclu?da",
-    "Conclu?da": "Conclu?da",
-    "Horario Bloqueado": "Hor?rio Bloqueado",
-    "Reavaliacao postural": "Reavalia?o postural",
-    Evolucao: "Evolu?o",
+  const exactReplacements = {
+    Reposicao: "Reposição",
+    "Sala Clinica": "Sala Clínica",
+    Concluida: "Concluída",
+    "Horario Bloqueado": "Horário Bloqueado",
+    "Reavaliacao postural": "Reavaliação postural",
+    Evolucao: "Evolução",
   };
-  return replacements[value] ?? value;
+  const textReplacements = [
+    ["Matr?cula", "Matrícula"],
+    ["matr?cula", "matrícula"],
+    ["Sess?es", "Sessões"],
+    ["sess?o", "sessão"],
+    ["Respons?veis", "Responsáveis"],
+    ["Observa??es", "Observações"],
+    ["Observa?es", "Observações"],
+    ["Observaçao", "Observação"],
+    ["Observacao", "Observação"],
+    ["Descri??o", "Descrição"],
+    ["Descri?ao", "Descrição"],
+    ["Descriçao", "Descrição"],
+    ["Descricao", "Descrição"],
+    ["Conta cont?bil", "Conta contábil"],
+    ["C?digo", "Código"],
+    ["A?es", "Ações"],
+    ["Avan?ado", "Avançado"],
+    ["Usu?rio", "Usuário"],
+    ["N?o", "Não"],
+    ["Pessoa f?sica", "Pessoa física"],
+    ["Pessoa jur?dica", "Pessoa jurídica"],
+    ["Cart?o", "Cartão"],
+    ["Cr?dito", "Crédito"],
+    ["D?bito", "Débito"],
+    ["Transfer?ncia", "Transferência"],
+    ["Renova??o", "Renovação"],
+    ["autom?tica", "automática"],
+    ["Cl?nica", "Clínica"],
+    ["Hor?rio", "Horário"],
+    ["Ter?a-feira", "Terça-feira"],
+    ["S?bado", "Sábado"],
+    ["Domic?lio", "Domicílio"],
+    ["Conv?nio", "Convênio"],
+    ["f?rias", "férias"],
+    ["Empr?stimo", "Empréstimo"],
+    ["Empr?stimos", "Empréstimos"],
+    ["M?veis", "Móveis"],
+    ["Transit?rio", "Transitório"],
+    ["Conclu?da", "Concluída"],
+    ["Reavalia?o", "Reavaliação"],
+    ["Evolu?o", "Evolução"],
+  ];
+  let normalized = exactReplacements[value] ?? value;
+  textReplacements.forEach(([from, to]) => {
+    normalized = normalized.split(from).join(to);
+  });
+  return normalized;
 }
 
 function saveState() {
@@ -1125,7 +1171,7 @@ function queueRemoteStateSave() {
   window.clearTimeout(remoteSaveTimer);
   remoteSaveTimer = window.setTimeout(async () => {
     const { error } = await window.PhysiofitData.saveState(state);
-    if (error) console.warn("Nao foi possivel sincronizar com o Neon.", error);
+    if (error) console.warn("Não foi possível sincronizar com o Neon.", error);
   }, 600);
 }
 
@@ -1153,7 +1199,7 @@ async function hydrateStateFromNeon() {
   remoteStateReady = true;
   const result = await window.PhysiofitData.saveState(state);
   if (result.error) {
-    console.warn("Nao foi possivel fazer a carga inicial no Neon.", result.error);
+    console.warn("Não foi possível fazer a carga inicial no Neon.", result.error);
     return;
   }
 
@@ -1311,7 +1357,7 @@ function upsertSupplierFromAccount(name = "", document = "") {
     id: uid("f"),
     name: cleanName,
     document: cleanDocument,
-    supplierType: cleanDocument.includes("/") ?"Pessoa jur?dica" : cleanDocument ?"Pessoa f?sica" : "Sem documento",
+    supplierType: cleanDocument.includes("/") ?"Pessoa jurídica" : cleanDocument ?"Pessoa física" : "Sem documento",
     notes: "Criado a partir de lançamento financeiro",
   }, state.suppliers.length);
   state.suppliers.push(supplier);
@@ -1320,7 +1366,7 @@ function upsertSupplierFromAccount(name = "", document = "") {
 
 function chartAccountName(id) {
   const item = state.chartAccounts.find((account) => account.id === id);
-  return item ?`${item.code} - ${item.name}` : "Sem classificacao";
+  return item ?`${item.code} - ${item.name}` : "Sem classificação";
 }
 
 function statusClass(status = "") {
@@ -1916,8 +1962,8 @@ function renderEnrollments() {
             <tr>
               <td>
                 <div class="row-actions">
-                  <button class="row-action-button edit-icon-button" data-edit-enrollment="${item.id}" type="button" title="Editar matr?cula" aria-label="Editar matr?cula">&#9998;</button>
-                  <button class="row-action-button delete-icon-button" data-delete-enrollment="${item.id}" type="button" title="Excluir matr?cula" aria-label="Excluir matr?cula">&times;</button>
+                  <button class="row-action-button edit-icon-button" data-edit-enrollment="${item.id}" type="button" title="Editar matrícula" aria-label="Editar matrícula">&#9998;</button>
+                  <button class="row-action-button delete-icon-button" data-delete-enrollment="${item.id}" type="button" title="Excluir matrícula" aria-label="Excluir matrícula">&times;</button>
                 </div>
               </td>
               <td><div class="patient-name"><strong>${studentName(item.studentId).toUpperCase()}</strong></div></td>
@@ -1983,7 +2029,7 @@ function renderSuppliers() {
           <tr>
             <td>
               <div class="row-actions">
-                <button class="row-action-button delete-icon-button" data-delete-supplier="${item.id}" type="button" title="Excluir fornecedor" aria-label="Excluir fornecedor">Ã—</button>
+                <button class="row-action-button delete-icon-button" data-delete-supplier="${item.id}" type="button" title="Excluir fornecedor" aria-label="Excluir fornecedor">&times;</button>
               </div>
             </td>
             <td><div class="patient-name"><strong>${item.name.toUpperCase()}</strong><span>${item.email || item.phone || item.notes || ""}</span></div></td>
@@ -2172,7 +2218,7 @@ function savePlanEditor() {
 }
 
 function monthlyRows() {
-  const paymentMethods = ["Cart?o de D?bito", "Pix", "Cart?o de Cr?dito", "Aguardando", "Cortesia"];
+  const paymentMethods = ["Cartão de Débito", "Pix", "Cartão de Crédito", "Aguardando", "Cortesia"];
   if (activeEnrollments().length) {
     return activeEnrollments().map((enrollment, index) => {
       const studentItem = state.students.find((student) => student.id === enrollment.studentId) ?? {};
@@ -2523,7 +2569,7 @@ function cashFlowProjection(label, monthIndex) {
     "Distribuição de Lucros - Obra": 0,
     "Transferência Entre Contas": 0,
   };
-  return (values[label] ?? 0) + (label === "Pagamento de Empr?stimo" && monthIndex === 22 ? -16500 : 0);
+  return (values[label] ?? 0) + (label === "Pagamento de Empréstimo" && monthIndex === 22 ? -16500 : 0);
 }
 
 function cashFlowRowValues(months, label, predicate) {
@@ -3213,7 +3259,7 @@ function renderRecords() {
         .join("")
     : `<div class="empty-state">Nenhum registro clinico cadastrado.</div>`;
 
-  const checkins = state.appointments.filter((item) => item.status === "Concluida" || item.status === "Conclu?da" || item.status === "Compareceu").sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));
+  const checkins = state.appointments.filter((item) => item.status === "Concluida" || item.status === "Concluída" || item.status === "Compareceu").sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));
   const missed = state.appointments.filter((item) => item.status === "Faltou");
   const canceled = state.appointments.filter((item) => item.status === "Cancelada");
   const credits = state.students.reduce((sum, item) => sum + replacementBalance(item.id), 0);
@@ -3221,7 +3267,7 @@ function renderRecords() {
     <article class="summary-item"><span>Presencas</span><strong>${checkins.length}</strong></article>
     <article class="summary-item"><span>Faltas</span><strong>${missed.length}</strong></article>
     <article class="summary-item"><span>Cancelamentos</span><strong>${canceled.length}</strong></article>
-    <article class="summary-item"><span>Creditos de reposicao</span><strong>${credits}</strong></article>
+    <article class="summary-item"><span>Créditos de reposição</span><strong>${credits}</strong></article>
   `;
 
   document.querySelector("#checkinList").innerHTML = checkins.length
@@ -3246,10 +3292,10 @@ function renderRecords() {
       const studentMissed = studentAppointments.filter((item) => item.status === "Faltou").length;
       const studentCanceled = studentAppointments.filter((item) => item.status === "Cancelada").length;
       const lastPresence = studentAppointments
-        .filter((item) => item.status === "Concluida" || item.status === "Conclu?da" || item.status === "Compareceu")
+        .filter((item) => item.status === "Concluida" || item.status === "Concluída" || item.status === "Compareceu")
         .sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`))[0]?.date || studentItem.lastPresence || "";
       const creditBalance = replacementBalance(studentItem.id);
-      const risk = studentMissed >= 2 || creditBalance >= 3 ? "Alto" : studentMissed || creditBalance ? "Medio" : "Baixo";
+      const risk = studentMissed >= 2 || creditBalance >= 3 ? "Alto" : studentMissed || creditBalance ? "Médio" : "Baixo";
       return { studentItem, studentMissed, studentCanceled, lastPresence, creditBalance, risk };
     })
     .filter((row) => row.studentMissed || row.studentCanceled || row.creditBalance || row.risk !== "Baixo")
@@ -3277,7 +3323,7 @@ function replacementBalance(studentId) {
 
 function retentionRiskClass(risk) {
   if (risk === "Alto") return "atrasado";
-  if (risk === "Medio") return "pendente";
+  if (risk === "Médio") return "pendente";
   return "ativo";
 }
 
@@ -3310,7 +3356,7 @@ function applyAuthSession() {
   document.body.classList.toggle("professional-session", Boolean(user && !isAdminSession()));
   document.querySelector("#loginScreen").hidden = Boolean(user);
   document.querySelector("#sessionChip").hidden = !user;
-  document.querySelector("#sessionUserName").textContent = user?.name || "Usuario";
+  document.querySelector("#sessionUserName").textContent = user?.name || "Usuário";
   document.querySelector("#sessionUserRole").textContent = user?.role || "";
 }
 
@@ -3328,7 +3374,7 @@ async function handleLogin(event) {
     switchView(canAccessView(currentView()) ? currentView() : "dashboard");
     toast(`Bem-vindo, ${currentUser().name}.`);
   } catch (error) {
-    feedback.textContent = error.message || "Nao foi possivel entrar.";
+    feedback.textContent = error.message || "Não foi possível entrar.";
   }
 }
 
@@ -3346,7 +3392,7 @@ async function renderAccessUsers() {
   const table = document.querySelector("#accessUsersTable");
   if (!table || !isAdminSession()) return;
 
-  table.innerHTML = `<tr><td colspan="5"><div class="empty-state">Carregando usuarios...</div></td></tr>`;
+  table.innerHTML = `<tr><td colspan="5"><div class="empty-state">Carregando usuários...</div></td></tr>`;
 
   try {
     const users = await window.PhysiofitData.listUsers();
@@ -3369,14 +3415,14 @@ async function renderAccessUsers() {
             `,
           )
           .join("")
-      : `<tr><td colspan="5"><div class="empty-state">Nenhum usuario encontrado.</div></td></tr>`;
+      : `<tr><td colspan="5"><div class="empty-state">Nenhum usuário encontrado.</div></td></tr>`;
   } catch (error) {
     table.innerHTML = `<tr><td colspan="5"><div class="empty-state">${error.message}</div></td></tr>`;
   }
 }
 
 async function setUserPassword(userId) {
-  const password = window.prompt("Digite a nova senha para este usuario:");
+  const password = window.prompt("Digite a nova senha para este usuário:");
   if (!password) return;
   if (password.length < 6) {
     toast("Use uma senha com pelo menos 6 caracteres.");
@@ -3388,7 +3434,7 @@ async function setUserPassword(userId) {
     await renderAccessUsers();
     toast("Senha atualizada.");
   } catch (error) {
-    toast(error.message || "Nao foi possivel atualizar a senha.");
+    toast(error.message || "Não foi possível atualizar a senha.");
   }
 }
 
@@ -3396,9 +3442,9 @@ async function toggleUserStatus(userId, status) {
   try {
     await window.PhysiofitData.updateUser(userId, { status });
     await renderAccessUsers();
-    toast(status === "Ativo" ? "Usuario ativado." : "Usuario bloqueado.");
+    toast(status === "Ativo" ? "Usuário ativado." : "Usuário bloqueado.");
   } catch (error) {
-    toast(error.message || "Nao foi possivel atualizar o usuario.");
+    toast(error.message || "Não foi possível atualizar o usuário.");
   }
 }
 
@@ -3704,7 +3750,7 @@ document.addEventListener("click", (event) => {
         return;
       }
       appointment.status = "Reposta";
-      appointment.sessionKind = "Reposicao";
+      appointment.sessionKind = "Reposição";
       appointment.replacementUsed = true;
     }
     saveState();
