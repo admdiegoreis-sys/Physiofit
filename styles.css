@@ -1117,36 +1117,196 @@ button {
 
 .ofx-import-panel {
   display: grid;
-  grid-template-columns: minmax(220px, 0.7fr) minmax(260px, 1fr) auto;
-  gap: 12px;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(340px, 1.25fr) minmax(150px, auto);
+  gap: 10px;
   align-items: end;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .ofx-import-panel label {
   display: grid;
-  gap: 7px;
+  gap: 6px;
   color: #5f6875;
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   font-weight: 800;
+}
+
+.ofx-import-panel select,
+.ofx-import-panel input[type="file"] {
+  min-height: 34px;
+  padding: 5px 8px;
+  font-size: 0.82rem;
+}
+
+.ofx-import-panel input[type="file"] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ofx-import-panel .action-button {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 0.86rem;
+  justify-self: end;
 }
 
 .ofx-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ofx-summary .summary-item {
+  min-height: 92px;
+  padding: 12px;
+}
+
+.ofx-summary .summary-item span {
+  font-size: 0.78rem;
+}
+
+.ofx-summary .summary-item strong {
+  margin-top: 6px;
+  font-size: clamp(1.05rem, 1.45vw, 1.35rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .ofx-summary .summary-item small {
   display: block;
   margin-top: 5px;
   color: #6b7280;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  line-height: 1.25;
+}
+
+#ofxImportView .title-actions .primary-button,
+#ofxImportView .title-actions .ghost-button {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 0.88rem;
+}
+
+.ofx-review-table-wrap {
+  max-height: calc(100vh - 360px);
+  overflow: auto;
 }
 
 .ofx-review-table-wrap table {
-  min-width: 1560px;
+  min-width: 1280px;
+  table-layout: fixed;
+  font-size: 0.78rem;
+  line-height: 1.22;
+}
+
+.ofx-review-table-wrap th {
+  padding: 10px 8px;
+  font-size: 0.68rem;
+  line-height: 1.15;
+  white-space: normal;
+}
+
+.ofx-review-table-wrap td {
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.ofx-review-table-wrap th:nth-child(1),
+.ofx-review-table-wrap td:nth-child(1),
+.ofx-review-table-wrap th:nth-child(2),
+.ofx-review-table-wrap td:nth-child(2) {
+  width: 116px;
+}
+
+.ofx-review-table-wrap th:nth-child(3),
+.ofx-review-table-wrap td:nth-child(3) {
+  width: 250px;
+}
+
+.ofx-review-table-wrap th:nth-child(4),
+.ofx-review-table-wrap td:nth-child(4) {
+  width: 74px;
+}
+
+.ofx-review-table-wrap th:nth-child(5),
+.ofx-review-table-wrap td:nth-child(5),
+.ofx-review-table-wrap th:nth-child(6),
+.ofx-review-table-wrap td:nth-child(6) {
+  width: 90px;
+}
+
+.ofx-review-table-wrap th:nth-child(7),
+.ofx-review-table-wrap td:nth-child(7) {
+  width: 180px;
+}
+
+.ofx-review-table-wrap th:nth-child(8),
+.ofx-review-table-wrap td:nth-child(8) {
+  width: 64px;
+}
+
+.ofx-review-table-wrap th:nth-child(9),
+.ofx-review-table-wrap td:nth-child(9) {
+  width: 116px;
+}
+
+.ofx-review-table-wrap th:nth-child(10),
+.ofx-review-table-wrap td:nth-child(10),
+.ofx-review-table-wrap th:nth-child(11),
+.ofx-review-table-wrap td:nth-child(11),
+.ofx-review-table-wrap th:nth-child(12),
+.ofx-review-table-wrap td:nth-child(12) {
+  width: 94px;
+}
+
+.ofx-review-table-wrap td:nth-child(3) strong {
+  display: block;
+  max-height: 3.7em;
+  overflow: hidden;
+  color: #111827;
+  font-size: 0.82rem;
+  line-height: 1.22;
+}
+
+.ofx-review-table-wrap td:nth-child(3) small {
+  display: block;
+  max-height: 2.6em;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #6b7280;
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.ofx-review-table-wrap .inline-field {
+  min-width: 0;
+  min-height: 32px;
+  padding: 5px 8px;
+  font-size: 0.76rem;
+}
+
+.ofx-review-table-wrap .status-pill {
+  min-height: 24px;
+  padding: 0 7px;
+  font-size: 0.68rem;
+}
+
+.ofx-review-table-wrap .row-actions {
+  gap: 4px;
+}
+
+.ofx-review-table-wrap .row-action-button {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  font-size: 0.7rem;
+}
+
+.ofx-review-table-wrap .amount-in,
+.ofx-review-table-wrap .amount-out {
+  font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .inline-field {
