@@ -1626,7 +1626,7 @@ button {
 }
 
 .accounts-table-wrap table {
-  min-width: 1320px;
+  min-width: 1180px;
 }
 
 .chart-accounts-table-wrap table {
@@ -2388,6 +2388,10 @@ tr:last-child td {
   font-size: 0.84rem;
 }
 
+.accounts-table-wrap table {
+  font-size: 0.76rem;
+}
+
 .monthly-table-wrap th,
 .monthly-table-wrap td,
 .accounts-table-wrap th,
@@ -2397,6 +2401,12 @@ tr:last-child td {
   padding: 9px 10px;
   vertical-align: middle;
   line-height: 1.22;
+}
+
+.accounts-table-wrap th,
+.accounts-table-wrap td {
+  padding: 7px 8px;
+  line-height: 1.18;
 }
 
 .monthly-table-wrap th,
@@ -2410,6 +2420,11 @@ tr:last-child td {
   font-size: 0.7rem;
   letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+.accounts-table-wrap th {
+  font-size: 0.62rem;
+  letter-spacing: 0.01em;
 }
 
 .monthly-table-wrap td,
@@ -2444,6 +2459,12 @@ tr:last-child td {
   white-space: normal;
 }
 
+.accounts-table-wrap td:first-child,
+.accounts-table-wrap td:nth-child(8),
+.accounts-table-wrap td:last-child {
+  text-overflow: clip;
+}
+
 .accounts-table-wrap td:nth-child(7) small,
 .accounts-table-wrap td:nth-child(9) small,
 .accounts-table-wrap td:nth-child(10) small {
@@ -2452,10 +2473,13 @@ tr:last-child td {
 }
 
 .monthly-table-wrap th:first-child,
-.monthly-table-wrap td:first-child,
+.monthly-table-wrap td:first-child {
+  width: 92px;
+}
+
 .accounts-table-wrap th:last-child,
 .accounts-table-wrap td:last-child {
-  width: 78px;
+  width: 58px;
 }
 
 .monthly-table-wrap th:nth-child(2),
@@ -2477,12 +2501,12 @@ tr:last-child td {
 .accounts-table-wrap th:nth-child(6),
 .accounts-table-wrap td:nth-child(6) {
   text-align: right;
-  width: 130px;
+  width: 100px;
 }
 
 .accounts-table-wrap th:nth-child(1),
 .accounts-table-wrap td:nth-child(1) {
-  width: 100px;
+  width: 78px;
 }
 
 .accounts-table-wrap th:nth-child(2),
@@ -2493,37 +2517,57 @@ tr:last-child td {
 .accounts-table-wrap td:nth-child(4),
 .accounts-table-wrap th:nth-child(5),
 .accounts-table-wrap td:nth-child(5) {
-  width: 96px;
+  width: 82px;
 }
 
 .accounts-table-wrap th:nth-child(7),
 .accounts-table-wrap td:nth-child(7) {
-  width: 250px;
+  width: 220px;
 }
 
 .accounts-table-wrap th:nth-child(8),
 .accounts-table-wrap td:nth-child(8) {
-  width: 86px;
+  width: 70px;
 }
 
 .accounts-table-wrap th:nth-child(9),
 .accounts-table-wrap td:nth-child(9) {
-  width: 210px;
+  width: 176px;
 }
 
 .accounts-table-wrap th:nth-child(10),
 .accounts-table-wrap td:nth-child(10) {
-  width: 210px;
+  width: 188px;
+}
+
+.accounts-table-wrap .monthly-status-button {
+  min-width: 62px;
+  min-height: 28px;
+  padding: 0 7px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+}
+
+.accounts-table-wrap .row-action-button {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  font-size: 0.72rem;
+}
+
+.accounts-table-wrap .amount-in,
+.accounts-table-wrap .amount-out {
+  font-size: 0.76rem;
 }
 
 .source-pill {
   display: inline-flex;
-  min-height: 24px;
+  min-height: 22px;
   align-items: center;
   justify-content: center;
-  padding: 0 9px;
+  padding: 0 7px;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 800;
   white-space: nowrap;
 }
