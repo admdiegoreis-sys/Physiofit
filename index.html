@@ -78,6 +78,7 @@
                 <button class="top-menu-option" data-view="monthlyPayments" type="button">Mensalidades</button>
                 <button class="top-menu-option" data-view="fiscal" type="button">NFS-e</button>
                 <button class="top-menu-option" data-view="accounts" type="button">Contas a Pagar/Receber</button>
+                <button class="top-menu-option" data-view="ofxImport" type="button">Importar OFX</button>
                 <button class="top-menu-option" data-view="cashFlow" type="button">Fluxo de Caixa</button>
                 <button class="top-menu-option" data-view="dre" type="button">DRE</button>
                 <button class="top-menu-option" data-view="chartAccounts" type="button">Plano de Contas</button>
@@ -1158,6 +1159,63 @@
                     </tr>
                   </thead>
                   <tbody id="accountsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="ofxImportView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Importar OFX</h2>
+              </div>
+              <div class="title-actions">
+                <button class="ghost-button" id="clearOfxImportButton" type="button">Limpar importação</button>
+                <button class="primary-button" id="approveOfxValidButton" type="button">Confirmar válidos</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <div class="ofx-import-panel">
+                <label>Conta/Banco de origem
+                  <select id="ofxBankAccountSelect" required>
+                    <option value="">Selecione a conta</option>
+                    <option value="itau">Itaú</option>
+                    <option value="asaas">Asaas</option>
+                    <option value="caixa">Caixa</option>
+                    <option value="santander">Santander</option>
+                    <option value="outro">Outro banco</option>
+                  </select>
+                </label>
+                <label>Arquivo OFX
+                  <input id="ofxFileInput" type="file" accept=".ofx,application/x-ofx,application/octet-stream" />
+                </label>
+                <button class="action-button blue" id="processOfxButton" type="button">Processar OFX</button>
+              </div>
+
+              <div class="ofx-summary" id="ofxBatchSummary"></div>
+
+              <div class="table-wrap ofx-review-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Competência</th>
+                      <th>Pagamento</th>
+                      <th>Descrição</th>
+                      <th>Conta</th>
+                      <th>Tipo conta</th>
+                      <th>Origem</th>
+                      <th>Plano de contas / Categoria</th>
+                      <th>Código</th>
+                      <th>Tipo</th>
+                      <th>Valor</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ofxReviewTable"></tbody>
                 </table>
               </div>
             </div>

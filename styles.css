@@ -1115,6 +1115,57 @@ button {
   margin-bottom: 16px;
 }
 
+.ofx-import-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(260px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.ofx-import-panel label {
+  display: grid;
+  gap: 7px;
+  color: #5f6875;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.ofx-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ofx-summary .summary-item small {
+  display: block;
+  margin-top: 5px;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.ofx-review-table-wrap table {
+  min-width: 1560px;
+}
+
+.inline-field {
+  width: 100%;
+  min-width: 130px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid #d4dae3;
+  border-radius: 6px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+}
+
+.muted-row {
+  background: #f8fafc;
+  color: #64748b;
+}
+
 .attendance-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2489,6 +2540,7 @@ tr:last-child td {
   .metric-grid,
   .crm-funnel,
   .fiscal-summary,
+  .ofx-summary,
   .dashboard-grid,
   .finance-layout,
   .records-layout,
@@ -2614,6 +2666,10 @@ tr:last-child td {
     grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
 
+  .ofx-import-panel {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
   .patient-search-row {
     grid-column: 1 / -1;
   }
@@ -2651,6 +2707,11 @@ tr:last-child td {
   .checkin-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .ofx-import-panel,
+  .ofx-summary {
+    grid-template-columns: 1fr;
   }
 
   .topbar {

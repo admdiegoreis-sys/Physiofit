@@ -290,6 +290,17 @@ const seedAccounts = [
   { id: "cp10", direction: "Receber", status: "Aberto", competenceDate: "2026-05-03", forecastDate: "2026-05-03", dueDate: "2026-05-20", paidDate: "", amount: 310, description: "Mensalidade: Claudia Morais Sena", person: "Claudia Morais Sena", document: "190.478.351-15", modalityId: "m2", teacherId: "t3", chartAccountId: "pc1", paymentMethod: "Pix" },
 ];
 
+const seedOfxRules = [
+  { id: "ofxr1", keyword: "PIX RECEBIDO", chartAccountId: "pc1", type: "receita", bankAccountId: "", priority: 100, active: true },
+  { id: "ofxr2", keyword: "PIX TRANSF", chartAccountId: "pc1", type: "receita", bankAccountId: "", priority: 95, active: true },
+  { id: "ofxr3", keyword: "MENSALIDADE", chartAccountId: "pc1", type: "receita", bankAccountId: "", priority: 90, active: true },
+  { id: "ofxr4", keyword: "TARIFA", chartAccountId: "pc52", type: "despesa", bankAccountId: "", priority: 90, active: true },
+  { id: "ofxr5", keyword: "SIMPLES", chartAccountId: "pc8", type: "despesa", bankAccountId: "", priority: 90, active: true },
+  { id: "ofxr6", keyword: "ALUGUEL", chartAccountId: "pc26", type: "despesa", bankAccountId: "", priority: 85, active: true },
+  { id: "ofxr7", keyword: "EMPRESTIMO", chartAccountId: "pc72", type: "financiamento", bankAccountId: "", priority: 85, active: true },
+  { id: "ofxr8", keyword: "TRANSFERENCIA", chartAccountId: "pc76", type: "transferência", bankAccountId: "", priority: 80, active: true },
+];
+
 const seedEnrollments = [
   { id: "e1", studentId: "s1", planId: "pl38", modalityId: "m3", professionalId: "t1", startDate: "2026-02-02", endDate: "2026-08-02", monthlyValue: 295, paymentMethod: "Pix", status: "Ativa", contractStatus: "Assinado", notes: "" },
   { id: "e2", studentId: "s2", planId: "pl21", modalityId: "m3", professionalId: "t4", startDate: "2026-04-01", endDate: "2026-05-31", monthlyValue: 190, paymentMethod: "Cartão de Débito", status: "Ativa", contractStatus: "Pendente", notes: "" },
@@ -407,6 +418,9 @@ const seedData = {
   enrollments: importedArray("enrollments", seedEnrollments),
   chartAccounts: seedChartAccounts,
   accounts: seedAccounts,
+  ofxBatches: [],
+  ofxDrafts: [],
+  ofxRules: seedOfxRules,
   appointments: Array.isArray(importedStudioData.appointments) ? importedStudioData.appointments : appointmentSeed.map(([date, time, endTime, studentId, teacher, room, type, status, sessionKind], index) => ({
     id: `a${index + 1}`,
     date,
@@ -482,6 +496,7 @@ const viewTitles = {
   monthlyPayments: "Mensalidades",
   fiscal: "NFS-e",
   accounts: "Contas a Pagar/Receber",
+  ofxImport: "Importar OFX",
   cashFlow: "Fluxo de Caixa",
   dre: "DRE",
   chartAccounts: "Plano de Contas",
@@ -507,6 +522,7 @@ const menuGroupByView = {
   monthlyPayments: "finance",
   fiscal: "finance",
   accounts: "finance",
+  ofxImport: "finance",
   cashFlow: "finance",
   dre: "finance",
   chartAccounts: "finance",
@@ -825,6 +841,9 @@ function normalizeState(data) {
     ...item,
     supplierId: item.supplierId || supplierIdByIdentityFromList(normalized.suppliers, item.person, item.document),
   }));
+  normalized.ofxBatches = (Array.isArray(data.ofxBatches) ? data.ofxBatches : []).map((item, index) => normalizeOfxBatch(normalizeTextFields(item), index));
+  normalized.ofxDrafts = (Array.isArray(data.ofxDrafts) ? data.ofxDrafts : []).map((item, index) => normalizeOfxDraft(normalizeTextFields(item), index));
+  normalized.ofxRules = (Array.isArray(data.ofxRules) && data.ofxRules.length ? data.ofxRules : structuredClone(seedOfxRules)).map((item, index) => normalizeOfxRule(normalizeTextFields(item), index));
   normalized.appointments = normalized.appointments.map((item) => normalizeTextFields(item));
   normalized.blocks = normalized.blocks.map((item) => normalizeTextFields(item));
   normalized.records = normalized.records.map((item) => normalizeTextFields(item));
@@ -1068,9 +1087,79 @@ function normalizeAccount(item, index) {
     teacherId: defaults.teacherId,
     chartAccountId: defaults.chartAccountId,
     paymentMethod: defaults.paymentMethod,
+    origin: defaults.origin || "Manual",
+    importBatchId: defaults.importBatchId || "",
+    bankAccountId: defaults.bankAccountId || "",
+    ofxIdentifier: defaults.ofxIdentifier || "",
+    duplicateHash: defaults.duplicateHash || "",
     ...item,
     amount: Number(item.amount ?? defaults.amount ?? 0),
     supplierId: item.supplierId || "",
+  };
+}
+
+function normalizeOfxBatch(item, index) {
+  return {
+    id: item.id || uid("ofxb"),
+    fileName: item.fileName || item.nomeArquivo || `Importação OFX ${index + 1}`,
+    accountId: item.accountId || item.contaId || "",
+    bankOrigin: item.bankOrigin || item.bancoOrigem || "",
+    importedAt: item.importedAt || item.dataImportacao || new Date().toISOString(),
+    transactionCount: Number(item.transactionCount ?? item.quantidadeTransacoes ?? 0),
+    categorizedCount: Number(item.categorizedCount ?? item.quantidadeCategorizadas ?? 0),
+    reviewCount: Number(item.reviewCount ?? item.quantidadeARevisar ?? 0),
+    duplicateCount: Number(item.duplicateCount ?? item.quantidadeDuplicadas ?? 0),
+    status: item.status || "Em revisão",
+    userId: item.userId || item.usuarioId || "",
+    ...item,
+    transactionCount: Number(item.transactionCount ?? item.quantidadeTransacoes ?? 0),
+    categorizedCount: Number(item.categorizedCount ?? item.quantidadeCategorizadas ?? 0),
+    reviewCount: Number(item.reviewCount ?? item.quantidadeARevisar ?? 0),
+    duplicateCount: Number(item.duplicateCount ?? item.quantidadeDuplicadas ?? 0),
+  };
+}
+
+function normalizeOfxDraft(item, index) {
+  return {
+    id: item.id || uid("ofxd"),
+    importBatchId: item.importBatchId || item.loteImportacaoId || "",
+    competenceDate: item.competenceDate || item.dataCompetencia || demoToday,
+    paymentDate: item.paymentDate || item.dataPagamento || item.date || demoToday,
+    description: item.description || item.descricao || "",
+    accountId: item.accountId || item.contaId || "",
+    accountName: item.accountName || item.contaNome || "",
+    accountType: item.accountType || item.tipoConta || "Conta bancária",
+    origin: item.origin || "Importação OFX",
+    chartAccountId: item.chartAccountId || item.planoContaId || item.categoryId || "",
+    chartAccountCode: item.chartAccountCode || item.codigoPlanoConta || "",
+    type: item.type || item.tipo || "",
+    amount: Number(item.amount ?? item.valor ?? 0),
+    ofxIdentifier: item.ofxIdentifier || item.identificadorOfx || "",
+    duplicateHash: item.duplicateHash || item.hashDuplicidade || "",
+    status: item.status || "A revisar",
+    note: item.note || item.observacao || "",
+    createdAt: item.createdAt || new Date().toISOString(),
+    updatedAt: item.updatedAt || new Date().toISOString(),
+    balance: item.balance || "",
+    ...item,
+    amount: Number(item.amount ?? item.valor ?? 0),
+  };
+}
+
+function normalizeOfxRule(item, index) {
+  const defaults = seedOfxRules[index % seedOfxRules.length] ?? {};
+  return {
+    id: item.id || defaults.id || uid("ofxr"),
+    keyword: item.keyword || item.palavraChave || defaults.keyword || "",
+    chartAccountId: item.chartAccountId || item.planoContaId || item.categoryId || defaults.chartAccountId || "",
+    chartAccountCode: item.chartAccountCode || item.codigoPlanoConta || "",
+    type: item.type || item.tipo || defaults.type || "despesa",
+    bankAccountId: item.bankAccountId || item.contaId || defaults.bankAccountId || "",
+    priority: Number(item.priority ?? item.prioridade ?? defaults.priority ?? 0),
+    active: item.active ?? item.ativo ?? defaults.active ?? true,
+    ...item,
+    priority: Number(item.priority ?? item.prioridade ?? defaults.priority ?? 0),
+    active: item.active ?? item.ativo ?? defaults.active ?? true,
   };
 }
 
@@ -1369,6 +1458,126 @@ function chartAccountName(id) {
   return item ?`${item.code} - ${item.name}` : "Sem classificação";
 }
 
+function bankAccountLabel(id) {
+  const labels = {
+    itau: "Itaú",
+    asaas: "Asaas",
+    caixa: "Caixa",
+    santander: "Santander",
+    outro: "Outro banco",
+  };
+  return labels[id] || id || "-";
+}
+
+function accountDirectionByOfxType(type, amount) {
+  if (type === "receita") return "Receber";
+  if (type === "despesa" || type === "financiamento") return "Pagar";
+  return Number(amount) >= 0 ? "Receber" : "Pagar";
+}
+
+function inferOfxType(description = "", amount = 0, rule = null) {
+  if (rule?.type) return rule.type;
+  const text = normalizedText(description);
+  if (text.includes("transfer") || text.includes("ted") || text.includes("doc ")) return "transferência";
+  if (text.includes("emprest") || text.includes("financ")) return "financiamento";
+  return Number(amount) >= 0 ? "receita" : "despesa";
+}
+
+function ofxDateToIso(value = "") {
+  const match = String(value).match(/(\d{4})(\d{2})(\d{2})/);
+  return match ? `${match[1]}-${match[2]}-${match[3]}` : demoToday;
+}
+
+function ofxTag(block, tag) {
+  const match = String(block).match(new RegExp(`<${tag}[^>]*>\\s*([^<\\r\\n]+)`, "i"));
+  return match ? match[1].trim() : "";
+}
+
+function ofxDuplicateHash({ accountId, paymentDate, amount, ofxIdentifier, description }) {
+  return normalizedText([accountId, paymentDate, Number(amount || 0).toFixed(2), ofxIdentifier || description].join("|"));
+}
+
+function findOfxRule(description = "", accountId = "") {
+  const text = normalizedText(description);
+  return state.ofxRules
+    .filter((rule) => rule.active !== false)
+    .filter((rule) => !rule.bankAccountId || rule.bankAccountId === accountId)
+    .filter((rule) => text.includes(normalizedText(rule.keyword)))
+    .sort((a, b) => Number(b.priority || 0) - Number(a.priority || 0))[0] || null;
+}
+
+function officialAccountMatchesOfx(draft) {
+  return state.accounts.some((account) => {
+    const sameAccount = (account.bankAccountId || account.paymentMethod || "") === draft.accountId;
+    const sameDate = (account.paidDate || account.dueDate || account.competenceDate || "") === draft.paymentDate;
+    const sameValue = Math.abs(Number(account.amount || 0) - Math.abs(Number(draft.amount || 0))) < 0.01;
+    const sameIdentifier = draft.ofxIdentifier && account.ofxIdentifier === draft.ofxIdentifier;
+    const sameHash = draft.duplicateHash && account.duplicateHash === draft.duplicateHash;
+    return sameAccount && sameDate && sameValue && (sameIdentifier || sameHash);
+  });
+}
+
+function parseOfxTransactions(content) {
+  const text = String(content || "").replace(/\r/g, "");
+  const balance = ofxTag(text, "LEDGERBAL") || ofxTag(text, "BALAMT");
+  const blocks = [...text.matchAll(/<STMTTRN>([\s\S]*?)(?=<STMTTRN>|<\/BANKTRANLIST>|<\/STMTTRN>)/gi)].map((match) => match[1]);
+  return blocks.map((block) => ({
+    date: ofxDateToIso(ofxTag(block, "DTPOSTED") || ofxTag(block, "DTUSER")),
+    description: fixPortugueseText(ofxTag(block, "MEMO") || ofxTag(block, "NAME") || "Lançamento OFX"),
+    amount: Number(String(ofxTag(block, "TRNAMT")).replace(",", ".")) || 0,
+    identifier: ofxTag(block, "FITID") || ofxTag(block, "CHECKNUM"),
+    balance,
+  }));
+}
+
+function createOfxDraft(transaction, batch) {
+  const rule = findOfxRule(transaction.description, batch.accountId);
+  const type = inferOfxType(transaction.description, transaction.amount, rule);
+  const chartAccount = state.chartAccounts.find((item) => item.id === rule?.chartAccountId);
+  const draft = normalizeOfxDraft({
+    id: uid("ofxd"),
+    importBatchId: batch.id,
+    competenceDate: transaction.date,
+    paymentDate: transaction.date,
+    description: transaction.description,
+    accountId: batch.accountId,
+    accountName: batch.bankOrigin,
+    accountType: "Conta bancária",
+    origin: "Importação OFX",
+    chartAccountId: chartAccount?.id || "",
+    chartAccountCode: chartAccount?.code || "",
+    type,
+    amount: Math.abs(Number(transaction.amount || 0)),
+    ofxIdentifier: transaction.identifier,
+    status: chartAccount ? "Válido" : "A revisar",
+    note: chartAccount ? `Categorizado por regra: ${rule.keyword}` : "Sem regra de categorização.",
+    balance: transaction.balance,
+  }, state.ofxDrafts.length);
+  draft.duplicateHash = ofxDuplicateHash(draft);
+  if (officialAccountMatchesOfx(draft)) {
+    draft.status = "Duplicado";
+    draft.note = "Já existe lançamento oficial com mesma conta, data, valor e identificador/hash.";
+  }
+  return draft;
+}
+
+function updateOfxBatchCounters(batchId) {
+  const batch = state.ofxBatches.find((item) => item.id === batchId);
+  if (!batch) return;
+  const drafts = state.ofxDrafts.filter((item) => item.importBatchId === batchId);
+  batch.transactionCount = drafts.length;
+  batch.categorizedCount = drafts.filter((item) => item.chartAccountId && item.status !== "Duplicado" && item.status !== "Ignorado").length;
+  batch.reviewCount = drafts.filter((item) => item.status === "A revisar").length;
+  batch.duplicateCount = drafts.filter((item) => item.status === "Duplicado").length;
+  batch.updatedAt = new Date().toISOString();
+}
+
+function currentOfxBatch() {
+  return state.ofxBatches
+    .filter((item) => item.status !== "Concluído")
+    .sort((a, b) => String(b.importedAt).localeCompare(String(a.importedAt)))[0] || state.ofxBatches.at(-1) || null;
+}
+
 function statusClass(status = "") {
   return status
     .toLowerCase()
@@ -1429,6 +1638,7 @@ function render() {
   renderFiscalInvoices();
   renderAccountOptions();
   renderAccounts();
+  renderOfxImport();
   renderCashFlow();
   renderDre();
   renderChartAccounts();
@@ -2507,7 +2717,7 @@ function renderAccounts() {
               <td>${dateLabel(item.dueDate)}</td>
               <td>${item.paidDate ?dateLabel(item.paidDate) : "-"}</td>
               <td><strong class="${item.direction === "Receber" ? "amount-in" : "amount-out"}">${item.direction === "Receber" ? "" : "-"}${currency(item.amount)}</strong></td>
-              <td><strong>${item.description}</strong><br><small>${item.bankLaunch ?? item.paymentMethod ?? ""}</small></td>
+              <td><strong>${item.description}</strong><br><small>${[item.origin, item.bankLaunch ?? item.paymentMethod ?? ""].filter(Boolean).join(" · ")}</small></td>
               <td>${supplierName(item.supplierId) || item.person || "-"}<br><small>${item.document || supplierById(item.supplierId)?.document || ""}</small></td>
               <td>${chartAccountName(item.chartAccountId)}<br><small>${state.chartAccounts.find((account) => account.id === item.chartAccountId)?.dfcGroup ?? ""}</small></td>
               <td>
@@ -2518,6 +2728,75 @@ function renderAccounts() {
         )
         .join("")
     : `<tr><td colspan="10"><div class="empty-state">Nenhum lançamento encontrado.</div></td></tr>`;
+}
+
+function renderOfxImport() {
+  const summary = document.querySelector("#ofxBatchSummary");
+  const table = document.querySelector("#ofxReviewTable");
+  if (!summary || !table) return;
+  const batch = currentOfxBatch();
+  const drafts = batch ? state.ofxDrafts.filter((item) => item.importBatchId === batch.id) : [];
+  const validCount = drafts.filter((item) => item.status === "Válido").length;
+  const reviewCount = drafts.filter((item) => item.status === "A revisar").length;
+  const duplicateCount = drafts.filter((item) => item.status === "Duplicado").length;
+  const ignoredCount = drafts.filter((item) => item.status === "Ignorado").length;
+
+  summary.innerHTML = batch
+    ? `
+      <article class="summary-item"><span>Lote</span><strong>${batch.fileName}</strong><small>${bankAccountLabel(batch.accountId)} · ${dateTimeLabel(batch.importedAt)}</small></article>
+      <article class="summary-item"><span>Transações</span><strong>${drafts.length}</strong><small>${validCount} válidas</small></article>
+      <article class="summary-item"><span>A revisar</span><strong>${reviewCount}</strong><small>${duplicateCount} duplicadas</small></article>
+      <article class="summary-item"><span>Ignoradas</span><strong>${ignoredCount}</strong><small>Status do lote: ${batch.status}</small></article>
+    `
+    : `<div class="empty-state">Selecione uma conta, envie um arquivo .ofx e clique em Processar OFX.</div>`;
+
+  const chartOptions = activeChartAccounts().map((account) => `<option value="${account.id}">${account.code} - ${account.name}</option>`).join("");
+  table.innerHTML = drafts.length
+    ? drafts
+        .map((draft) => {
+          const chart = state.chartAccounts.find((account) => account.id === draft.chartAccountId);
+          const status = draft.status === "Duplicado" ? "atrasado" : draft.status === "A revisar" ? "pendente" : draft.status === "Ignorado" ? "cancelada" : "ativo";
+          return `
+            <tr class="${draft.status === "Duplicado" ? "muted-row" : ""}">
+              <td><input class="inline-field" data-ofx-field="competenceDate" data-ofx-id="${draft.id}" type="date" value="${draft.competenceDate}" /></td>
+              <td><input class="inline-field" data-ofx-field="paymentDate" data-ofx-id="${draft.id}" type="date" value="${draft.paymentDate}" /></td>
+              <td><strong>${draft.description}</strong><br><small>${draft.ofxIdentifier || "-"} ${draft.note ? `· ${draft.note}` : ""}</small></td>
+              <td>${draft.accountName || bankAccountLabel(draft.accountId)}</td>
+              <td>${draft.accountType}</td>
+              <td>${draft.origin}</td>
+              <td>
+                <select class="inline-field" data-ofx-field="chartAccountId" data-ofx-id="${draft.id}">
+                  <option value="">A revisar</option>
+                  ${chartOptions}
+                </select>
+              </td>
+              <td>${chart?.code || draft.chartAccountCode || "-"}</td>
+              <td>
+                <select class="inline-field" data-ofx-field="type" data-ofx-id="${draft.id}">
+                  ${["receita", "despesa", "transferência", "financiamento"].map((type) => `<option value="${type}">${type}</option>`).join("")}
+                </select>
+              </td>
+              <td><strong class="${draft.type === "receita" ? "amount-in" : "amount-out"}">${draft.type === "receita" ? "" : "-"}${currency(Math.abs(draft.amount))}</strong></td>
+              <td><span class="status-pill ${status}">${draft.status}</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="row-action-button edit-icon-button" data-confirm-ofx-draft="${draft.id}" type="button" title="Confirmar lançamento" aria-label="Confirmar lançamento">&#10003;</button>
+                  <button class="row-action-button edit-icon-button" data-save-ofx-rule="${draft.id}" type="button" title="Salvar regra" aria-label="Salvar regra">R</button>
+                  <button class="row-action-button delete-icon-button" data-ignore-ofx-draft="${draft.id}" type="button" title="Ignorar" aria-label="Ignorar">&times;</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .join("")
+    : `<tr><td colspan="12"><div class="empty-state">Nenhuma transação OFX em revisão.</div></td></tr>`;
+
+  drafts.forEach((draft) => {
+    const chartSelect = document.querySelector(`[data-ofx-field="chartAccountId"][data-ofx-id="${draft.id}"]`);
+    const typeSelect = document.querySelector(`[data-ofx-field="type"][data-ofx-id="${draft.id}"]`);
+    if (chartSelect) chartSelect.value = draft.chartAccountId || "";
+    if (typeSelect) typeSelect.value = draft.type || "despesa";
+  });
 }
 
 function cashFlowMonths() {
@@ -2972,6 +3251,167 @@ function importXmlAccount(event) {
     event.target.value = "";
   };
   reader.readAsText(file);
+}
+
+function processOfxFile() {
+  const accountId = document.querySelector("#ofxBankAccountSelect")?.value || "";
+  const file = document.querySelector("#ofxFileInput")?.files?.[0];
+  if (!accountId) {
+    toast("Selecione a conta/banco de origem.");
+    return;
+  }
+  if (!file) {
+    toast("Selecione um arquivo OFX.");
+    return;
+  }
+  if (!/\.ofx$/i.test(file.name)) {
+    toast("Arquivo inválido. Envie um arquivo com extensão .ofx.");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const transactions = parseOfxTransactions(reader.result);
+    if (!transactions.length) {
+      toast("Nenhuma transação encontrada no OFX.");
+      return;
+    }
+    const batch = normalizeOfxBatch({
+      id: uid("ofxb"),
+      fileName: file.name,
+      accountId,
+      bankOrigin: bankAccountLabel(accountId),
+      importedAt: new Date().toISOString(),
+      status: "Em revisão",
+      userId: currentUser()?.id || "",
+    }, state.ofxBatches.length);
+    const drafts = transactions.map((transaction) => createOfxDraft(transaction, batch));
+    state.ofxBatches.push(batch);
+    state.ofxDrafts = [...state.ofxDrafts.filter((item) => item.status === "Válido" || item.status === "A revisar" || item.status === "Duplicado" || item.status === "Ignorado"), ...drafts];
+    updateOfxBatchCounters(batch.id);
+    saveState();
+    render();
+    toast(`${transactions.length} transações OFX processadas para revisão.`);
+  };
+  reader.readAsText(file);
+}
+
+function updateOfxDraftField(draftId, field, value) {
+  const draft = state.ofxDrafts.find((item) => item.id === draftId);
+  if (!draft) return;
+  draft[field] = value;
+  if (field === "chartAccountId") {
+    const chart = state.chartAccounts.find((item) => item.id === value);
+    draft.chartAccountCode = chart?.code || "";
+  }
+  if (draft.status !== "Duplicado" && draft.status !== "Ignorado") {
+    draft.status = draft.chartAccountId ? "Válido" : "A revisar";
+  }
+  draft.updatedAt = new Date().toISOString();
+  updateOfxBatchCounters(draft.importBatchId);
+  saveState();
+  renderOfxImport();
+}
+
+function confirmOfxDraft(draftId, options = {}) {
+  const draft = state.ofxDrafts.find((item) => item.id === draftId);
+  if (!draft || draft.status === "Duplicado" || draft.status === "Ignorado") return false;
+  if (!draft.chartAccountId) {
+    if (!options.silent) toast("Selecione o plano de contas antes de confirmar.");
+    return false;
+  }
+  if (officialAccountMatchesOfx(draft)) {
+    draft.status = "Duplicado";
+    draft.note = "Duplicado encontrado antes da aprovação.";
+    return false;
+  }
+  const direction = accountDirectionByOfxType(draft.type, draft.amount);
+  state.accounts.push(normalizeAccount({
+    id: uid("cp"),
+    direction,
+    status: direction === "Receber" ? "Recebido" : "Pago",
+    competenceDate: draft.competenceDate,
+    forecastDate: draft.paymentDate,
+    dueDate: draft.paymentDate,
+    paidDate: draft.paymentDate,
+    amount: Math.abs(Number(draft.amount || 0)),
+    description: draft.description,
+    person: draft.description,
+    document: "",
+    supplierId: "",
+    modalityId: "",
+    teacherId: "",
+    chartAccountId: draft.chartAccountId,
+    paymentMethod: bankAccountLabel(draft.accountId),
+    bankLaunch: draft.description,
+    origin: "Importação OFX",
+    importBatchId: draft.importBatchId,
+    bankAccountId: draft.accountId,
+    ofxIdentifier: draft.ofxIdentifier,
+    duplicateHash: draft.duplicateHash,
+  }, state.accounts.length));
+  draft.status = "Importado";
+  draft.updatedAt = new Date().toISOString();
+  return true;
+}
+
+function approveValidOfxDrafts() {
+  const batch = currentOfxBatch();
+  if (!batch) {
+    toast("Nenhum lote OFX em revisão.");
+    return;
+  }
+  const imported = state.ofxDrafts
+    .filter((item) => item.importBatchId === batch.id && item.status === "Válido")
+    .reduce((count, item) => count + (confirmOfxDraft(item.id, { silent: true }) ? 1 : 0), 0);
+  updateOfxBatchCounters(batch.id);
+  batch.status = "Concluído";
+  saveState();
+  render();
+  toast(`${imported} lançamentos OFX importados para Contas a Pagar/Receber.`);
+}
+
+function ignoreOfxDraft(draftId) {
+  const draft = state.ofxDrafts.find((item) => item.id === draftId);
+  if (!draft) return;
+  draft.status = "Ignorado";
+  draft.note = "Ignorado manualmente.";
+  draft.updatedAt = new Date().toISOString();
+  updateOfxBatchCounters(draft.importBatchId);
+  saveState();
+  renderOfxImport();
+}
+
+function saveOfxRuleFromDraft(draftId) {
+  const draft = state.ofxDrafts.find((item) => item.id === draftId);
+  if (!draft || !draft.chartAccountId) {
+    toast("Selecione o plano de contas antes de salvar a regra.");
+    return;
+  }
+  const keyword = window.prompt("Palavra-chave para nova regra OFX:", draft.description.split(/\s+/).slice(0, 3).join(" "));
+  if (!keyword) return;
+  const chart = state.chartAccounts.find((item) => item.id === draft.chartAccountId);
+  state.ofxRules.push(normalizeOfxRule({
+    id: uid("ofxr"),
+    keyword,
+    chartAccountId: draft.chartAccountId,
+    chartAccountCode: chart?.code || "",
+    type: draft.type,
+    bankAccountId: draft.accountId,
+    priority: 100,
+    active: true,
+  }, state.ofxRules.length));
+  saveState();
+  toast("Regra OFX salva.");
+}
+
+function clearOfxImport() {
+  const batch = currentOfxBatch();
+  if (!batch || !window.confirm("Limpar a importação OFX temporária atual?")) return;
+  state.ofxDrafts = state.ofxDrafts.filter((item) => item.importBatchId !== batch.id);
+  state.ofxBatches = state.ofxBatches.filter((item) => item.id !== batch.id);
+  saveState();
+  render();
+  toast("Importação OFX temporária limpa.");
 }
 
 function deleteStudent(studentId) {
@@ -3710,6 +4150,22 @@ document.addEventListener("click", (event) => {
   const cancelInvoiceButton = event.target.closest("[data-cancel-invoice]");
   if (cancelInvoiceButton) cancelFiscalInvoice(cancelInvoiceButton.dataset.cancelInvoice);
 
+  const confirmOfxButton = event.target.closest("[data-confirm-ofx-draft]");
+  if (confirmOfxButton) {
+    const imported = confirmOfxDraft(confirmOfxButton.dataset.confirmOfxDraft);
+    const draft = state.ofxDrafts.find((item) => item.id === confirmOfxButton.dataset.confirmOfxDraft);
+    if (draft) updateOfxBatchCounters(draft.importBatchId);
+    saveState();
+    render();
+    toast(imported ? "Lançamento OFX confirmado." : "Revise o lançamento antes de confirmar.");
+  }
+
+  const ignoreOfxButton = event.target.closest("[data-ignore-ofx-draft]");
+  if (ignoreOfxButton) ignoreOfxDraft(ignoreOfxButton.dataset.ignoreOfxDraft);
+
+  const saveOfxRuleButton = event.target.closest("[data-save-ofx-rule]");
+  if (saveOfxRuleButton) saveOfxRuleFromDraft(saveOfxRuleButton.dataset.saveOfxRule);
+
   const patientTab = event.target.closest("[data-patient-tab]");
   if (patientTab) setPatientTab(patientTab.dataset.patientTab);
 
@@ -3892,6 +4348,14 @@ document.querySelector("#chartAccountSearch")?.addEventListener("input", renderC
 document.querySelector("#chartAccountSearchButton")?.addEventListener("click", renderChartAccounts);
 document.querySelector("#importXmlButton")?.addEventListener("click", () => document.querySelector("#xmlFileInput")?.click());
 document.querySelector("#xmlFileInput")?.addEventListener("change", importXmlAccount);
+document.querySelector("#processOfxButton")?.addEventListener("click", processOfxFile);
+document.querySelector("#approveOfxValidButton")?.addEventListener("click", approveValidOfxDrafts);
+document.querySelector("#clearOfxImportButton")?.addEventListener("click", clearOfxImport);
+document.querySelector("#ofxReviewTable")?.addEventListener("change", (event) => {
+  const field = event.target.closest("[data-ofx-field]");
+  if (!field) return;
+  updateOfxDraftField(field.dataset.ofxId, field.dataset.ofxField, field.value);
+});
 
 document.querySelector("#settingsForm").addEventListener("submit", (event) => {
   event.preventDefault();
