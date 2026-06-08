@@ -1626,7 +1626,7 @@ button {
 }
 
 .accounts-table-wrap table {
-  min-width: 1360px;
+  min-width: 1320px;
 }
 
 .chart-accounts-table-wrap table {
@@ -2420,7 +2420,7 @@ tr:last-child td {
 }
 
 .monthly-table-wrap td:not(:nth-child(2)),
-.accounts-table-wrap td:not(:nth-child(7)):not(:nth-child(8)):not(:nth-child(9)),
+.accounts-table-wrap td:not(:nth-child(7)):not(:nth-child(9)):not(:nth-child(10)),
 .chart-accounts-table-wrap td:not(:nth-child(2)):not(:nth-child(4)):not(:nth-child(5)):not(:nth-child(6)) {
   white-space: nowrap;
 }
@@ -2437,11 +2437,25 @@ tr:last-child td {
   white-space: nowrap;
 }
 
+.accounts-table-wrap td:nth-child(7),
+.accounts-table-wrap td:nth-child(9),
+.accounts-table-wrap td:nth-child(10) {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.accounts-table-wrap td:nth-child(7) small,
+.accounts-table-wrap td:nth-child(9) small,
+.accounts-table-wrap td:nth-child(10) small {
+  display: block;
+  white-space: normal;
+}
+
 .monthly-table-wrap th:first-child,
 .monthly-table-wrap td:first-child,
 .accounts-table-wrap th:last-child,
 .accounts-table-wrap td:last-child {
-  width: 92px;
+  width: 78px;
 }
 
 .monthly-table-wrap th:nth-child(2),
@@ -2468,7 +2482,7 @@ tr:last-child td {
 
 .accounts-table-wrap th:nth-child(1),
 .accounts-table-wrap td:nth-child(1) {
-  width: 108px;
+  width: 100px;
 }
 
 .accounts-table-wrap th:nth-child(2),
@@ -2479,22 +2493,49 @@ tr:last-child td {
 .accounts-table-wrap td:nth-child(4),
 .accounts-table-wrap th:nth-child(5),
 .accounts-table-wrap td:nth-child(5) {
-  width: 104px;
+  width: 96px;
 }
 
 .accounts-table-wrap th:nth-child(7),
 .accounts-table-wrap td:nth-child(7) {
-  width: 260px;
+  width: 250px;
 }
 
 .accounts-table-wrap th:nth-child(8),
 .accounts-table-wrap td:nth-child(8) {
-  width: 240px;
+  width: 86px;
 }
 
 .accounts-table-wrap th:nth-child(9),
 .accounts-table-wrap td:nth-child(9) {
-  width: 240px;
+  width: 210px;
+}
+
+.accounts-table-wrap th:nth-child(10),
+.accounts-table-wrap td:nth-child(10) {
+  width: 210px;
+}
+
+.source-pill {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.source-pill.manual {
+  color: #334155;
+  background: #eef2f7;
+}
+
+.source-pill.ofx {
+  color: #1e4d3a;
+  background: #dff3e8;
 }
 
 .chart-accounts-table-wrap th:first-child,

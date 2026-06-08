@@ -2707,29 +2707,31 @@ function renderAccounts() {
   if (!table) return;
   const rows = accountRows();
   table.innerHTML = rows.length
-    ?rows
-        .map(
-          (item) => `
+    ? rows
+        .map((item) => {
+          const sourceLabel = item.origin === "Importação OFX" ? "OFX" : "Manual";
+          const sourceClass = item.origin === "Importação OFX" ? "ofx" : "manual";
+          return `
             <tr>
               <td><span class="monthly-status-button ${statusClass(item.status)}">${item.status}</span></td>
               <td>${dateLabel(item.competenceDate)}</td>
               <td>${dateLabel(item.forecastDate)}</td>
               <td>${dateLabel(item.dueDate)}</td>
-              <td>${item.paidDate ?dateLabel(item.paidDate) : "-"}</td>
+              <td>${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
               <td><strong class="${item.direction === "Receber" ? "amount-in" : "amount-out"}">${item.direction === "Receber" ? "" : "-"}${currency(item.amount)}</strong></td>
-              <td><strong>${item.description}</strong><br><small>${[item.origin, item.bankLaunch ?? item.paymentMethod ?? ""].filter(Boolean).join(" · ")}</small></td>
+              <td><strong>${item.description}</strong><br><small>${item.bankLaunch ?? item.paymentMethod ?? ""}</small></td>
+              <td><span class="source-pill ${sourceClass}">${sourceLabel}</span></td>
               <td>${supplierName(item.supplierId) || item.person || "-"}<br><small>${item.document || supplierById(item.supplierId)?.document || ""}</small></td>
               <td>${chartAccountName(item.chartAccountId)}<br><small>${state.chartAccounts.find((account) => account.id === item.chartAccountId)?.dfcGroup ?? ""}</small></td>
               <td>
-                <button class="row-action-button delete-icon-button" data-delete-account="${item.id}" type="button" title="Excluir">×</button>
+                <button class="row-action-button delete-icon-button" data-delete-account="${item.id}" type="button" title="Excluir">&times;</button>
               </td>
             </tr>
-          `,
-        )
+          `;
+        })
         .join("")
-    : `<tr><td colspan="10"><div class="empty-state">Nenhum lançamento encontrado.</div></td></tr>`;
+    : `<tr><td colspan="11"><div class="empty-state">Nenhum lançamento encontrado.</div></td></tr>`;
 }
-
 function renderOfxImport() {
   const summary = document.querySelector("#ofxBatchSummary");
   const table = document.querySelector("#ofxReviewTable");
