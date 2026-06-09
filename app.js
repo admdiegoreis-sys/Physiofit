@@ -3329,49 +3329,6 @@ function deleteChartAccount(chartAccountId) {
   toast("Conta contábil excluída.");
 }
 
-function xmlText(doc, tagName) {
-  return doc.querySelector(tagName)?.textContent?.trim() ?? "";
-}
-
-function importXmlAccount(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    const xml = new DOMParser().parseFromString(String(reader.result), "application/xml");
-    const total = Number(xmlText(xml, "vNF") || xmlText(xml, "vLiq") || 0);
-    const issueDate = (xmlText(xml, "dhEmi") || xmlText(xml, "dEmi") || demoToday).slice(0, 10);
-    const supplier = xmlText(xml, "emit xNome") || xml.querySelector("emit xNome")?.textContent || xml.querySelector("emit > xNome")?.textContent || xmlText(xml, "xNome") || file.name.replace(/\.xml$/i, "");
-    const document = xml.querySelector("emit > CNPJ")?.textContent || xml.querySelector("emit > CPF")?.textContent || "";
-    const invoice = xmlText(xml, "nNF");
-    const supplierId = upsertSupplierFromAccount(supplier, document);
-    state.accounts.push({
-      id: uid("cp"),
-      direction: "Pagar",
-      status: "Aberto",
-      competenceDate: issueDate,
-      forecastDate: issueDate,
-      dueDate: issueDate,
-      paidDate: "",
-      amount: total,
-      description: invoice ?`NF-e ${invoice} - ${supplier}` : `XML importado - ${supplier}`,
-      supplierId,
-      person: supplier,
-      document,
-      modalityId: "",
-      teacherId: "",
-      chartAccountId: activeChartAccounts().find((item) => normalizedText(item.name).includes("materiais") || normalizedText(item.package).includes("despesas"))?.id || activeChartAccounts()[0]?.id || "",
-      paymentMethod: "XML",
-      bankLaunch: file.name,
-    });
-    saveState();
-    render();
-    toast("XML importado como conta a pagar.");
-    event.target.value = "";
-  };
-  reader.readAsText(file);
-}
-
 function processOfxFile() {
   const accountId = document.querySelector("#ofxBankAccountSelect")?.value || "";
   const file = document.querySelector("#ofxFileInput")?.files?.[0];
@@ -4642,8 +4599,6 @@ Object.values(accountViewConfigs).forEach((config) => {
 document.querySelector("#chartAccountSearch")?.addEventListener("input", renderChartAccounts);
 document.querySelector("#chartAccountSearchButton")?.addEventListener("click", renderChartAccounts);
 document.querySelector("#chartAccountClearFiltersButton")?.addEventListener("click", clearChartAccountFilters);
-document.querySelector("#importXmlButton")?.addEventListener("click", () => document.querySelector("#xmlFileInput")?.click());
-document.querySelector("#xmlFileInput")?.addEventListener("change", importXmlAccount);
 document.querySelector("#processOfxButton")?.addEventListener("click", processOfxFile);
 document.querySelector("#approveOfxValidButton")?.addEventListener("click", approveValidOfxDraftsToFinance);
 document.querySelector("#clearOfxImportButton")?.addEventListener("click", clearOfxImport);
