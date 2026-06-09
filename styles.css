@@ -17,8 +17,8 @@
   --shadow: 0 2px 7px rgba(31, 37, 45, 0.12);
   --shadow-soft: 0 12px 28px rgba(31, 37, 45, 0.08);
   --topbar-height: 96px;
-  --button-radius: 10px;
-  --button-radius-sm: 8px;
+  --button-radius: 0;
+  --button-radius-sm: 0;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -3184,4 +3184,35 @@ button,
 .nav-square + .nav-square,
 .mode-button:last-child {
   border-radius: 0 var(--button-radius) var(--button-radius) 0;
+}
+
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.primary-button,
+.ghost-button,
+.icon-button,
+.secondary-button,
+.action-button,
+.mini-button,
+.clear-filter-button,
+.monthly-status-button,
+.linked-edit-button,
+.row-action-button,
+.top-menu-button,
+.nav-item,
+.menu-button,
+.help-button,
+.user-button,
+.session-chip button,
+#ofxImportView .title-actions .primary-button,
+#ofxImportView .title-actions .ghost-button,
+.agenda-search-row .action-button,
+.patient-search-row .action-button,
+.nav-square,
+.today-button,
+.mode-button {
+  border-radius: 0;
 }
