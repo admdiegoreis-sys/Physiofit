@@ -478,6 +478,8 @@ let editingPlanId = null;
 let editingChartAccountId = null;
 let editingEnrollmentId = null;
 let editingLeadId = null;
+let editingAccountId = null;
+let settlingAccountId = null;
 
 const viewTitles = {
   dashboard: "Painel de controle",
@@ -728,8 +730,7 @@ const modalSchemas = {
       { name: "status", label: "Status", type: "select", options: ["Aberto", "Pago", "Recebido", "Atrasado"], value: "Aberto" },
       { name: "competenceDate", label: "Competência", type: "date", value: demoToday },
       { name: "forecastDate", label: "Previsão", type: "date", value: demoToday },
-      { name: "dueDate", label: "Vencimento", type: "date", value: demoToday },
-      { name: "paidDate", label: "Baixa", type: "date", value: demoToday },
+      { name: "dueDate", label: "Data prevista de pagamento", type: "date", value: demoToday },
       { name: "amount", label: "Valor", type: "number", value: 0 },
       { name: "description", label: "Descrição", type: "text", value: "Nova conta" },
       { name: "supplierId", label: "Fornecedor", type: "supplier" },
@@ -743,15 +744,34 @@ const modalSchemas = {
     handler: (values) => {
       const supplier = supplierById(values.supplierId);
       const supplierId = values.supplierId || (values.direction === "Pagar" ? upsertSupplierFromAccount(values.person, values.document) : "");
-      state.accounts.push({
-        id: uid("cp"),
+      const current = editingAccountId ? state.accounts.find((item) => item.id === editingAccountId) : {};
+      const payload = {
+        ...current,
+        id: editingAccountId || uid("cp"),
         ...values,
         supplierId,
         person: values.person || supplier?.name || "",
         document: values.document || supplier?.document || "",
         amount: Number(values.amount || 0),
-        paidDate: values.status === "Aberto" || values.status === "Atrasado" ? "" : values.paidDate,
-      });
+        paidDate: values.status === "Aberto" || values.status === "Atrasado" ? "" : (current?.paidDate || demoToday),
+      };
+      if (editingAccountId) state.accounts = state.accounts.map((item) => (item.id === editingAccountId ? payload : item));
+      else state.accounts.push(payload);
+      editingAccountId = null;
+    },
+  },
+  accountSettlement: {
+    title: "Baixar conta",
+    submit: "Confirmar baixa",
+    fields: [
+      { name: "paidDate", label: "Data do pagamento", type: "date", value: demoToday },
+    ],
+    handler: (values) => {
+      const account = state.accounts.find((item) => item.id === settlingAccountId);
+      if (!account) return;
+      account.paidDate = values.paidDate || demoToday;
+      account.status = account.direction === "Receber" ? "Recebido" : "Pago";
+      settlingAccountId = null;
     },
   },
   chartAccount: {
@@ -2754,21 +2774,22 @@ function renderAccountTable(config) {
               <td><span class="monthly-status-button ${statusClass(item.status)}">${item.status}</span></td>
               <td>${dateLabel(item.competenceDate)}</td>
               <td>${dateLabel(item.forecastDate)}</td>
-              <td>${dateLabel(item.dueDate)}</td>
               <td>${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
               <td><strong class="${item.direction === "Receber" ? "amount-in" : "amount-out"}">${item.direction === "Receber" ? "" : "-"}${currency(item.amount)}</strong></td>
               <td><strong>${item.description}</strong><br><small>${item.bankLaunch ?? item.paymentMethod ?? ""}</small></td>
               <td><span class="source-pill ${sourceClass}">${sourceLabel}</span></td>
               <td>${supplierName(item.supplierId) || item.person || "-"}<br><small>${item.document || supplierById(item.supplierId)?.document || ""}</small></td>
               <td>${chartAccountName(item.chartAccountId)}<br><small>${state.chartAccounts.find((account) => account.id === item.chartAccountId)?.dfcGroup ?? ""}</small></td>
-              <td>
-                <button class="row-action-button delete-icon-button" data-delete-account="${item.id}" type="button" title="Excluir">&times;</button>
+              <td class="row-actions">
+                <button class="row-action-button edit-icon-button" data-edit-account="${item.id}" type="button" title="Editar" aria-label="Editar conta">✎</button>
+                <button class="row-action-button settle-icon-button" data-settle-account="${item.id}" type="button" title="Baixar" aria-label="Baixar conta">$</button>
+                <button class="row-action-button delete-icon-button" data-delete-account="${item.id}" type="button" title="Excluir" aria-label="Excluir conta">&times;</button>
               </td>
             </tr>
           `;
         })
         .join("")
-    : `<tr><td colspan="11"><div class="empty-state">${config.emptyMessage}</div></td></tr>`;
+    : `<tr><td colspan="10"><div class="empty-state">${config.emptyMessage}</div></td></tr>`;
 }
 
 function renderAccounts() {
@@ -3223,6 +3244,21 @@ function openLeadModal(leadId = null) {
   const item = leadId ? state.leads.find((lead) => lead.id === leadId) : null;
   openModal("lead", item ?? {});
   document.querySelector("#modalTitle").textContent = leadId ? "Editar lead" : "Novo lead";
+}
+
+function openAccountModal(accountId = null, defaults = {}) {
+  editingAccountId = accountId;
+  const item = accountId ? state.accounts.find((account) => account.id === accountId) : null;
+  openModal("account", item ?? defaults);
+  document.querySelector("#modalTitle").textContent = accountId ? "Editar conta" : "Adicionar conta";
+}
+
+function openAccountSettlementModal(accountId) {
+  settlingAccountId = accountId;
+  const item = state.accounts.find((account) => account.id === accountId);
+  if (!item) return;
+  openModal("accountSettlement", { paidDate: item.paidDate || demoToday });
+  document.querySelector("#modalTitle").textContent = item.direction === "Receber" ? "Baixar conta a receber" : "Baixar conta a pagar";
 }
 
 function saveChartAccountModal(values) {
@@ -4091,6 +4127,8 @@ function closeModal() {
   editingChartAccountId = null;
   editingEnrollmentId = null;
   editingLeadId = null;
+  editingAccountId = null;
+  settlingAccountId = null;
   document.querySelector("#modalBackdrop").hidden = true;
 }
 
@@ -4148,6 +4186,12 @@ document.addEventListener("click", (event) => {
 
   const editChartAccountButton = event.target.closest("[data-edit-chart-account]");
   if (editChartAccountButton) openChartAccountModal(editChartAccountButton.dataset.editChartAccount);
+
+  const editAccountButton = event.target.closest("[data-edit-account]");
+  if (editAccountButton) openAccountModal(editAccountButton.dataset.editAccount);
+
+  const settleAccountButton = event.target.closest("[data-settle-account]");
+  if (settleAccountButton) openAccountSettlementModal(settleAccountButton.dataset.settleAccount);
 
   const deleteStudentButton = event.target.closest("[data-delete-student]");
   if (deleteStudentButton) deleteStudent(deleteStudentButton.dataset.deleteStudent);
@@ -4222,7 +4266,7 @@ document.addEventListener("click", (event) => {
   const accountDirectionButton = event.target.closest("[data-open-account-direction]");
   if (accountDirectionButton) {
     const direction = accountDirectionButton.dataset.openAccountDirection;
-    openModal("account", {
+    openAccountModal(null, {
       direction,
       status: "Aberto",
     });
@@ -4282,7 +4326,7 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
   saveState();
   closeModal();
   render();
-  toast("Cadastro salvo com sucesso.");
+  toast(form.dataset.type === "accountSettlement" ? "Baixa registrada com sucesso." : "Cadastro salvo com sucesso.");
 });
 
 document.querySelector("#modalForm").addEventListener("change", (event) => {
