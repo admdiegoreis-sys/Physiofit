@@ -1386,6 +1386,18 @@ async function hydrateStateFromNeon() {
   }
 
   if (data?.data) {
+    if (data.data.dataVersion !== seedData.dataVersion) {
+      applyingRemoteState = true;
+      state = normalizeState(structuredClone(seedData));
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      applyingRemoteState = false;
+      remoteStateReady = true;
+      const result = await window.PhysiofitData.saveState(state);
+      if (result.error) console.warn("Não foi possível atualizar a base inicial no Neon.", result.error);
+      render();
+      toast("Base financeira atualizada.");
+      return;
+    }
     applyingRemoteState = true;
     state = normalizeState(data.data);
     localStorage.setItem(storageKey, JSON.stringify(state));
