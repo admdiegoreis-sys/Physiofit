@@ -495,7 +495,8 @@ const viewTitles = {
   planEditor: "Cadastro de plano",
   monthlyPayments: "Mensalidades",
   fiscal: "NFS-e",
-  accounts: "Contas a Pagar/Receber",
+  accountsPayable: "Contas a Pagar",
+  accountsReceivable: "Contas a Receber",
   ofxImport: "Importar OFX",
   cashFlow: "Fluxo de Caixa",
   dre: "DRE",
@@ -521,7 +522,8 @@ const menuGroupByView = {
   planEditor: "registers",
   monthlyPayments: "finance",
   fiscal: "finance",
-  accounts: "finance",
+  accountsPayable: "finance",
+  accountsReceivable: "finance",
   ofxImport: "finance",
   cashFlow: "finance",
   dre: "finance",
@@ -1735,30 +1737,32 @@ function renderMonthlyOptions() {
 }
 
 function renderAccountOptions() {
-  const modalityFilter = document.querySelector("#accountModalityFilter");
-  if (modalityFilter) {
-    const selected = modalityFilter.value || "all";
-    modalityFilter.innerHTML = `<option value="all">Modalidades</option>${activeModalities().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
-    modalityFilter.value = selected === "all" || activeModalities().some((item) => item.id === selected) ?selected : "all";
-  }
-  const professionalFilter = document.querySelector("#accountProfessionalFilter");
-  if (professionalFilter) {
-    const selected = professionalFilter.value || "all";
-    professionalFilter.innerHTML = `<option value="all">Professor</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
-    professionalFilter.value = selected === "all" || activeProfessionals().some((item) => item.id === selected) ?selected : "all";
-  }
-  const chartFilter = document.querySelector("#accountChartFilter");
-  if (chartFilter) {
-    const selected = chartFilter.value || "all";
-    chartFilter.innerHTML = `<option value="all">Plano de contas</option>${activeChartAccounts().map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("")}`;
-    chartFilter.value = selected === "all" || activeChartAccounts().some((item) => item.id === selected) ?selected : "all";
-  }
-  const supplierFilter = document.querySelector("#accountSupplierFilter");
-  if (supplierFilter) {
-    const selected = supplierFilter.value || "all";
-    supplierFilter.innerHTML = `<option value="all">Fornecedores</option>${activeSuppliers().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
-    supplierFilter.value = selected === "all" || activeSuppliers().some((item) => item.id === selected) ?selected : "all";
-  }
+  Object.values(accountViewConfigs).forEach((config) => {
+    const modalityFilter = document.querySelector(`#${config.modalityId}`);
+    if (modalityFilter) {
+      const selected = modalityFilter.value || "all";
+      modalityFilter.innerHTML = `<option value="all">Modalidades</option>${activeModalities().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
+      modalityFilter.value = selected === "all" || activeModalities().some((item) => item.id === selected) ? selected : "all";
+    }
+    const professionalFilter = document.querySelector(`#${config.professionalId}`);
+    if (professionalFilter) {
+      const selected = professionalFilter.value || "all";
+      professionalFilter.innerHTML = `<option value="all">Professor</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
+      professionalFilter.value = selected === "all" || activeProfessionals().some((item) => item.id === selected) ? selected : "all";
+    }
+    const chartFilter = document.querySelector(`#${config.chartId}`);
+    if (chartFilter) {
+      const selected = chartFilter.value || "all";
+      chartFilter.innerHTML = `<option value="all">Plano de contas</option>${activeChartAccounts().map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("")}`;
+      chartFilter.value = selected === "all" || activeChartAccounts().some((item) => item.id === selected) ? selected : "all";
+    }
+    const supplierFilter = document.querySelector(`#${config.supplierId}`);
+    if (supplierFilter) {
+      const selected = supplierFilter.value || "all";
+      supplierFilter.innerHTML = `<option value="all">Fornecedores</option>${activeSuppliers().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
+      supplierFilter.value = selected === "all" || activeSuppliers().some((item) => item.id === selected) ? selected : "all";
+    }
+  });
 }
 
 function renderDashboard() {
@@ -2687,17 +2691,47 @@ function issuePendingFiscalInvoices() {
   toast(`${issued.filter((item) => item?.status === "Autorizada").length} NFS-e autorizadas; ${issued.filter((item) => item?.status === "Rejeitada").length} rejeitadas.`);
 }
 
-function accountRows() {
-  const term = normalizedText(document.querySelector("#accountSearch")?.value.trim() ?? "");
-  const direction = document.querySelector("#accountDirectionFilter")?.value ?? "all";
-  const status = document.querySelector("#accountStatusFilter")?.value ?? "all";
-  const modality = document.querySelector("#accountModalityFilter")?.value ?? "all";
-  const professional = document.querySelector("#accountProfessionalFilter")?.value ?? "all";
-  const chartAccount = document.querySelector("#accountChartFilter")?.value ?? "all";
-  const supplier = document.querySelector("#accountSupplierFilter")?.value ?? "all";
+const accountViewConfigs = {
+  payable: {
+    direction: "Pagar",
+    tableId: "payableAccountsTable",
+    searchId: "payableAccountSearch",
+    periodTypeId: "payableAccountPeriodType",
+    dateRangeId: "payableAccountDateRange",
+    monthId: "payableAccountMonthFilter",
+    statusId: "payableAccountStatusFilter",
+    modalityId: "payableAccountModalityFilter",
+    professionalId: "payableAccountProfessionalFilter",
+    chartId: "payableAccountChartFilter",
+    supplierId: "payableAccountSupplierFilter",
+    emptyMessage: "Nenhuma conta a pagar encontrada.",
+  },
+  receivable: {
+    direction: "Receber",
+    tableId: "receivableAccountsTable",
+    searchId: "receivableAccountSearch",
+    periodTypeId: "receivableAccountPeriodType",
+    dateRangeId: "receivableAccountDateRange",
+    monthId: "receivableAccountMonthFilter",
+    statusId: "receivableAccountStatusFilter",
+    modalityId: "receivableAccountModalityFilter",
+    professionalId: "receivableAccountProfessionalFilter",
+    chartId: "receivableAccountChartFilter",
+    supplierId: "receivableAccountSupplierFilter",
+    emptyMessage: "Nenhuma conta a receber encontrada.",
+  },
+};
+
+function accountRows(config) {
+  const term = normalizedText(document.querySelector(`#${config.searchId}`)?.value.trim() ?? "");
+  const status = document.querySelector(`#${config.statusId}`)?.value ?? "all";
+  const modality = document.querySelector(`#${config.modalityId}`)?.value ?? "all";
+  const professional = document.querySelector(`#${config.professionalId}`)?.value ?? "all";
+  const chartAccount = document.querySelector(`#${config.chartId}`)?.value ?? "all";
+  const supplier = document.querySelector(`#${config.supplierId}`)?.value ?? "all";
   return state.accounts
     .filter((item) => !term || normalizedText(`${item.description} ${supplierName(item.supplierId)} ${item.person} ${item.document} ${item.bankLaunch ?? ""}`).includes(term))
-    .filter((item) => direction === "all" || item.direction === direction)
+    .filter((item) => item.direction === config.direction)
     .filter((item) => status === "all" || item.status === status)
     .filter((item) => modality === "all" || item.modalityId === modality)
     .filter((item) => professional === "all" || item.teacherId === professional)
@@ -2706,10 +2740,10 @@ function accountRows() {
     .sort((a, b) => (a.dueDate || "").localeCompare(b.dueDate || ""));
 }
 
-function renderAccounts() {
-  const table = document.querySelector("#accountsTable");
+function renderAccountTable(config) {
+  const table = document.querySelector(`#${config.tableId}`);
   if (!table) return;
-  const rows = accountRows();
+  const rows = accountRows(config);
   table.innerHTML = rows.length
     ? rows
         .map((item) => {
@@ -2734,7 +2768,11 @@ function renderAccounts() {
           `;
         })
         .join("")
-    : `<tr><td colspan="11"><div class="empty-state">Nenhum lançamento encontrado.</div></td></tr>`;
+    : `<tr><td colspan="11"><div class="empty-state">${config.emptyMessage}</div></td></tr>`;
+}
+
+function renderAccounts() {
+  Object.values(accountViewConfigs).forEach(renderAccountTable);
 }
 function renderOfxImport() {
   const summary = document.querySelector("#ofxBatchSummary");
@@ -3373,7 +3411,7 @@ function approveValidOfxDrafts() {
   batch.status = "Concluído";
   saveState();
   render();
-  toast(`${imported} lançamentos OFX importados para Contas a Pagar/Receber.`);
+  toast(`${imported} lançamentos OFX importados para o financeiro.`);
 }
 
 function ignoreOfxDraft(draftId) {
@@ -4181,6 +4219,15 @@ document.addEventListener("click", (event) => {
   const modeButton = event.target.closest("[data-agenda-mode]");
   if (modeButton) setAgendaMode(modeButton.dataset.agendaMode);
 
+  const accountDirectionButton = event.target.closest("[data-open-account-direction]");
+  if (accountDirectionButton) {
+    const direction = accountDirectionButton.dataset.openAccountDirection;
+    openModal("account", {
+      direction,
+      status: "Aberto",
+    });
+  }
+
   const modalButton = event.target.closest("[data-open-modal]");
   if (modalButton) {
     if (modalButton.dataset.openModal === "chartAccount") openChartAccountModal();
@@ -4333,17 +4380,16 @@ function clearFiscalFilters() {
   renderFiscalInvoices();
 }
 
-function clearAccountFilters() {
-  setControlValue("accountSearch", "");
-  setControlValue("accountPeriodType", "Mês/Ano Competência");
-  setControlValue("accountDateRange", "01/05/2026 - 31/05/2026");
-  setControlValue("accountMonthFilter", "2026-05");
-  setControlValue("accountDirectionFilter", "all");
-  setControlValue("accountStatusFilter", "all");
-  setControlValue("accountModalityFilter", "all");
-  setControlValue("accountProfessionalFilter", "all");
-  setControlValue("accountChartFilter", "all");
-  setControlValue("accountSupplierFilter", "all");
+function clearAccountFilters(config) {
+  setControlValue(config.searchId, "");
+  setControlValue(config.periodTypeId, "Mês/Ano Competência");
+  setControlValue(config.dateRangeId, "01/05/2026 - 31/05/2026");
+  setControlValue(config.monthId, "2026-05");
+  setControlValue(config.statusId, "all");
+  setControlValue(config.modalityId, "all");
+  setControlValue(config.professionalId, "all");
+  setControlValue(config.chartId, "all");
+  setControlValue(config.supplierId, "all");
   renderAccounts();
 }
 
@@ -4460,12 +4506,14 @@ document.querySelector("#fiscalSearchButton")?.addEventListener("click", renderF
 document.querySelector("#fiscalClearFiltersButton")?.addEventListener("click", clearFiscalFilters);
 document.querySelector("#issueSelectedInvoicesButton")?.addEventListener("click", issuePendingFiscalInvoices);
 
-["accountSearch", "accountPeriodType", "accountDateRange", "accountMonthFilter", "accountDirectionFilter", "accountStatusFilter", "accountModalityFilter", "accountProfessionalFilter", "accountChartFilter", "accountSupplierFilter"].forEach((id) => {
-  document.querySelector(`#${id}`)?.addEventListener("input", renderAccounts);
-  document.querySelector(`#${id}`)?.addEventListener("change", renderAccounts);
+Object.values(accountViewConfigs).forEach((config) => {
+  [config.searchId, config.periodTypeId, config.dateRangeId, config.monthId, config.statusId, config.modalityId, config.professionalId, config.chartId, config.supplierId].forEach((id) => {
+    document.querySelector(`#${id}`)?.addEventListener("input", renderAccounts);
+    document.querySelector(`#${id}`)?.addEventListener("change", renderAccounts);
+  });
+  document.querySelector(`#${config.searchId.replace("Search", "SearchButton")}`)?.addEventListener("click", renderAccounts);
+  document.querySelector(`#${config.searchId.replace("Search", "ClearFiltersButton")}`)?.addEventListener("click", () => clearAccountFilters(config));
 });
-document.querySelector("#accountSearchButton")?.addEventListener("click", renderAccounts);
-document.querySelector("#accountClearFiltersButton")?.addEventListener("click", clearAccountFilters);
 document.querySelector("#chartAccountSearch")?.addEventListener("input", renderChartAccounts);
 document.querySelector("#chartAccountSearchButton")?.addEventListener("click", renderChartAccounts);
 document.querySelector("#chartAccountClearFiltersButton")?.addEventListener("click", clearChartAccountFilters);

@@ -77,7 +77,8 @@
               <div class="top-menu-panel">
                 <button class="top-menu-option" data-view="monthlyPayments" type="button">Mensalidades</button>
                 <button class="top-menu-option" data-view="fiscal" type="button">NFS-e</button>
-                <button class="top-menu-option" data-view="accounts" type="button">Contas a Pagar/Receber</button>
+                <button class="top-menu-option" data-view="accountsPayable" type="button">Contas a Pagar</button>
+                <button class="top-menu-option" data-view="accountsReceivable" type="button">Contas a Receber</button>
                 <button class="top-menu-option" data-view="ofxImport" type="button">Importar OFX</button>
                 <button class="top-menu-option" data-view="cashFlow" type="button">Fluxo de Caixa</button>
                 <button class="top-menu-option" data-view="dre" type="button">DRE</button>
@@ -1095,15 +1096,15 @@
           </div>
         </section>
 
-        <section class="view" id="accountsView" aria-labelledby="viewTitle">
+        <section class="view" id="accountsPayableView" aria-labelledby="viewTitle">
           <div class="page-module">
             <div class="module-titlebar">
               <div>
                 <p class="eyebrow">Financeiro</p>
-                <h2>Contas a Pagar/Receber</h2>
+                <h2>Contas a Pagar</h2>
               </div>
               <div class="title-actions">
-                <button class="primary-button" data-open-modal="account" type="button">Adicionar Conta</button>
+                <button class="primary-button" data-open-account-direction="Pagar" type="button">Adicionar Conta a Pagar</button>
                 <button class="ghost-button" id="importXmlButton" type="button">Importar XML</button>
                 <button class="ghost-button" type="button">Imprimir / Salvar</button>
               </div>
@@ -1111,45 +1112,39 @@
             <div class="module-body">
               <input id="xmlFileInput" type="file" accept=".xml,text/xml,application/xml" hidden />
               <div class="accounts-toolbar">
-                <select id="accountPeriodType">
+                <select id="payableAccountPeriodType">
                   <option>Mês/Ano Competência</option>
                   <option>Data de Vencimento</option>
                   <option>Data de Baixa</option>
                 </select>
-                <input id="accountDateRange" type="text" value="01/05/2026 - 31/05/2026" aria-label="Período" />
-                <select id="accountMonthFilter">
+                <input id="payableAccountDateRange" type="text" value="01/05/2026 - 31/05/2026" aria-label="Período" />
+                <select id="payableAccountMonthFilter">
                   <option value="2026-05">maio/2026</option>
                   <option value="2026-04">abril/2026</option>
                   <option value="2026-06">junho/2026</option>
                 </select>
-                <select id="accountDirectionFilter">
-                  <option value="all">Pagar/Receber</option>
-                  <option value="Pagar">Pagar</option>
-                  <option value="Receber">Receber</option>
-                </select>
-                <select id="accountStatusFilter">
+                <select id="payableAccountStatusFilter">
                   <option value="all">Todos (Pagos e Não Pagos)</option>
                   <option value="Aberto">Em aberto</option>
                   <option value="Pago">Pagos</option>
-                  <option value="Recebido">Recebidos</option>
                   <option value="Atrasado">Atrasados</option>
                 </select>
-                <select id="accountModalityFilter">
+                <select id="payableAccountModalityFilter">
                   <option value="all">Modalidades</option>
                 </select>
-                <select id="accountProfessionalFilter">
+                <select id="payableAccountProfessionalFilter">
                   <option value="all">Professor</option>
                 </select>
-                <select id="accountChartFilter">
+                <select id="payableAccountChartFilter">
                   <option value="all">Plano de contas</option>
                 </select>
-                <select id="accountSupplierFilter">
+                <select id="payableAccountSupplierFilter">
                   <option value="all">Fornecedores</option>
                 </select>
                 <div class="patient-search-row accounts-search-row">
-                  <input id="accountSearch" type="search" placeholder="Buscar por aluno, fornecedor ou descrição" />
-                  <button class="action-button blue" id="accountSearchButton" type="button">Buscar</button>
-                  <button class="action-button clear-filter-button" id="accountClearFiltersButton" type="button">Limpar filtros</button>
+                  <input id="payableAccountSearch" type="search" placeholder="Buscar por fornecedor ou descrição" />
+                  <button class="action-button blue" id="payableAccountSearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="payableAccountClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
               </div>
 
@@ -1165,12 +1160,86 @@
                       <th>Valor</th>
                       <th>Descrição</th>
                       <th>Origem</th>
-                      <th>Paciente/Fornecedor</th>
+                      <th>Fornecedor</th>
                       <th>Plano de contas</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
-                  <tbody id="accountsTable"></tbody>
+                  <tbody id="payableAccountsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="accountsReceivableView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Contas a Receber</h2>
+              </div>
+              <div class="title-actions">
+                <button class="primary-button" data-open-account-direction="Receber" type="button">Adicionar Conta a Receber</button>
+                <button class="ghost-button" type="button">Imprimir / Salvar</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <div class="accounts-toolbar">
+                <select id="receivableAccountPeriodType">
+                  <option>Mês/Ano Competência</option>
+                  <option>Data de Vencimento</option>
+                  <option>Data de Baixa</option>
+                </select>
+                <input id="receivableAccountDateRange" type="text" value="01/05/2026 - 31/05/2026" aria-label="Período" />
+                <select id="receivableAccountMonthFilter">
+                  <option value="2026-05">maio/2026</option>
+                  <option value="2026-04">abril/2026</option>
+                  <option value="2026-06">junho/2026</option>
+                </select>
+                <select id="receivableAccountStatusFilter">
+                  <option value="all">Todos (Recebidos e Não Recebidos)</option>
+                  <option value="Aberto">Em aberto</option>
+                  <option value="Recebido">Recebidos</option>
+                  <option value="Atrasado">Atrasados</option>
+                </select>
+                <select id="receivableAccountModalityFilter">
+                  <option value="all">Modalidades</option>
+                </select>
+                <select id="receivableAccountProfessionalFilter">
+                  <option value="all">Professor</option>
+                </select>
+                <select id="receivableAccountChartFilter">
+                  <option value="all">Plano de contas</option>
+                </select>
+                <select id="receivableAccountSupplierFilter">
+                  <option value="all">Fornecedores</option>
+                </select>
+                <div class="patient-search-row accounts-search-row">
+                  <input id="receivableAccountSearch" type="search" placeholder="Buscar por aluno, fornecedor ou descrição" />
+                  <button class="action-button blue" id="receivableAccountSearchButton" type="button">Buscar</button>
+                  <button class="action-button clear-filter-button" id="receivableAccountClearFiltersButton" type="button">Limpar filtros</button>
+                </div>
+              </div>
+
+              <div class="table-wrap accounts-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Competência</th>
+                      <th>Previsão</th>
+                      <th>Vencimento</th>
+                      <th>Baixa</th>
+                      <th>Valor</th>
+                      <th>Descrição</th>
+                      <th>Origem</th>
+                      <th>Aluno/Fornecedor</th>
+                      <th>Plano de contas</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="receivableAccountsTable"></tbody>
                 </table>
               </div>
             </div>
