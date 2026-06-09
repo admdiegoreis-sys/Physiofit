@@ -2509,7 +2509,7 @@ tr:last-child td {
 
 .accounts-table-wrap th:last-child,
 .accounts-table-wrap td:last-child {
-  width: 104px;
+  width: 94px;
 }
 
 .monthly-table-wrap th:nth-child(2),
@@ -2570,17 +2570,46 @@ tr:last-child td {
 
 .accounts-table-wrap .monthly-status-button {
   min-width: 62px;
-  min-height: 28px;
+  min-height: 26px;
   padding: 0 7px;
   border-radius: 5px;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
+}
+
+.accounts-table-wrap .row-actions {
+  gap: 5px;
+  justify-content: flex-start;
 }
 
 .accounts-table-wrap .row-action-button {
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  font-size: 0.72rem;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(87, 169, 189, 0.16);
+  font-size: 0.66rem;
+}
+
+.accounts-table-wrap .row-action-button:hover {
+  box-shadow: 0 4px 10px rgba(87, 169, 189, 0.22);
+}
+
+.accounts-table-wrap .settle-icon-button {
+  box-shadow: 0 2px 6px rgba(91, 156, 83, 0.16);
+}
+
+.accounts-table-wrap .settle-icon-button:hover {
+  box-shadow: 0 4px 10px rgba(91, 156, 83, 0.22);
+}
+
+.accounts-table-wrap .delete-icon-button {
+  box-shadow: 0 2px 6px rgba(200, 70, 78, 0.16);
+  font-size: 0.78rem;
+}
+
+.accounts-table-wrap .delete-icon-button:hover {
+  box-shadow: 0 4px 10px rgba(200, 70, 78, 0.22);
 }
 
 .accounts-table-wrap .amount-in,
