@@ -418,6 +418,7 @@ const seedData = {
   enrollments: importedArray("enrollments", seedEnrollments),
   chartAccounts: seedChartAccounts,
   accounts: seedAccounts,
+  bankMovements: [],
   ofxBatches: [],
   ofxDrafts: [],
   ofxRules: seedOfxRules,
@@ -500,6 +501,7 @@ const viewTitles = {
   accountsPayable: "Contas a Pagar",
   accountsReceivable: "Contas a Receber",
   ofxImport: "Importar OFX",
+  bankReconciliation: "Conciliação Bancária",
   cashFlow: "Fluxo de Caixa",
   dre: "DRE",
   chartAccounts: "Plano de Contas",
@@ -527,6 +529,7 @@ const menuGroupByView = {
   accountsPayable: "finance",
   accountsReceivable: "finance",
   ofxImport: "finance",
+  bankReconciliation: "finance",
   cashFlow: "finance",
   dre: "finance",
   chartAccounts: "finance",
@@ -749,10 +752,15 @@ const modalSchemas = {
         person: values.person || supplier?.name || "",
         document: values.document || supplier?.document || "",
         amount: Number(values.amount || 0),
+        originalAmount: Number(values.amount || 0),
+        paidAmount: current?.paidAmount || 0,
+        openAmount: Math.max(0, Number(values.amount || 0) - Number(current?.paidAmount || 0)),
         dueDate: values.forecastDate || current?.dueDate || values.competenceDate || demoToday,
         modalityId: current?.modalityId || "",
         teacherId: current?.teacherId || "",
         paidDate: current?.paidDate || "",
+        linkedBankMovementId: current?.linkedBankMovementId || "",
+        reconciliationStatus: current?.reconciliationStatus || "unreconciled",
       };
       payload.status = accountAutoStatus(payload);
       if (editingAccountId) state.accounts = state.accounts.map((item) => (item.id === editingAccountId ? payload : item));
@@ -765,11 +773,19 @@ const modalSchemas = {
     submit: "Confirmar baixa",
     fields: [
       { name: "paidDate", label: "Pagamento", type: "date", value: demoToday },
+      { name: "paidAmount", label: "Valor pago/recebido", type: "number", value: 0 },
+      { name: "notes", label: "Observação", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
       const account = state.accounts.find((item) => item.id === settlingAccountId);
       if (!account) return;
+      const originalAmount = accountOriginalAmount(account);
+      const paymentValue = Number(values.paidAmount || accountOpenAmount(account) || originalAmount);
       account.paidDate = values.paidDate || demoToday;
+      account.paidAmount = Math.min(originalAmount, accountPaidAmount(account) + paymentValue);
+      account.openAmount = Math.max(0, originalAmount - account.paidAmount);
+      account.reconciliationStatus = account.linkedBankMovementId ? "reconciled" : "manual";
+      account.notes = values.notes || account.notes || "";
       account.status = accountAutoStatus(account);
       settlingAccountId = null;
     },
@@ -863,6 +879,13 @@ function normalizeState(data) {
     ...item,
     supplierId: item.supplierId || supplierIdByIdentityFromList(normalized.suppliers, item.person, item.document),
   }));
+  const savedBankMovements = Array.isArray(data.bankMovements) ? data.bankMovements : [];
+  const legacyOfxMovements = savedAccounts
+    .filter((item) => item.origin === "Importação OFX" || item.origin === "ImportaÃ§Ã£o OFX")
+    .map((item) => bankMovementFromAccount(item));
+  const movementKeys = new Set(savedBankMovements.map((item) => item.ofxIdentifier || item.duplicateHash || item.id));
+  normalized.bankMovements = [...savedBankMovements, ...legacyOfxMovements.filter((item) => !movementKeys.has(item.ofxIdentifier || item.duplicateHash || item.id))]
+    .map((item, index) => normalizeBankMovement(normalizeTextFields(item), index));
   normalized.ofxBatches = (Array.isArray(data.ofxBatches) ? data.ofxBatches : []).map((item, index) => normalizeOfxBatch(normalizeTextFields(item), index));
   normalized.ofxDrafts = (Array.isArray(data.ofxDrafts) ? data.ofxDrafts : []).map((item, index) => normalizeOfxDraft(normalizeTextFields(item), index));
   normalized.ofxRules = (Array.isArray(data.ofxRules) && data.ofxRules.length ? data.ofxRules : structuredClone(seedOfxRules)).map((item, index) => normalizeOfxRule(normalizeTextFields(item), index));
@@ -1092,6 +1115,9 @@ function normalizeChartAccount(item, index) {
 
 function normalizeAccount(item, index) {
   const defaults = seedAccounts[index % seedAccounts.length] ?? seedAccounts[0];
+  const originalAmount = Number(item.originalAmount ?? item.original_amount ?? item.amount ?? defaults.amount ?? 0);
+  const paidAmount = Number(item.paidAmount ?? item.paid_amount ?? (item.paidDate ? originalAmount : 0));
+  const openAmount = Math.max(0, Number(item.openAmount ?? item.open_amount ?? (originalAmount - paidAmount)));
   return {
     id: item.id || defaults.id || uid("cp"),
     direction: defaults.direction,
@@ -1101,6 +1127,9 @@ function normalizeAccount(item, index) {
     dueDate: defaults.dueDate,
     paidDate: defaults.paidDate,
     amount: Number(defaults.amount || 0),
+    originalAmount,
+    paidAmount,
+    openAmount,
     description: defaults.description,
     person: defaults.person,
     document: defaults.document,
@@ -1112,11 +1141,61 @@ function normalizeAccount(item, index) {
     origin: defaults.origin || "Manual",
     importBatchId: defaults.importBatchId || "",
     bankAccountId: defaults.bankAccountId || "",
+    linkedBankMovementId: item.linkedBankMovementId || item.linked_bank_movement_id || "",
+    reconciliationStatus: item.reconciliationStatus || item.reconciliation_status || (item.paidDate ? "manual" : "unreconciled"),
+    notes: item.notes || item.observacoes || "",
     ofxIdentifier: defaults.ofxIdentifier || "",
     duplicateHash: defaults.duplicateHash || "",
     ...item,
     amount: Number(item.amount ?? defaults.amount ?? 0),
+    originalAmount,
+    paidAmount,
+    openAmount,
     supplierId: item.supplierId || "",
+  };
+}
+
+function bankMovementFromAccount(item = {}) {
+  const signedAmount = Number(item.signedAmount ?? (item.direction === "Receber" ? item.amount : -Math.abs(Number(item.amount || 0))));
+  return {
+    id: item.bankMovementId || `bm-${item.id || uid("legacy")}`,
+    date: item.paidDate || item.dueDate || item.forecastDate || item.competenceDate || demoToday,
+    description: item.bankLaunch || item.description || "",
+    amount: signedAmount || Number(item.amount || 0),
+    bankAccountId: item.bankAccountId || "",
+    bankName: item.paymentMethod || bankAccountLabel(item.bankAccountId),
+    chartAccountId: item.chartAccountId || "",
+    origin: "Importação OFX",
+    importBatchId: item.importBatchId || "",
+    ofxIdentifier: item.ofxIdentifier || "",
+    duplicateHash: item.duplicateHash || "",
+    reconciliationStatus: item.linkedFinancialTitleId ? "reconciled" : "unreconciled",
+    linkedFinancialTitleId: item.linkedFinancialTitleId || "",
+    notes: item.notes || "",
+  };
+}
+
+function normalizeBankMovement(item, index) {
+  return {
+    id: item.id || uid("bm"),
+    date: item.date || item.paymentDate || item.dataPagamento || demoToday,
+    description: item.description || item.descricao || "",
+    amount: Number(item.amount ?? item.valor ?? 0),
+    bankAccountId: item.bankAccountId || item.accountId || item.contaId || "",
+    bankName: item.bankName || item.accountName || item.contaNome || bankAccountLabel(item.bankAccountId || item.accountId || item.contaId || ""),
+    chartAccountId: item.chartAccountId || item.planoContaId || item.accountingAccountId || "",
+    origin: item.origin || "Importação OFX",
+    importBatchId: item.importBatchId || item.loteImportacaoId || "",
+    ofxIdentifier: item.ofxIdentifier || item.identificadorOfx || "",
+    duplicateHash: item.duplicateHash || item.hashDuplicidade || "",
+    reconciliationStatus: item.reconciliationStatus || item.reconciliation_status || "unreconciled",
+    linkedFinancialTitleId: item.linkedFinancialTitleId || item.linked_financial_title_id || "",
+    isTransfer: Boolean(item.isTransfer || item.is_transfer),
+    notes: item.notes || item.observacao || "",
+    createdAt: item.createdAt || new Date().toISOString(),
+    updatedAt: item.updatedAt || new Date().toISOString(),
+    ...item,
+    amount: Number(item.amount ?? item.valor ?? 0),
   };
 }
 
@@ -1338,6 +1417,11 @@ function addDays(date, days) {
   return next;
 }
 
+function daysBetween(first, second) {
+  if (!first || !second) return Number.POSITIVE_INFINITY;
+  return Math.round(Math.abs(parseLocalDate(first) - parseLocalDate(second)) / 86400000);
+}
+
 function isoDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
@@ -1543,6 +1627,15 @@ function findOfxRule(description = "", accountId = "") {
 }
 
 function officialAccountMatchesOfx(draft) {
+  const matchesMovement = state.bankMovements.some((movement) => {
+    const sameAccount = movement.bankAccountId === draft.accountId;
+    const sameDate = movement.date === draft.paymentDate;
+    const sameValue = Math.abs(Math.abs(Number(movement.amount || 0)) - Math.abs(Number(draft.amount || 0))) < 0.01;
+    const sameIdentifier = draft.ofxIdentifier && movement.ofxIdentifier === draft.ofxIdentifier;
+    const sameHash = draft.duplicateHash && movement.duplicateHash === draft.duplicateHash;
+    return sameAccount && sameDate && sameValue && (sameIdentifier || sameHash);
+  });
+  if (matchesMovement) return true;
   return state.accounts.some((account) => {
     const sameAccount = (account.bankAccountId || account.paymentMethod || "") === draft.accountId;
     const sameDate = (account.paidDate || account.dueDate || account.competenceDate || "") === draft.paymentDate;
@@ -1595,7 +1688,7 @@ function createOfxDraft(transaction, batch) {
   draft.duplicateHash = ofxDuplicateHash(draft);
   if (officialAccountMatchesOfx(draft)) {
     draft.status = "Duplicado";
-    draft.note = "Já existe lançamento oficial com mesma conta, data, valor e identificador/hash.";
+    draft.note = "Já existe movimento bancário com mesma conta, data, valor e identificador/hash.";
   }
   return draft;
 }
@@ -1630,22 +1723,42 @@ function accountPaymentDate(item = {}) {
   return item.paidDate || item.paymentDate || "";
 }
 
+function accountOriginalAmount(item = {}) {
+  return Number(item.originalAmount ?? item.amount ?? 0);
+}
+
+function accountPaidAmount(item = {}) {
+  if (item.paidAmount !== undefined) return Number(item.paidAmount || 0);
+  return accountPaymentDate(item) ? accountOriginalAmount(item) : 0;
+}
+
+function accountOpenAmount(item = {}) {
+  if (item.openAmount !== undefined) return Number(item.openAmount || 0);
+  return Math.max(0, accountOriginalAmount(item) - accountPaidAmount(item));
+}
+
 function accountExpectedDate(item = {}) {
   return item.forecastDate || item.dueDate || item.competenceDate || "";
 }
 
 function isAccountOverdue(item = {}) {
   const expectedDate = accountExpectedDate(item);
-  return !accountPaymentDate(item) && expectedDate && expectedDate < demoToday;
+  return accountOpenAmount(item) > 0 && expectedDate && expectedDate < demoToday && item.status !== "Cancelado";
 }
 
 function accountAutoStatus(item = {}) {
-  if (accountPaymentDate(item)) return item.direction === "Receber" ? "Recebido" : "Pago";
+  if (item.status === "Cancelado") return "Cancelado";
+  const paid = accountPaidAmount(item);
+  const open = accountOpenAmount(item);
+  if (paid > 0 && open > 0) return "Parcial";
+  if (paid > 0 && open <= 0) return item.direction === "Receber" ? "Recebido" : "Pago";
   return "Em aberto";
 }
 
 function accountAutoStatusClass(item = {}) {
-  if (accountPaymentDate(item)) return item.direction === "Receber" ? "recebido" : "pago";
+  if (item.status === "Cancelado") return "cancelado";
+  if (accountPaidAmount(item) > 0 && accountOpenAmount(item) > 0) return "parcial";
+  if (accountPaidAmount(item) > 0 && accountOpenAmount(item) <= 0) return item.direction === "Receber" ? "recebido" : "pago";
   return isAccountOverdue(item) ? "atrasado" : "em-aberto";
 }
 
@@ -1701,6 +1814,7 @@ function render() {
   renderAccountOptions();
   renderAccounts();
   renderOfxImport();
+  renderBankReconciliation();
   renderCashFlow();
   renderDre();
   renderChartAccounts();
@@ -1832,6 +1946,16 @@ function renderDashboard() {
   const occupancyRate = Math.min(100, Math.round((weekAppointments.length / weeklyCapacity) * 100));
   const confirmedRate = todayClasses.length ?Math.round((todayClasses.filter((item) => ["Confirmada", "Concluída", "Compareceu"].includes(item.status)).length / todayClasses.length) * 100) : 0;
   const atRisk = state.students.filter((item) => item.status === "Inativo" || item.membership === "Matr. Cancel.").length;
+  const financialTitles = state.accounts.filter((item) => item.origin !== "Importação OFX" && item.origin !== "ImportaÃ§Ã£o OFX" && item.status !== "Cancelado");
+  const receivableOverdue = financialTitles.filter((item) => item.direction === "Receber" && isAccountOverdue(item)).reduce((sum, item) => sum + accountOpenAmount(item), 0);
+  const payableOverdue = financialTitles.filter((item) => item.direction === "Pagar" && isAccountOverdue(item)).reduce((sum, item) => sum + accountOpenAmount(item), 0);
+  const predictedMonthBalance = financialTitles
+    .filter((item) => accountExpectedDate(item).slice(0, 7) === demoToday.slice(0, 7))
+    .reduce((sum, item) => sum + (item.direction === "Receber" ? accountOpenAmount(item) : -accountOpenAmount(item)), 0);
+  const realizedMonthBalance = state.bankMovements
+    .filter((item) => item.reconciliationStatus === "reconciled" && String(item.date || "").slice(0, 7) === demoToday.slice(0, 7))
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const unreconciledMovements = state.bankMovements.filter((item) => item.reconciliationStatus === "unreconciled").length;
 
   document.querySelector("#activeStudentsMetric").textContent = state.students.filter((item) => item.status === "Ativo").length;
   document.querySelector("#todayClassesMetric").textContent = todayClasses.length;
@@ -1866,9 +1990,11 @@ function renderDashboard() {
   document.querySelector("#alertsList").innerHTML = alerts.length ?alerts.map((alert) => `<div class="alert-item">${alert}</div>`).join("") : `<div class="empty-state">Sem pendências críticas agora.</div>`;
 
   document.querySelector("#dashboardFinanceSummary").innerHTML = `
-    <article class="summary-item"><span>Recebido</span><strong>${currency(monthRevenue)}</strong></article>
-    <article class="summary-item"><span>Pendente</span><strong>${currency(pending)}</strong></article>
-    <article class="summary-item"><span>Atrasado</span><strong>${currency(overdue)}</strong></article>
+    <article class="summary-item"><span>A receber vencido</span><strong>${currency(receivableOverdue)}</strong></article>
+    <article class="summary-item"><span>A pagar vencido</span><strong>${currency(payableOverdue)}</strong></article>
+    <article class="summary-item"><span>Saldo previsto mês</span><strong>${currency(predictedMonthBalance)}</strong></article>
+    <article class="summary-item"><span>Saldo realizado mês</span><strong>${currency(realizedMonthBalance)}</strong></article>
+    <article class="summary-item"><span>OFX não conciliado</span><strong>${unreconciledMovements}</strong></article>
   `;
 
   const modalityRows = activeModalities()
@@ -2756,6 +2882,7 @@ const accountViewConfigs = {
     dateRangeId: "payableAccountDateRange",
     monthId: "payableAccountMonthFilter",
     statusId: "payableAccountStatusFilter",
+    reconciliationId: "payableAccountReconciliationFilter",
     modalityId: "payableAccountModalityFilter",
     professionalId: "payableAccountProfessionalFilter",
     chartId: "payableAccountChartFilter",
@@ -2770,6 +2897,7 @@ const accountViewConfigs = {
     dateRangeId: "receivableAccountDateRange",
     monthId: "receivableAccountMonthFilter",
     statusId: "receivableAccountStatusFilter",
+    reconciliationId: "receivableAccountReconciliationFilter",
     modalityId: "receivableAccountModalityFilter",
     professionalId: "receivableAccountProfessionalFilter",
     chartId: "receivableAccountChartFilter",
@@ -2781,17 +2909,20 @@ const accountViewConfigs = {
 function accountRows(config) {
   const term = normalizedText(document.querySelector(`#${config.searchId}`)?.value.trim() ?? "");
   const status = document.querySelector(`#${config.statusId}`)?.value ?? "all";
+  const reconciliation = document.querySelector(`#${config.reconciliationId}`)?.value ?? "all";
   const chartAccount = document.querySelector(`#${config.chartId}`)?.value ?? "all";
   const supplier = document.querySelector(`#${config.supplierId}`)?.value ?? "all";
   return state.accounts
     .filter((item) => !term || normalizedText(`${item.description} ${supplierName(item.supplierId)} ${item.person} ${item.document} ${item.bankLaunch ?? ""}`).includes(term))
+    .filter((item) => item.origin !== "Importação OFX" && item.origin !== "ImportaÃ§Ã£o OFX")
     .filter((item) => item.direction === config.direction)
     .filter((item) => {
       if (status === "all") return true;
-      if (status === "Aberto") return !accountPaymentDate(item);
+      if (status === "Aberto") return accountOpenAmount(item) > 0 && item.status !== "Cancelado";
       if (status === "Atrasado") return isAccountOverdue(item);
       return accountAutoStatus(item) === status;
     })
+    .filter((item) => reconciliation === "all" || (item.reconciliationStatus || "unreconciled") === reconciliation)
     .filter((item) => chartAccount === "all" || item.chartAccountId === chartAccount)
     .filter((item) => supplier === "all" || item.supplierId === supplier)
     .sort((a, b) => (accountExpectedDate(a) || "").localeCompare(accountExpectedDate(b) || ""));
@@ -2804,8 +2935,13 @@ function renderAccountTable(config) {
   table.innerHTML = rows.length
     ? rows
         .map((item) => {
-          const sourceLabel = item.origin === "Importação OFX" ? "OFX" : "Manual";
-          const sourceClass = item.origin === "Importação OFX" ? "ofx" : "manual";
+          const sourceLabel =
+            item.reconciliationStatus === "reconciled"
+              ? "Conciliado"
+              : item.reconciliationStatus === "manual"
+                ? "Baixa manual"
+                : "Não conciliado";
+          const sourceClass = item.reconciliationStatus === "reconciled" ? "ofx" : "manual";
           const statusLabel = accountAutoStatus(item);
           const statusStyle = accountAutoStatusClass(item);
           return `
@@ -2833,6 +2969,197 @@ function renderAccountTable(config) {
 
 function renderAccounts() {
   Object.values(accountViewConfigs).forEach(renderAccountTable);
+}
+
+function bankMovementDirection(movement = {}) {
+  return Number(movement.amount || 0) >= 0 ? "Receber" : "Pagar";
+}
+
+function reconciliationStatusLabel(status = "") {
+  return {
+    unreconciled: "Não conciliado",
+    reconciled: "Conciliado",
+    ignored: "Ignorado",
+  }[status] || "Não conciliado";
+}
+
+function compatibleTitlesForMovement(movement = {}) {
+  const direction = bankMovementDirection(movement);
+  const movementAmount = Math.abs(Number(movement.amount || 0));
+  const movementText = normalizedText(movement.description || "");
+  return state.accounts
+    .filter((account) => account.direction === direction)
+    .filter((account) => account.origin !== "Importação OFX" && account.origin !== "ImportaÃ§Ã£o OFX")
+    .filter((account) => account.status !== "Cancelado" && accountOpenAmount(account) > 0)
+    .map((account) => {
+      const valueScore = Math.abs(accountOpenAmount(account) - movementAmount) < 0.01 ? 60 : 0;
+      const dateScore = Math.abs(daysBetween(accountExpectedDate(account), movement.date)) <= 5 ? 20 : 0;
+      const accountText = normalizedText(`${account.person} ${supplierName(account.supplierId)} ${account.description}`);
+      const textScore = accountText && movementText.split(/\s+/).some((word) => word.length > 3 && accountText.includes(word)) ? 20 : 0;
+      return { account, score: valueScore + dateScore + textScore };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8)
+    .map((item) => item.account);
+}
+
+function reconciliationRows() {
+  const term = normalizedText(document.querySelector("#bankReconciliationSearch")?.value.trim() || "");
+  const status = document.querySelector("#bankReconciliationStatusFilter")?.value || "unreconciled";
+  const type = document.querySelector("#bankReconciliationTypeFilter")?.value || "all";
+  const accountId = document.querySelector("#bankReconciliationAccountFilter")?.value || "all";
+  return state.bankMovements
+    .filter((movement) => status === "all" || movement.reconciliationStatus === status)
+    .filter((movement) => type === "all" || (type === "receivable" ? Number(movement.amount || 0) >= 0 : Number(movement.amount || 0) < 0))
+    .filter((movement) => accountId === "all" || movement.bankAccountId === accountId)
+    .filter((movement) => !term || normalizedText(`${movement.description} ${movement.bankName} ${movement.notes}`).includes(term))
+    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+}
+
+function renderBankReconciliation() {
+  const summary = document.querySelector("#bankReconciliationSummary");
+  const table = document.querySelector("#bankReconciliationTable");
+  if (!summary || !table) return;
+  const rows = reconciliationRows();
+  const unreconciled = state.bankMovements.filter((item) => item.reconciliationStatus === "unreconciled").length;
+  const reconciled = state.bankMovements.filter((item) => item.reconciliationStatus === "reconciled").length;
+  const ignored = state.bankMovements.filter((item) => item.reconciliationStatus === "ignored").length;
+  summary.innerHTML = `
+    <article class="summary-item"><span>Não conciliados</span><strong>${unreconciled}</strong><small>Movimentos pendentes de vínculo</small></article>
+    <article class="summary-item"><span>Conciliados</span><strong>${reconciled}</strong><small>Baixas vinculadas a títulos</small></article>
+    <article class="summary-item"><span>Ignorados</span><strong>${ignored}</strong><small>Movimentos fora do financeiro</small></article>
+  `;
+  table.innerHTML = rows.length
+    ? rows.map((movement) => {
+        const suggestions = compatibleTitlesForMovement(movement);
+        const selectedId = movement.linkedFinancialTitleId || suggestions[0]?.id || "";
+        const locked = movement.reconciliationStatus !== "unreconciled" ? "disabled" : "";
+        const titleOptions = suggestions.length
+          ? suggestions.map((account) => `<option value="${account.id}" ${account.id === selectedId ? "selected" : ""}>${account.person || supplierName(account.supplierId) || account.description} · ${currency(accountOpenAmount(account))} · ${dateLabel(accountExpectedDate(account))}</option>`).join("")
+          : `<option value="">Nenhum título sugerido</option>`;
+        return `
+          <tr>
+            <td>${dateLabel(movement.date)}</td>
+            <td><strong>${movement.description}</strong><br><small>${movement.ofxIdentifier || movement.notes || "-"}</small></td>
+            <td>${movement.bankName || bankAccountLabel(movement.bankAccountId)}</td>
+            <td><strong class="${Number(movement.amount || 0) >= 0 ? "amount-in" : "amount-out"}">${currency(Math.abs(Number(movement.amount || 0)))}</strong></td>
+            <td><span class="source-pill ${movement.reconciliationStatus === "reconciled" ? "ofx" : "manual"}">${reconciliationStatusLabel(movement.reconciliationStatus)}</span></td>
+            <td>
+              <select class="inline-field" data-reconciliation-title="${movement.id}" ${locked}>
+                ${titleOptions}
+              </select>
+            </td>
+            <td class="row-actions">
+              <button class="row-action-button settle-icon-button" data-reconcile-movement="${movement.id}" type="button" title="Conciliar" aria-label="Conciliar movimento" ${locked}>$</button>
+              <button class="row-action-button edit-icon-button" data-create-title-from-movement="${movement.id}" type="button" title="Criar título" aria-label="Criar título a partir do movimento" ${locked}>+</button>
+              <button class="row-action-button delete-icon-button" data-ignore-movement="${movement.id}" type="button" title="Ignorar" aria-label="Ignorar movimento" ${locked}>&times;</button>
+            </td>
+          </tr>
+        `;
+      }).join("")
+    : `<tr><td colspan="7"><div class="empty-state">Nenhum movimento OFX encontrado para os filtros selecionados.</div></td></tr>`;
+}
+
+function resetBankReconciliationFilters() {
+  const status = document.querySelector("#bankReconciliationStatusFilter");
+  const type = document.querySelector("#bankReconciliationTypeFilter");
+  const account = document.querySelector("#bankReconciliationAccountFilter");
+  const search = document.querySelector("#bankReconciliationSearch");
+  if (status) status.value = "unreconciled";
+  if (type) type.value = "all";
+  if (account) account.value = "all";
+  if (search) search.value = "";
+}
+
+function reconcileBankMovement(movementId, titleId) {
+  const movement = state.bankMovements.find((item) => item.id === movementId);
+  const title = state.accounts.find((item) => item.id === titleId);
+  if (!movement || !title) {
+    toast("Selecione um título financeiro para conciliar.");
+    return;
+  }
+  if (movement.reconciliationStatus !== "unreconciled") {
+    toast("Este movimento já foi tratado.");
+    return;
+  }
+  if (bankMovementDirection(movement) !== title.direction) {
+    toast("Entrada só concilia com contas a receber; saída só concilia com contas a pagar.");
+    return;
+  }
+  const movementAmount = Math.abs(Number(movement.amount || 0));
+  const openAmount = accountOpenAmount(title);
+  if (movementAmount > openAmount + 0.01) {
+    toast("Valor do movimento é maior que o saldo aberto do título.");
+    return;
+  }
+  title.paidAmount = Math.min(accountOriginalAmount(title), accountPaidAmount(title) + movementAmount);
+  title.openAmount = Math.max(0, accountOriginalAmount(title) - title.paidAmount);
+  title.paidDate = movement.date;
+  title.settlementDate = movement.date;
+  title.linkedBankMovementId = movement.id;
+  title.reconciliationStatus = "reconciled";
+  title.bankAccountId = movement.bankAccountId;
+  title.paymentMethod = movement.bankName || bankAccountLabel(movement.bankAccountId);
+  title.status = accountAutoStatus(title);
+  movement.reconciliationStatus = "reconciled";
+  movement.linkedFinancialTitleId = title.id;
+  movement.updatedAt = new Date().toISOString();
+  saveState();
+  render();
+  toast("Movimento conciliado com sucesso.");
+}
+
+function ignoreBankMovement(movementId) {
+  const movement = state.bankMovements.find((item) => item.id === movementId);
+  if (!movement) return;
+  if (movement.reconciliationStatus !== "unreconciled") {
+    toast("Este movimento já foi tratado.");
+    return;
+  }
+  movement.reconciliationStatus = "ignored";
+  movement.notes = "Ignorado manualmente.";
+  movement.updatedAt = new Date().toISOString();
+  saveState();
+  render();
+  toast("Movimento ignorado.");
+}
+
+function createTitleFromMovement(movementId) {
+  const movement = state.bankMovements.find((item) => item.id === movementId);
+  if (!movement) return;
+  if (movement.reconciliationStatus !== "unreconciled") {
+    toast("Este movimento já foi tratado.");
+    return;
+  }
+  const direction = bankMovementDirection(movement);
+  const amount = Math.abs(Number(movement.amount || 0));
+  const account = normalizeAccount({
+    id: uid("cp"),
+    direction,
+    status: "Aberto",
+    competenceDate: movement.date,
+    forecastDate: movement.date,
+    dueDate: movement.date,
+    paidDate: "",
+    amount,
+    originalAmount: amount,
+    paidAmount: 0,
+    openAmount: amount,
+    description: movement.description,
+    person: movement.description,
+    document: "",
+    supplierId: "",
+    chartAccountId: movement.chartAccountId || activeChartAccounts()[0]?.id || "",
+    paymentMethod: "",
+    origin: "Manual",
+    bankAccountId: movement.bankAccountId,
+    reconciliationStatus: "unreconciled",
+  }, state.accounts.length);
+  state.accounts.push(account);
+  saveState();
+  render();
+  toast("Título criado. Confira os dados e concilie o movimento.");
 }
 function renderOfxImport() {
   const summary = document.querySelector("#ofxBatchSummary");
@@ -3289,14 +3616,14 @@ function openAccountModal(accountId = null, defaults = {}) {
   editingAccountId = accountId;
   const item = accountId ? state.accounts.find((account) => account.id === accountId) : null;
   openModal("account", item ?? defaults);
-  document.querySelector("#modalTitle").textContent = accountId ? "Editar conta" : "Adicionar conta";
+  document.querySelector("#modalTitle").textContent = accountId ? "Editar título" : "Adicionar título";
 }
 
 function openAccountSettlementModal(accountId) {
   settlingAccountId = accountId;
   const item = state.accounts.find((account) => account.id === accountId);
   if (!item) return;
-  openModal("accountSettlement", { paidDate: item.paidDate || demoToday });
+  openModal("accountSettlement", { paidDate: item.paidDate || demoToday, paidAmount: accountOpenAmount(item) || item.amount, notes: item.notes || "" });
   document.querySelector("#modalTitle").textContent = item.direction === "Receber" ? "Baixar conta a receber" : "Baixar conta a pagar";
 }
 
@@ -3312,11 +3639,19 @@ function saveChartAccountModal(values) {
 
 function deleteAccount(accountId) {
   const item = state.accounts.find((account) => account.id === accountId);
-  if (!item || !window.confirm(`Excluir o lançamento ${item.description}?`)) return;
+  if (!item || !window.confirm(`Excluir o título ${item.description}?`)) return;
+  if (item.linkedBankMovementId) {
+    const movement = state.bankMovements.find((bankItem) => bankItem.id === item.linkedBankMovementId);
+    if (movement) {
+      movement.reconciliationStatus = "unreconciled";
+      movement.linkedFinancialTitleId = "";
+      movement.updatedAt = new Date().toISOString();
+    }
+  }
   state.accounts = state.accounts.filter((account) => account.id !== accountId);
   saveState();
   render();
-  toast("Lançamento excluído.");
+  toast("Título excluído.");
 }
 
 function deleteChartAccount(chartAccountId) {
@@ -3400,32 +3735,22 @@ function confirmOfxDraft(draftId, options = {}) {
     draft.note = "Duplicado encontrado antes da aprovação.";
     return false;
   }
-  const direction = ofxDraftDirection(draft);
-  state.accounts.push(normalizeAccount({
-    id: uid("cp"),
-    direction,
-    status: direction === "Receber" ? "Recebido" : "Pago",
-    competenceDate: draft.competenceDate,
-    forecastDate: draft.paymentDate,
-    dueDate: draft.paymentDate,
-    paidDate: draft.paymentDate,
-    amount: Math.abs(Number(draft.amount || 0)),
+  state.bankMovements.push(normalizeBankMovement({
+    id: uid("bm"),
+    date: draft.paymentDate,
     description: draft.description,
-    person: draft.description,
-    document: "",
-    supplierId: "",
-    modalityId: "",
-    teacherId: "",
+    amount: Number(draft.signedAmount || draft.amount || 0),
+    bankAccountId: draft.accountId,
+    bankName: bankAccountLabel(draft.accountId),
     chartAccountId: draft.chartAccountId,
-    paymentMethod: bankAccountLabel(draft.accountId),
-    bankLaunch: draft.description,
     origin: "Importação OFX",
     importBatchId: draft.importBatchId,
-    bankAccountId: draft.accountId,
     ofxIdentifier: draft.ofxIdentifier,
     duplicateHash: draft.duplicateHash,
-    signedAmount: draft.signedAmount,
-  }, state.accounts.length));
+    reconciliationStatus: "unreconciled",
+    linkedFinancialTitleId: "",
+    notes: draft.note || "",
+  }, state.bankMovements.length));
   draft.status = "Importado";
   draft.updatedAt = new Date().toISOString();
   return true;
@@ -3444,7 +3769,7 @@ function approveValidOfxDrafts() {
   batch.status = "Concluído";
   saveState();
   render();
-  toast(`${imported} lançamentos OFX importados para o financeiro.`);
+  toast(`${imported} movimentos OFX importados para conciliação.`);
 }
 
 function approveValidOfxDraftsToFinance() {
@@ -3454,28 +3779,22 @@ function approveValidOfxDraftsToFinance() {
     return;
   }
   const validDrafts = state.ofxDrafts.filter((item) => item.importBatchId === batch.id && isValidOfxDraftStatus(item.status));
-  const importedDirections = [];
   const imported = validDrafts.reduce((count, item) => {
-    const direction = ofxDraftDirection(item);
     const confirmed = confirmOfxDraft(item.id, { silent: true });
-    if (confirmed) importedDirections.push(direction);
     return count + (confirmed ? 1 : 0);
   }, 0);
   updateOfxBatchCounters(batch.id);
   if (imported > 0) {
     batch.status = "Concluído";
-    const hasPayable = importedDirections.includes("Pagar");
-    const hasReceivable = importedDirections.includes("Receber");
-    if (hasPayable) resetAccountFiltersForImport(accountViewConfigs.payable);
-    if (hasReceivable) resetAccountFiltersForImport(accountViewConfigs.receivable);
+    resetBankReconciliationFilters();
   }
   saveState();
   render();
   if (imported > 0) {
-    switchView(importedDirections.includes("Pagar") && !importedDirections.includes("Receber") ? "accountsPayable" : "accountsReceivable");
-    toast(`${imported} lançamentos OFX importados para o financeiro.`);
+    switchView("bankReconciliation");
+    toast(`${imported} movimentos OFX importados para conciliação.`);
   } else {
-    toast("Nenhum lançamento válido para importar. Revise o plano de contas ou remova duplicados.");
+    toast("Nenhum movimento válido para importar. Revise o plano de contas ou remova duplicados.");
   }
 }
 
@@ -4222,6 +4541,19 @@ document.addEventListener("click", (event) => {
   const settleAccountButton = event.target.closest("[data-settle-account]");
   if (settleAccountButton) openAccountSettlementModal(settleAccountButton.dataset.settleAccount);
 
+  const reconcileButton = event.target.closest("[data-reconcile-movement]");
+  if (reconcileButton) {
+    const movementId = reconcileButton.dataset.reconcileMovement;
+    const titleId = document.querySelector(`[data-reconciliation-title="${movementId}"]`)?.value || "";
+    reconcileBankMovement(movementId, titleId);
+  }
+
+  const createTitleButton = event.target.closest("[data-create-title-from-movement]");
+  if (createTitleButton) createTitleFromMovement(createTitleButton.dataset.createTitleFromMovement);
+
+  const ignoreMovementButton = event.target.closest("[data-ignore-movement]");
+  if (ignoreMovementButton) ignoreBankMovement(ignoreMovementButton.dataset.ignoreMovement);
+
   const deleteStudentButton = event.target.closest("[data-delete-student]");
   if (deleteStudentButton) deleteStudent(deleteStudentButton.dataset.deleteStudent);
 
@@ -4274,7 +4606,7 @@ document.addEventListener("click", (event) => {
     if (draft) updateOfxBatchCounters(draft.importBatchId);
     saveState();
     render();
-    toast(imported ? "Lançamento OFX confirmado." : "Revise o lançamento antes de confirmar.");
+    toast(imported ? "Movimento OFX confirmado." : "Revise o movimento antes de confirmar.");
   }
 
   const ignoreOfxButton = event.target.closest("[data-ignore-ofx-draft]");
@@ -4459,6 +4791,7 @@ function clearAccountFilters(config) {
   setControlValue(config.dateRangeId, "01/05/2026 - 31/05/2026");
   setControlValue(config.monthId, "2026-05");
   setControlValue(config.statusId, "all");
+  setControlValue(config.reconciliationId, "all");
   setControlValue(config.modalityId, "all");
   setControlValue(config.professionalId, "all");
   setControlValue(config.chartId, "all");
@@ -4469,6 +4802,7 @@ function clearAccountFilters(config) {
 function resetAccountFiltersForImport(config) {
   setControlValue(config.searchId, "");
   setControlValue(config.statusId, "all");
+  setControlValue(config.reconciliationId, "all");
   setControlValue(config.modalityId, "all");
   setControlValue(config.professionalId, "all");
   setControlValue(config.chartId, "all");
@@ -4589,7 +4923,7 @@ document.querySelector("#fiscalClearFiltersButton")?.addEventListener("click", c
 document.querySelector("#issueSelectedInvoicesButton")?.addEventListener("click", issuePendingFiscalInvoices);
 
 Object.values(accountViewConfigs).forEach((config) => {
-  [config.searchId, config.periodTypeId, config.dateRangeId, config.monthId, config.statusId, config.modalityId, config.professionalId, config.chartId, config.supplierId].forEach((id) => {
+  [config.searchId, config.periodTypeId, config.dateRangeId, config.monthId, config.statusId, config.reconciliationId, config.modalityId, config.professionalId, config.chartId, config.supplierId].forEach((id) => {
     document.querySelector(`#${id}`)?.addEventListener("input", renderAccounts);
     document.querySelector(`#${id}`)?.addEventListener("change", renderAccounts);
   });
@@ -4602,6 +4936,15 @@ document.querySelector("#chartAccountClearFiltersButton")?.addEventListener("cli
 document.querySelector("#processOfxButton")?.addEventListener("click", processOfxFile);
 document.querySelector("#approveOfxValidButton")?.addEventListener("click", approveValidOfxDraftsToFinance);
 document.querySelector("#clearOfxImportButton")?.addEventListener("click", clearOfxImport);
+["bankReconciliationStatusFilter", "bankReconciliationTypeFilter", "bankReconciliationAccountFilter", "bankReconciliationSearch"].forEach((id) => {
+  document.querySelector(`#${id}`)?.addEventListener("input", renderBankReconciliation);
+  document.querySelector(`#${id}`)?.addEventListener("change", renderBankReconciliation);
+});
+document.querySelector("#bankReconciliationSearchButton")?.addEventListener("click", renderBankReconciliation);
+document.querySelector("#bankReconciliationClearFiltersButton")?.addEventListener("click", () => {
+  resetBankReconciliationFilters();
+  renderBankReconciliation();
+});
 document.querySelector("#ofxReviewTable")?.addEventListener("change", (event) => {
   const field = event.target.closest("[data-ofx-field]");
   if (!field) return;

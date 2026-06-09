@@ -80,6 +80,7 @@
                 <button class="top-menu-option" data-view="accountsPayable" type="button">Contas a Pagar</button>
                 <button class="top-menu-option" data-view="accountsReceivable" type="button">Contas a Receber</button>
                 <button class="top-menu-option" data-view="ofxImport" type="button">Importar OFX</button>
+                <button class="top-menu-option" data-view="bankReconciliation" type="button">Conciliação Bancária</button>
                 <button class="top-menu-option" data-view="cashFlow" type="button">Fluxo de Caixa</button>
                 <button class="top-menu-option" data-view="dre" type="button">DRE</button>
                 <button class="top-menu-option" data-view="chartAccounts" type="button">Plano de Contas</button>
@@ -1127,6 +1128,12 @@
                   <option value="Pago">Pagos</option>
                   <option value="Atrasado">Atrasados</option>
                 </select>
+                <select id="payableAccountReconciliationFilter">
+                  <option value="all">Conciliação</option>
+                  <option value="reconciled">Conciliados</option>
+                  <option value="unreconciled">Não conciliados</option>
+                  <option value="manual">Baixa manual</option>
+                </select>
                 <select id="payableAccountModalityFilter">
                   <option value="all">Modalidades</option>
                 </select>
@@ -1156,7 +1163,7 @@
                       <th>Pagamento</th>
                       <th>Valor</th>
                       <th>Descrição</th>
-                      <th>Origem</th>
+                      <th>Conciliação</th>
                       <th>Fornecedor</th>
                       <th>Plano de contas</th>
                       <th>Ações</th>
@@ -1200,6 +1207,12 @@
                   <option value="Recebido">Recebidos</option>
                   <option value="Atrasado">Atrasados</option>
                 </select>
+                <select id="receivableAccountReconciliationFilter">
+                  <option value="all">Conciliação</option>
+                  <option value="reconciled">Conciliados</option>
+                  <option value="unreconciled">Não conciliados</option>
+                  <option value="manual">Baixa manual</option>
+                </select>
                 <select id="receivableAccountModalityFilter">
                   <option value="all">Modalidades</option>
                 </select>
@@ -1229,7 +1242,7 @@
                       <th>Pagamento</th>
                       <th>Valor</th>
                       <th>Descrição</th>
-                      <th>Origem</th>
+                      <th>Conciliação</th>
                       <th>Aluno/Fornecedor</th>
                       <th>Plano de contas</th>
                       <th>Ações</th>
@@ -1293,6 +1306,62 @@
                     </tr>
                   </thead>
                   <tbody id="ofxReviewTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="bankReconciliationView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Conciliação Bancária</h2>
+              </div>
+              <button class="ghost-button" id="bankReconciliationClearFiltersButton" type="button">Limpar filtros</button>
+            </div>
+            <div class="module-body">
+              <div class="accounts-toolbar">
+                <select id="bankReconciliationStatusFilter">
+                  <option value="unreconciled">Não conciliados</option>
+                  <option value="reconciled">Conciliados</option>
+                  <option value="ignored">Ignorados</option>
+                  <option value="all">Todos</option>
+                </select>
+                <select id="bankReconciliationTypeFilter">
+                  <option value="all">Entradas e saídas</option>
+                  <option value="receivable">Entradas</option>
+                  <option value="payable">Saídas</option>
+                </select>
+                <select id="bankReconciliationAccountFilter">
+                  <option value="all">Conta/Banco</option>
+                  <option value="itau">Itaú</option>
+                  <option value="asaas">Asaas</option>
+                  <option value="caixa">Caixa</option>
+                  <option value="santander">Santander</option>
+                  <option value="outro">Outro banco</option>
+                </select>
+                <div class="patient-search-row accounts-search-row">
+                  <input id="bankReconciliationSearch" type="search" placeholder="Buscar por histórico, pessoa ou descrição" />
+                  <button class="action-button blue" id="bankReconciliationSearchButton" type="button">Buscar</button>
+                </div>
+              </div>
+              <div class="ofx-summary" id="bankReconciliationSummary"></div>
+              <div class="table-wrap bank-reconciliation-table-wrap accounts-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Histórico</th>
+                      <th>Banco</th>
+                      <th>Valor</th>
+                      <th>Status</th>
+                      <th>Título sugerido</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bankReconciliationTable"></tbody>
                 </table>
               </div>
             </div>
