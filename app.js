@@ -399,6 +399,7 @@ const seedLeads = [
 
 const importedStudioData = globalThis.studioImportedData ?? {};
 const importedArray = (key, fallback) => (Array.isArray(importedStudioData[key]) ? importedStudioData[key] : fallback);
+const hasImportedAccounts = Array.isArray(importedStudioData.accounts);
 const currentDataVersion = importedStudioData.version ?? "demo-v1";
 
 const seedData = {
@@ -417,8 +418,8 @@ const seedData = {
   plans: importedArray("plans", seedPlans),
   enrollments: importedArray("enrollments", seedEnrollments),
   chartAccounts: seedChartAccounts,
-  accounts: seedAccounts,
-  bankMovements: [],
+  accounts: importedArray("accounts", seedAccounts),
+  bankMovements: importedArray("bankMovements", []),
   ofxBatches: [],
   ofxDrafts: [],
   ofxRules: seedOfxRules,
@@ -872,7 +873,10 @@ function normalizeState(data) {
   const savedAccounts = Array.isArray(data.accounts) ? data.accounts : [];
   const savedAccountDescriptions = new Set(savedAccounts.map((item) => normalizedText(`${item.description ?? ""}-${item.person ?? ""}-${item.amount ?? ""}`)));
   const mergedAccounts = savedAccounts.length
-    ? [...savedAccounts, ...seedAccounts.filter((item) => !savedAccountDescriptions.has(normalizedText(`${item.description}-${item.person}-${item.amount}`)))]
+    ? [
+        ...savedAccounts,
+        ...(hasImportedAccounts ? [] : seedAccounts.filter((item) => !savedAccountDescriptions.has(normalizedText(`${item.description}-${item.person}-${item.amount}`)))),
+      ]
     : structuredClone(seedAccounts);
   normalized.accounts = mergedAccounts.map((item, index) => normalizeAccount(normalizeTextFields(item), index));
   normalized.accounts = normalized.accounts.map((item) => ({
