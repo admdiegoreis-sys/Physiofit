@@ -1895,7 +1895,14 @@ button {
   font-weight: 700;
 }
 
-.monthly-status-button.pago {
+.monthly-status-button.em-aberto {
+  color: #202733;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #d8dee8;
+}
+
+.monthly-status-button.pago,
+.monthly-status-button.recebido {
   color: #fff;
   background: #57a052;
   box-shadow: none;

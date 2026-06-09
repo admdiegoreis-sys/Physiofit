@@ -727,18 +727,14 @@ const modalSchemas = {
     submit: "Salvar conta",
     fields: [
       { name: "direction", label: "Pagar/Receber", type: "select", options: ["Pagar", "Receber"], value: "Pagar" },
-      { name: "status", label: "Status", type: "select", options: ["Aberto", "Pago", "Recebido", "Atrasado"], value: "Aberto" },
       { name: "competenceDate", label: "Competência", type: "date", value: demoToday },
       { name: "forecastDate", label: "Previsão", type: "date", value: demoToday },
-      { name: "dueDate", label: "Data prevista de pagamento", type: "date", value: demoToday },
       { name: "amount", label: "Valor", type: "number", value: 0 },
       { name: "description", label: "Descrição", type: "text", value: "Nova conta" },
       { name: "supplierId", label: "Fornecedor", type: "supplier" },
       { name: "person", label: "Paciente/Fornecedor", type: "text", value: "" },
       { name: "document", label: "CPF/CNPJ", type: "text", value: "" },
       { name: "chartAccountId", label: "Plano de contas", type: "chartAccount" },
-      { name: "modalityId", label: "Modalidade", type: "modalityId" },
-      { name: "teacherId", label: "Profissional", type: "professionalOptional" },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Transferência", "Dinheiro"], value: "Pix" },
     ],
     handler: (values) => {
@@ -753,8 +749,12 @@ const modalSchemas = {
         person: values.person || supplier?.name || "",
         document: values.document || supplier?.document || "",
         amount: Number(values.amount || 0),
-        paidDate: values.status === "Aberto" || values.status === "Atrasado" ? "" : (current?.paidDate || demoToday),
+        dueDate: values.forecastDate || current?.dueDate || values.competenceDate || demoToday,
+        modalityId: current?.modalityId || "",
+        teacherId: current?.teacherId || "",
+        paidDate: current?.paidDate || "",
       };
+      payload.status = accountAutoStatus(payload);
       if (editingAccountId) state.accounts = state.accounts.map((item) => (item.id === editingAccountId ? payload : item));
       else state.accounts.push(payload);
       editingAccountId = null;
@@ -764,13 +764,13 @@ const modalSchemas = {
     title: "Baixar conta",
     submit: "Confirmar baixa",
     fields: [
-      { name: "paidDate", label: "Data do pagamento", type: "date", value: demoToday },
+      { name: "paidDate", label: "Pagamento", type: "date", value: demoToday },
     ],
     handler: (values) => {
       const account = state.accounts.find((item) => item.id === settlingAccountId);
       if (!account) return;
       account.paidDate = values.paidDate || demoToday;
-      account.status = account.direction === "Receber" ? "Recebido" : "Pago";
+      account.status = accountAutoStatus(account);
       settlingAccountId = null;
     },
   },
@@ -1624,6 +1624,29 @@ function statusClass(status = "") {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+function accountPaymentDate(item = {}) {
+  return item.paidDate || item.paymentDate || "";
+}
+
+function accountExpectedDate(item = {}) {
+  return item.forecastDate || item.dueDate || item.competenceDate || "";
+}
+
+function isAccountOverdue(item = {}) {
+  const expectedDate = accountExpectedDate(item);
+  return !accountPaymentDate(item) && expectedDate && expectedDate < demoToday;
+}
+
+function accountAutoStatus(item = {}) {
+  if (accountPaymentDate(item)) return item.direction === "Receber" ? "Recebido" : "Pago";
+  return "Em aberto";
+}
+
+function accountAutoStatusClass(item = {}) {
+  if (accountPaymentDate(item)) return item.direction === "Receber" ? "recebido" : "pago";
+  return isAccountOverdue(item) ? "atrasado" : "em-aberto";
 }
 
 function normalizedText(value = "") {
@@ -2758,19 +2781,20 @@ const accountViewConfigs = {
 function accountRows(config) {
   const term = normalizedText(document.querySelector(`#${config.searchId}`)?.value.trim() ?? "");
   const status = document.querySelector(`#${config.statusId}`)?.value ?? "all";
-  const modality = document.querySelector(`#${config.modalityId}`)?.value ?? "all";
-  const professional = document.querySelector(`#${config.professionalId}`)?.value ?? "all";
   const chartAccount = document.querySelector(`#${config.chartId}`)?.value ?? "all";
   const supplier = document.querySelector(`#${config.supplierId}`)?.value ?? "all";
   return state.accounts
     .filter((item) => !term || normalizedText(`${item.description} ${supplierName(item.supplierId)} ${item.person} ${item.document} ${item.bankLaunch ?? ""}`).includes(term))
     .filter((item) => item.direction === config.direction)
-    .filter((item) => status === "all" || item.status === status)
-    .filter((item) => modality === "all" || item.modalityId === modality)
-    .filter((item) => professional === "all" || item.teacherId === professional)
+    .filter((item) => {
+      if (status === "all") return true;
+      if (status === "Aberto") return !accountPaymentDate(item);
+      if (status === "Atrasado") return isAccountOverdue(item);
+      return accountAutoStatus(item) === status;
+    })
     .filter((item) => chartAccount === "all" || item.chartAccountId === chartAccount)
     .filter((item) => supplier === "all" || item.supplierId === supplier)
-    .sort((a, b) => (a.dueDate || "").localeCompare(b.dueDate || ""));
+    .sort((a, b) => (accountExpectedDate(a) || "").localeCompare(accountExpectedDate(b) || ""));
 }
 
 function renderAccountTable(config) {
@@ -2782,9 +2806,11 @@ function renderAccountTable(config) {
         .map((item) => {
           const sourceLabel = item.origin === "Importação OFX" ? "OFX" : "Manual";
           const sourceClass = item.origin === "Importação OFX" ? "ofx" : "manual";
+          const statusLabel = accountAutoStatus(item);
+          const statusStyle = accountAutoStatusClass(item);
           return `
             <tr>
-              <td><span class="monthly-status-button ${statusClass(item.status)}">${item.status}</span></td>
+              <td><span class="monthly-status-button ${statusStyle}">${statusLabel}</span></td>
               <td>${dateLabel(item.competenceDate)}</td>
               <td>${dateLabel(item.forecastDate)}</td>
               <td>${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
