@@ -1156,6 +1156,7 @@ function normalizeOfxDraft(item, index) {
     chartAccountCode: item.chartAccountCode || item.codigoPlanoConta || "",
     type: item.type || item.tipo || "",
     amount: Number(item.amount ?? item.valor ?? 0),
+    signedAmount: Number(item.signedAmount ?? item.valorOriginal ?? item.amount ?? item.valor ?? 0),
     ofxIdentifier: item.ofxIdentifier || item.identificadorOfx || "",
     duplicateHash: item.duplicateHash || item.hashDuplicidade || "",
     status: item.status || "A revisar",
@@ -1165,6 +1166,7 @@ function normalizeOfxDraft(item, index) {
     balance: item.balance || "",
     ...item,
     amount: Number(item.amount ?? item.valor ?? 0),
+    signedAmount: Number(item.signedAmount ?? item.valorOriginal ?? item.amount ?? item.valor ?? 0),
   };
 }
 
@@ -1501,6 +1503,14 @@ function accountDirectionByOfxType(type, amount) {
   return Number(amount) >= 0 ? "Receber" : "Pagar";
 }
 
+function isValidOfxDraftStatus(status = "") {
+  return status === "Válido" || status === "VÃ¡lido" || normalizedText(status) === "valido";
+}
+
+function ofxDraftDirection(draft) {
+  return draft.direction || accountDirectionByOfxType(draft.type, draft.signedAmount ?? draft.amount);
+}
+
 function inferOfxType(description = "", amount = 0, rule = null) {
   if (rule?.type) return rule.type;
   const text = normalizedText(description);
@@ -1560,6 +1570,7 @@ function createOfxDraft(transaction, batch) {
   const rule = findOfxRule(transaction.description, batch.accountId);
   const type = inferOfxType(transaction.description, transaction.amount, rule);
   const chartAccount = state.chartAccounts.find((item) => item.id === rule?.chartAccountId);
+  const direction = accountDirectionByOfxType(type, transaction.amount);
   const draft = normalizeOfxDraft({
     id: uid("ofxd"),
     importBatchId: batch.id,
@@ -1573,7 +1584,9 @@ function createOfxDraft(transaction, batch) {
     chartAccountId: chartAccount?.id || "",
     chartAccountCode: chartAccount?.code || "",
     type,
+    direction,
     amount: Math.abs(Number(transaction.amount || 0)),
+    signedAmount: Number(transaction.amount || 0),
     ofxIdentifier: transaction.identifier,
     status: chartAccount ? "Válido" : "A revisar",
     note: chartAccount ? `Categorizado por regra: ${rule.keyword}` : "Sem regra de categorização.",
@@ -3404,7 +3417,7 @@ function confirmOfxDraft(draftId, options = {}) {
     draft.note = "Duplicado encontrado antes da aprovação.";
     return false;
   }
-  const direction = accountDirectionByOfxType(draft.type, draft.amount);
+  const direction = ofxDraftDirection(draft);
   state.accounts.push(normalizeAccount({
     id: uid("cp"),
     direction,
@@ -3428,6 +3441,7 @@ function confirmOfxDraft(draftId, options = {}) {
     bankAccountId: draft.accountId,
     ofxIdentifier: draft.ofxIdentifier,
     duplicateHash: draft.duplicateHash,
+    signedAmount: draft.signedAmount,
   }, state.accounts.length));
   draft.status = "Importado";
   draft.updatedAt = new Date().toISOString();
@@ -3448,6 +3462,38 @@ function approveValidOfxDrafts() {
   saveState();
   render();
   toast(`${imported} lançamentos OFX importados para o financeiro.`);
+}
+
+function approveValidOfxDraftsToFinance() {
+  const batch = currentOfxBatch();
+  if (!batch) {
+    toast("Nenhum lote OFX em revisão.");
+    return;
+  }
+  const validDrafts = state.ofxDrafts.filter((item) => item.importBatchId === batch.id && isValidOfxDraftStatus(item.status));
+  const importedDirections = [];
+  const imported = validDrafts.reduce((count, item) => {
+    const direction = ofxDraftDirection(item);
+    const confirmed = confirmOfxDraft(item.id, { silent: true });
+    if (confirmed) importedDirections.push(direction);
+    return count + (confirmed ? 1 : 0);
+  }, 0);
+  updateOfxBatchCounters(batch.id);
+  if (imported > 0) {
+    batch.status = "Concluído";
+    const hasPayable = importedDirections.includes("Pagar");
+    const hasReceivable = importedDirections.includes("Receber");
+    if (hasPayable) resetAccountFiltersForImport(accountViewConfigs.payable);
+    if (hasReceivable) resetAccountFiltersForImport(accountViewConfigs.receivable);
+  }
+  saveState();
+  render();
+  if (imported > 0) {
+    switchView(importedDirections.includes("Pagar") && !importedDirections.includes("Receber") ? "accountsPayable" : "accountsReceivable");
+    toast(`${imported} lançamentos OFX importados para o financeiro.`);
+  } else {
+    toast("Nenhum lançamento válido para importar. Revise o plano de contas ou remova duplicados.");
+  }
 }
 
 function ignoreOfxDraft(draftId) {
@@ -4437,6 +4483,15 @@ function clearAccountFilters(config) {
   renderAccounts();
 }
 
+function resetAccountFiltersForImport(config) {
+  setControlValue(config.searchId, "");
+  setControlValue(config.statusId, "all");
+  setControlValue(config.modalityId, "all");
+  setControlValue(config.professionalId, "all");
+  setControlValue(config.chartId, "all");
+  setControlValue(config.supplierId, "all");
+}
+
 function clearChartAccountFilters() {
   setControlValue("chartAccountSearch", "");
   renderChartAccounts();
@@ -4564,7 +4619,7 @@ document.querySelector("#chartAccountClearFiltersButton")?.addEventListener("cli
 document.querySelector("#importXmlButton")?.addEventListener("click", () => document.querySelector("#xmlFileInput")?.click());
 document.querySelector("#xmlFileInput")?.addEventListener("change", importXmlAccount);
 document.querySelector("#processOfxButton")?.addEventListener("click", processOfxFile);
-document.querySelector("#approveOfxValidButton")?.addEventListener("click", approveValidOfxDrafts);
+document.querySelector("#approveOfxValidButton")?.addEventListener("click", approveValidOfxDraftsToFinance);
 document.querySelector("#clearOfxImportButton")?.addEventListener("click", clearOfxImport);
 document.querySelector("#ofxReviewTable")?.addEventListener("change", (event) => {
   const field = event.target.closest("[data-ofx-field]");
