@@ -774,6 +774,7 @@ const modalSchemas = {
     submit: "Confirmar baixa",
     fields: [
       { name: "paidDate", label: "Pagamento", type: "date", value: demoToday },
+      { name: "bankAccountId", label: "Banco", type: "bankAccount", value: "itau" },
       { name: "paidAmount", label: "Valor pago/recebido", type: "number", value: 0 },
       { name: "notes", label: "Observação", type: "textarea", value: "", required: false },
     ],
@@ -783,6 +784,8 @@ const modalSchemas = {
       const originalAmount = accountOriginalAmount(account);
       const paymentValue = Number(values.paidAmount || accountOpenAmount(account) || originalAmount);
       account.paidDate = values.paidDate || demoToday;
+      account.bankAccountId = values.bankAccountId || account.bankAccountId || "";
+      account.paymentMethod = bankAccountLabel(account.bankAccountId) || account.paymentMethod || "";
       account.paidAmount = Math.min(originalAmount, accountPaidAmount(account) + paymentValue);
       account.openAmount = Math.max(0, originalAmount - account.paidAmount);
       account.reconciliationStatus = account.linkedBankMovementId ? "reconciled" : "manual";
@@ -3639,7 +3642,12 @@ function openAccountSettlementModal(accountId) {
   settlingAccountId = accountId;
   const item = state.accounts.find((account) => account.id === accountId);
   if (!item) return;
-  openModal("accountSettlement", { paidDate: item.paidDate || demoToday, paidAmount: accountOpenAmount(item) || item.amount, notes: item.notes || "" });
+  openModal("accountSettlement", {
+    paidDate: item.paidDate || demoToday,
+    bankAccountId: item.bankAccountId || "itau",
+    paidAmount: accountOpenAmount(item) || item.amount,
+    notes: item.notes || "",
+  });
   document.querySelector("#modalTitle").textContent = item.direction === "Receber" ? "Baixar conta a receber" : "Baixar conta a pagar";
 }
 
@@ -4451,6 +4459,16 @@ function renderField(field) {
         <select name="${field.name}" ${required}>
           <option value="" ${isSelected("")}>Sem fornecedor vinculado</option>
           ${activeSuppliers().map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.name}</option>`).join("")}
+        </select>
+      </label>
+    `;
+  }
+  if (field.type === "bankAccount") {
+    const bankOptions = ["itau", "asaas", "caixa", "santander", "outro"];
+    return `
+      <label>${field.label}
+        <select name="${field.name}" ${required}>
+          ${bankOptions.map((id) => `<option value="${id}" ${isSelected(id)}>${bankAccountLabel(id)}</option>`).join("")}
         </select>
       </label>
     `;
