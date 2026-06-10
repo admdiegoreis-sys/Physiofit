@@ -735,16 +735,16 @@ const modalSchemas = {
       { name: "forecastDate", label: "Previsão", type: "date", value: demoToday },
       { name: "amount", label: "Valor", type: "number", value: 0 },
       { name: "description", label: "Descrição", type: "text", value: "Nova conta" },
-      { name: "supplierId", label: "Fornecedor", type: "supplier" },
       { name: "person", label: "Paciente/Fornecedor", type: "text", value: "" },
       { name: "document", label: "CPF/CNPJ", type: "text", value: "" },
       { name: "chartAccountId", label: "Plano de contas", type: "chartAccount" },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Transferência", "Dinheiro"], value: "Pix" },
     ],
     handler: (values) => {
-      const supplier = supplierById(values.supplierId);
-      const supplierId = values.supplierId || (values.direction === "Pagar" ? upsertSupplierFromAccount(values.person, values.document) : "");
       const current = editingAccountId ? state.accounts.find((item) => item.id === editingAccountId) : {};
+      const currentSupplier = supplierById(current?.supplierId || values.supplierId);
+      const supplierId = values.direction === "Pagar" ? upsertSupplierFromAccount(values.person, values.document) || current?.supplierId || "" : "";
+      const supplier = supplierById(supplierId) || currentSupplier;
       const payload = {
         ...current,
         id: editingAccountId || uid("cp"),
