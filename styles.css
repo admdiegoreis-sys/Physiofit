@@ -1986,6 +1986,8 @@ button {
   display: flex;
   gap: 7px;
   align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .row-action-button {
@@ -2004,6 +2006,7 @@ button {
   line-height: 1;
   cursor: pointer;
   transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  flex: 0 0 auto;
 }
 
 .row-action-button:hover,
@@ -2546,7 +2549,8 @@ tr:last-child td {
 
 .accounts-table-wrap th:last-child,
 .accounts-table-wrap td:last-child {
-  width: 94px;
+  width: 116px;
+  min-width: 116px;
 }
 
 .monthly-table-wrap th:nth-child(2),
@@ -2614,15 +2618,15 @@ tr:last-child td {
 }
 
 .accounts-table-wrap .row-actions {
-  gap: 5px;
-  justify-content: flex-start;
+  gap: 4px;
+  justify-content: center;
 }
 
 .accounts-table-wrap .row-action-button {
-  width: 26px;
-  min-width: 26px;
-  height: 26px;
-  min-height: 26px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
   border-radius: 4px;
   box-shadow: 0 2px 6px rgba(87, 169, 189, 0.16);
   font-size: 0.66rem;
@@ -2630,6 +2634,28 @@ tr:last-child td {
 
 .accounts-table-wrap .row-action-button:hover {
   box-shadow: 0 4px 10px rgba(87, 169, 189, 0.22);
+}
+
+td.row-actions,
+.accounts-table-wrap td.row-actions,
+.ofx-review-table-wrap td.row-actions,
+.bank-reconciliation-table-wrap td.row-actions,
+.chart-accounts-table-wrap td.row-actions,
+.monthly-table-wrap td.row-actions {
+  display: table-cell;
+  white-space: nowrap;
+  vertical-align: middle;
+  text-align: center;
+}
+
+td.row-actions .row-action-button {
+  display: inline-grid;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+td.row-actions .row-action-button:last-child {
+  margin-right: 0;
 }
 
 .accounts-table-wrap .settle-icon-button {
