@@ -758,7 +758,7 @@ const modalSchemas = {
         monthlyValue: Number(values.monthlyValue || plan?.value || 0),
         dueDay: Number(values.dueDay || 0),
         registrationFee: Number(values.registrationFee || 0),
-        sessions: Number(values.sessions || plan?.sessions || 0),
+        sessions: Number(values.sessions || weeklySessionsFromPlan(plan) || 0),
       }, state.enrollments.length);
       if (editingEnrollmentId) {
         state.enrollments = state.enrollments.map((item) => (item.id === editingEnrollmentId ? normalized : item));
@@ -1563,6 +1563,16 @@ function monthsForPlanType(type = "") {
   if (label === "Semestral") return 6;
   if (label === "Avulsa" || label === "Pacote") return 1;
   return 1;
+}
+
+function weeklySessionsFromPlan(plan = {}) {
+  const nameMatch = String(plan.name || "").match(/(\d+)\s*x/i);
+  if (nameMatch) return Number(nameMatch[1]);
+  const sessions = Number(plan.sessions || 0);
+  if (!sessions) return 0;
+  const type = planTypeLabel(plan.type);
+  if (type === "Avulsa" || type === "Pacote") return sessions;
+  return Math.max(1, Math.round(sessions / (monthsForPlanType(type) * 4)));
 }
 
 function calculatedEnrollmentEndDate(startDate, type = "") {
@@ -4711,7 +4721,7 @@ function applyEnrollmentPlanDefaults(form, overwrite = true) {
   setIfNeeded("modalityId", plan.modalityId || "");
   setIfNeeded("planType", planTypeLabel(plan.type));
   setIfNeeded("monthlyValue", Number(plan.value || 0).toFixed(2));
-  setIfNeeded("sessions", Number(plan.sessions || 0));
+  setIfNeeded("sessions", weeklySessionsFromPlan(plan));
   setIfNeeded("firstPaymentDate", form.elements.startDate?.value || demoToday);
   if (form.elements.startDate?.value) setIfNeeded("endDate", calculatedEnrollmentEndDate(form.elements.startDate.value, form.elements.planType?.value || plan.type));
 }
