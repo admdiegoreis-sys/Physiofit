@@ -2542,6 +2542,7 @@ function renderAgendaList() {
                   <td>${item.room}</td>
                   <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
                   <td>
+                    <button class="mini-button" data-action="reschedule" data-id="${item.id}" type="button">Editar horário</button>
                     <button class="mini-button" data-action="confirm" data-id="${item.id}" type="button">Confirmar</button>
                     <button class="mini-button" data-action="complete" data-id="${item.id}" type="button">Check-in</button>
                     <button class="mini-button" data-action="missed" data-id="${item.id}" type="button">Falta</button>

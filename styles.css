@@ -996,6 +996,20 @@ button {
   border-radius: 5px;
 }
 
+.agenda-list td:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 300px;
+}
+
+.agenda-list .mini-button {
+  min-width: 92px;
+  min-height: 34px;
+  padding-inline: 8px;
+  font-size: 0.85rem;
+}
+
 .month-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(120px, 1fr));
