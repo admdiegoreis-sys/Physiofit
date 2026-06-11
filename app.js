@@ -832,6 +832,7 @@ const modalSchemas = {
       payload.status = accountAutoStatus(payload);
       if (editingAccountId) state.accounts = state.accounts.map((item) => (item.id === editingAccountId ? payload : item));
       else state.accounts.push(payload);
+      syncEnrollmentPaymentFromAccount(payload);
       editingAccountId = null;
     },
   },
@@ -857,6 +858,7 @@ const modalSchemas = {
       account.reconciliationStatus = account.linkedBankMovementId ? "reconciled" : "manual";
       account.notes = values.notes || account.notes || "";
       account.status = accountAutoStatus(account);
+      syncEnrollmentPaymentFromAccount(account);
       settlingAccountId = null;
     },
   },
@@ -1004,8 +1006,12 @@ function normalizeStudent(item, index) {
     responsiblePhone: "",
     emergencyContact: "",
     emergencyPhone: "",
+    paymentStatus: "Pendente",
+    lastPaymentDate: "",
+    lastPaidAmount: 0,
     notes: "",
     ...item,
+    lastPaidAmount: Number(item.lastPaidAmount ?? defaults.lastPaidAmount ?? 0),
   };
 }
 
@@ -1149,6 +1155,9 @@ function normalizeEnrollment(item, index) {
     contractTemplate: defaults.contractTemplate || "Contrato de matrícula",
     lockStartDate: defaults.lockStartDate || "",
     lockEndDate: defaults.lockEndDate || "",
+    paymentStatus: defaults.paymentStatus || "Pendente",
+    lastPaymentDate: defaults.lastPaymentDate || "",
+    lastPaidAmount: Number(defaults.lastPaidAmount || 0),
     financialTitlesGenerated: Boolean(defaults.financialTitlesGenerated),
     notes: "",
     ...item,
@@ -1157,6 +1166,9 @@ function normalizeEnrollment(item, index) {
     dueDay: Number(item.dueDay ?? defaults.dueDay ?? 0),
     registrationFee: Number(item.registrationFee ?? defaults.registrationFee ?? 0),
     sessions: Number(item.sessions ?? defaults.sessions ?? plan?.sessions ?? 0),
+    paymentStatus: item.paymentStatus ?? defaults.paymentStatus ?? "Pendente",
+    lastPaymentDate: item.lastPaymentDate ?? defaults.lastPaymentDate ?? "",
+    lastPaidAmount: Number(item.lastPaidAmount ?? defaults.lastPaidAmount ?? 0),
     financialTitlesGenerated: Boolean(item.financialTitlesGenerated ?? defaults.financialTitlesGenerated),
   };
 }
@@ -2034,6 +2046,54 @@ function accountAutoStatusClass(item = {}) {
   return isAccountOverdue(item) ? "atrasado" : "em-aberto";
 }
 
+function enrollmentFinancialAccounts(enrollmentId = "") {
+  return state.accounts.filter((item) => item.enrollmentId === enrollmentId && item.direction === "Receber" && item.status !== "Cancelado");
+}
+
+function enrollmentPaymentSummary(enrollmentId = "") {
+  const enrollment = state.enrollments.find((item) => item.id === enrollmentId);
+  const accounts = enrollmentFinancialAccounts(enrollmentId);
+  const paidAccounts = accounts.filter((item) => accountPaidAmount(item) > 0 || ["Recebido", "Pago"].includes(accountAutoStatus(item)));
+  const paidAmount = accounts.reduce((sum, item) => sum + accountPaidAmount(item), 0);
+  const latestPaidDate = paidAccounts
+    .map((item) => accountPaymentDate(item))
+    .filter(Boolean)
+    .sort()
+    .at(-1) || enrollment?.lastPaymentDate || "";
+  const hasPayment = paidAccounts.length > 0 || paidAmount > 0 || enrollment?.paymentStatus === "Pago";
+  const hasOverdue = accounts.some((item) => isAccountOverdue(item));
+
+  if (hasPayment) {
+    return { label: "Pago", className: "ativo", paid: true, paidDate: latestPaidDate, paidAmount };
+  }
+  if (hasOverdue) {
+    return { label: "Atrasado", className: "atrasado", paid: false, paidDate: "", paidAmount: 0 };
+  }
+  return { label: "Pendente", className: "pendente", paid: false, paidDate: "", paidAmount: 0 };
+}
+
+function syncEnrollmentPaymentFromAccount(account = {}) {
+  if (!account.enrollmentId || account.direction !== "Receber") return;
+  const enrollment = state.enrollments.find((item) => item.id === account.enrollmentId);
+  if (!enrollment) return;
+  const summary = enrollmentPaymentSummary(enrollment.id);
+  if (!summary.paid) return;
+
+  enrollment.paymentStatus = "Pago";
+  enrollment.lastPaymentDate = summary.paidDate || accountPaymentDate(account) || demoToday;
+  enrollment.lastPaidAmount = summary.paidAmount || accountPaidAmount(account);
+  enrollment.financialTitlesGenerated = true;
+
+  const relatedStudent = student(enrollment.studentId || account.studentId);
+  if (relatedStudent) {
+    relatedStudent.paymentStatus = enrollment.paymentStatus;
+    relatedStudent.lastPaymentDate = enrollment.lastPaymentDate;
+    relatedStudent.lastPaidAmount = enrollment.lastPaidAmount;
+    relatedStudent.plan = planName(enrollment.planId) || relatedStudent.plan;
+    relatedStudent.membership = "Matriculado";
+  }
+}
+
 function normalizedText(value = "") {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
@@ -2641,7 +2701,10 @@ function renderEnrollments() {
   table.innerHTML = list.length
     ?list
         .map(
-          (item) => `
+          (item) => {
+            const financialGenerated = state.accounts.some((account) => account.enrollmentId === item.id) || item.financialTitlesGenerated;
+            const paymentSummary = enrollmentPaymentSummary(item.id);
+            return `
             <tr>
               <td>
                 <div class="row-actions">
@@ -2656,12 +2719,13 @@ function renderEnrollments() {
               <td>${item.dueDay || "-"}</td>
               <td><strong>${currency(Number(item.monthlyValue || 0))}</strong></td>
               <td><div class="patient-name"><strong>${displayName(planName(item.planId))}</strong><span>${planTypeLabel(item.planType || planById(item.planId)?.type)}</span></div></td>
-              <td>${item.contractStatus || "-"}</td>
+              <td><div class="patient-name"><strong>${paymentSummary.label}</strong><span>${item.paymentMethod || "-"}</span></div></td>
               <td>${item.sessions || "-"}</td>
-              <td><span class="status-pill ${state.accounts.some((account) => account.enrollmentId === item.id) || item.financialTitlesGenerated ? "ativo" : "pendente"}">${state.accounts.some((account) => account.enrollmentId === item.id) || item.financialTitlesGenerated ? "Gerado" : "Pendente"}</span></td>
+              <td><span class="status-pill ${paymentSummary.label === "Pago" ? paymentSummary.className : financialGenerated ? "ativo" : "pendente"}">${paymentSummary.label === "Pago" ? paymentSummary.label : financialGenerated ? "Gerado" : "Pendente"}</span></td>
               <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
             </tr>
-          `,
+          `;
+          },
         )
         .join("")
     : `<tr><td colspan="12"><div class="empty-state">Nenhuma matrícula encontrada.</div></td></tr>`;
@@ -4412,6 +4476,9 @@ function renderPatientEnrollmentHistory(studentId = "") {
     ? enrollments
         .map((item, index) => {
           const hasFinancial = state.accounts.some((account) => account.enrollmentId === item.id) || item.financialTitlesGenerated;
+          const paymentSummary = enrollmentPaymentSummary(item.id);
+          const financialLabel = paymentSummary.label === "Pago" ? paymentSummary.label : hasFinancial ? "Gerado" : "Pendente";
+          const financialClass = paymentSummary.label === "Pago" ? paymentSummary.className : hasFinancial ? "ativo" : "pendente";
           return `
             <tr>
               <td><span class="status-pill ${index === 0 ? "pendente" : "ativo"}">${index === 0 ? "Matrícula" : "Renovação"}</span></td>
@@ -4420,7 +4487,7 @@ function renderPatientEnrollmentHistory(studentId = "") {
               <td>${dateLabel(item.startDate)}</td>
               <td>${dateLabel(item.endDate)}</td>
               <td><strong>${currency(Number(item.monthlyValue || 0))}</strong></td>
-              <td><span class="status-pill ${hasFinancial ? "ativo" : "pendente"}">${hasFinancial ? "Gerado" : "Pendente"}</span></td>
+              <td><span class="status-pill ${financialClass}">${financialLabel}</span></td>
               <td><span class="status-pill ${statusClass(item.status)}">${item.status || "-"}</span></td>
             </tr>
           `;
