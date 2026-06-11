@@ -2299,8 +2299,34 @@ function renderMonthlyOptions() {
   }
 }
 
+function accountMonthOptions() {
+  const months = new Set();
+  const current = demoToday.slice(0, 7);
+  months.add(current);
+  state.accounts.forEach((item) => {
+    if (item.competenceDate) months.add(item.competenceDate.slice(0, 7));
+    if (item.forecastDate) months.add(item.forecastDate.slice(0, 7));
+    if (item.dueDate) months.add(item.dueDate.slice(0, 7));
+    if (item.paidDate) months.add(item.paidDate.slice(0, 7));
+  });
+  return [...months].sort((a, b) => b.localeCompare(a));
+}
+
+function monthLabel(ym) {
+  const [year, month] = ym.split("-");
+  const names = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  return `${names[Number(month) - 1]}/${year}`;
+}
+
 function renderAccountOptions() {
+  const months = accountMonthOptions();
   Object.values(accountViewConfigs).forEach((config) => {
+    const monthFilter = document.querySelector(`#${config.monthId}`);
+    if (monthFilter) {
+      const selected = monthFilter.value || demoToday.slice(0, 7);
+      monthFilter.innerHTML = months.map((ym) => `<option value="${ym}">${monthLabel(ym)}</option>`).join("");
+      monthFilter.value = months.includes(selected) ? selected : months[0] || selected;
+    }
     const modalityFilter = document.querySelector(`#${config.modalityId}`);
     if (modalityFilter) {
       const selected = modalityFilter.value || "all";
@@ -3331,19 +3357,33 @@ function accountRows(config) {
   const reconciliation = document.querySelector(`#${config.reconciliationId}`)?.value ?? "all";
   const chartAccount = document.querySelector(`#${config.chartId}`)?.value ?? "all";
   const supplier = document.querySelector(`#${config.supplierId}`)?.value ?? "all";
+  const modality = document.querySelector(`#${config.modalityId}`)?.value ?? "all";
+  const professional = document.querySelector(`#${config.professionalId}`)?.value ?? "all";
+  const periodType = document.querySelector(`#${config.periodTypeId}`)?.value ?? "Mês/Ano Competência";
+  const month = document.querySelector(`#${config.monthId}`)?.value ?? "";
+
   return state.accounts
     .filter((item) => !term || normalizedText(`${item.description} ${supplierName(item.supplierId)} ${item.person} ${item.document} ${item.bankLaunch ?? ""}`).includes(term))
     .filter((item) => item.origin !== "Importação OFX" && item.origin !== "ImportaÃ§Ã£o OFX")
     .filter((item) => item.direction === config.direction)
     .filter((item) => {
+      if (!month) return true;
+      let dateField = item.competenceDate;
+      if (periodType === "Data de Vencimento") dateField = item.forecastDate || item.dueDate || item.competenceDate;
+      if (periodType === "Data de Pagamento") dateField = item.paidDate || item.competenceDate;
+      return (dateField || "").slice(0, 7) === month;
+    })
+    .filter((item) => {
       if (status === "all") return true;
-      if (status === "Aberto") return accountOpenAmount(item) > 0 && item.status !== "Cancelado";
+      if (status === "Aberto") return accountOpenAmount(item) > 0 && !isAccountOverdue(item) && item.status !== "Cancelado";
       if (status === "Atrasado") return isAccountOverdue(item);
       return accountAutoStatus(item) === status;
     })
     .filter((item) => reconciliation === "all" || (item.reconciliationStatus || "unreconciled") === reconciliation)
     .filter((item) => chartAccount === "all" || item.chartAccountId === chartAccount)
     .filter((item) => supplier === "all" || item.supplierId === supplier)
+    .filter((item) => modality === "all" || item.modalityId === modality)
+    .filter((item) => professional === "all" || item.teacherId === professional)
     .sort((a, b) => (accountExpectedDate(a) || "").localeCompare(accountExpectedDate(b) || ""));
 }
 
@@ -5252,6 +5292,9 @@ document.addEventListener("click", (event) => {
   const toggleUserButton = event.target.closest("[data-toggle-user]");
   if (toggleUserButton) toggleUserStatus(toggleUserButton.dataset.toggleUser, toggleUserButton.dataset.userStatus);
 
+  const printViewButton = event.target.closest("[data-print-view]");
+  if (printViewButton) window.print();
+
   const issueInvoiceButton = event.target.closest("[data-issue-invoice]");
   if (issueInvoiceButton) issueFiscalInvoice(issueInvoiceButton.dataset.issueInvoice);
 
@@ -5483,8 +5526,8 @@ function clearFiscalFilters() {
 function clearAccountFilters(config) {
   setControlValue(config.searchId, "");
   setControlValue(config.periodTypeId, "Mês/Ano Competência");
-  setControlValue(config.dateRangeId, "01/05/2026 - 31/05/2026");
-  setControlValue(config.monthId, "2026-05");
+  setControlValue(config.dateRangeId, "");
+  setControlValue(config.monthId, demoToday.slice(0, 7));
   setControlValue(config.statusId, "all");
   setControlValue(config.reconciliationId, "all");
   setControlValue(config.modalityId, "all");
