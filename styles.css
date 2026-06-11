@@ -1951,6 +1951,24 @@ button {
   font-size: 0.88rem;
 }
 
+.date-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  grid-column: span 2;
+}
+
+.date-range-inputs span {
+  flex-shrink: 0;
+  color: #697386;
+  font-size: 0.82rem;
+}
+
+.date-range-inputs input {
+  flex: 1;
+  min-width: 0;
+}
+
 .accounts-search-row {
   grid-column: span 2;
 }

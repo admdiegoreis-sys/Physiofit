@@ -1094,12 +1094,12 @@
                   <option>Data de Vencimento</option>
                   <option>Data de Pagamento</option>
                 </select>
-                <input id="payableAccountDateRange" type="text" value="01/05/2026 - 31/05/2026" aria-label="Período" />
-                <select id="payableAccountMonthFilter">
-                  <option value="2026-05">maio/2026</option>
-                  <option value="2026-04">abril/2026</option>
-                  <option value="2026-06">junho/2026</option>
-                </select>
+                <input id="payableAccountMonthFilter" type="month" aria-label="Mês/Ano" />
+                <div class="date-range-inputs">
+                  <input id="payableAccountDateFrom" type="date" aria-label="De" title="De" />
+                  <span>até</span>
+                  <input id="payableAccountDateTo" type="date" aria-label="Até" title="Até" />
+                </div>
                 <select id="payableAccountStatusFilter">
                   <option value="all">Todos (Pagos e Não Pagos)</option>
                   <option value="Aberto">Em aberto</option>
@@ -1169,12 +1169,12 @@
                   <option>Data de Vencimento</option>
                   <option>Data de Pagamento</option>
                 </select>
-                <input id="receivableAccountDateRange" type="text" value="01/05/2026 - 31/05/2026" aria-label="Período" />
-                <select id="receivableAccountMonthFilter">
-                  <option value="2026-05">maio/2026</option>
-                  <option value="2026-04">abril/2026</option>
-                  <option value="2026-06">junho/2026</option>
-                </select>
+                <input id="receivableAccountMonthFilter" type="month" aria-label="Mês/Ano" />
+                <div class="date-range-inputs">
+                  <input id="receivableAccountDateFrom" type="date" aria-label="De" title="De" />
+                  <span>até</span>
+                  <input id="receivableAccountDateTo" type="date" aria-label="Até" title="Até" />
+                </div>
                 <select id="receivableAccountStatusFilter">
                   <option value="all">Todos (Recebidos e Não Recebidos)</option>
                   <option value="Aberto">Em aberto</option>

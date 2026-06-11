@@ -2322,10 +2322,8 @@ function renderAccountOptions() {
   const months = accountMonthOptions();
   Object.values(accountViewConfigs).forEach((config) => {
     const monthFilter = document.querySelector(`#${config.monthId}`);
-    if (monthFilter) {
-      const selected = monthFilter.value || demoToday.slice(0, 7);
-      monthFilter.innerHTML = months.map((ym) => `<option value="${ym}">${monthLabel(ym)}</option>`).join("");
-      monthFilter.value = months.includes(selected) ? selected : months[0] || selected;
+    if (monthFilter && !monthFilter.value) {
+      monthFilter.value = demoToday.slice(0, 7);
     }
     const chartFilter = document.querySelector(`#${config.chartId}`);
     if (chartFilter) {
@@ -3311,8 +3309,9 @@ const accountViewConfigs = {
     paidLabel: "Total Pago",
     searchId: "payableAccountSearch",
     periodTypeId: "payableAccountPeriodType",
-    dateRangeId: "payableAccountDateRange",
     monthId: "payableAccountMonthFilter",
+    dateFromId: "payableAccountDateFrom",
+    dateToId: "payableAccountDateTo",
     statusId: "payableAccountStatusFilter",
     reconciliationId: "payableAccountReconciliationFilter",
     chartId: "payableAccountChartFilter",
@@ -3327,8 +3326,9 @@ const accountViewConfigs = {
     paidLabel: "Total Recebido",
     searchId: "receivableAccountSearch",
     periodTypeId: "receivableAccountPeriodType",
-    dateRangeId: "receivableAccountDateRange",
     monthId: "receivableAccountMonthFilter",
+    dateFromId: "receivableAccountDateFrom",
+    dateToId: "receivableAccountDateTo",
     statusId: "receivableAccountStatusFilter",
     reconciliationId: "receivableAccountReconciliationFilter",
     chartId: "receivableAccountChartFilter",
@@ -3345,17 +3345,25 @@ function accountRows(config) {
   const supplier = document.querySelector(`#${config.supplierId}`)?.value ?? "all";
   const periodType = document.querySelector(`#${config.periodTypeId}`)?.value ?? "Mês/Ano Competência";
   const month = document.querySelector(`#${config.monthId}`)?.value ?? "";
+  const dateFrom = document.querySelector(`#${config.dateFromId}`)?.value ?? "";
+  const dateTo = document.querySelector(`#${config.dateToId}`)?.value ?? "";
 
   return state.accounts
     .filter((item) => !term || normalizedText(`${item.description} ${supplierName(item.supplierId)} ${item.person} ${item.document} ${item.bankLaunch ?? ""}`).includes(term))
     .filter((item) => item.origin !== "Importação OFX" && item.origin !== "ImportaÃ§Ã£o OFX")
     .filter((item) => item.direction === config.direction)
     .filter((item) => {
-      if (!month) return true;
       let dateField = item.competenceDate;
       if (periodType === "Data de Vencimento") dateField = item.forecastDate || item.dueDate || item.competenceDate;
       if (periodType === "Data de Pagamento") dateField = item.paidDate || item.competenceDate;
-      return (dateField || "").slice(0, 7) === month;
+      const d = dateField || "";
+      if (dateFrom || dateTo) {
+        if (dateFrom && d < dateFrom) return false;
+        if (dateTo && d > dateTo) return false;
+        return true;
+      }
+      if (month) return d.slice(0, 7) === month;
+      return true;
     })
     .filter((item) => {
       if (status === "all") return true;
@@ -5508,8 +5516,9 @@ function clearFiscalFilters() {
 function clearAccountFilters(config) {
   setControlValue(config.searchId, "");
   setControlValue(config.periodTypeId, "Mês/Ano Competência");
-  setControlValue(config.dateRangeId, "");
   setControlValue(config.monthId, demoToday.slice(0, 7));
+  setControlValue(config.dateFromId, "");
+  setControlValue(config.dateToId, "");
   setControlValue(config.statusId, "all");
   setControlValue(config.reconciliationId, "all");
   setControlValue(config.chartId, "all");
@@ -5647,7 +5656,7 @@ document.querySelector("#fiscalClearFiltersButton")?.addEventListener("click", c
 document.querySelector("#issueSelectedInvoicesButton")?.addEventListener("click", issuePendingFiscalInvoices);
 
 Object.values(accountViewConfigs).forEach((config) => {
-  [config.searchId, config.periodTypeId, config.monthId, config.statusId, config.reconciliationId, config.chartId, config.supplierId].forEach((id) => {
+  [config.searchId, config.periodTypeId, config.monthId, config.dateFromId, config.dateToId, config.statusId, config.reconciliationId, config.chartId, config.supplierId].forEach((id) => {
     document.querySelector(`#${id}`)?.addEventListener("input", renderAccounts);
     document.querySelector(`#${id}`)?.addEventListener("change", renderAccounts);
   });
