@@ -1557,18 +1557,22 @@ button {
 
 .patient-toolbar {
   display: grid;
-  grid-template-columns: minmax(160px, 240px) minmax(150px, 210px) minmax(360px, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid #dfe5ef;
+  border-radius: 6px;
+  background: #f8fafc;
 }
 
 .enrollment-toolbar {
-  grid-template-columns: minmax(150px, 190px) minmax(170px, 220px) minmax(150px, 180px) minmax(120px, 150px) minmax(220px, 1fr) minmax(170px, 210px);
-  align-items: stretch;
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
 }
 
 .enrollment-toolbar .patient-search-row {
-  grid-column: 2 / span 4;
+  grid-column: 1 / -1;
 }
 
 .title-actions {
@@ -1586,28 +1590,33 @@ button {
 .patient-toolbar select,
 .patient-toolbar input {
   width: 100%;
-  min-height: 44px;
+  min-height: 42px;
   padding: 0 12px;
   border: 1px solid #cfd5de;
   border-radius: 5px;
   color: #535b66;
   background: #fff;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .patient-search-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto auto auto;
+  grid-column: 1 / -1;
+  gap: 8px;
   min-width: 0;
 }
 
 .patient-search-row input {
   min-width: 0;
-  border-radius: 5px 0 0 5px;
+  border-radius: 5px;
 }
 
 .patient-search-row .action-button {
-  min-height: 44px;
-  border-radius: 0 5px 5px 0;
+  min-width: 112px;
+  min-height: 42px;
+  padding-inline: 14px;
+  border-radius: 0;
   box-shadow: none;
 }
 
@@ -1616,7 +1625,7 @@ button {
 }
 
 .patient-search-row .action-button:last-child {
-  border-radius: 0 5px 5px 0;
+  border-radius: 0;
 }
 
 .clear-filter-button {
@@ -3011,6 +3020,14 @@ td.row-actions .row-action-button:last-child {
 }
 
 @media (max-width: 1280px) {
+  .patient-toolbar {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+  }
+
+  .enrollment-toolbar {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+  }
+
   .accounts-toolbar {
     grid-template-columns: repeat(3, minmax(150px, 1fr));
   }
@@ -3243,6 +3260,7 @@ td.row-actions .row-action-button:last-child {
 
   .patient-search-row {
     grid-column: auto;
+    grid-template-columns: 1fr;
   }
 
   .monthly-search-row {
