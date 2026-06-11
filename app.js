@@ -480,6 +480,7 @@ let editingPlanId = null;
 let editingSupplierId = null;
 let editingChartAccountId = null;
 let editingEnrollmentId = null;
+let editingAppointmentId = null;
 let editingLeadId = null;
 let editingAccountId = null;
 let settlingAccountId = null;
@@ -605,13 +606,23 @@ const modalSchemas = {
       { name: "time", label: "Horário inicial", type: "time", value: "09:00" },
       { name: "endTime", label: "Horário final", type: "time", value: "10:00" },
       { name: "studentId", label: "Aluno/Paciente", type: "student" },
-      { name: "teacherId", label: "Profissional", type: "professional" },
-      { name: "room", label: "Sala", type: "select", options: ["Sala Reformer", "Sala Cadillac", "Sala Clínica", "Sala Solo"] },
+      { name: "teacherId", label: "Profissional", type: "professionalOptional", required: false },
+      { name: "room", label: "Sala", type: "roomOptional", value: "", required: false },
       { name: "type", label: "Modalidade", type: "modality" },
       { name: "sessionKind", label: "Tipo de sessão", type: "select", options: ["Mensalidade", "Experimental", "Avulso"] },
       { name: "status", label: "Status", type: "select", options: ["Agendada", "Confirmada", "Aguardando", "Compareceu", "Faltou", "Cancelada", "Reposta"] },
+      { name: "notes", label: "Observação", type: "textarea", value: "", required: false },
     ],
-    handler: (values) => state.appointments.push({ id: uid("a"), ...values }),
+    handler: (values) => {
+      if (editingAppointmentId) {
+        state.appointments = state.appointments.map((item) => {
+          if (item.id !== editingAppointmentId) return item;
+          return { ...item, ...values, notes: appendNote(values.notes || item.notes, "Remarcação") };
+        });
+      } else {
+        state.appointments.push({ id: uid("a"), ...values });
+      }
+    },
   },
   block: {
     title: "Agenda livre / bloqueio",
@@ -1670,7 +1681,9 @@ function ensureEnrollmentFinancialTitles(enrollment) {
 }
 
 function ensureEnrollmentAppointments(enrollment) {
-  if (!enrollment?.id || state.appointments.some((item) => item.enrollmentId === enrollment.id)) return;
+  if (!enrollment?.id) return;
+  state.appointments = state.appointments.filter((item) => item.enrollmentId !== enrollment.id);
+  if (enrollment.status === "Cancelada") return;
   const dayFields = [
     ["mondayTime", 1],
     ["tuesdayTime", 2],
@@ -1680,7 +1693,7 @@ function ensureEnrollmentAppointments(enrollment) {
   ];
   const selectedDays = dayFields.filter(([field]) => enrollment[field]);
   if (!selectedDays.length || !enrollment.startDate || !enrollment.endDate) return;
-  const endLimit = Math.min(parseLocalDate(enrollment.endDate).getTime(), addDays(parseLocalDate(enrollment.startDate), 180).getTime());
+  const endLimit = parseLocalDate(enrollment.endDate).getTime();
   const appointments = [];
   let cursor = parseLocalDate(enrollment.startDate);
   while (cursor.getTime() <= endLimit) {
@@ -1709,6 +1722,14 @@ function ensureEnrollmentAppointments(enrollment) {
 function addOneHour(time = "") {
   const [hour = 0, minute = 0] = time.split(":").map(Number);
   return `${String((hour + 1) % 24).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+function appendNote(current = "", note = "") {
+  const cleanCurrent = String(current || "").trim();
+  const cleanNote = String(note || "").trim();
+  if (!cleanNote) return cleanCurrent;
+  if (normalizedText(cleanCurrent).includes(normalizedText(cleanNote))) return cleanCurrent;
+  return [cleanCurrent, cleanNote].filter(Boolean).join("\n");
 }
 
 function shortDate(date) {
@@ -2472,7 +2493,7 @@ function renderCalendarEvent(item) {
   const relatedStudent = student(item.studentId);
   const relatedProfessional = professional(item.teacherId);
   return `
-    <article class="calendar-event ${statusClass(item.status)}" style="${relatedProfessional?.color ?`background:${relatedProfessional.color}` : ""}" data-action="complete" data-id="${item.id}" title="${item.type} - ${studentName(item.studentId)}">
+    <article class="calendar-event ${statusClass(item.status)}" style="${relatedProfessional?.color ?`background:${relatedProfessional.color}` : ""}" data-action="reschedule" data-id="${item.id}" title="Editar/remarcar ${item.type} - ${studentName(item.studentId)}">
       <span>${item.time} - ${item.endTime}</span>
       <strong>${studentName(item.studentId).toUpperCase()}</strong>
       <small>${professionalName(item.teacherId)} · ${relatedStudent?.plan ?? item.sessionKind}</small>
@@ -3868,6 +3889,13 @@ function openEnrollmentModal(enrollmentId = null) {
   document.querySelector("#modalTitle").textContent = enrollmentId ? "Editar matrícula" : "Nova matrícula";
 }
 
+function openAppointmentModal(appointmentId = null) {
+  editingAppointmentId = appointmentId;
+  const item = appointmentId ? state.appointments.find((appointment) => appointment.id === appointmentId) : null;
+  openModal("appointment", item ?? {});
+  document.querySelector("#modalTitle").textContent = appointmentId ? "Remarcar sessão" : "Agendar sessão";
+}
+
 function openLeadModal(leadId = null) {
   editingLeadId = leadId;
   const item = leadId ? state.leads.find((lead) => lead.id === leadId) : null;
@@ -4178,6 +4206,7 @@ function deleteEnrollment(enrollmentId) {
   const item = state.enrollments.find((enrollment) => enrollment.id === enrollmentId);
   if (!item || !window.confirm(`Excluir a matrícula de ${studentName(item.studentId)}?`)) return;
   state.enrollments = state.enrollments.filter((enrollment) => enrollment.id !== enrollmentId);
+  state.appointments = state.appointments.filter((appointment) => appointment.enrollmentId !== enrollmentId);
   saveState();
   render();
   toast("Matrícula excluída.");
@@ -4922,6 +4951,7 @@ function closeModal() {
   editingSupplierId = null;
   editingChartAccountId = null;
   editingEnrollmentId = null;
+  editingAppointmentId = null;
   editingLeadId = null;
   editingAccountId = null;
   settlingAccountId = null;
@@ -5091,6 +5121,7 @@ document.addEventListener("click", (event) => {
     editingSupplierId = null;
     if (modalButton.dataset.openModal === "chartAccount") openChartAccountModal();
     else if (modalButton.dataset.openModal === "enrollment") openEnrollmentModal();
+    else if (modalButton.dataset.openModal === "appointment") openAppointmentModal();
     else if (modalButton.dataset.openModal === "lead") openLeadModal();
     else openModal(modalButton.dataset.openModal);
   }
@@ -5098,6 +5129,10 @@ document.addEventListener("click", (event) => {
   const scheduleAction = event.target.closest("[data-action]");
   if (scheduleAction) {
     const appointment = state.appointments.find((item) => item.id === scheduleAction.dataset.id);
+    if (scheduleAction.dataset.action === "reschedule" && appointment) {
+      openAppointmentModal(appointment.id);
+      return;
+    }
     if (scheduleAction.dataset.action === "confirm" && appointment) appointment.status = "Confirmada";
     if (scheduleAction.dataset.action === "complete" && appointment) {
       appointment.status = "Compareceu";
