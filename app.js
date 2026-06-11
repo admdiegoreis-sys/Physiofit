@@ -2132,6 +2132,13 @@ function renderPlanOptions() {
     planModalityFilter.innerHTML = `<option value="all">Todas as modalidades</option>${activeModalities().map((item) => `<option value="${item.id}">${displayName(item.name)}</option>`).join("")}`;
     planModalityFilter.value = selected === "all" || activeModalities().some((item) => item.id === selected) ?selected : "all";
   }
+  const planSessionsFilter = document.querySelector("#planSessionsFilter");
+  if (planSessionsFilter) {
+    const selected = planSessionsFilter.value || "all";
+    const sessionOptions = [...new Set(state.plans.map((item) => Number(item.sessions || 0)))].sort((a, b) => a - b);
+    planSessionsFilter.innerHTML = `<option value="all">Todas as sessões</option>${sessionOptions.map((sessions) => `<option value="${sessions}">${sessions ? `${sessions} sessões inclusas` : "Plano livre"}</option>`).join("")}`;
+    planSessionsFilter.value = selected === "all" || sessionOptions.some((sessions) => String(sessions) === selected) ?selected : "all";
+  }
   document.querySelectorAll("[data-plan-select]").forEach((select) => {
     const selected = select.value || activePlans()[0]?.name || "";
     const fallbackPlans = ["Mensal 2x semana", "Mensal livre", "Fisioterapia", "Experimental", "Aula avulsa"];
@@ -2824,10 +2831,12 @@ function renderPlans() {
   const statusFilter = document.querySelector("#planStatusFilter")?.value ?? "Ativo";
   const modalityFilter = document.querySelector("#planModalityFilter")?.value ?? "all";
   const typeFilter = document.querySelector("#planTypeFilter")?.value ?? "all";
+  const sessionsFilter = document.querySelector("#planSessionsFilter")?.value ?? "all";
   const list = state.plans
     .filter((item) => statusFilter === "all" || item.status === statusFilter)
     .filter((item) => modalityFilter === "all" || item.modalityId === modalityFilter)
     .filter((item) => typeFilter === "all" || planTypeLabel(item.type) === planTypeLabel(typeFilter))
+    .filter((item) => sessionsFilter === "all" || Number(item.sessions || 0) === Number(sessionsFilter))
     .filter((item) => normalizedText([item.name, modalityName(item.modalityId), item.type, item.status, item.notes].join(" ")).includes(term))
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
@@ -5267,6 +5276,7 @@ function clearPlanFilters() {
   setControlValue("planStatusFilter", "Ativo");
   setControlValue("planModalityFilter", "all");
   setControlValue("planTypeFilter", "all");
+  setControlValue("planSessionsFilter", "all");
   renderPlans();
 }
 
@@ -5412,6 +5422,7 @@ document.querySelector("#planClearFiltersButton")?.addEventListener("click", cle
 document.querySelector("#planStatusFilter").addEventListener("change", renderPlans);
 document.querySelector("#planModalityFilter")?.addEventListener("change", renderPlans);
 document.querySelector("#planTypeFilter")?.addEventListener("change", renderPlans);
+document.querySelector("#planSessionsFilter")?.addEventListener("change", renderPlans);
 document.querySelector("#newPlanButton").addEventListener("click", () => openPlanEditor());
 document.querySelector("#backToPlansButton").addEventListener("click", () => switchView("plans"));
 document.querySelector("#planEditorForm").addEventListener("submit", (event) => {
