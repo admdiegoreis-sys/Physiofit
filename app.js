@@ -702,6 +702,7 @@ const modalSchemas = {
       { name: "name", label: "Nome do plano", type: "text", value: "" },
       { name: "modalityId", label: "Modalidade", type: "modalityId" },
       { name: "type", label: "Tipo de plano", type: "select", options: ["Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "Mensal" },
+      { name: "chartAccountId", label: "Linha de receita no plano de contas", type: "revenueChartAccount" },
       { name: "value", label: "Valor", type: "number", value: "0.00" },
       { name: "sessions", label: "Sessões inclusas", type: "number", value: 0 },
       { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
@@ -711,11 +712,13 @@ const modalSchemas = {
       values.value = Number(values.value || 0).toFixed(2);
       values.sessions = Number(values.sessions || 0);
       values.type = planTypeLabel(values.type);
+      values.chartAccountId = values.chartAccountId || revenueChartAccountForModality(values.modalityId)?.id || "";
       values.notes = values.notes || "";
       const current = editingPlanId ? state.plans.find((item) => item.id === editingPlanId) : {};
       const payload = { ...createEmptyPlan(), ...current, id: editingPlanId || uid("pl"), ...values, value: Number(values.value) };
       if (editingPlanId) state.plans = state.plans.map((item) => (item.id === editingPlanId ? payload : item));
       else state.plans.push(payload);
+      syncPlanChartAccountToFinancialTitles(payload.id, payload.chartAccountId);
       editingPlanId = null;
       renderPlanOptions();
       renderEnrollmentOptions();
@@ -941,6 +944,10 @@ function normalizeState(data) {
     ? [...savedChartAccounts, ...seedChartAccounts.filter((item) => !savedChartCodes.has(String(item.code)))]
     : structuredClone(seedChartAccounts);
   normalized.chartAccounts = mergedChartAccounts.map((item, index) => normalizeChartAccount(normalizeTextFields(item), index));
+  normalized.plans = normalized.plans.map((item) => ({
+    ...item,
+    chartAccountId: item.chartAccountId || revenueChartAccountForModalityFromLists(normalized.chartAccounts, normalized.modalities, item.modalityId)?.id || "",
+  }));
   const savedAccounts = Array.isArray(data.accounts) ? data.accounts : [];
   const savedAccountDescriptions = new Set(savedAccounts.map((item) => normalizedText(`${item.description ?? ""}-${item.person ?? ""}-${item.amount ?? ""}`)));
   const mergedAccounts = savedAccounts.length
@@ -954,6 +961,15 @@ function normalizeState(data) {
     ...item,
     supplierId: item.supplierId || supplierIdByIdentityFromList(normalized.suppliers, item.person, item.document),
   }));
+  const planChartByEnrollment = new Map(normalized.enrollments.map((enrollment) => {
+    const plan = normalized.plans.find((item) => item.id === enrollment.planId);
+    return [enrollment.id, plan?.chartAccountId || ""];
+  }));
+  normalized.accounts = normalized.accounts.map((item) => (
+    item.direction === "Receber" && item.enrollmentId && planChartByEnrollment.get(item.enrollmentId)
+      ? { ...item, chartAccountId: planChartByEnrollment.get(item.enrollmentId) }
+      : item
+  ));
   const savedBankMovements = Array.isArray(data.bankMovements) ? data.bankMovements : [];
   const legacyOfxMovements = savedAccounts
     .filter((item) => item.origin === "Importação OFX" || item.origin === "ImportaÃ§Ã£o OFX")
@@ -1108,6 +1124,7 @@ function normalizeModality(item, index) {
 function normalizePlan(item, index) {
   const defaults = seedPlans[index % seedPlans.length] ?? seedPlans[0];
   const { linkedEnrollments, ...cleanItem } = item;
+  const modalityId = cleanItem.modalityId || defaults.modalityId;
   return {
     id: item.id || defaults.id || uid("pl"),
     name: defaults.name,
@@ -1115,9 +1132,12 @@ function normalizePlan(item, index) {
     type: defaults.type,
     value: defaults.value,
     sessions: defaults.sessions,
+    chartAccountId: defaults.chartAccountId || "",
     status: "Ativo",
     notes: "",
     ...cleanItem,
+    modalityId,
+    chartAccountId: cleanItem.chartAccountId || defaults.chartAccountId || "",
   };
 }
 
@@ -1606,14 +1626,22 @@ function calculatedEnrollmentEndDate(startDate, type = "") {
   return isoDate(date);
 }
 
-function revenueChartAccountForModality(modalityId = "") {
-  const modality = modalityName(modalityId);
+function revenueChartAccountForModalityFromLists(chartAccounts = [], modalities = [], modalityId = "") {
+  const modality = modalities.find((item) => item.id === modalityId)?.name || modalityId;
   const modalityTerm = normalizedText(modality);
   return (
-    state.chartAccounts.find((item) => item.nature === "Receita" && modalityTerm && normalizedText(item.name).includes(modalityTerm)) ||
-    state.chartAccounts.find((item) => item.nature === "Receita") ||
-    state.chartAccounts[0]
+    chartAccounts.find((item) => item.nature === "Receita" && modalityTerm && normalizedText(item.name).includes(modalityTerm)) ||
+    chartAccounts.find((item) => item.nature === "Receita") ||
+    chartAccounts[0]
   );
+}
+
+function revenueChartAccountForModality(modalityId = "") {
+  return revenueChartAccountForModalityFromLists(state.chartAccounts, state.modalities, modalityId);
+}
+
+function activeRevenueChartAccounts() {
+  return activeChartAccounts().filter((item) => item.nature === "Receita");
 }
 
 function addMonthsToIsoDate(value, months) {
@@ -1629,7 +1657,7 @@ function ensureEnrollmentFinancialTitles(enrollment) {
   }
   const relatedStudent = student(enrollment.studentId);
   const plan = state.plans.find((item) => item.id === enrollment.planId);
-  const chartAccount = revenueChartAccountForModality(enrollment.modalityId);
+  const chartAccount = state.chartAccounts.find((item) => item.id === plan?.chartAccountId) || revenueChartAccountForModality(enrollment.modalityId);
   const planType = planTypeLabel(enrollment.planType || plan?.type);
   const installments = planType === "Trimestral" ? 3 : planType === "Semestral" ? 6 : 1;
   const firstDate = enrollment.firstPaymentDate || enrollment.startDate || demoToday;
@@ -1690,6 +1718,16 @@ function ensureEnrollmentFinancialTitles(enrollment) {
   }
   state.accounts.push(...titles);
   enrollment.financialTitlesGenerated = titles.length > 0;
+}
+
+function syncPlanChartAccountToFinancialTitles(planId = "", chartAccountId = "") {
+  if (!planId || !chartAccountId) return;
+  const enrollmentIds = new Set(state.enrollments.filter((item) => item.planId === planId).map((item) => item.id));
+  state.accounts = state.accounts.map((account) => (
+    account.direction === "Receber" && enrollmentIds.has(account.enrollmentId)
+      ? { ...account, chartAccountId }
+      : account
+  ));
 }
 
 function ensureEnrollmentAppointments(enrollment) {
@@ -2205,6 +2243,15 @@ function renderPlanOptions() {
     const options = activePlans().length ?activePlans().map((item) => item.name) : fallbackPlans;
     select.innerHTML = options.map((name) => `<option>${name}</option>`).join("");
     select.value = options.includes(selected) ?selected : options[0] || "";
+  });
+}
+
+function renderRevenueChartAccountOptions(selectedValue = "") {
+  document.querySelectorAll("[data-revenue-chart-account-select]").forEach((select) => {
+    const selected = selectedValue || select.value || activeRevenueChartAccounts()[0]?.id || "";
+    const options = activeRevenueChartAccounts();
+    select.innerHTML = options.map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("");
+    select.value = options.some((item) => item.id === selected) ? selected : options[0]?.id || "";
   });
 }
 
@@ -2900,7 +2947,7 @@ function renderPlans() {
     .filter((item) => modalityFilter === "all" || item.modalityId === modalityFilter)
     .filter((item) => typeFilter === "all" || planTypeLabel(item.type) === planTypeLabel(typeFilter))
     .filter((item) => sessionsFilter === "all" || Number(item.sessions || 0) === Number(sessionsFilter))
-    .filter((item) => normalizedText([item.name, modalityName(item.modalityId), item.type, item.status, item.notes].join(" ")).includes(term))
+    .filter((item) => normalizedText([item.name, modalityName(item.modalityId), chartAccountName(item.chartAccountId), item.type, item.status, item.notes].join(" ")).includes(term))
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
   table.innerHTML = list.length
@@ -2916,6 +2963,7 @@ function renderPlans() {
               </td>
               <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.sessions ?`${item.sessions} sessões inclusas` : "Plano livre"}</span></div></td>
               <td>${displayName(modalityName(item.modalityId))}</td>
+              <td>${chartAccountName(item.chartAccountId)}</td>
               <td>${planTypeLabel(item.type)}</td>
               <td><strong>${currency(Number(item.value || 0))}</strong></td>
               <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
@@ -2923,14 +2971,14 @@ function renderPlans() {
           `,
         )
         .join("")
-    : `<tr><td colspan="6"><div class="empty-state">Nenhum plano encontrado.</div></td></tr>`;
+    : `<tr><td colspan="7"><div class="empty-state">Nenhum plano encontrado.</div></td></tr>`;
 }
 
 function openPlanEditor(planId = null) {
   editingPlanId = planId;
   const item = planId ?state.plans.find((planItem) => planItem.id === planId) : createEmptyPlan();
   if (!item) return;
-  openModal("plan", { ...item, type: planTypeLabel(item.type), value: Number(item.value || 0).toFixed(2), notes: planId ? item.notes || "" : "" });
+  openModal("plan", { ...item, chartAccountId: item.chartAccountId || revenueChartAccountForModality(item.modalityId)?.id || "", type: planTypeLabel(item.type), value: Number(item.value || 0).toFixed(2), notes: planId ? item.notes || "" : "" });
   document.querySelector("#modalTitle").textContent = planId ? `Editar ${displayName(item.name)}` : "Novo plano";
 }
 
@@ -2940,6 +2988,7 @@ function createEmptyPlan() {
     name: "",
     modalityId: activeModalities()[0]?.id || "",
     type: "Mensal",
+    chartAccountId: revenueChartAccountForModality(activeModalities()[0]?.id || "")?.id || activeRevenueChartAccounts()[0]?.id || "",
     value: 0,
     sessions: 0,
     status: "Ativo",
@@ -2950,10 +2999,12 @@ function createEmptyPlan() {
 function fillPlanEditor(item) {
   const form = document.querySelector("#planEditorForm");
   renderModalityOptions();
+  renderRevenueChartAccountOptions(item.chartAccountId || revenueChartAccountForModality(item.modalityId)?.id || "");
   Object.entries(createEmptyPlan()).forEach(([key, defaultValue]) => {
     if (form.elements[key]) form.elements[key].value = item[key] ?? defaultValue;
   });
   if (form.elements.type) form.elements.type.value = planTypeLabel(item.type);
+  if (form.elements.chartAccountId) form.elements.chartAccountId.value = item.chartAccountId || revenueChartAccountForModality(item.modalityId)?.id || activeRevenueChartAccounts()[0]?.id || "";
 }
 
 function savePlanEditor() {
@@ -2962,12 +3013,15 @@ function savePlanEditor() {
   values.value = Number(values.value || 0);
   values.sessions = Number(values.sessions || 0);
   values.type = planTypeLabel(values.type);
+  values.chartAccountId = values.chartAccountId || revenueChartAccountForModality(values.modalityId)?.id || "";
   values.notes = values.notes || "";
   if (editingPlanId) {
     state.plans = state.plans.map((item) => (item.id === editingPlanId ?{ ...item, ...values } : item));
   } else {
     state.plans.push({ ...createEmptyPlan(), ...values, id: uid("pl") });
   }
+  const savedPlanId = editingPlanId || state.plans.at(-1)?.id || "";
+  syncPlanChartAccountToFinancialTitles(savedPlanId, values.chartAccountId);
   saveState();
   renderPlanOptions();
   renderEnrollmentOptions();
@@ -4949,7 +5003,17 @@ function renderField(field) {
     return `
       <label>${field.label}
         <select name="${field.name}" ${required}>
-          ${activeChartAccounts().map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.name}</option>`).join("")}
+          ${activeChartAccounts().map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.code} - ${item.name}</option>`).join("")}
+        </select>
+      </label>
+    `;
+  }
+  if (field.type === "revenueChartAccount") {
+    const options = activeRevenueChartAccounts();
+    return `
+      <label>${field.label}
+        <select name="${field.name}" ${required}>
+          ${options.map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.code} - ${item.name}</option>`).join("")}
         </select>
       </label>
     `;
@@ -5281,6 +5345,10 @@ document.querySelector("#modalForm").addEventListener("change", (event) => {
     applyEnrollmentPlanDefaults(form, true);
     return;
   }
+  if (form.dataset.type === "plan" && event.target.name === "modalityId" && form.elements.chartAccountId) {
+    form.elements.chartAccountId.value = revenueChartAccountForModality(event.target.value)?.id || form.elements.chartAccountId.value;
+    return;
+  }
   if (event.target.name !== "supplierId") return;
   const supplier = supplierById(event.target.value);
   if (!supplier) return;
@@ -5494,6 +5562,11 @@ document.querySelector("#backToPlansButton").addEventListener("click", () => swi
 document.querySelector("#planEditorForm").addEventListener("submit", (event) => {
   event.preventDefault();
   savePlanEditor();
+});
+document.querySelector("#planEditorForm").addEventListener("change", (event) => {
+  if (event.target.name !== "modalityId") return;
+  const form = event.currentTarget;
+  if (form.elements.chartAccountId) form.elements.chartAccountId.value = revenueChartAccountForModality(event.target.value)?.id || form.elements.chartAccountId.value;
 });
 ["enrollmentSearch", "enrollmentStatusFilter", "enrollmentModalityFilter", "enrollmentRoomFilter", "enrollmentProfessionalFilter", "enrollmentPlanTypeFilter", "enrollmentDateFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderEnrollments);
