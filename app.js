@@ -729,7 +729,7 @@ const modalSchemas = {
       { name: "monthlyValue", label: "Valor da mensalidade", type: "number", value: 0 },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Dinheiro", "Transferência"], value: "Pix" },
       { name: "autoRenew", label: "Renovação automática", type: "select", options: ["Sim", "Não"], value: "Sim" },
-      { name: "room", label: "Sala", type: "select", options: ["Sala Reformer", "Sala Cadillac", "Sala Clínica", "Sala Solo", "Sala Funcional"], value: "Sala Reformer", required: false },
+      { name: "room", label: "Sala", type: "roomOptional", value: "", required: false },
       { name: "freeSchedule", label: "Horário livre", type: "select", options: ["Não", "Sim"], value: "Não" },
       { name: "sessions", label: "Sessões por semana", type: "number", value: 1 },
       { name: "mondayTime", label: "Segunda-feira", type: "time", value: "", required: false },
@@ -1685,7 +1685,7 @@ function ensureEnrollmentAppointments(enrollment) {
         endTime: addOneHour(time),
         studentId: enrollment.studentId,
         teacherId: enrollment.professionalId,
-        room: enrollment.room || "Sala Reformer",
+        room: enrollment.room || "",
         type: modalityName(enrollment.modalityId) || "Pilates",
         status: "Agendada",
         sessionKind: planTypeLabel(enrollment.planType),
@@ -4840,6 +4840,23 @@ function renderField(field) {
       <label>${field.label}
         <select name="${field.name}" ${required}>
           ${activePlans().map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${escapeHtml(displayName(item.name))}</option>`).join("")}
+        </select>
+      </label>
+    `;
+  }
+  if (field.type === "roomOptional") {
+    const options = [
+      { value: "", label: "Sem sala" },
+      { value: "Sala Reformer", label: "Sala Reformer" },
+      { value: "Sala Cadillac", label: "Sala Cadillac" },
+      { value: "Sala Clínica", label: "Sala Clínica" },
+      { value: "Sala Solo", label: "Sala Solo" },
+      { value: "Sala Funcional", label: "Sala Funcional" },
+    ];
+    return `
+      <label>${field.label}
+        <select name="${field.name}" ${required}>
+          ${options.map((option) => `<option value="${option.value}" ${isSelected(option.value)}>${option.label}</option>`).join("")}
         </select>
       </label>
     `;
