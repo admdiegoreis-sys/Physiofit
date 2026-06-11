@@ -2771,13 +2771,12 @@ function renderModalities() {
               <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.notes || ""}</span></div></td>
               <td><span class="color-swatch" style="background:${item.color || "#6043c2"}" title="${item.color || ""}"></span></td>
               <td>${Number(item.maxPatients || 0)}</td>
-              <td>${dateTimeLabel(item.createdAt)}</td>
               <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
             </tr>
           `,
         )
         .join("")
-    : `<tr><td colspan="6"><div class="empty-state">Nenhuma modalidade encontrada.</div></td></tr>`;
+    : `<tr><td colspan="5"><div class="empty-state">Nenhuma modalidade encontrada.</div></td></tr>`;
 }
 
 function openModalityEditor(modalityId = null) {
