@@ -2626,7 +2626,7 @@ function renderEnrollments() {
               <td>${dateLabel(item.startDate)}</td>
               <td>${item.dueDay || "-"}</td>
               <td><strong>${currency(Number(item.monthlyValue || 0))}</strong></td>
-              <td><span class="contract-icon" title="${planName(item.planId)}">▤</span></td>
+              <td><div class="patient-name"><strong>${displayName(planName(item.planId))}</strong><span>${planTypeLabel(item.planType || planById(item.planId)?.type)}</span></div></td>
               <td>${item.contractStatus || "-"}</td>
               <td>${item.sessions || "-"}</td>
               <td><span class="status-pill ${state.accounts.some((account) => account.enrollmentId === item.id) || item.financialTitlesGenerated ? "ativo" : "pendente"}">${state.accounts.some((account) => account.enrollmentId === item.id) || item.financialTitlesGenerated ? "Gerado" : "Pendente"}</span></td>
