@@ -2369,6 +2369,18 @@ button {
   font-size: 0.9rem;
 }
 
+.enrollment-history-heading {
+  margin-top: 28px;
+}
+
+.patient-enrollment-history-wrap {
+  margin-top: 12px;
+}
+
+.patient-enrollment-history-wrap table {
+  min-width: 980px;
+}
+
 .editor-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(160px, 1fr));

@@ -492,6 +492,26 @@
                     <label>Última presença<input name="lastPresence" type="date" /></label>
                     <label class="wide">Observações comerciais<textarea name="commercialNotes" rows="4"></textarea></label>
                   </div>
+                  <div class="form-section-heading enrollment-history-heading">
+                    <h3>Matrículas e renovações</h3>
+                  </div>
+                  <div class="table-wrap patient-enrollment-history-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Tipo</th>
+                          <th>Plano vigente</th>
+                          <th>Modalidade</th>
+                          <th>Início</th>
+                          <th>Fim</th>
+                          <th>Valor</th>
+                          <th>Financeiro</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="patientEnrollmentHistoryTable"></tbody>
+                    </table>
+                  </div>
                 </section>
 
                 <section class="patient-tab-panel" data-patient-panel="clinical">

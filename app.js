@@ -4355,6 +4355,38 @@ function fillPatientEditor(patient) {
     if (form.elements[key]) form.elements[key].value = patient[key] ?? defaultValue;
   });
   if (form.elements.gender) form.elements.gender.value = patient.gender === "M" ? "Masculino" : patient.gender === "F" ? "Feminino" : patient.gender || "Feminino";
+  renderPatientEnrollmentHistory(patient.id);
+}
+
+function renderPatientEnrollmentHistory(studentId = "") {
+  const table = document.querySelector("#patientEnrollmentHistoryTable");
+  if (!table) return;
+  if (!studentId) {
+    table.innerHTML = `<tr><td colspan="8"><div class="empty-state">Histórico disponível após salvar o paciente.</div></td></tr>`;
+    return;
+  }
+  const enrollments = state.enrollments
+    .filter((item) => item.studentId === studentId)
+    .sort((a, b) => String(a.startDate || "").localeCompare(String(b.startDate || "")));
+  table.innerHTML = enrollments.length
+    ? enrollments
+        .map((item, index) => {
+          const hasFinancial = state.accounts.some((account) => account.enrollmentId === item.id) || item.financialTitlesGenerated;
+          return `
+            <tr>
+              <td><span class="status-pill ${index === 0 ? "pendente" : "ativo"}">${index === 0 ? "Matrícula" : "Renovação"}</span></td>
+              <td><div class="patient-name"><strong>${displayName(planName(item.planId))}</strong><span>${planTypeLabel(item.planType || planById(item.planId)?.type)}</span></div></td>
+              <td>${modalityName(item.modalityId) || "-"}</td>
+              <td>${dateLabel(item.startDate)}</td>
+              <td>${dateLabel(item.endDate)}</td>
+              <td><strong>${currency(Number(item.monthlyValue || 0))}</strong></td>
+              <td><span class="status-pill ${hasFinancial ? "ativo" : "pendente"}">${hasFinancial ? "Gerado" : "Pendente"}</span></td>
+              <td><span class="status-pill ${statusClass(item.status)}">${item.status || "-"}</span></td>
+            </tr>
+          `;
+        })
+        .join("")
+    : `<tr><td colspan="8"><div class="empty-state">Nenhuma matrícula vinculada ao paciente.</div></td></tr>`;
 }
 
 function savePatientEditor() {
