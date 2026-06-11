@@ -2273,6 +2273,12 @@ button {
   display: block;
 }
 
+.patient-editor-form .patient-tab-panel.active:not(:first-of-type) {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid #e3e7ef;
+}
+
 .form-section-heading {
   margin-bottom: 16px;
   padding-bottom: 12px;
