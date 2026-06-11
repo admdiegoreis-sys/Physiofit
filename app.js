@@ -4205,15 +4205,13 @@ function importAccountsFromXlsx(file, direction) {
       const rows = window.XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
       const colMap = {
-        competencia:  ["Competência","Competencia","competencia","competência"],
-        descricao:    ["Descrição","Descricao","descricao","descrição","Descrição"],
-        banco:        ["Banco","banco"],
-        previsao:     ["Previsão","Previsao","previsao","previsão"],
-        dataPagto:    ["Data Pagto","Data Pagamento","dataPagto","data_pagto","DataPagto"],
-        fornecedor:   ["Fornecedor","fornecedor"],
-        documento:    ["CPF/CNPJ","cpf_cnpj","documento","Documento"],
-        valor:        ["Valor (R$)","Valor","valor","valor_rs"],
-        conta:        ["Conta","conta"],
+        competencia: ["Competência","Competencia","competencia","competência"],
+        previsao:    ["Previsão","Previsao","previsao","previsão"],
+        dataPagto:   ["Data Pagto","Data Pagamento","dataPagto","data_pagto","DataPagto"],
+        fornecedor:  ["Fornecedor","fornecedor"],
+        documento:   ["CPF/CNPJ","cpf_cnpj","documento","Documento"],
+        valor:       ["Valor (R$)","Valor","valor","valor_rs"],
+        descricao:   ["Descrição","Descricao","descricao","descrição"],
       };
 
       function col(row, key) {
@@ -4223,7 +4221,8 @@ function importAccountsFromXlsx(file, direction) {
         return "";
       }
 
-      let imported = 0;
+      let applied = 0;
+      let notFound = 0;
       let skipped = 0;
 
       rows.forEach((row) => {
@@ -4231,46 +4230,50 @@ function importAccountsFromXlsx(file, direction) {
         const rowDirection = rawValor < 0 ? "Pagar" : "Receber";
         if (rowDirection !== direction) { skipped++; return; }
 
-        const amount = Math.abs(rawValor);
+        const paidDate = xlsxDateToIso(col(row, "dataPagto"));
+        if (!paidDate) { skipped++; return; }
+
+        const amount         = Math.abs(rawValor);
         const competenceDate = xlsxDateToIso(col(row, "competencia"));
-        const forecastDate   = xlsxDateToIso(col(row, "previsao")) || competenceDate;
-        const paidDate       = xlsxDateToIso(col(row, "dataPagto"));
-        const description    = String(col(row, "descricao")).trim();
-        const person         = String(col(row, "fornecedor")).trim();
-        const document       = String(col(row, "documento")).trim();
-        const banco          = String(col(row, "banco")).trim();
-        const contaCodigo    = String(col(row, "conta")).trim();
-        const chartAccount   = chartAccountByCode(contaCodigo);
+        const forecastDate   = xlsxDateToIso(col(row, "previsao"));
+        const person         = normalizedText(String(col(row, "fornecedor")).trim());
+        const documento      = String(col(row, "documento")).trim().replace(/\D/g, "");
 
-        if (!amount || !competenceDate) { skipped++; return; }
-
-        state.accounts.push({
-          id: uid("cp"),
-          direction,
-          status: paidDate ? (direction === "Receber" ? "Recebido" : "Pago") : "Aberto",
-          competenceDate,
-          forecastDate,
-          dueDate: forecastDate,
-          paidDate,
-          paidAmount: paidDate ? amount : 0,
-          openAmount: paidDate ? 0 : amount,
-          originalAmount: amount,
-          amount,
-          description,
-          person,
-          document,
-          paymentMethod: banco,
-          bankLaunch: description,
-          chartAccountId: chartAccount?.id || "",
-          reconciliationStatus: paidDate ? "manual" : "unreconciled",
-          origin: "Importação Manual",
+        // Busca lançamento correspondente: mesma direção + valor + mês de competência ou previsão
+        const candidates = state.accounts.filter((acc) => {
+          if (acc.direction !== direction) return false;
+          if (accountOpenAmount(acc) <= 0) return false;
+          if (Math.abs(accountOriginalAmount(acc) - amount) > 0.01) return false;
+          const accMonth = (acc.competenceDate || acc.forecastDate || "").slice(0, 7);
+          const rowMonth = (competenceDate || forecastDate || "").slice(0, 7);
+          if (accMonth && rowMonth && accMonth !== rowMonth) return false;
+          return true;
         });
-        imported++;
+
+        // Refina por fornecedor/documento se houver mais de um candidato
+        let match = candidates[0];
+        if (candidates.length > 1) {
+          const byDoc = documento ? candidates.find((acc) => (acc.document || "").replace(/\D/g, "") === documento) : null;
+          const byPerson = person ? candidates.find((acc) => normalizedText(acc.person || supplierName(acc.supplierId) || "").includes(person)) : null;
+          match = byDoc || byPerson || candidates[0];
+        }
+
+        if (!match) { notFound++; return; }
+
+        match.paidDate             = paidDate;
+        match.paidAmount           = amount;
+        match.openAmount           = 0;
+        match.reconciliationStatus = "manual";
+        match.updatedAt            = new Date().toISOString();
+        applied++;
       });
 
       saveState();
       render();
-      toast(`${imported} lançamento(s) importado(s). ${skipped > 0 ? `${skipped} linha(s) ignorada(s) por direção ou dados incompletos.` : ""}`);
+      const msg = [`${applied} baixa(s) aplicada(s).`];
+      if (notFound) msg.push(`${notFound} linha(s) sem lançamento correspondente.`);
+      if (skipped)  msg.push(`${skipped} linha(s) ignorada(s).`);
+      toast(msg.join(" "));
     } catch (err) {
       toast("Erro ao ler a planilha: " + (err.message || "formato inválido."));
     }
