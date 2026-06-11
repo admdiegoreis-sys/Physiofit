@@ -4277,7 +4277,7 @@ function renderProfessionalModalityOptions(selectedValue = "") {
 }
 
 function updateProfessionalSummary(item) {
-  document.querySelector("#professionalSummaryName").textContent = (item.name || "Novo profissional").toUpperCase();
+  document.querySelector("#professionalSummaryName").textContent = displayName(item.name || "Novo profissional");
   document.querySelector("#professionalSummaryDocument").textContent = `CREFITO: ${item.document || "-"}`;
   document.querySelector("#professionalSummaryPhone").textContent = `Celular: ${item.phone || "-"}`;
 }
