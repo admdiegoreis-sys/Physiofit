@@ -2019,6 +2019,79 @@ button {
   font-family: Arial, sans-serif;
 }
 
+.lead-action-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.lead-action-icon {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+}
+
+.lead-action-edit::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 1px;
+  width: 5px;
+  height: 17px;
+  border-radius: 1px;
+  background: #fff;
+  transform: rotate(-42deg);
+  transform-origin: center;
+}
+
+.lead-action-edit::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid #fff;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transform: rotate(-42deg);
+}
+
+.lead-action-calendar {
+  border: 2px solid #fff;
+  border-top-width: 5px;
+}
+
+.lead-action-calendar::before,
+.lead-action-calendar::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  width: 3px;
+  height: 6px;
+  background: #fff;
+}
+
+.lead-action-calendar::before {
+  left: 3px;
+}
+
+.lead-action-calendar::after {
+  right: 3px;
+}
+
+.lead-action-check::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0;
+  width: 8px;
+  height: 15px;
+  border-right: 4px solid #fff;
+  border-bottom: 4px solid #fff;
+  transform: rotate(42deg);
+}
+
 .settle-icon-button {
   background: #5b9c53;
   box-shadow: 0 5px 12px rgba(91, 156, 83, 0.2);
