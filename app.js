@@ -1533,6 +1533,15 @@ function displayName(value = "") {
     .replace(/(^|\s|\/|-)(\p{L})/gu, (match, prefix, letter) => `${prefix}${letter.toLocaleUpperCase("pt-BR")}`);
 }
 
+function escapeHtml(value = "") {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function maskedCpf(value = "") {
   const digits = String(value || "").replace(/\D/g, "");
   if (!digits || digits.length < 5) return "Não informado";
@@ -4685,16 +4694,39 @@ function applyEnrollmentPlanDefaults(form, overwrite = true) {
   if (form.elements.startDate?.value) setIfNeeded("endDate", calculatedEnrollmentEndDate(form.elements.startDate.value, form.elements.planType?.value || plan.type));
 }
 
+function findStudentByLookup(value = "") {
+  const term = normalizedText(value);
+  if (!term) return null;
+  return (
+    state.students.find((item) => normalizedText(item.name) === term) ||
+    state.students.find((item) => normalizedText(item.name).includes(term)) ||
+    null
+  );
+}
+
+function syncStudentLookup(input, allowPartial = false) {
+  const form = input.closest("form");
+  const hidden = form?.elements[input.dataset.studentTarget];
+  const studentMatch = allowPartial ? findStudentByLookup(input.value) : state.students.find((item) => normalizedText(item.name) === normalizedText(input.value));
+  if (hidden) hidden.value = studentMatch?.id || "";
+  input.setCustomValidity(studentMatch ? "" : "Selecione um paciente cadastrado.");
+  return Boolean(studentMatch);
+}
+
 function renderField(field) {
   const required = field.required === false ? "" : "required";
   const isSelected = (value) => String(value ?? "") === String(field.value ?? "") ? "selected" : "";
 
   if (field.type === "student") {
+    const selectedStudent = state.students.find((item) => item.id === field.value) || state.students[0] || {};
+    const listId = `studentList-${field.name}`;
     return `
-      <label>${field.label}
-        <select name="${field.name}" ${required}>
-          ${state.students.map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.name}</option>`).join("")}
-        </select>
+      <label class="student-lookup-field">${field.label}
+        <input type="search" name="${field.name}Search" list="${listId}" value="${escapeHtml(selectedStudent.name || "")}" data-student-search data-student-target="${field.name}" placeholder="Digite parte do nome do paciente" autocomplete="off" ${required} />
+        <input type="hidden" name="${field.name}" value="${escapeHtml(selectedStudent.id || "")}" />
+        <datalist id="${listId}">
+          ${state.students.map((item) => `<option value="${escapeHtml(item.name)}" label="${escapeHtml([item.cpf, item.phone].filter(Boolean).join(" · "))}"></option>`).join("")}
+        </datalist>
       </label>
     `;
   }
@@ -5022,13 +5054,26 @@ document.querySelector("#modalBackdrop").addEventListener("click", (event) => {
 document.querySelector("#modalForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const form = event.currentTarget;
+  const invalidLookup = [...form.querySelectorAll("[data-student-search]")].find((input) => !syncStudentLookup(input, true));
+  if (invalidLookup) {
+    invalidLookup.reportValidity();
+    return;
+  }
   const schema = modalSchemas[form.dataset.type];
   const values = Object.fromEntries(new FormData(form).entries());
+  form.querySelectorAll("[data-student-search]").forEach((input) => {
+    delete values[`${input.dataset.studentTarget}Search`];
+  });
   schema.handler(values);
   saveState();
   closeModal();
   render();
   toast(form.dataset.type === "accountSettlement" ? "Baixa registrada com sucesso." : "Cadastro salvo com sucesso.");
+});
+
+document.querySelector("#modalForm").addEventListener("input", (event) => {
+  if (!event.target.matches("[data-student-search]")) return;
+  syncStudentLookup(event.target, false);
 });
 
 document.querySelector("#modalForm").addEventListener("change", (event) => {
