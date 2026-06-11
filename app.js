@@ -2327,23 +2327,13 @@ function renderAccountOptions() {
       monthFilter.innerHTML = months.map((ym) => `<option value="${ym}">${monthLabel(ym)}</option>`).join("");
       monthFilter.value = months.includes(selected) ? selected : months[0] || selected;
     }
-    const modalityFilter = document.querySelector(`#${config.modalityId}`);
-    if (modalityFilter) {
-      const selected = modalityFilter.value || "all";
-      modalityFilter.innerHTML = `<option value="all">Modalidades</option>${activeModalities().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
-      modalityFilter.value = selected === "all" || activeModalities().some((item) => item.id === selected) ? selected : "all";
-    }
-    const professionalFilter = document.querySelector(`#${config.professionalId}`);
-    if (professionalFilter) {
-      const selected = professionalFilter.value || "all";
-      professionalFilter.innerHTML = `<option value="all">Professor</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
-      professionalFilter.value = selected === "all" || activeProfessionals().some((item) => item.id === selected) ? selected : "all";
-    }
     const chartFilter = document.querySelector(`#${config.chartId}`);
     if (chartFilter) {
       const selected = chartFilter.value || "all";
-      chartFilter.innerHTML = `<option value="all">Plano de contas</option>${activeChartAccounts().map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("")}`;
-      chartFilter.value = selected === "all" || activeChartAccounts().some((item) => item.id === selected) ? selected : "all";
+      const nature = config.direction === "Pagar" ? "Despesa" : "Receita";
+      const chartOptions = activeChartAccounts().filter((item) => item.nature === nature);
+      chartFilter.innerHTML = `<option value="all">Plano de contas</option>${chartOptions.map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("")}`;
+      chartFilter.value = selected === "all" || chartOptions.some((item) => item.id === selected) ? selected : "all";
     }
     const supplierFilter = document.querySelector(`#${config.supplierId}`);
     if (supplierFilter) {
@@ -3325,8 +3315,6 @@ const accountViewConfigs = {
     monthId: "payableAccountMonthFilter",
     statusId: "payableAccountStatusFilter",
     reconciliationId: "payableAccountReconciliationFilter",
-    modalityId: "payableAccountModalityFilter",
-    professionalId: "payableAccountProfessionalFilter",
     chartId: "payableAccountChartFilter",
     supplierId: "payableAccountSupplierFilter",
     emptyMessage: "Nenhuma conta a pagar encontrada.",
@@ -3343,8 +3331,6 @@ const accountViewConfigs = {
     monthId: "receivableAccountMonthFilter",
     statusId: "receivableAccountStatusFilter",
     reconciliationId: "receivableAccountReconciliationFilter",
-    modalityId: "receivableAccountModalityFilter",
-    professionalId: "receivableAccountProfessionalFilter",
     chartId: "receivableAccountChartFilter",
     supplierId: "receivableAccountSupplierFilter",
     emptyMessage: "Nenhuma conta a receber encontrada.",
@@ -3357,8 +3343,6 @@ function accountRows(config) {
   const reconciliation = document.querySelector(`#${config.reconciliationId}`)?.value ?? "all";
   const chartAccount = document.querySelector(`#${config.chartId}`)?.value ?? "all";
   const supplier = document.querySelector(`#${config.supplierId}`)?.value ?? "all";
-  const modality = document.querySelector(`#${config.modalityId}`)?.value ?? "all";
-  const professional = document.querySelector(`#${config.professionalId}`)?.value ?? "all";
   const periodType = document.querySelector(`#${config.periodTypeId}`)?.value ?? "Mês/Ano Competência";
   const month = document.querySelector(`#${config.monthId}`)?.value ?? "";
 
@@ -3382,8 +3366,6 @@ function accountRows(config) {
     .filter((item) => reconciliation === "all" || (item.reconciliationStatus || "unreconciled") === reconciliation)
     .filter((item) => chartAccount === "all" || item.chartAccountId === chartAccount)
     .filter((item) => supplier === "all" || item.supplierId === supplier)
-    .filter((item) => modality === "all" || item.modalityId === modality)
-    .filter((item) => professional === "all" || item.teacherId === professional)
     .sort((a, b) => (accountExpectedDate(a) || "").localeCompare(accountExpectedDate(b) || ""));
 }
 
@@ -5530,8 +5512,6 @@ function clearAccountFilters(config) {
   setControlValue(config.monthId, demoToday.slice(0, 7));
   setControlValue(config.statusId, "all");
   setControlValue(config.reconciliationId, "all");
-  setControlValue(config.modalityId, "all");
-  setControlValue(config.professionalId, "all");
   setControlValue(config.chartId, "all");
   setControlValue(config.supplierId, "all");
   renderAccounts();
@@ -5541,8 +5521,6 @@ function resetAccountFiltersForImport(config) {
   setControlValue(config.searchId, "");
   setControlValue(config.statusId, "all");
   setControlValue(config.reconciliationId, "all");
-  setControlValue(config.modalityId, "all");
-  setControlValue(config.professionalId, "all");
   setControlValue(config.chartId, "all");
   setControlValue(config.supplierId, "all");
 }
@@ -5669,7 +5647,7 @@ document.querySelector("#fiscalClearFiltersButton")?.addEventListener("click", c
 document.querySelector("#issueSelectedInvoicesButton")?.addEventListener("click", issuePendingFiscalInvoices);
 
 Object.values(accountViewConfigs).forEach((config) => {
-  [config.searchId, config.periodTypeId, config.dateRangeId, config.monthId, config.statusId, config.reconciliationId, config.modalityId, config.professionalId, config.chartId, config.supplierId].forEach((id) => {
+  [config.searchId, config.periodTypeId, config.monthId, config.statusId, config.reconciliationId, config.chartId, config.supplierId].forEach((id) => {
     document.querySelector(`#${id}`)?.addEventListener("input", renderAccounts);
     document.querySelector(`#${id}`)?.addEventListener("change", renderAccounts);
   });
