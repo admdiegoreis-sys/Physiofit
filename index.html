@@ -1082,6 +1082,8 @@
               </div>
               <div class="title-actions">
                 <button class="primary-button" data-open-account-direction="Pagar" type="button">Adicionar Conta a Pagar</button>
+                <button class="ghost-button" data-import-accounts="Pagar" type="button">Importar Planilha</button>
+                <input id="importAccountsPayableFile" type="file" accept=".xlsx" hidden />
                 <button class="ghost-button" data-print-view="accountsPayable" type="button">Imprimir / Salvar</button>
               </div>
             </div>
@@ -1157,6 +1159,8 @@
               </div>
               <div class="title-actions">
                 <button class="primary-button" data-open-account-direction="Receber" type="button">Adicionar Conta a Receber</button>
+                <button class="ghost-button" data-import-accounts="Receber" type="button">Importar Planilha</button>
+                <input id="importAccountsReceivableFile" type="file" accept=".xlsx" hidden />
                 <button class="ghost-button" data-print-view="accountsReceivable" type="button">Imprimir / Salvar</button>
               </div>
             </div>
@@ -1616,6 +1620,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>

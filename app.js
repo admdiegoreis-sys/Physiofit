@@ -4167,6 +4167,117 @@ function deleteChartAccount(chartAccountId) {
   toast("Conta contábil excluída.");
 }
 
+function xlsxDateToIso(value) {
+  if (!value) return "";
+  if (value instanceof Date) {
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, "0");
+    const d = String(value.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  if (typeof value === "number") {
+    return xlsxDateToIso(new Date(Math.round((value - 25569) * 86400 * 1000)));
+  }
+  if (typeof value === "string") {
+    const parts = value.split("/");
+    if (parts.length === 3) return `${parts[2]}-${parts[1].padStart(2,"0")}-${parts[0].padStart(2,"0")}`;
+    return value.slice(0, 10);
+  }
+  return "";
+}
+
+function chartAccountByCode(code) {
+  if (!code) return null;
+  const str = String(code).trim();
+  return state.chartAccounts.find((item) => item.code === str) || null;
+}
+
+function importAccountsFromXlsx(file, direction) {
+  if (!window.XLSX) {
+    toast("Biblioteca de leitura de planilha não carregada. Verifique sua conexão.");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const wb = window.XLSX.read(e.target.result, { type: "array", cellDates: true });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = window.XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+      const colMap = {
+        competencia:  ["Competência","Competencia","competencia","competência"],
+        descricao:    ["Descrição","Descricao","descricao","descrição","Descrição"],
+        banco:        ["Banco","banco"],
+        previsao:     ["Previsão","Previsao","previsao","previsão"],
+        dataPagto:    ["Data Pagto","Data Pagamento","dataPagto","data_pagto","DataPagto"],
+        fornecedor:   ["Fornecedor","fornecedor"],
+        documento:    ["CPF/CNPJ","cpf_cnpj","documento","Documento"],
+        valor:        ["Valor (R$)","Valor","valor","valor_rs"],
+        conta:        ["Conta","conta"],
+      };
+
+      function col(row, key) {
+        for (const name of colMap[key]) {
+          if (row[name] !== undefined && row[name] !== "") return row[name];
+        }
+        return "";
+      }
+
+      let imported = 0;
+      let skipped = 0;
+
+      rows.forEach((row) => {
+        const rawValor = parseFloat(String(col(row, "valor")).replace(",", ".")) || 0;
+        const rowDirection = rawValor < 0 ? "Pagar" : "Receber";
+        if (rowDirection !== direction) { skipped++; return; }
+
+        const amount = Math.abs(rawValor);
+        const competenceDate = xlsxDateToIso(col(row, "competencia"));
+        const forecastDate   = xlsxDateToIso(col(row, "previsao")) || competenceDate;
+        const paidDate       = xlsxDateToIso(col(row, "dataPagto"));
+        const description    = String(col(row, "descricao")).trim();
+        const person         = String(col(row, "fornecedor")).trim();
+        const document       = String(col(row, "documento")).trim();
+        const banco          = String(col(row, "banco")).trim();
+        const contaCodigo    = String(col(row, "conta")).trim();
+        const chartAccount   = chartAccountByCode(contaCodigo);
+
+        if (!amount || !competenceDate) { skipped++; return; }
+
+        state.accounts.push({
+          id: uid("cp"),
+          direction,
+          status: paidDate ? (direction === "Receber" ? "Recebido" : "Pago") : "Aberto",
+          competenceDate,
+          forecastDate,
+          dueDate: forecastDate,
+          paidDate,
+          paidAmount: paidDate ? amount : 0,
+          openAmount: paidDate ? 0 : amount,
+          originalAmount: amount,
+          amount,
+          description,
+          person,
+          document,
+          paymentMethod: banco,
+          bankLaunch: description,
+          chartAccountId: chartAccount?.id || "",
+          reconciliationStatus: paidDate ? "manual" : "unreconciled",
+          origin: "Importação Manual",
+        });
+        imported++;
+      });
+
+      saveState();
+      render();
+      toast(`${imported} lançamento(s) importado(s). ${skipped > 0 ? `${skipped} linha(s) ignorada(s) por direção ou dados incompletos.` : ""}`);
+    } catch (err) {
+      toast("Erro ao ler a planilha: " + (err.message || "formato inválido."));
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
 function processOfxFile() {
   const accountId = document.querySelector("#ofxBankAccountSelect")?.value || "";
   const file = document.querySelector("#ofxFileInput")?.files?.[0];
@@ -5282,6 +5393,13 @@ document.addEventListener("click", (event) => {
   const toggleUserButton = event.target.closest("[data-toggle-user]");
   if (toggleUserButton) toggleUserStatus(toggleUserButton.dataset.toggleUser, toggleUserButton.dataset.userStatus);
 
+  const importAccountsButton = event.target.closest("[data-import-accounts]");
+  if (importAccountsButton) {
+    const dir = importAccountsButton.dataset.importAccounts;
+    const inputId = dir === "Pagar" ? "importAccountsPayableFile" : "importAccountsReceivableFile";
+    document.querySelector(`#${inputId}`)?.click();
+  }
+
   const printViewButton = event.target.closest("[data-print-view]");
   if (printViewButton) window.print();
 
@@ -5667,6 +5785,14 @@ document.querySelector("#chartAccountSearch")?.addEventListener("input", renderC
 document.querySelector("#chartAccountSearchButton")?.addEventListener("click", renderChartAccounts);
 document.querySelector("#chartAccountClearFiltersButton")?.addEventListener("click", clearChartAccountFilters);
 document.querySelector("#processOfxButton")?.addEventListener("click", processOfxFile);
+document.querySelector("#importAccountsPayableFile")?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (file) { importAccountsFromXlsx(file, "Pagar"); e.target.value = ""; }
+});
+document.querySelector("#importAccountsReceivableFile")?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (file) { importAccountsFromXlsx(file, "Receber"); e.target.value = ""; }
+});
 document.querySelector("#approveOfxValidButton")?.addEventListener("click", approveValidOfxDraftsToFinance);
 document.querySelector("#clearOfxImportButton")?.addEventListener("click", clearOfxImport);
 ["bankReconciliationStatusFilter", "bankReconciliationTypeFilter", "bankReconciliationAccountFilter", "bankReconciliationSearch"].forEach((id) => {
