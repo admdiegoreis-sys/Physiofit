@@ -19,6 +19,13 @@
   --topbar-height: 96px;
   --button-radius: 0;
   --button-radius-sm: 0;
+  --app-font-size: 14px;
+  --ui-font-size: 0.86rem;
+  --ui-font-size-sm: 0.76rem;
+  --table-font-size: 0.84rem;
+  --table-font-size-sm: 0.7rem;
+  --button-font-size: 0.86rem;
+  --field-height: 38px;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -31,6 +38,7 @@ body {
   margin: 0;
   color: var(--ink);
   background: #f3f5f9;
+  font-size: var(--app-font-size);
 }
 
 button,
@@ -3415,4 +3423,210 @@ input[type="reset"],
 .today-button,
 .mode-button {
   border-radius: 0;
+}
+
+/* App-wide typography density: keeps screens readable while fitting more data. */
+.agenda-titlebar,
+.module-titlebar {
+  min-height: 64px;
+  padding: 10px 14px;
+}
+
+.agenda-titlebar h2,
+.module-titlebar h2 {
+  font-size: 1.18rem;
+  line-height: 1.12;
+}
+
+.module-titlebar .eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
+.primary-button,
+.ghost-button,
+.secondary-button,
+.action-button,
+.clear-filter-button,
+.mini-button,
+.monthly-status-button,
+.linked-edit-button,
+.top-menu-option,
+.help-button,
+.user-button {
+  min-height: var(--field-height);
+  font-size: var(--button-font-size);
+}
+
+.primary-button {
+  padding: 0 14px;
+}
+
+.ghost-button,
+.secondary-button,
+.clear-filter-button {
+  padding: 0 12px;
+}
+
+.icon-button {
+  width: 38px;
+  min-height: var(--field-height);
+  font-size: 1rem;
+}
+
+.patient-toolbar {
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px;
+}
+
+.patient-toolbar select,
+.patient-toolbar input,
+.accounts-toolbar select,
+.accounts-toolbar input,
+.monthly-toolbar select,
+.monthly-toolbar input,
+.search-field input,
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.editor-grid input,
+.editor-grid select,
+.editor-grid textarea,
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+  min-height: var(--field-height);
+  padding: 7px 10px;
+  font-size: var(--ui-font-size);
+}
+
+.form-grid textarea,
+.editor-grid textarea,
+.modal-body textarea {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+.search-field,
+.editor-grid label,
+.form-grid label {
+  font-size: var(--ui-font-size-sm);
+}
+
+.patients-table-wrap table,
+.professionals-table-wrap table,
+.modalities-table-wrap table,
+.plans-table-wrap table,
+.enrollments-table-wrap table,
+.crm-table-wrap table,
+.fiscal-table-wrap table,
+.patient-enrollment-history-wrap table,
+.chart-accounts-table-wrap table {
+  font-size: var(--table-font-size);
+}
+
+.patients-table-wrap th,
+.patients-table-wrap td,
+.professionals-table-wrap th,
+.professionals-table-wrap td,
+.modalities-table-wrap th,
+.modalities-table-wrap td,
+.plans-table-wrap th,
+.plans-table-wrap td,
+.enrollments-table-wrap th,
+.enrollments-table-wrap td,
+.crm-table-wrap th,
+.crm-table-wrap td,
+.fiscal-table-wrap th,
+.fiscal-table-wrap td,
+.patient-enrollment-history-wrap th,
+.patient-enrollment-history-wrap td,
+.chart-accounts-table-wrap th,
+.chart-accounts-table-wrap td {
+  padding: 10px 12px;
+  line-height: 1.24;
+}
+
+.patients-table-wrap th,
+.professionals-table-wrap th,
+.modalities-table-wrap th,
+.plans-table-wrap th,
+.enrollments-table-wrap th,
+.crm-table-wrap th,
+.fiscal-table-wrap th,
+.patient-enrollment-history-wrap th,
+.chart-accounts-table-wrap th {
+  font-size: var(--table-font-size-sm);
+  letter-spacing: 0.01em;
+}
+
+.plans-table-wrap table {
+  min-width: 1020px;
+}
+
+.modalities-table-wrap table {
+  min-width: 900px;
+}
+
+.patient-name strong,
+.dashboard-list-item strong,
+.class-card strong,
+.payment-row strong,
+.record-card strong {
+  font-size: 0.9rem;
+}
+
+.patient-name span,
+.patient-contact span,
+.patient-contact a,
+.dashboard-list-item span,
+table small,
+.meta {
+  font-size: 0.72rem;
+}
+
+.time-pill,
+.status-pill {
+  min-height: 24px;
+  padding: 0 8px;
+  font-size: 0.68rem;
+}
+
+.row-actions {
+  gap: 6px;
+}
+
+.patients-table-wrap .row-action-button,
+.professionals-table-wrap .row-action-button,
+.modalities-table-wrap .row-action-button,
+.plans-table-wrap .row-action-button,
+.enrollments-table-wrap .row-action-button,
+.crm-table-wrap .row-action-button,
+.fiscal-table-wrap .row-action-button,
+.chart-accounts-table-wrap .row-action-button,
+.patient-enrollment-history-wrap .row-action-button {
+  width: 36px;
+  min-width: 36px;
+  height: 32px;
+  min-height: 32px;
+  font-size: 0.88rem;
+}
+
+.accounts-table-wrap .row-action-button {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  font-size: 0.76rem;
+}
+
+.monthly-table-wrap table,
+.accounts-table-wrap table {
+  font-size: 0.74rem;
+}
+
+.monthly-table-wrap th,
+.accounts-table-wrap th {
+  font-size: 0.6rem;
 }
