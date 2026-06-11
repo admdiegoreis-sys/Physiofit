@@ -477,6 +477,7 @@ let editingStudentId = null;
 let editingProfessionalId = null;
 let editingModalityId = null;
 let editingPlanId = null;
+let editingSupplierId = null;
 let editingChartAccountId = null;
 let editingEnrollmentId = null;
 let editingLeadId = null;
@@ -655,15 +656,68 @@ const modalSchemas = {
       { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
       { name: "notes", label: "Observações", type: "textarea", value: "" },
     ],
-    handler: (values) => state.suppliers.push(normalizeSupplier({ id: uid("f"), ...values }, state.suppliers.length)),
+    handler: (values) => {
+      const current = editingSupplierId ? state.suppliers.find((item) => item.id === editingSupplierId) : {};
+      const payload = normalizeSupplier({ ...current, id: editingSupplierId || uid("f"), ...values }, state.suppliers.length);
+      if (editingSupplierId) state.suppliers = state.suppliers.map((item) => (item.id === editingSupplierId ? payload : item));
+      else state.suppliers.push(payload);
+      editingSupplierId = null;
+    },
+  },
+  modality: {
+    title: "Modalidade",
+    submit: "Salvar modalidade",
+    fields: [
+      { name: "name", label: "Nome da modalidade", type: "text", value: "" },
+      { name: "maxPatients", label: "Máx. pacientes", type: "number", value: 1 },
+      { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
+      { name: "color", label: "Cor", type: "color", value: "#6043c2" },
+      { name: "notes", label: "Observações", type: "textarea", value: "", required: false },
+    ],
+    handler: (values) => {
+      values.maxPatients = Number(values.maxPatients || 1);
+      values.notes = values.notes || "";
+      const current = editingModalityId ? state.modalities.find((item) => item.id === editingModalityId) : {};
+      const payload = normalizeModality({ ...current, id: editingModalityId || uid("m"), createdAt: current?.createdAt || new Date().toISOString(), ...values }, state.modalities.length);
+      if (editingModalityId) state.modalities = state.modalities.map((item) => (item.id === editingModalityId ? payload : item));
+      else state.modalities.push(payload);
+      editingModalityId = null;
+    },
+  },
+  plan: {
+    title: "Plano",
+    submit: "Salvar plano",
+    fields: [
+      { name: "name", label: "Nome do plano", type: "text", value: "" },
+      { name: "modalityId", label: "Modalidade", type: "modalityId" },
+      { name: "type", label: "Tipo de plano", type: "select", options: ["Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "Mensal" },
+      { name: "value", label: "Valor", type: "number", value: "0.00" },
+      { name: "sessions", label: "Sessões inclusas", type: "number", value: 0 },
+      { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
+      { name: "notes", label: "Observações", type: "textarea", value: "", required: false },
+    ],
+    handler: (values) => {
+      values.value = Number(values.value || 0).toFixed(2);
+      values.sessions = Number(values.sessions || 0);
+      values.type = planTypeLabel(values.type);
+      values.notes = values.notes || "";
+      const current = editingPlanId ? state.plans.find((item) => item.id === editingPlanId) : {};
+      const payload = { ...createEmptyPlan(), ...current, id: editingPlanId || uid("pl"), ...values, value: Number(values.value) };
+      if (editingPlanId) state.plans = state.plans.map((item) => (item.id === editingPlanId ? payload : item));
+      else state.plans.push(payload);
+      editingPlanId = null;
+      renderPlanOptions();
+      renderEnrollmentOptions();
+    },
   },
   enrollment: {
     title: "Matrícula",
     submit: "Salvar matrícula",
     fields: [
       { name: "studentId", label: "Aluno/Paciente", type: "student" },
-      { name: "planId", label: "Plano", type: "planId" },
       { name: "modalityId", label: "Modalidade", type: "modalityId" },
+      { name: "planType", label: "Tipo de plano", type: "select", options: ["Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "Mensal" },
+      { name: "planId", label: "Plano", type: "planId" },
       { name: "professionalId", label: "Profissional", type: "professionalOptional" },
       { name: "startDate", label: "Data da matrícula", type: "date", value: demoToday },
       { name: "endDate", label: "Data final", type: "date", value: "2026-12-31" },
@@ -672,25 +726,20 @@ const modalSchemas = {
       { name: "registrationFee", label: "Taxa de matrícula", type: "number", value: 0, required: false },
       { name: "dueNotice", label: "Aviso de vencimento", type: "select", options: ["Sim", "Não"], value: "Sim" },
       { name: "sessionReminder", label: "Lembrete de sessão", type: "select", options: ["Sim", "Não"], value: "Sim" },
-      { name: "planType", label: "Tipo de plano", type: "select", options: ["Aula avulsa", "Mensalidade", "Trimestralidade", "Semestralidade", "Pacote de sessão"], value: "Mensalidade" },
       { name: "monthlyValue", label: "Valor da mensalidade", type: "number", value: 0 },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Dinheiro", "Transferência"], value: "Pix" },
       { name: "autoRenew", label: "Renovação automática", type: "select", options: ["Sim", "Não"], value: "Sim" },
       { name: "room", label: "Sala", type: "select", options: ["Sala Reformer", "Sala Cadillac", "Sala Clínica", "Sala Solo", "Sala Funcional"], value: "Sala Reformer", required: false },
       { name: "freeSchedule", label: "Horário livre", type: "select", options: ["Não", "Sim"], value: "Não" },
       { name: "sessions", label: "Sessões por semana", type: "number", value: 1 },
-      { name: "sessionType", label: "Tipo de sessão", type: "select", options: ["Presencial", "Domicílio", "Online"], value: "Presencial" },
-      { name: "attendanceType", label: "Forma de atendimento", type: "select", options: ["Particular", "Convênio", "Cortesia"], value: "Particular" },
       { name: "mondayTime", label: "Segunda-feira", type: "time", value: "", required: false },
       { name: "tuesdayTime", label: "Terça-feira", type: "time", value: "", required: false },
       { name: "wednesdayTime", label: "Quarta-feira", type: "time", value: "", required: false },
       { name: "thursdayTime", label: "Quinta-feira", type: "time", value: "", required: false },
       { name: "fridayTime", label: "Sexta-feira", type: "time", value: "", required: false },
-      { name: "saturdayTime", label: "Sábado", type: "time", value: "", required: false },
       { name: "financialNotes", label: "Observação financeira", type: "textarea", value: "", required: false },
       { name: "contractTemplate", label: "Contrato", type: "select", options: ["Contrato de matrícula", "Termo avulso", "Sem contrato"], value: "Contrato de matrícula" },
       { name: "contractStatus", label: "Assinatura do contrato", type: "select", options: ["Não enviado", "Pendente", "Assinado"], value: "Pendente" },
-      { name: "signatureStatus", label: "Assinatura virtual", type: "select", options: ["Não enviada", "Pendente", "Assinada"], value: "Pendente" },
       { name: "lockStartDate", label: "Início férias/trancamento", type: "date", value: "", required: false },
       { name: "lockEndDate", label: "Fim férias/trancamento", type: "date", value: "", required: false },
       { name: "status", label: "Status", type: "select", options: ["Ativa", "Pendente", "Suspensa", "Cancelada"], value: "Ativa" },
@@ -698,20 +747,26 @@ const modalSchemas = {
     ],
     handler: (values) => {
       const plan = state.plans.find((item) => item.id === values.planId);
+      const enrollmentId = editingEnrollmentId || uid("e");
       const normalized = normalizeEnrollment({
-        id: editingEnrollmentId || uid("e"),
+        id: enrollmentId,
         ...values,
         modalityId: values.modalityId || plan?.modalityId || "",
+        endDate: values.endDate || calculatedEnrollmentEndDate(values.startDate, values.planType || plan?.type),
+        firstPaymentDate: values.firstPaymentDate || values.startDate,
+        planType: planTypeLabel(values.planType || plan?.type),
         monthlyValue: Number(values.monthlyValue || plan?.value || 0),
         dueDay: Number(values.dueDay || 0),
         registrationFee: Number(values.registrationFee || 0),
-        sessions: Number(values.sessions || 0),
+        sessions: Number(values.sessions || plan?.sessions || 0),
       }, state.enrollments.length);
       if (editingEnrollmentId) {
         state.enrollments = state.enrollments.map((item) => (item.id === editingEnrollmentId ? normalized : item));
       } else {
         state.enrollments.push(normalized);
       }
+      ensureEnrollmentFinancialTitles(normalized);
+      ensureEnrollmentAppointments(normalized);
     },
   },
   payment: {
@@ -960,10 +1015,6 @@ function normalizeProfessional(item, index) {
     commission: "",
     hourValue: "",
     commissionNotes: "",
-    signatureName: "",
-    signatureDocument: "",
-    signatureStatus: "Não configurada",
-    signatureFooter: "",
     ...item,
   };
 }
@@ -1024,35 +1075,32 @@ function normalizeSupplier(item, index) {
 
 function normalizeModality(item, index) {
   const defaults = seedModalities[index % seedModalities.length] ?? seedModalities[0];
+  const { wellhub, totalPass, experimentalValue, singleValue, ...cleanItem } = item;
   return {
     id: item.id || defaults.id || uid("m"),
     name: defaults.name,
     status: "Ativo",
     maxPatients: defaults.maxPatients,
     color: defaults.color,
-    wellhub: false,
-    totalPass: false,
-    experimentalValue: 0,
-    singleValue: 0,
     createdAt: new Date().toISOString(),
     notes: "",
-    ...item,
+    ...cleanItem,
   };
 }
 
 function normalizePlan(item, index) {
   const defaults = seedPlans[index % seedPlans.length] ?? seedPlans[0];
+  const { linkedEnrollments, ...cleanItem } = item;
   return {
     id: item.id || defaults.id || uid("pl"),
     name: defaults.name,
     modalityId: defaults.modalityId,
     type: defaults.type,
     value: defaults.value,
-    linkedEnrollments: defaults.linkedEnrollments,
     sessions: defaults.sessions,
     status: "Ativo",
     notes: "",
-    ...item,
+    ...cleanItem,
   };
 }
 
@@ -1081,25 +1129,24 @@ function normalizeEnrollment(item, index) {
     room: defaults.room || "",
     freeSchedule: defaults.freeSchedule || "Não",
     sessions: Number(defaults.sessions || plan?.sessions || 0),
-    sessionType: defaults.sessionType || "Presencial",
-    attendanceType: defaults.attendanceType || "Particular",
     mondayTime: defaults.mondayTime || "",
     tuesdayTime: defaults.tuesdayTime || "",
     wednesdayTime: defaults.wednesdayTime || "",
     thursdayTime: defaults.thursdayTime || "",
     fridayTime: defaults.fridayTime || "",
-    saturdayTime: defaults.saturdayTime || "",
     financialNotes: defaults.financialNotes || "",
     contractTemplate: defaults.contractTemplate || "Contrato de matrícula",
-    signatureStatus: defaults.signatureStatus || "Pendente",
     lockStartDate: defaults.lockStartDate || "",
     lockEndDate: defaults.lockEndDate || "",
+    financialTitlesGenerated: Boolean(defaults.financialTitlesGenerated),
     notes: "",
     ...item,
+    planType: planTypeLabel(item.planType ?? defaults.planType ?? plan?.type ?? "Mensal"),
     monthlyValue: Number(item.monthlyValue ?? defaults.monthlyValue ?? plan?.value ?? 0),
     dueDay: Number(item.dueDay ?? defaults.dueDay ?? 0),
     registrationFee: Number(item.registrationFee ?? defaults.registrationFee ?? 0),
     sessions: Number(item.sessions ?? defaults.sessions ?? plan?.sessions ?? 0),
+    financialTitlesGenerated: Boolean(item.financialTitlesGenerated ?? defaults.financialTitlesGenerated),
   };
 }
 
@@ -1477,6 +1524,172 @@ function ageFromDate(value) {
   const hadBirthday = today.getMonth() > birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
   if (!hadBirthday) age -= 1;
   return age;
+}
+
+function displayName(value = "") {
+  return String(value || "")
+    .trim()
+    .toLocaleLowerCase("pt-BR")
+    .replace(/(^|\s|\/|-)(\p{L})/gu, (match, prefix, letter) => `${prefix}${letter.toLocaleUpperCase("pt-BR")}`);
+}
+
+function maskedCpf(value = "") {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (!digits || digits.length < 5) return "Não informado";
+  return `${digits.slice(0, 3)}.*****${digits.slice(-2)}`;
+}
+
+function planTypeLabel(type = "") {
+  const normalized = normalizedText(type);
+  if (normalized.includes("avulsa") || normalized.includes("avulso") || normalized.includes("livre")) return "Avulsa";
+  if (normalized.includes("pacote")) return "Pacote";
+  if (normalized.includes("trimestral")) return "Trimestral";
+  if (normalized.includes("semestral")) return "Semestral";
+  return "Mensal";
+}
+
+function monthsForPlanType(type = "") {
+  const label = planTypeLabel(type);
+  if (label === "Trimestral") return 3;
+  if (label === "Semestral") return 6;
+  if (label === "Avulsa" || label === "Pacote") return 1;
+  return 1;
+}
+
+function calculatedEnrollmentEndDate(startDate, type = "") {
+  if (!startDate) return "";
+  const date = parseLocalDate(startDate);
+  date.setMonth(date.getMonth() + monthsForPlanType(type));
+  date.setDate(date.getDate() - 1);
+  return isoDate(date);
+}
+
+function revenueChartAccountForModality(modalityId = "") {
+  const modality = modalityName(modalityId);
+  const modalityTerm = normalizedText(modality);
+  return (
+    state.chartAccounts.find((item) => item.nature === "Receita" && modalityTerm && normalizedText(item.name).includes(modalityTerm)) ||
+    state.chartAccounts.find((item) => item.nature === "Receita") ||
+    state.chartAccounts[0]
+  );
+}
+
+function addMonthsToIsoDate(value, months) {
+  const date = parseLocalDate(value);
+  date.setMonth(date.getMonth() + months);
+  return isoDate(date);
+}
+
+function ensureEnrollmentFinancialTitles(enrollment) {
+  if (!enrollment?.id || state.accounts.some((item) => item.enrollmentId === enrollment.id)) {
+    enrollment.financialTitlesGenerated = state.accounts.some((item) => item.enrollmentId === enrollment.id);
+    return;
+  }
+  const relatedStudent = student(enrollment.studentId);
+  const plan = state.plans.find((item) => item.id === enrollment.planId);
+  const chartAccount = revenueChartAccountForModality(enrollment.modalityId);
+  const planType = planTypeLabel(enrollment.planType || plan?.type);
+  const installments = planType === "Trimestral" ? 3 : planType === "Semestral" ? 6 : 1;
+  const firstDate = enrollment.firstPaymentDate || enrollment.startDate || demoToday;
+  const titles = [];
+  for (let index = 0; index < installments; index += 1) {
+    const dueDate = addMonthsToIsoDate(firstDate, index);
+    const amount = Number(enrollment.monthlyValue || plan?.value || 0);
+    if (!amount) continue;
+    titles.push(normalizeAccount({
+      id: uid("cp"),
+      direction: "Receber",
+      status: "Aberto",
+      competenceDate: addMonthsToIsoDate(enrollment.startDate || firstDate, index),
+      forecastDate: dueDate,
+      dueDate,
+      paidDate: "",
+      amount,
+      originalAmount: amount,
+      paidAmount: 0,
+      openAmount: amount,
+      description: `Mensalidade: ${displayName(relatedStudent?.name || "Aluno")}`,
+      person: relatedStudent?.name || "",
+      document: relatedStudent?.cpf || "",
+      modalityId: enrollment.modalityId,
+      teacherId: enrollment.professionalId,
+      chartAccountId: chartAccount?.id || "",
+      paymentMethod: enrollment.paymentMethod || "Pix",
+      origin: "Matrícula",
+      enrollmentId: enrollment.id,
+      reconciliationStatus: "unreconciled",
+    }, state.accounts.length + titles.length));
+  }
+  const registrationFee = Number(enrollment.registrationFee || 0);
+  if (registrationFee > 0) {
+    titles.push(normalizeAccount({
+      id: uid("cp"),
+      direction: "Receber",
+      status: "Aberto",
+      competenceDate: enrollment.startDate || firstDate,
+      forecastDate: firstDate,
+      dueDate: firstDate,
+      paidDate: "",
+      amount: registrationFee,
+      originalAmount: registrationFee,
+      paidAmount: 0,
+      openAmount: registrationFee,
+      description: `Taxa de matrícula: ${displayName(relatedStudent?.name || "Aluno")}`,
+      person: relatedStudent?.name || "",
+      document: relatedStudent?.cpf || "",
+      modalityId: enrollment.modalityId,
+      teacherId: enrollment.professionalId,
+      chartAccountId: chartAccount?.id || "",
+      paymentMethod: enrollment.paymentMethod || "Pix",
+      origin: "Matrícula",
+      enrollmentId: enrollment.id,
+      reconciliationStatus: "unreconciled",
+    }, state.accounts.length + titles.length));
+  }
+  state.accounts.push(...titles);
+  enrollment.financialTitlesGenerated = titles.length > 0;
+}
+
+function ensureEnrollmentAppointments(enrollment) {
+  if (!enrollment?.id || state.appointments.some((item) => item.enrollmentId === enrollment.id)) return;
+  const dayFields = [
+    ["mondayTime", 1],
+    ["tuesdayTime", 2],
+    ["wednesdayTime", 3],
+    ["thursdayTime", 4],
+    ["fridayTime", 5],
+  ];
+  const selectedDays = dayFields.filter(([field]) => enrollment[field]);
+  if (!selectedDays.length || !enrollment.startDate || !enrollment.endDate) return;
+  const endLimit = Math.min(parseLocalDate(enrollment.endDate).getTime(), addDays(parseLocalDate(enrollment.startDate), 180).getTime());
+  const appointments = [];
+  let cursor = parseLocalDate(enrollment.startDate);
+  while (cursor.getTime() <= endLimit) {
+    selectedDays.forEach(([field, weekDay]) => {
+      if (cursor.getDay() !== weekDay) return;
+      const time = enrollment[field];
+      appointments.push({
+        id: uid("a"),
+        enrollmentId: enrollment.id,
+        date: isoDate(cursor),
+        time,
+        endTime: addOneHour(time),
+        studentId: enrollment.studentId,
+        teacherId: enrollment.professionalId,
+        room: enrollment.room || "Sala Reformer",
+        type: modalityName(enrollment.modalityId) || "Pilates",
+        status: "Agendada",
+        sessionKind: planTypeLabel(enrollment.planType),
+      });
+    });
+    cursor = addDays(cursor, 1);
+  }
+  state.appointments.push(...appointments);
+}
+
+function addOneHour(time = "") {
+  const [hour = 0, minute = 0] = time.split(":").map(Number);
+  return `${String((hour + 1) % 24).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 }
 
 function shortDate(date) {
@@ -1903,7 +2116,7 @@ function renderEnrollmentOptions() {
   }
   const typeFilter = document.querySelector("#enrollmentPlanTypeFilter");
   if (typeFilter) {
-    const types = [...new Set(state.plans.map((item) => item.type).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    const types = ["Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"];
     const selected = typeFilter.value || "all";
     typeFilter.innerHTML = `<option value="all">Tipo de plano</option>${types.map((type) => `<option value="${type}">${type}</option>`).join("")}`;
     typeFilter.value = selected === "all" || types.includes(selected) ?selected : "all";
@@ -2319,12 +2532,10 @@ function renderMonthAgenda() {
 function renderStudents() {
   const term = normalizedText(document.querySelector("#studentSearch")?.value.trim() ?? "");
   const statusFilter = document.querySelector("#studentStatusFilter")?.value ?? "all";
-  const limitFilter = document.querySelector("#studentLimitFilter")?.value ?? "50";
-  const filtered = state.students
+  const list = state.students
     .filter((item) => statusFilter === "all" || item.status === statusFilter)
     .filter((item) => normalizedText([item.name, item.phone, item.email, item.plan, item.status, item.cpf, item.responsible].join(" ")).includes(term))
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
-  const list = limitFilter === "all" ?filtered : filtered.slice(0, Number(limitFilter));
   document.querySelector("#studentsTable").innerHTML = list.length
     ?list
         .map(
@@ -2336,11 +2547,11 @@ function renderStudents() {
                   <button class="row-action-button delete-icon-button" data-delete-student="${item.id}" type="button" title="Excluir paciente" aria-label="Excluir paciente">×</button>
                 </div>
               </td>
-              <td><div class="patient-name"><strong>${item.name.toUpperCase()}</strong><span>${item.plan}</span></div></td>
+              <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.plan}</span></div></td>
               <td><span class="status-pill ${statusClass(item.membership)}">${item.membership}</span></td>
               <td><div class="patient-contact"><span>${item.email || "-"}</span><a href="tel:${item.phone}">${item.phone}</a></div></td>
-              <td>${item.cpf || "-"}</td>
-              <td>${dateLabel(item.birthDate)} ${item.birthDate ?`[${ageFromDate(item.birthDate)}]` : ""} ${item.gender === "M" ?"M" : "F"}</td>
+              <td>${maskedCpf(item.cpf)}</td>
+              <td>${dateLabel(item.birthDate)} ${item.birthDate ?`[${ageFromDate(item.birthDate)}]` : ""} ${item.gender === "Masculino" || item.gender === "M" ?"Masculino" : "Feminino"}</td>
             </tr>
           `,
         )
@@ -2357,13 +2568,12 @@ function renderEnrollments() {
   const professionalFilter = document.querySelector("#enrollmentProfessionalFilter")?.value ?? "all";
   const roomFilter = document.querySelector("#enrollmentRoomFilter")?.value ?? "all";
   const typeFilter = document.querySelector("#enrollmentPlanTypeFilter")?.value ?? "all";
-  const limitFilter = document.querySelector("#enrollmentLimitFilter")?.value ?? "50";
-  const rows = state.enrollments
+  const list = state.enrollments
     .filter((item) => statusFilter === "all" || (statusFilter === "activeAndExpired" ?["Ativa", "Vencida"].includes(item.status) : item.status === statusFilter))
     .filter((item) => modalityFilter === "all" || item.modalityId === modalityFilter)
     .filter((item) => professionalFilter === "all" || item.professionalId === professionalFilter)
     .filter((item) => roomFilter === "all" || item.room === roomFilter)
-    .filter((item) => typeFilter === "all" || planById(item.planId)?.type === typeFilter)
+    .filter((item) => typeFilter === "all" || planTypeLabel(item.planType || planById(item.planId)?.type) === planTypeLabel(typeFilter))
     .filter((item) => {
       const student = studentName(item.studentId);
       const plan = planName(item.planId);
@@ -2372,7 +2582,6 @@ function renderEnrollments() {
       return !term || normalizedText(`${student} ${plan} ${professional} ${modality} ${item.status} ${item.contractStatus}`).includes(term);
     })
     .sort((a, b) => studentName(a.studentId).localeCompare(studentName(b.studentId), "pt-BR"));
-  const list = limitFilter === "all" ?rows : rows.slice(0, Number(limitFilter));
 
   table.innerHTML = list.length
     ?list
@@ -2385,7 +2594,7 @@ function renderEnrollments() {
                   <button class="row-action-button delete-icon-button" data-delete-enrollment="${item.id}" type="button" title="Excluir matrícula" aria-label="Excluir matrícula">&times;</button>
                 </div>
               </td>
-              <td><div class="patient-name"><strong>${studentName(item.studentId).toUpperCase()}</strong></div></td>
+              <td><div class="patient-name"><strong>${displayName(studentName(item.studentId))}</strong></div></td>
               <td>${professionalName(item.professionalId)}</td>
               <td><strong>${modalityName(item.modalityId)}</strong><br><small>${item.room || "-"}</small></td>
               <td>${dateLabel(item.startDate)}</td>
@@ -2394,12 +2603,13 @@ function renderEnrollments() {
               <td><span class="contract-icon" title="${planName(item.planId)}">▤</span></td>
               <td>${item.contractStatus || "-"}</td>
               <td>${item.sessions || "-"}</td>
+              <td><span class="status-pill ${state.accounts.some((account) => account.enrollmentId === item.id) || item.financialTitlesGenerated ? "ativo" : "pendente"}">${state.accounts.some((account) => account.enrollmentId === item.id) || item.financialTitlesGenerated ? "Gerado" : "Pendente"}</span></td>
               <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
             </tr>
           `,
         )
         .join("")
-    : `<tr><td colspan="11"><div class="empty-state">Nenhuma matrícula encontrada.</div></td></tr>`;
+    : `<tr><td colspan="12"><div class="empty-state">Nenhuma matrícula encontrada.</div></td></tr>`;
 }
 
 function renderProfessionals() {
@@ -2448,29 +2658,25 @@ function renderSuppliers() {
           <tr>
             <td>
               <div class="row-actions">
+                <button class="row-action-button edit-icon-button" data-edit-supplier="${item.id}" type="button" title="Editar fornecedor" aria-label="Editar fornecedor">✎</button>
                 <button class="row-action-button delete-icon-button" data-delete-supplier="${item.id}" type="button" title="Excluir fornecedor" aria-label="Excluir fornecedor">&times;</button>
               </div>
             </td>
-            <td><div class="patient-name"><strong>${item.name.toUpperCase()}</strong><span>${item.email || item.phone || item.notes || ""}</span></div></td>
+            <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${(item.email || item.phone || item.notes || "").replace("Importado da aba BD_Physiofit", "Importação Manual")}</span></div></td>
             <td>${item.document || "-"}</td>
             <td>${item.supplierType || "-"}</td>
-            <td>${item.movementCount || 0}</td>
-            <td>${currency(Number(item.totalPaid || 0))}</td>
-            <td>${dateLabel(item.lastMovementDate)}</td>
             <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
           </tr>
         `)
         .join("")
-    : `<tr><td colspan="8"><div class="empty-state">Nenhum fornecedor encontrado.</div></td></tr>`;
+    : `<tr><td colspan="5"><div class="empty-state">Nenhum fornecedor encontrado.</div></td></tr>`;
 }
 
 function renderModalities() {
   const table = document.querySelector("#modalitiesTable");
   if (!table) return;
   const term = normalizedText(document.querySelector("#modalitySearch")?.value.trim() ?? "");
-  const statusFilter = document.querySelector("#modalityStatusListFilter")?.value ?? "Ativo";
   const list = state.modalities
-    .filter((item) => statusFilter === "all" || item.status === statusFilter)
     .filter((item) => normalizedText([item.name, item.status, item.notes].join(" ")).includes(term))
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
@@ -2485,26 +2691,22 @@ function renderModalities() {
                   <button class="row-action-button delete-icon-button" data-delete-modality="${item.id}" type="button" title="Excluir modalidade" aria-label="Excluir modalidade">×</button>
                 </div>
               </td>
-              <td><div class="patient-name"><strong>${item.name.toUpperCase()}</strong><span>${item.notes || "Serviço de atendimento"}</span></div></td>
-              <td><span class="modality-capacity">${item.maxPatients || "-"}</span><span class="professional-color-dot" style="background:${item.color || "#6043c2"}"></span></td>
-              <td>${[item.wellhub ?"Wellhub" : "", item.totalPass ?"TotalPass" : ""].filter(Boolean).join(" / ") || "-"}</td>
-              <td><div class="modality-values"><span>${currency(Number(item.experimentalValue || 0))}</span><span>${currency(Number(item.singleValue || 0))}</span></div></td>
+              <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.notes || ""}</span></div></td>
               <td>${dateTimeLabel(item.createdAt)}</td>
               <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
             </tr>
           `,
         )
         .join("")
-    : `<tr><td colspan="7"><div class="empty-state">Nenhuma modalidade encontrada.</div></td></tr>`;
+    : `<tr><td colspan="4"><div class="empty-state">Nenhuma modalidade encontrada.</div></td></tr>`;
 }
 
 function openModalityEditor(modalityId = null) {
   editingModalityId = modalityId;
   const item = modalityId ?state.modalities.find((modalityItem) => modalityItem.id === modalityId) : createEmptyModality();
   if (!item) return;
-  fillModalityEditor(item);
-  document.querySelector("#modalityEditorTitle").textContent = modalityId ?item.name : "Nova modalidade";
-  switchView("modalityEditor");
+  openModal("modality", { ...item, notes: modalityId ? item.notes || "" : "" });
+  document.querySelector("#modalTitle").textContent = modalityId ? `Editar ${displayName(item.name)}` : "Nova modalidade";
 }
 
 function createEmptyModality() {
@@ -2514,10 +2716,6 @@ function createEmptyModality() {
     status: "Ativo",
     maxPatients: 1,
     color: "#6043c2",
-    wellhub: false,
-    totalPass: false,
-    experimentalValue: 0,
-    singleValue: 0,
     createdAt: new Date().toISOString(),
     notes: "",
   };
@@ -2534,10 +2732,6 @@ function saveModalityEditor() {
   const form = document.querySelector("#modalityEditorForm");
   const values = Object.fromEntries(new FormData(form).entries());
   values.maxPatients = Number(values.maxPatients || 0);
-  values.experimentalValue = Number(values.experimentalValue || 0);
-  values.singleValue = Number(values.singleValue || 0);
-  values.wellhub = values.wellhub === "true";
-  values.totalPass = values.totalPass === "true";
   if (editingModalityId) {
     state.modalities = state.modalities.map((item) => (item.id === editingModalityId ?{ ...item, ...values } : item));
   } else {
@@ -2572,27 +2766,24 @@ function renderPlans() {
                   <button class="row-action-button delete-icon-button" data-delete-plan="${item.id}" type="button" title="Excluir plano" aria-label="Excluir plano">×</button>
                 </div>
               </td>
-              <td><div class="patient-name"><strong>${item.name}</strong><span>${item.sessions ?`${item.sessions} sessões inclusas` : "Plano livre"}</span></div></td>
-              <td>${modalityName(item.modalityId).toUpperCase()}</td>
-              <td>${item.type}</td>
+              <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.sessions ?`${item.sessions} sessões inclusas` : "Plano livre"}</span></div></td>
+              <td>${displayName(modalityName(item.modalityId))}</td>
+              <td>${planTypeLabel(item.type)}</td>
               <td><strong>${currency(Number(item.value || 0))}</strong></td>
-              <td>${Number(item.linkedEnrollments || 0)}</td>
               <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
             </tr>
           `,
         )
         .join("")
-    : `<tr><td colspan="7"><div class="empty-state">Nenhum plano encontrado.</div></td></tr>`;
+    : `<tr><td colspan="6"><div class="empty-state">Nenhum plano encontrado.</div></td></tr>`;
 }
 
 function openPlanEditor(planId = null) {
   editingPlanId = planId;
-  renderModalityOptions();
   const item = planId ?state.plans.find((planItem) => planItem.id === planId) : createEmptyPlan();
   if (!item) return;
-  fillPlanEditor(item);
-  document.querySelector("#planEditorTitle").textContent = planId ?item.name : "Novo plano";
-  switchView("planEditor");
+  openModal("plan", { ...item, type: planTypeLabel(item.type), value: Number(item.value || 0).toFixed(2), notes: planId ? item.notes || "" : "" });
+  document.querySelector("#modalTitle").textContent = planId ? `Editar ${displayName(item.name)}` : "Novo plano";
 }
 
 function createEmptyPlan() {
@@ -2600,9 +2791,8 @@ function createEmptyPlan() {
     id: "",
     name: "",
     modalityId: activeModalities()[0]?.id || "",
-    type: "Mensalidade",
+    type: "Mensal",
     value: 0,
-    linkedEnrollments: 0,
     sessions: 0,
     status: "Ativo",
     notes: "",
@@ -2615,6 +2805,7 @@ function fillPlanEditor(item) {
   Object.entries(createEmptyPlan()).forEach(([key, defaultValue]) => {
     if (form.elements[key]) form.elements[key].value = item[key] ?? defaultValue;
   });
+  if (form.elements.type) form.elements.type.value = planTypeLabel(item.type);
 }
 
 function savePlanEditor() {
@@ -2622,7 +2813,8 @@ function savePlanEditor() {
   const values = Object.fromEntries(new FormData(form).entries());
   values.value = Number(values.value || 0);
   values.sessions = Number(values.sessions || 0);
-  values.linkedEnrollments = Number(values.linkedEnrollments || 0);
+  values.type = planTypeLabel(values.type);
+  values.notes = values.notes || "";
   if (editingPlanId) {
     state.plans = state.plans.map((item) => (item.id === editingPlanId ?{ ...item, ...values } : item));
   } else {
@@ -3631,6 +3823,18 @@ function openLeadModal(leadId = null) {
   document.querySelector("#modalTitle").textContent = leadId ? "Editar lead" : "Novo lead";
 }
 
+function openSupplierModal(supplierId = null) {
+  editingSupplierId = supplierId;
+  const item = supplierId ? state.suppliers.find((supplier) => supplier.id === supplierId) : null;
+  if (!item) return;
+  openModal("supplier", {
+    ...item,
+    name: displayName(item.name),
+    notes: String(item.notes || "").replace("Importado da aba BD_Physiofit", "Importação Manual"),
+  });
+  document.querySelector("#modalTitle").textContent = "Editar fornecedor";
+}
+
 function openAccountModal(accountId = null, defaults = {}) {
   editingAccountId = accountId;
   const item = accountId ? state.accounts.find((account) => account.id === accountId) : null;
@@ -3935,7 +4139,6 @@ function openProfessionalEditor(professionalId = null) {
   document.querySelector("#professionalEditorTitle").textContent = professionalId ?item.name : "Novo profissional";
   updateProfessionalSummary(item);
   setProfessionalTab("register");
-  renderLinkedEnrollments(item.id);
   switchView("professionalEditor");
 }
 
@@ -3955,18 +4158,30 @@ function createEmptyProfessional() {
     commission: "",
     hourValue: "",
     commissionNotes: "",
-    signatureName: "",
-    signatureDocument: "",
-    signatureStatus: "Não configurada",
-    signatureFooter: "",
   };
 }
 
 function fillProfessionalEditor(item) {
   const form = document.querySelector("#professionalEditorForm");
+  renderProfessionalModalityOptions(item.modalities);
   Object.entries(createEmptyProfessional()).forEach(([key, defaultValue]) => {
     if (form.elements[key]) form.elements[key].value = item[key] ?? defaultValue;
   });
+}
+
+function renderProfessionalModalityOptions(selectedValue = "") {
+  const select = document.querySelector("[data-professional-modalities-select]");
+  if (!select) return;
+  const selected = String(selectedValue || "")
+    .split(",")
+    .map((value) => normalizedText(value.trim()))
+    .filter(Boolean);
+  select.innerHTML = activeModalities()
+    .map((item) => {
+      const selectedAttr = selected.includes(normalizedText(item.id)) || selected.includes(normalizedText(item.name)) ? "selected" : "";
+      return `<option value="${item.id}" ${selectedAttr}>${displayName(item.name)}</option>`;
+    })
+    .join("");
 }
 
 function updateProfessionalSummary(item) {
@@ -3981,6 +4196,8 @@ function setProfessionalTab(tab) {
 }
 
 function renderLinkedEnrollments(professionalId) {
+  const table = document.querySelector("#linkedEnrollmentsTable");
+  if (!table) return;
   const rows = state.appointments
     .filter((appointment) => appointment.teacherId === professionalId)
     .map((appointment, index) => {
@@ -3993,7 +4210,7 @@ function renderLinkedEnrollments(professionalId) {
         modality: `${appointment.type.toUpperCase()} [${(index % 3) + 1}x]`,
       };
     });
-  document.querySelector("#linkedEnrollmentsTable").innerHTML = rows.length
+  table.innerHTML = rows.length
     ?rows
         .map(
           (row) => `
@@ -4014,7 +4231,9 @@ function renderLinkedEnrollments(professionalId) {
 
 function saveProfessionalEditor() {
   const form = document.querySelector("#professionalEditorForm");
-  const values = Object.fromEntries(new FormData(form).entries());
+  const formData = new FormData(form);
+  const values = Object.fromEntries(formData.entries());
+  values.modalities = formData.getAll("modalities").join(",");
   values.maxPatients = Number(values.maxPatients || 0);
   if (editingProfessionalId) {
     state.professionals = state.professionals.map((item) => (item.id === editingProfessionalId ?{ ...item, ...values } : item));
@@ -4042,12 +4261,13 @@ function openPatientEditor(studentId = null) {
 function createEmptyPatient() {
   return {
     id: "",
+    linkedLeadId: "",
     name: "",
     email: "",
     phone: "",
     cpf: "",
     birthDate: "",
-    gender: "F",
+    gender: "Feminino",
     plan: "Mensal 2x semana",
     status: "Ativo",
     membership: "Matriculado",
@@ -4078,14 +4298,27 @@ function createEmptyPatient() {
 
 function fillPatientEditor(patient) {
   const form = document.querySelector("#patientEditorForm");
+  renderPatientLeadOptions(patient.linkedLeadId);
   Object.entries(createEmptyPatient()).forEach(([key, defaultValue]) => {
     if (form.elements[key]) form.elements[key].value = patient[key] ?? defaultValue;
   });
+  if (form.elements.gender) form.elements.gender.value = patient.gender === "M" ? "Masculino" : patient.gender === "F" ? "Feminino" : patient.gender || "Feminino";
 }
 
 function savePatientEditor() {
   const form = document.querySelector("#patientEditorForm");
   const values = Object.fromEntries(new FormData(form).entries());
+  if (values.linkedLeadId) {
+    const lead = state.leads.find((item) => item.id === values.linkedLeadId);
+    if (lead) {
+      values.name ||= lead.name;
+      values.email ||= lead.email;
+      values.phone ||= lead.phone;
+      values.origin ||= lead.origin;
+      values.commercialNotes ||= lead.notes || lead.initialMessage || "";
+      lead.status = "Matriculado";
+    }
+  }
   if (editingStudentId) {
     state.students = state.students.map((item) => (item.id === editingStudentId ? { ...item, ...values } : item));
   } else {
@@ -4097,9 +4330,23 @@ function savePatientEditor() {
   toast("Cadastro do paciente salvo.");
 }
 
+function renderPatientLeadOptions(selectedValue = "") {
+  const select = document.querySelector("[data-patient-lead-select]");
+  if (!select) return;
+  const options = state.leads
+    .filter((lead) => !lead.linkedStudentId || lead.id === selectedValue)
+    .map((lead) => `<option value="${lead.id}" ${lead.id === selectedValue ? "selected" : ""}>${displayName(lead.name)} · ${lead.status}</option>`)
+    .join("");
+  select.innerHTML = `<option value="">Sem lead vinculado</option>${options}`;
+}
+
 function setPatientTab(tab) {
   document.querySelectorAll("[data-patient-tab]").forEach((button) => button.classList.toggle("active", button.dataset.patientTab === tab));
-  document.querySelectorAll("[data-patient-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.patientPanel === tab));
+  document.querySelectorAll("[data-patient-panel]").forEach((panel) => {
+    const group = panel.dataset.patientPanel;
+    const isPersonalGroup = tab === "personal" && ["personal", "contact", "responsibles"].includes(group);
+    panel.classList.toggle("active", isPersonalGroup || group === tab);
+  });
 }
 
 function renderFinance() {
@@ -4343,7 +4590,7 @@ async function toggleUserStatus(userId, status) {
 function switchView(view) {
   if (!canAccessView(view)) {
     view = "dashboard";
-    if (currentUser()) toast("Seu perfil nao tem acesso a essa tela.");
+    if (currentUser()) toast("Seu perfil não tem acesso a essa tela.");
   }
   document.querySelectorAll(".view").forEach((element) => element.classList.remove("active"));
   document.querySelector(`#${view}View`).classList.add("active");
@@ -4384,8 +4631,25 @@ function openModal(type, values = {}) {
   form.dataset.type = type;
   const fields = schema.fields.map((field) => ({ ...field, value: values[field.name] ?? field.value }));
   form.innerHTML = [...fields.map(renderField), `<button class="primary-button" type="submit">${schema.submit}</button>`].join("");
+  if (type === "enrollment") applyEnrollmentPlanDefaults(form, false);
   backdrop.hidden = false;
   form.querySelector("input, select, textarea")?.focus();
+}
+
+function applyEnrollmentPlanDefaults(form, overwrite = true) {
+  if (!form || form.dataset.type !== "enrollment") return;
+  const plan = state.plans.find((item) => item.id === form.elements.planId?.value);
+  if (!plan) return;
+  const setIfNeeded = (name, value) => {
+    if (!form.elements[name]) return;
+    if (overwrite || !form.elements[name].value) form.elements[name].value = value ?? "";
+  };
+  setIfNeeded("modalityId", plan.modalityId || "");
+  setIfNeeded("planType", planTypeLabel(plan.type));
+  setIfNeeded("monthlyValue", Number(plan.value || 0).toFixed(2));
+  setIfNeeded("sessions", Number(plan.sessions || 0));
+  setIfNeeded("firstPaymentDate", form.elements.startDate?.value || demoToday);
+  if (form.elements.startDate?.value) setIfNeeded("endDate", calculatedEnrollmentEndDate(form.elements.startDate.value, form.elements.planType?.value || plan.type));
 }
 
 function renderField(field) {
@@ -4435,11 +4699,12 @@ function renderField(field) {
     `;
   }
   if (field.type === "modalityId") {
+    const options = activeModalities();
     return `
       <label>${field.label}
         <select name="${field.name}" ${required}>
           <option value="" ${isSelected("")}>Sem modalidade</option>
-          ${activeModalities().map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.name}</option>`).join("")}
+          ${options.map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.name}</option>`).join("")}
         </select>
       </label>
     `;
@@ -4506,6 +4771,9 @@ function renderField(field) {
 }
 
 function closeModal() {
+  editingModalityId = null;
+  editingPlanId = null;
+  editingSupplierId = null;
   editingChartAccountId = null;
   editingEnrollmentId = null;
   editingLeadId = null;
@@ -4559,6 +4827,9 @@ document.addEventListener("click", (event) => {
 
   const editPlanButton = event.target.closest("[data-edit-plan]");
   if (editPlanButton) openPlanEditor(editPlanButton.dataset.editPlan);
+
+  const editSupplierButton = event.target.closest("[data-edit-supplier]");
+  if (editSupplierButton) openSupplierModal(editSupplierButton.dataset.editSupplier);
 
   const editEnrollmentButton = event.target.closest("[data-edit-enrollment]");
   if (editEnrollmentButton) openEnrollmentModal(editEnrollmentButton.dataset.editEnrollment);
@@ -4669,6 +4940,9 @@ document.addEventListener("click", (event) => {
 
   const modalButton = event.target.closest("[data-open-modal]");
   if (modalButton) {
+    editingModalityId = null;
+    editingPlanId = null;
+    editingSupplierId = null;
     if (modalButton.dataset.openModal === "chartAccount") openChartAccountModal();
     else if (modalButton.dataset.openModal === "enrollment") openEnrollmentModal();
     else if (modalButton.dataset.openModal === "lead") openLeadModal();
@@ -4725,10 +4999,14 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
 });
 
 document.querySelector("#modalForm").addEventListener("change", (event) => {
+  const form = event.currentTarget;
+  if (form.dataset.type === "enrollment" && ["planId", "startDate", "planType"].includes(event.target.name)) {
+    applyEnrollmentPlanDefaults(form, true);
+    return;
+  }
   if (event.target.name !== "supplierId") return;
   const supplier = supplierById(event.target.value);
   if (!supplier) return;
-  const form = event.currentTarget;
   if (form.elements.person && !form.elements.person.value) form.elements.person.value = supplier.name;
   if (form.elements.document && !form.elements.document.value) form.elements.document.value = supplier.document;
 });
@@ -4760,7 +5038,6 @@ function clearCrmFilters() {
 function clearStudentFilters() {
   setControlValue("studentSearch", "");
   setControlValue("studentStatusFilter", "Ativo");
-  setControlValue("studentLimitFilter", "50");
   renderStudents();
 }
 
@@ -4778,7 +5055,6 @@ function clearSupplierFilters() {
 
 function clearModalityFilters() {
   setControlValue("modalitySearch", "");
-  setControlValue("modalityStatusListFilter", "Ativo");
   renderModalities();
 }
 
@@ -4792,7 +5068,6 @@ function clearEnrollmentFilters() {
   setControlValue("enrollmentSearch", "");
   setControlValue("enrollmentStatusFilter", "activeAndExpired");
   setControlValue("enrollmentModalityFilter", "all");
-  setControlValue("enrollmentLimitFilter", "50");
   setControlValue("enrollmentRoomFilter", "all");
   setControlValue("enrollmentProfessionalFilter", "all");
   setControlValue("enrollmentPlanTypeFilter", "all");
@@ -4893,8 +5168,7 @@ document.querySelectorAll("[data-payment-filter]").forEach((button) => {
 document.querySelector("#studentSearch").addEventListener("input", renderStudents);
 document.querySelector("#studentSearchButton").addEventListener("click", renderStudents);
 document.querySelector("#studentClearFiltersButton")?.addEventListener("click", clearStudentFilters);
-document.querySelector("#studentStatusFilter").addEventListener("change", renderStudents);
-document.querySelector("#studentLimitFilter").addEventListener("change", renderStudents);
+document.querySelector("#studentStatusFilter")?.addEventListener("change", renderStudents);
 document.querySelector("#newPatientButton").addEventListener("click", () => openPatientEditor());
 document.querySelector("#backToPatientsButton").addEventListener("click", () => switchView("students"));
 document.querySelector("#patientEditorForm").addEventListener("submit", (event) => {
@@ -4918,7 +5192,6 @@ document.querySelector("#supplierStatusFilter")?.addEventListener("change", rend
 document.querySelector("#modalitySearch").addEventListener("input", renderModalities);
 document.querySelector("#modalitySearchButton").addEventListener("click", renderModalities);
 document.querySelector("#modalityClearFiltersButton")?.addEventListener("click", clearModalityFilters);
-document.querySelector("#modalityStatusListFilter").addEventListener("change", renderModalities);
 document.querySelector("#newModalityButton").addEventListener("click", () => openModalityEditor());
 document.querySelector("#backToModalitiesButton").addEventListener("click", () => switchView("modalities"));
 document.querySelector("#modalityEditorForm").addEventListener("submit", (event) => {
@@ -4935,7 +5208,7 @@ document.querySelector("#planEditorForm").addEventListener("submit", (event) => 
   event.preventDefault();
   savePlanEditor();
 });
-["enrollmentSearch", "enrollmentStatusFilter", "enrollmentModalityFilter", "enrollmentLimitFilter", "enrollmentRoomFilter", "enrollmentProfessionalFilter", "enrollmentPlanTypeFilter", "enrollmentDateFilter"].forEach((id) => {
+["enrollmentSearch", "enrollmentStatusFilter", "enrollmentModalityFilter", "enrollmentRoomFilter", "enrollmentProfessionalFilter", "enrollmentPlanTypeFilter", "enrollmentDateFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderEnrollments);
   document.querySelector(`#${id}`)?.addEventListener("change", renderEnrollments);
 });

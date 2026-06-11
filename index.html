@@ -60,12 +60,12 @@
                 <span><strong>Cadastros</strong><small>Dados base</small></span>
               </button>
               <div class="top-menu-panel">
-                <button class="top-menu-option" data-view="students" type="button">Alunos/Pacientes</button>
-                <button class="top-menu-option" data-view="enrollments" type="button">Matrículas</button>
-                <button class="top-menu-option" data-view="professionals" type="button">Profissionais</button>
-                <button class="top-menu-option" data-view="suppliers" type="button">Fornecedores</button>
                 <button class="top-menu-option" data-view="modalities" type="button">Modalidades</button>
                 <button class="top-menu-option" data-view="plans" type="button">Planos</button>
+                <button class="top-menu-option" data-view="suppliers" type="button">Fornecedores</button>
+                <button class="top-menu-option" data-view="professionals" type="button">Profissionais</button>
+                <button class="top-menu-option" data-view="students" type="button">Alunos/Pacientes</button>
+                <button class="top-menu-option" data-view="enrollments" type="button">Matrículas</button>
               </div>
             </div>
 
@@ -374,11 +374,6 @@
                   <option value="Ativo" selected>Ativo</option>
                   <option value="Inativo">Inativo</option>
                 </select>
-                <select id="studentLimitFilter" aria-label="Limite de pacientes">
-                  <option value="50">Limitar em 50</option>
-                  <option value="100">Limitar em 100</option>
-                  <option value="all">Todos os registros</option>
-                </select>
                 <div class="patient-search-row">
                   <input id="studentSearch" type="search" placeholder="Nome, CPF, celular, e-mail ou responsáveis" />
                   <button class="action-button blue" id="studentSearchButton" type="button">Buscar</button>
@@ -418,11 +413,9 @@
             </div>
             <div class="module-body">
               <div class="patient-editor-tabs" role="tablist" aria-label="Abas do cadastro do paciente">
-                <button class="patient-tab active" data-patient-tab="personal" type="button">Dados pessoais</button>
-                <button class="patient-tab" data-patient-tab="contact" type="button">Contato e endereço</button>
+                <button class="patient-tab active" data-patient-tab="personal" type="button">Dados Pessoais</button>
+                <button class="patient-tab" data-patient-tab="clinical" type="button">Saúde / Prontuário</button>
                 <button class="patient-tab" data-patient-tab="registration" type="button">Matrícula</button>
-                <button class="patient-tab" data-patient-tab="clinical" type="button">Saúde / prontuário</button>
-                <button class="patient-tab" data-patient-tab="responsibles" type="button">Responsáveis</button>
               </div>
 
               <form id="patientEditorForm" class="patient-editor-form">
@@ -431,13 +424,18 @@
                     <h3>Identificação</h3>
                   </div>
                   <div class="editor-grid">
+                    <label class="wide">Vincular lead existente
+                      <select name="linkedLeadId" data-patient-lead-select>
+                        <option value="">Sem lead vinculado</option>
+                      </select>
+                    </label>
                     <label class="wide">Nome completo<input name="name" required /></label>
                     <label>CPF<input name="cpf" /></label>
                     <label>Data de nascimento<input name="birthDate" type="date" /></label>
                     <label>Sexo
                       <select name="gender">
-                        <option value="F">Feminino</option>
-                        <option value="M">Masculino</option>
+                        <option>Feminino</option>
+                        <option>Masculino</option>
                       </select>
                     </label>
                     <label>Status
@@ -590,8 +588,6 @@
               <div class="professional-editor-tabs" role="tablist" aria-label="Abas do cadastro do profissional">
                 <button class="professional-tab active" data-professional-tab="register" type="button">Cadastro</button>
                 <button class="professional-tab" data-professional-tab="modalities" type="button">Vincular Modalidades</button>
-                <button class="professional-tab" data-professional-tab="signature" type="button">Assinatura Virtual</button>
-                <button class="professional-tab" data-professional-tab="linked" type="button">Matrículas vinculadas</button>
               </div>
 
               <form id="professionalEditorForm" class="patient-editor-form">
@@ -622,57 +618,13 @@
                     <h3>Modalidades e comissão</h3>
                   </div>
                   <div class="editor-grid">
-                    <label class="wide">Modalidades vinculadas<input name="modalities" placeholder="Pilates, Fisioterapia, Avaliação" /></label>
+                    <label class="wide">Modalidades vinculadas<select name="modalities" data-professional-modalities-select multiple></select></label>
                     <label>Comissão (%)<input name="commission" type="number" min="0" max="100" /></label>
                     <label>Valor hora<input name="hourValue" placeholder="R$ 0,00" /></label>
                     <label class="wide">Dados de comissão<textarea name="commissionNotes" rows="4"></textarea></label>
                   </div>
                 </section>
-
-                <section class="professional-tab-panel" data-professional-panel="signature">
-                  <div class="form-section-heading">
-                    <h3>Assinatura virtual</h3>
-                  </div>
-                  <div class="editor-grid">
-                    <label class="wide">Nome para assinatura<input name="signatureName" /></label>
-                    <label>Registro profissional<input name="signatureDocument" /></label>
-                    <label>Status da assinatura
-                      <select name="signatureStatus">
-                        <option>Não configurada</option>
-                        <option>Configurada</option>
-                      </select>
-                    </label>
-                    <label class="wide">Texto de rodapé da assinatura<textarea name="signatureFooter" rows="4"></textarea></label>
-                  </div>
-                </section>
               </form>
-
-              <section class="professional-tab-panel" data-professional-panel="linked">
-                <div class="linked-enrollments-toolbar">
-                  <select id="linkedEnrollmentFilter">
-                    <option>Matrículas Ativas</option>
-                    <option>Todas as Matrículas</option>
-                    <option>Matrículas Canceladas</option>
-                  </select>
-                  <label class="transfer-check"><input id="transferProfessionalCheck" type="checkbox" /> Transferir Profissional</label>
-                </div>
-                <div class="table-wrap linked-enrollments-table">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th>Aluno</th>
-                        <th>Data Inscrição</th>
-                        <th>Valor Matrícula</th>
-                        <th>Forma Pagamento</th>
-                        <th>Modalidade</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody id="linkedEnrollmentsTable"></tbody>
-                  </table>
-                </div>
-              </section>
             </div>
           </div>
         </section>
@@ -682,7 +634,7 @@
             <div class="module-titlebar">
               <div>
                 <p class="eyebrow">Cadastros</p>
-                <h2>Matrículas <span class="title-note">[Assinaturas]</span></h2>
+            <h2>Matrículas</h2>
               </div>
               <div class="title-actions">
                 <button class="primary-button success-button" data-open-modal="enrollment" type="button">Nova Matrícula</button>
@@ -700,11 +652,6 @@
                   <option value="Pendente">Pendentes</option>
                   <option value="Suspensa">Suspensas</option>
                   <option value="Cancelada">Canceladas</option>
-                  <option value="all">Todas</option>
-                </select>
-                <select id="enrollmentLimitFilter">
-                  <option value="50">Limitar em 50</option>
-                  <option value="100">Limitar em 100</option>
                   <option value="all">Todas</option>
                 </select>
                 <select id="enrollmentRoomFilter">
@@ -741,6 +688,7 @@
                       <th>Plano /<br />Contrato</th>
                       <th>Pagamento</th>
                       <th>Sessões</th>
+                      <th>Financeiro</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -781,9 +729,6 @@
                       <th>Fornecedor</th>
                       <th>CPF/CNPJ</th>
                       <th>Tipo</th>
-                      <th>Lançamentos</th>
-                      <th>Total Pago</th>
-                      <th>Último Movimento</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -805,11 +750,6 @@
             </div>
             <div class="module-body">
               <div class="patient-toolbar">
-                <select id="modalityStatusListFilter" aria-label="Filtrar modalidades por status">
-                  <option value="all">Todos</option>
-                  <option value="Ativo" selected>Ativos</option>
-                  <option value="Inativo">Inativos</option>
-                </select>
                 <div class="patient-search-row professionals-search-row">
                   <input id="modalitySearch" type="search" placeholder="Buscar por modalidade" />
                   <button class="action-button blue" id="modalitySearchButton" type="button">Buscar</button>
@@ -822,9 +762,6 @@
                     <tr>
                       <th></th>
                       <th>Modalidade / Serviço</th>
-                      <th>Máx. Pacientes</th>
-                      <th>Wellhub / TotalPass</th>
-                      <th>Valor Exp<br />Avulsa/Livre</th>
                       <th>Cadastrado em</th>
                       <th>Status</th>
                     </tr>
@@ -863,10 +800,6 @@
                     </select>
                   </label>
                   <label>Cor<input name="color" type="color" /></label>
-                  <label>Valor experimental<input name="experimentalValue" type="number" min="0" step="0.01" /></label>
-                  <label>Valor avulsa/livre<input name="singleValue" type="number" min="0" step="0.01" /></label>
-                  <label><span>Wellhub</span><select name="wellhub"><option value="false">Não</option><option value="true">Sim</option></select></label>
-                  <label><span>TotalPass</span><select name="totalPass"><option value="false">Não</option><option value="true">Sim</option></select></label>
                   <label class="wide">Observações<textarea name="notes" rows="4"></textarea></label>
                 </div>
               </form>
@@ -905,7 +838,6 @@
                       <th>Modalidade</th>
                       <th>Tipo de Plano</th>
                       <th>Valor</th>
-                      <th>Matrículas vinculadas</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -940,16 +872,15 @@
                   </label>
                   <label>Tipo de plano
                     <select name="type">
-                      <option>Mensalidade</option>
-                      <option>Pacote de Sessão</option>
-                      <option>Avulsa / Livre</option>
-                      <option>Trimestralidade</option>
-                      <option>Semestralidade</option>
+                      <option>Avulsa</option>
+                      <option>Pacote</option>
+                      <option>Mensal</option>
+                      <option>Trimestral</option>
+                      <option>Semestral</option>
                     </select>
                   </label>
                   <label>Valor<input name="value" type="number" min="0" step="0.01" /></label>
                   <label>Sessões inclusas<input name="sessions" type="number" min="0" /></label>
-                  <label>Matrículas vinculadas<input name="linkedEnrollments" type="number" min="0" /></label>
                   <label>Status
                     <select name="status">
                       <option>Ativo</option>
