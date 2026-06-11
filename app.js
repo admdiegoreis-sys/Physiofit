@@ -2036,6 +2036,7 @@ function render() {
   renderStudents();
   renderEnrollments();
   renderProfessionals();
+  renderSupplierRegisterFilters();
   renderSuppliers();
   renderModalities();
   renderPlans();
@@ -2654,8 +2655,12 @@ function renderSuppliers() {
   if (!table) return;
   const term = normalizedText(document.querySelector("#supplierSearch")?.value.trim() ?? "");
   const statusFilter = document.querySelector("#supplierStatusFilter")?.value ?? "Ativo";
+  const supplierFilter = document.querySelector("#supplierNameFilter")?.value ?? "all";
+  const typeFilter = document.querySelector("#supplierTypeFilter")?.value ?? "all";
   const list = state.suppliers
     .filter((item) => statusFilter === "all" || item.status === statusFilter)
+    .filter((item) => supplierFilter === "all" || item.id === supplierFilter)
+    .filter((item) => typeFilter === "all" || normalizedText(item.supplierType) === normalizedText(typeFilter))
     .filter((item) => normalizedText([item.name, item.document, item.supplierType, item.email, item.phone, item.notes].join(" ")).includes(term))
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   table.innerHTML = list.length
@@ -2676,6 +2681,24 @@ function renderSuppliers() {
         `)
         .join("")
     : `<tr><td colspan="5"><div class="empty-state">Nenhum fornecedor encontrado.</div></td></tr>`;
+}
+
+function renderSupplierRegisterFilters() {
+  const supplierFilter = document.querySelector("#supplierNameFilter");
+  if (supplierFilter) {
+    const selected = supplierFilter.value || "all";
+    const suppliers = [...state.suppliers].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    supplierFilter.innerHTML = `<option value="all">Todos os fornecedores</option>${suppliers.map((item) => `<option value="${item.id}">${displayName(item.name)}</option>`).join("")}`;
+    supplierFilter.value = selected === "all" || suppliers.some((item) => item.id === selected) ?selected : "all";
+  }
+
+  const typeFilter = document.querySelector("#supplierTypeFilter");
+  if (typeFilter) {
+    const selected = typeFilter.value || "all";
+    const types = [...new Set(state.suppliers.map((item) => item.supplierType).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    typeFilter.innerHTML = `<option value="all">Todos os tipos</option>${types.map((type) => `<option value="${type}">${type}</option>`).join("")}`;
+    typeFilter.value = selected === "all" || types.some((type) => normalizedText(type) === normalizedText(selected)) ?selected : "all";
+  }
 }
 
 function renderModalities() {
@@ -5060,6 +5083,8 @@ function clearProfessionalFilters() {
 function clearSupplierFilters() {
   setControlValue("supplierSearch", "");
   setControlValue("supplierStatusFilter", "Ativo");
+  setControlValue("supplierNameFilter", "all");
+  setControlValue("supplierTypeFilter", "all");
   renderSuppliers();
 }
 
@@ -5201,6 +5226,8 @@ document.querySelector("#supplierSearch")?.addEventListener("input", renderSuppl
 document.querySelector("#supplierSearchButton")?.addEventListener("click", renderSuppliers);
 document.querySelector("#supplierClearFiltersButton")?.addEventListener("click", clearSupplierFilters);
 document.querySelector("#supplierStatusFilter")?.addEventListener("change", renderSuppliers);
+document.querySelector("#supplierNameFilter")?.addEventListener("change", renderSuppliers);
+document.querySelector("#supplierTypeFilter")?.addEventListener("change", renderSuppliers);
 document.querySelector("#modalitySearch").addEventListener("input", renderModalities);
 document.querySelector("#modalitySearchButton").addEventListener("click", renderModalities);
 document.querySelector("#modalityClearFiltersButton")?.addEventListener("click", clearModalityFilters);
