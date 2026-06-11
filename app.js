@@ -659,13 +659,13 @@ const modalSchemas = {
     title: "Novo fornecedor",
     submit: "Salvar fornecedor",
     fields: [
-      { name: "name", label: "Razão social / Nome", type: "text" },
-      { name: "document", label: "CPF/CNPJ", type: "text", value: "" },
-      { name: "supplierType", label: "Tipo", type: "select", options: ["Pessoa jurídica", "Pessoa física", "Sem documento"], value: "Pessoa jurídica" },
-      { name: "email", label: "E-mail", type: "email", value: "" },
-      { name: "phone", label: "Telefone", type: "tel", value: "" },
-      { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
-      { name: "notes", label: "Observações", type: "textarea", value: "" },
+      { name: "name", label: "Razão social / Nome", type: "text", required: false },
+      { name: "document", label: "CPF/CNPJ", type: "text", value: "", required: false },
+      { name: "supplierType", label: "Tipo", type: "select", options: ["Pessoa jurídica", "Pessoa física", "Sem documento"], value: "Pessoa jurídica", required: false },
+      { name: "email", label: "E-mail", type: "email", value: "", required: false },
+      { name: "phone", label: "Telefone", type: "tel", value: "", required: false },
+      { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo", required: false },
+      { name: "notes", label: "Observações", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
       const current = editingSupplierId ? state.suppliers.find((item) => item.id === editingSupplierId) : {};
