@@ -3290,6 +3290,9 @@ const accountViewConfigs = {
   payable: {
     direction: "Pagar",
     tableId: "payableAccountsTable",
+    summaryId: "payableAccountSummary",
+    totalLabel: "Total de Pagamentos",
+    paidLabel: "Total Pago",
     searchId: "payableAccountSearch",
     periodTypeId: "payableAccountPeriodType",
     dateRangeId: "payableAccountDateRange",
@@ -3305,6 +3308,9 @@ const accountViewConfigs = {
   receivable: {
     direction: "Receber",
     tableId: "receivableAccountsTable",
+    summaryId: "receivableAccountSummary",
+    totalLabel: "Total de Recebimentos",
+    paidLabel: "Total Recebido",
     searchId: "receivableAccountSearch",
     periodTypeId: "receivableAccountPeriodType",
     dateRangeId: "receivableAccountDateRange",
@@ -3341,10 +3347,40 @@ function accountRows(config) {
     .sort((a, b) => (accountExpectedDate(a) || "").localeCompare(accountExpectedDate(b) || ""));
 }
 
+function renderAccountSummary(config, rows = []) {
+  const summary = document.querySelector(`#${config.summaryId}`);
+  if (!summary) return;
+
+  const activeRows = rows.filter((item) => item.status !== "Cancelado");
+  const totalAmount = activeRows.reduce((sum, item) => sum + accountOriginalAmount(item), 0);
+  const openAmount = activeRows.reduce((sum, item) => sum + accountOpenAmount(item), 0);
+  const paidAmount = activeRows.reduce((sum, item) => sum + accountPaidAmount(item), 0);
+  const unreconciledRows = activeRows.filter((item) => (item.reconciliationStatus || "unreconciled") === "unreconciled");
+  const unreconciledAmount = unreconciledRows.reduce((sum, item) => sum + accountOriginalAmount(item), 0);
+
+  const cards = [
+    { label: config.totalLabel, value: currency(totalAmount), detail: `${activeRows.length} lançamentos`, tone: "neutral" },
+    { label: "Total em aberto", value: currency(openAmount), detail: `${activeRows.filter((item) => accountOpenAmount(item) > 0).length} em aberto`, tone: openAmount > 0 ? "warning" : "neutral" },
+    { label: config.paidLabel, value: currency(paidAmount), detail: `${activeRows.filter((item) => accountPaidAmount(item) > 0).length} baixados`, tone: "success" },
+    { label: "Total Não Conciliado", value: currency(unreconciledAmount), detail: `${unreconciledRows.length} pendentes`, tone: unreconciledRows.length ? "danger" : "neutral" },
+  ];
+
+  summary.innerHTML = cards
+    .map((card) => `
+      <article class="financial-summary-card ${card.tone}">
+        <span>${card.label}</span>
+        <strong>${card.value}</strong>
+        <small>${card.detail}</small>
+      </article>
+    `)
+    .join("");
+}
+
 function renderAccountTable(config) {
   const table = document.querySelector(`#${config.tableId}`);
   if (!table) return;
   const rows = accountRows(config);
+  renderAccountSummary(config, rows);
   table.innerHTML = rows.length
     ? rows
         .map((item) => {

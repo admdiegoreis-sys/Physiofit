@@ -1887,6 +1887,58 @@ button {
   margin-bottom: 14px;
 }
 
+.financial-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.financial-summary-card {
+  display: grid;
+  gap: 4px;
+  min-height: 82px;
+  padding: 12px 14px;
+  border: 1px solid #dfe5ef;
+  background: #fff;
+  box-shadow: 0 6px 14px rgba(31, 37, 45, 0.05);
+}
+
+.financial-summary-card span {
+  color: #697386;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.financial-summary-card strong {
+  color: #111827;
+  font-size: 1.16rem;
+  line-height: 1.1;
+}
+
+.financial-summary-card small {
+  color: #707783;
+  font-size: 0.72rem;
+}
+
+.financial-summary-card.success {
+  border-left: 4px solid #5aa052;
+}
+
+.financial-summary-card.warning {
+  border-left: 4px solid #d99b28;
+}
+
+.financial-summary-card.danger {
+  border-left: 4px solid #bd4b53;
+}
+
+.financial-summary-card.neutral {
+  border-left: 4px solid #7baec0;
+}
+
 .accounts-toolbar select,
 .accounts-toolbar input {
   width: 100%;
@@ -3071,6 +3123,10 @@ td.row-actions .row-action-button:last-child {
     grid-template-columns: repeat(3, minmax(150px, 1fr));
   }
 
+  .financial-summary-cards {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+
   .accounts-search-row {
     grid-column: span 3;
   }
@@ -3179,6 +3235,10 @@ td.row-actions .row-action-button:last-child {
     grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
 
+  .financial-summary-cards {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
   .ofx-import-panel {
     grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
@@ -3205,6 +3265,10 @@ td.row-actions .row-action-button:last-child {
 @media (max-width: 720px) {
   :root {
     --topbar-height: 72px;
+  }
+
+  .financial-summary-cards {
+    grid-template-columns: 1fr;
   }
 
   .workspace {
