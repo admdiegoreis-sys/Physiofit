@@ -5219,7 +5219,6 @@ function applyAuthSession() {
   document.querySelector("#loginScreen").hidden = Boolean(user);
   document.querySelector("#sessionChip").hidden = !user;
   document.querySelector("#sessionUserName").textContent = user?.name || "Usuário";
-  document.querySelector("#sessionUserRole").textContent = user?.role || "";
 }
 
 async function handleLogin(event) {
