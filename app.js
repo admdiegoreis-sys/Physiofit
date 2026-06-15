@@ -3711,7 +3711,7 @@ function renderContracts() {
     return;
   }
 
-  tbody.innerHTML = filtered
+  tbody.innerHTML = [...filtered].sort((a, b) => Number(a.dayOfMonth) - Number(b.dayOfMonth))
     .map((c) => {
       const st = contractStatus(c);
       const stPill = st === "Ativo" ? "ativo" : st === "Inativo" ? "inativo" : "atrasado";
