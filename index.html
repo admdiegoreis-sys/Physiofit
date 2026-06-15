@@ -1087,6 +1087,21 @@
             </div>
             <div class="module-body">
               <div class="financial-summary-cards" id="contractsSummary"></div>
+              <div class="filter-toolbar">
+                <select id="contractChartFilter">
+                  <option value="all">Plano de contas</option>
+                </select>
+                <select id="contractStatusFilter">
+                  <option value="all">Todos os status</option>
+                  <option value="Ativo">Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                </select>
+                <select id="contractSupplierFilter">
+                  <option value="all">Fornecedor</option>
+                </select>
+                <input type="search" id="contractSearchInput" placeholder="Buscar por descrição" />
+                <button class="secondary-button" id="contractClearFilters" type="button">Limpar filtros</button>
+              </div>
               <div class="table-wrap">
                 <table>
                   <thead>

@@ -3651,6 +3651,42 @@ function renderContracts() {
   if (!tbody) return;
 
   const contracts = state.contracts || [];
+
+  // Populate chart account filter
+  const chartFilter = document.querySelector("#contractChartFilter");
+  if (chartFilter) {
+    const selected = chartFilter.value || "all";
+    const usedIds = [...new Set(contracts.map((c) => c.chartAccountId).filter(Boolean))];
+    const options = activeChartAccounts().filter((a) => usedIds.includes(a.id));
+    chartFilter.innerHTML = `<option value="all">Plano de contas</option>` +
+      options.map((a) => `<option value="${a.id}" ${a.id === selected ? "selected" : ""}>${a.code} - ${a.name}</option>`).join("");
+  }
+
+  // Populate supplier filter
+  const supplierFilter = document.querySelector("#contractSupplierFilter");
+  if (supplierFilter) {
+    const selected = supplierFilter.value || "all";
+    const usedSuppliers = [...new Map(contracts.map((c) => [c.supplierId || c.person, { id: c.supplierId, name: c.person }])).values()].filter((s) => s.name);
+    supplierFilter.innerHTML = `<option value="all">Fornecedor</option>` +
+      usedSuppliers.map((s) => `<option value="${s.id || s.name}" ${(s.id || s.name) === selected ? "selected" : ""}>${s.name}</option>`).join("");
+  }
+
+  // Read filter values
+  const chartVal = chartFilter?.value || "all";
+  const supplierVal = supplierFilter?.value || "all";
+  const statusVal = document.querySelector("#contractStatusFilter")?.value || "all";
+  const searchVal = normalizedText(document.querySelector("#contractSearchInput")?.value || "");
+
+  // Filtered set for table
+  const filtered = contracts.filter((c) => {
+    if (chartVal !== "all" && c.chartAccountId !== chartVal) return false;
+    if (supplierVal !== "all" && (c.supplierId || c.person) !== supplierVal) return false;
+    if (statusVal !== "all" && contractStatus(c) !== statusVal) return false;
+    if (searchVal && !normalizedText(c.description).includes(searchVal)) return false;
+    return true;
+  });
+
+  // Summary always counts ALL contracts (not filtered)
   const active = contracts.filter((c) => contractStatus(c) === "Ativo");
   const inactive = contracts.filter((c) => contractStatus(c) === "Inativo");
   const monthly = active.reduce((s, c) => s + Number(c.amount || 0), 0);
@@ -3670,12 +3706,12 @@ function renderContracts() {
       .join("");
   }
 
-  if (!contracts.length) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">Nenhum contrato cadastrado.</div></td></tr>`;
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">${contracts.length ? "Nenhum contrato encontrado para os filtros selecionados." : "Nenhum contrato cadastrado."}</div></td></tr>`;
     return;
   }
 
-  tbody.innerHTML = contracts
+  tbody.innerHTML = filtered
     .map((c) => {
       const st = contractStatus(c);
       const stPill = st === "Ativo" ? "ativo" : st === "Inativo" ? "inativo" : "atrasado";
@@ -6048,6 +6084,18 @@ document.querySelector("#chartAccountSearchButton")?.addEventListener("click", r
 document.querySelector("#chartAccountClearFiltersButton")?.addEventListener("click", clearChartAccountFilters);
 document.querySelector("#processOfxButton")?.addEventListener("click", processOfxFile);
 document.querySelector("#addContractButton")?.addEventListener("click", () => openContractModal(null));
+document.querySelector("#contractChartFilter")?.addEventListener("change", renderContracts);
+document.querySelector("#contractSupplierFilter")?.addEventListener("change", renderContracts);
+document.querySelector("#contractStatusFilter")?.addEventListener("change", renderContracts);
+document.querySelector("#contractSearchInput")?.addEventListener("input", renderContracts);
+document.querySelector("#contractClearFilters")?.addEventListener("click", () => {
+  const el = (id) => document.querySelector(id);
+  if (el("#contractChartFilter")) el("#contractChartFilter").value = "all";
+  if (el("#contractSupplierFilter")) el("#contractSupplierFilter").value = "all";
+  if (el("#contractStatusFilter")) el("#contractStatusFilter").value = "all";
+  if (el("#contractSearchInput")) el("#contractSearchInput").value = "";
+  renderContracts();
+});
 document.querySelector("#importAccountsPayableFile")?.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (file) { importAccountsFromXlsx(file, "Pagar"); e.target.value = ""; }
