@@ -809,7 +809,7 @@ const modalSchemas = {
       { name: "chartAccountId", label: "Plano de contas", type: "chartAccount" },
       { name: "amount", label: "Valor previsto (R$)", type: "number", value: 0 },
       { name: "dayOfMonth", label: "Dia do mês", type: "select", options: Array.from({length: 28}, (_, i) => String(i + 1)), value: "5" },
-      { name: "startDate", label: "Início", type: "date", value: demoToday },
+      { name: "startDate", label: "Início", type: "date", value: "2026-07-01" },
       { name: "endDate", label: "Fim (deixe vazio = indefinido)", type: "date", value: "", required: false },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Boleto", "Débito automático", "Transferência", "Cartão de Crédito", "Dinheiro"], value: "Pix" },
       { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
@@ -3521,7 +3521,7 @@ function renderAccountTable(config) {
 
 function ensureContractForecasts() {
   (state.contracts || []).forEach((contract) => {
-    if (contractStatus(contract) !== "Inativo") generateContractForecastTitles(contract);
+    if (contractStatus(contract) !== "Inativo") generateContractForecastTitles(contract, "2026-07-01");
   });
 }
 
@@ -3542,8 +3542,9 @@ function removeContractForecastTitles(contractId, onlyFuture = true) {
   });
 }
 
-function generateContractForecastTitles(contract) {
-  const start = contract.startDate || demoToday;
+function generateContractForecastTitles(contract, minDate = null) {
+  const rawStart = contract.startDate || demoToday;
+  const start = minDate && minDate > rawStart ? minDate : rawStart;
   const end = contract.endDate || "2099-12-31";
   const day = String(contract.dayOfMonth || 5).padStart(2, "0");
   const today = demoToday;
