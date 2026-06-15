@@ -831,11 +831,10 @@ const modalSchemas = {
       };
       if (editingContractId) {
         state.contracts = state.contracts.map((c) => c.id === editingContractId ? payload : c);
-        removeContractForecastTitles(editingContractId, false);
       } else {
         state.contracts.push(payload);
       }
-      generateContractForecastTitles(payload);
+      ensureContractForecasts();
       editingContractId = null;
     },
   },
@@ -3546,10 +3545,21 @@ function removeContractForecastTitles(contractId, onlyFuture = true) {
   });
 }
 
+function addMonthsToDate(dateStr, months) {
+  const [y, m] = dateStr.split("-").map(Number);
+  const total = (y * 12 + (m - 1)) + months;
+  const ny = Math.floor(total / 12);
+  const nm = (total % 12) + 1;
+  return `${ny}-${String(nm).padStart(2, "0")}-01`;
+}
+
 function generateContractForecastTitles(contract, minDate = null) {
   const rawStart = contract.startDate || demoToday;
   const start = minDate && minDate > rawStart ? minDate : rawStart;
-  const end = contract.endDate || "2099-12-31";
+  // Limit to 24 months ahead to avoid generating thousands of records
+  const horizon = addMonthsToDate(demoToday, 24);
+  const contractEnd = contract.endDate || "2099-12-31";
+  const end = contractEnd < horizon ? contractEnd : horizon;
   const day = String(contract.dayOfMonth || 5).padStart(2, "0");
   const today = demoToday;
 
