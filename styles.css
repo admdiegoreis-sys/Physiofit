@@ -2757,9 +2757,13 @@ tr:last-child td {
 }
 
 .accounts-table-wrap td:first-child,
-.accounts-table-wrap td:nth-child(7),
 .accounts-table-wrap td:last-child {
   text-overflow: clip;
+}
+
+.accounts-table-wrap td:nth-child(7) {
+  text-overflow: clip;
+  min-width: 112px;
 }
 
 .accounts-table-wrap td:nth-child(6) small,

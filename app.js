@@ -3618,7 +3618,7 @@ function generateContractForecastTitles(contract, minDate = null) {
         openAmount: contract.amount,
         paidAmount: 0,
         paidDate: "",
-        reconciliationStatus: "pendente",
+        reconciliationStatus: "unreconciled",
         notes: "",
         createdAt: today,
       });
@@ -3698,11 +3698,13 @@ function renderContracts() {
   // Summary always counts ALL contracts (not filtered)
   const active = contracts.filter((c) => contractStatus(c) === "Ativo");
   const inactive = contracts.filter((c) => contractStatus(c) === "Inativo");
+  const encerrado = contracts.filter((c) => contractStatus(c) === "Encerrado");
   const monthly = active.reduce((s, c) => s + Number(c.amount || 0), 0);
 
   if (summaryEl) {
+    const inativoDetail = [inactive.length && `${inactive.length} inativos`, encerrado.length && `${encerrado.length} encerrados`].filter(Boolean).join(", ") || "0 inativos";
     summaryEl.innerHTML = [
-      { label: "Contratos ativos", value: String(active.length), detail: `${inactive.length} inativos`, tone: "neutral" },
+      { label: "Contratos ativos", value: String(active.length), detail: inativoDetail, tone: "neutral" },
       { label: "Total mensal previsto", value: currency(monthly), detail: `${active.length} contratos`, tone: "success" },
       { label: "Total anual previsto", value: currency(monthly * 12), detail: "projeção 12 meses", tone: "neutral" },
     ]
@@ -3769,13 +3771,15 @@ function compatibleTitlesForMovement(movement = {}) {
     .filter((account) => account.origin !== "Importação OFX" && account.origin !== "ImportaÃ§Ã£o OFX")
     .filter((account) => account.status !== "Cancelado" && accountOpenAmount(account) > 0)
     .map((account) => {
-      const valueScore = Math.abs(accountOpenAmount(account) - movementAmount) < 0.01 ? 60 : 0;
+      const valueDiff = Math.abs(accountOpenAmount(account) - movementAmount);
+      const valueRatio = movementAmount > 0 ? valueDiff / movementAmount : 1;
+      const valueScore = valueDiff < 0.01 ? 60 : valueRatio < 0.05 ? 30 : valueRatio < 0.15 ? 10 : 0;
       const dateScore = Math.abs(daysBetween(accountExpectedDate(account), movement.date)) <= 5 ? 20 : 0;
       const accountText = normalizedText(`${account.person} ${supplierName(account.supplierId)} ${account.description}`);
       const textScore = accountText && movementText.split(/\s+/).some((word) => word.length > 3 && accountText.includes(word)) ? 20 : 0;
       return { account, score: valueScore + dateScore + textScore };
     })
-    .filter((item) => item.score > 0)
+    .filter((item) => item.score >= 50)
     .sort((a, b) => b.score - a.score)
     .slice(0, 8)
     .map((item) => item.account);
