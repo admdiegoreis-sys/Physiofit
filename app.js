@@ -3792,12 +3792,14 @@ function reconciliationRows() {
   const status = document.querySelector("#bankReconciliationStatusFilter")?.value || "unreconciled";
   const type = document.querySelector("#bankReconciliationTypeFilter")?.value || "all";
   const accountId = document.querySelector("#bankReconciliationAccountFilter")?.value || "all";
+  const reconMonth = document.querySelector("#bankReconciliationMonthFilter")?.value || "";
   return state.bankMovements
     .filter((movement) => status === "all" || movement.reconciliationStatus === status)
     .filter((movement) => type === "all" || (type === "receivable" ? Number(movement.amount || 0) >= 0 : Number(movement.amount || 0) < 0))
     .filter((movement) => accountId === "all" || movement.bankAccountId === accountId)
+    .filter((movement) => !reconMonth || String(movement.date || "").startsWith(reconMonth))
     .filter((movement) => !term || normalizedText(`${movement.description} ${movement.bankName} ${movement.notes}`).includes(term))
-    .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    .sort((a, b) => Math.abs(Number(b.amount || 0)) - Math.abs(Number(a.amount || 0)));
 }
 
 function renderBankReconciliation() {
@@ -3863,11 +3865,7 @@ function renderBankReconciliation() {
       return reconMonth ? d.startsWith(reconMonth) : true;
     })
     .filter((a) => accountOpenAmount(a) > 0)
-    .sort((a, b) => {
-      const da = a.forecastDate || a.competenceDate || "";
-      const db = b.forecastDate || b.competenceDate || "";
-      return da.localeCompare(db);
-    });
+    .sort((a, b) => accountOpenAmount(b) - accountOpenAmount(a));
 
   rightPanel.innerHTML = systemAccounts.length
     ? systemAccounts.map((a) => {
