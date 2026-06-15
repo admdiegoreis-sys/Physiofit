@@ -20,13 +20,20 @@ export async function ensureAuthTables(sql) {
     )
   `;
 
-  const rows = await sql`select id from public.auth_users where id = 'admin' limit 1`;
+  const rows = await sql`select id, password_hash from public.auth_users where id = 'admin' limit 1`;
   if (!rows.length) {
     const passwordHash = hashPassword("Admin@123");
     await sql`
       insert into public.auth_users (id, name, username, email, role, status, password_hash, must_change_password)
       values ('admin', 'Administrador', 'admin', 'admin@physiofit.local', 'Administrador', 'Ativo', ${passwordHash}, true)
       on conflict (id) do nothing
+    `;
+  } else if (!rows[0].password_hash) {
+    const passwordHash = hashPassword("Admin@123");
+    await sql`
+      update public.auth_users
+      set password_hash = ${passwordHash}, must_change_password = true, updated_at = now()
+      where id = 'admin'
     `;
   }
 }
