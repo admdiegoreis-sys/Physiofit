@@ -3510,7 +3510,10 @@ function renderAccountTable(config) {
               <td>${chartAccountName(item.chartAccountId)}<br><small>${state.chartAccounts.find((account) => account.id === item.chartAccountId)?.dfcGroup ?? ""}</small></td>
               <td class="row-actions">
                 <button class="row-action-button edit-icon-button" data-edit-account="${item.id}" type="button" title="Editar" aria-label="Editar conta">✎</button>
-                <button class="row-action-button settle-icon-button" data-settle-account="${item.id}" type="button" title="Baixar" aria-label="Baixar conta">$</button>
+                ${item.paidDate
+                  ? `<button class="row-action-button reverse-icon-button" data-reverse-account="${item.id}" type="button" title="Estornar baixa" aria-label="Estornar baixa">↩</button>`
+                  : `<button class="row-action-button settle-icon-button" data-settle-account="${item.id}" type="button" title="Baixar" aria-label="Baixar conta">$</button>`
+                }
                 <button class="row-action-button delete-icon-button" data-delete-account="${item.id}" type="button" title="Excluir" aria-label="Excluir conta">&times;</button>
               </td>
             </tr>
@@ -5643,6 +5646,22 @@ document.addEventListener("click", (event) => {
   const settleAccountButton = event.target.closest("[data-settle-account]");
   if (settleAccountButton) openAccountSettlementModal(settleAccountButton.dataset.settleAccount);
 
+  const reverseAccountButton = event.target.closest("[data-reverse-account]");
+  if (reverseAccountButton) {
+    const accountId = reverseAccountButton.dataset.reverseAccount;
+    const account = state.accounts.find((item) => item.id === accountId);
+    if (account && confirm("Estornar a baixa desta conta? O pagamento será desfeito.")) {
+      account.paidDate = "";
+      account.paidAmount = 0;
+      account.openAmount = account.amount;
+      account.reconciliationStatus = "unreconciled";
+      account.linkedBankMovementId = "";
+      account.status = accountAutoStatus(account);
+      saveState();
+      render();
+    }
+  }
+
   const reconcileButton = event.target.closest("[data-reconcile-movement]");
   if (reconcileButton) {
     const movementId = reconcileButton.dataset.reconcileMovement;
@@ -6154,4 +6173,15 @@ document.querySelector("#seedButton")?.addEventListener("click", () => {
 applyAuthSession();
 ensureContractForecasts();
 render();
+
+// Default account month filters to the current month
+(function initAccountMonthFilters() {
+  const currentMonth = demoToday.slice(0, 7);
+  const payableInput = document.querySelector("#payableAccountMonthFilter");
+  const receivableInput = document.querySelector("#receivableAccountMonthFilter");
+  if (payableInput && !payableInput.value) payableInput.value = currentMonth;
+  if (receivableInput && !receivableInput.value) receivableInput.value = currentMonth;
+  renderAccounts();
+})();
+
 hydrateStateFromNeon();

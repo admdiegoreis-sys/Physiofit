@@ -2221,6 +2221,16 @@ button {
   box-shadow: 0 7px 16px rgba(91, 156, 83, 0.28);
 }
 
+.reverse-icon-button {
+  background: #e07b2a;
+  box-shadow: 0 5px 12px rgba(224, 123, 42, 0.2);
+}
+
+.reverse-icon-button:hover {
+  background: #b85e14;
+  box-shadow: 0 7px 16px rgba(224, 123, 42, 0.28);
+}
+
 .delete-icon-button {
   color: #fff;
   background: #c8464e;
