@@ -3652,14 +3652,22 @@ function renderContracts() {
 
   const contracts = state.contracts || [];
   const active = contracts.filter((c) => contractStatus(c) === "Ativo");
+  const inactive = contracts.filter((c) => contractStatus(c) === "Inativo");
   const monthly = active.reduce((s, c) => s + Number(c.amount || 0), 0);
 
   if (summaryEl) {
-    summaryEl.innerHTML = `
-      <div class="summary-card"><span class="card-label">Contratos ativos</span><span class="card-value">${active.length}</span></div>
-      <div class="summary-card"><span class="card-label">Total mensal previsto</span><span class="card-value">${currency(monthly)}</span></div>
-      <div class="summary-card"><span class="card-label">Total anual previsto</span><span class="card-value">${currency(monthly * 12)}</span></div>
-    `;
+    summaryEl.innerHTML = [
+      { label: "Contratos ativos", value: String(active.length), detail: `${inactive.length} inativos`, tone: "neutral" },
+      { label: "Total mensal previsto", value: currency(monthly), detail: `${active.length} contratos`, tone: "success" },
+      { label: "Total anual previsto", value: currency(monthly * 12), detail: "projeção 12 meses", tone: "neutral" },
+    ]
+      .map((card) => `
+        <article class="financial-summary-card ${card.tone}">
+          <span>${card.label}</span>
+          <strong>${card.value}</strong>
+          <small>${card.detail}</small>
+        </article>`)
+      .join("");
   }
 
   if (!contracts.length) {
@@ -3676,11 +3684,11 @@ function renderContracts() {
         <td>${c.description || ""}</td>
         <td>${c.person || ""}</td>
         <td>${chartAccountName(c.chartAccountId)}</td>
-        <td>${c.dayOfMonth}</td>
-        <td>${c.startDate || ""}</td>
-        <td>${c.endDate || "Indefinido"}</td>
-        <td>${currency(c.amount)}</td>
-        <td>
+        <td style="text-align:center">${c.dayOfMonth}</td>
+        <td>${dateLabel(c.startDate)}</td>
+        <td>${c.endDate ? dateLabel(c.endDate) : "Indefinido"}</td>
+        <td><strong>${currency(c.amount)}</strong></td>
+        <td class="row-actions">
           <button class="row-action-button edit-icon-button" data-edit-contract="${c.id}" type="button" title="Editar contrato" aria-label="Editar contrato">&#9998;</button>
           <button class="row-action-button delete-icon-button" data-delete-contract="${c.id}" type="button" title="Excluir contrato" aria-label="Excluir contrato">&times;</button>
         </td>
