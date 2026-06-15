@@ -3883,3 +3883,28 @@ table small,
 .accounts-table-wrap th {
   font-size: 0.6rem;
 }
+
+/* Password overlay */
+.pw-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.pw-overlay[hidden] { display: none; }
+.pw-overlay-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 32px 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pw-overlay-card h3 { margin: 0 0 4px; font-size: 1.1rem; }
+

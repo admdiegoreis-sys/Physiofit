@@ -1633,6 +1633,26 @@
                     <button class="ghost-button" id="copyPortalButton" type="button">Copiar link</button>
                   </div>
                 </section>
+                <section class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <p class="eyebrow">Segurança</p>
+                      <h2>Alterar minha senha</h2>
+                    </div>
+                  </div>
+                  <form id="changePasswordForm" class="form-grid">
+                    <label>
+                      Nova senha
+                      <input id="changePasswordNew" name="newPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Mínimo 6 caracteres" />
+                    </label>
+                    <label>
+                      Confirmar nova senha
+                      <input id="changePasswordConfirm" name="confirmPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Repita a nova senha" />
+                    </label>
+                    <span id="changePasswordFeedback" class="login-feedback" role="alert"></span>
+                    <button class="primary-button" type="submit">Salvar nova senha</button>
+                  </form>
+                </section>
                 <section class="panel access-panel">
                   <div class="panel-heading">
                     <div>
@@ -1661,6 +1681,29 @@
           </div>
         </section>
       </main>
+    </div>
+
+    <!-- Password overlay (admin: set password for another user) -->
+    <div id="passwordOverlay" class="pw-overlay" hidden>
+      <div class="pw-overlay-card">
+        <p class="eyebrow">Redefinir senha</p>
+        <h3 id="passwordOverlayTitle"></h3>
+        <form id="passwordOverlayForm" class="form-grid">
+          <label>
+            Nova senha
+            <input id="overlayNewPassword" name="newPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Mínimo 6 caracteres" />
+          </label>
+          <label>
+            Confirmar senha
+            <input id="overlayConfirmPassword" name="confirmPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Repita a nova senha" />
+          </label>
+          <span id="overlayPasswordFeedback" class="login-feedback" role="alert"></span>
+          <div style="display:flex;gap:8px;">
+            <button class="primary-button" type="submit">Salvar</button>
+            <button class="ghost-button" type="button" id="passwordOverlayCancel">Cancelar</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div class="modal-backdrop" id="modalBackdrop" hidden>

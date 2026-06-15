@@ -5331,7 +5331,7 @@ async function renderAccessUsers() {
                 <td>${user.has_password ? "Configurada" : "Pendente"}</td>
                 <td>
                   <div class="row-actions">
-                    <button class="row-action-button edit-icon-button" data-set-password="${user.id}" type="button" title="Definir senha">Senha</button>
+                    <button class="row-action-button edit-icon-button" data-set-password="${user.id}" data-set-password-name="${user.name}" type="button" title="Definir senha">Senha</button>
                     <button class="row-action-button ${user.status === "Ativo" ? "delete-icon-button" : "edit-icon-button"}" data-toggle-user="${user.id}" data-user-status="${user.status === "Ativo" ? "Inativo" : "Ativo"}" type="button">${user.status === "Ativo" ? "Bloquear" : "Ativar"}</button>
                   </div>
                 </td>
@@ -5345,21 +5345,28 @@ async function renderAccessUsers() {
   }
 }
 
-async function setUserPassword(userId) {
-  const password = window.prompt("Digite a nova senha para este usuário:");
-  if (!password) return;
-  if (password.length < 6) {
-    toast("Use uma senha com pelo menos 6 caracteres.");
-    return;
-  }
+let _pendingPasswordUserId = null;
 
-  try {
-    await window.PhysiofitData.updateUser(userId, { password });
-    await renderAccessUsers();
-    toast("Senha atualizada.");
-  } catch (error) {
-    toast(error.message || "Não foi possível atualizar a senha.");
-  }
+function setUserPassword(userId, userName) {
+  _pendingPasswordUserId = userId;
+  const overlay = document.querySelector("#passwordOverlay");
+  const title = document.querySelector("#passwordOverlayTitle");
+  const newPw = document.querySelector("#overlayNewPassword");
+  const confirmPw = document.querySelector("#overlayConfirmPassword");
+  const feedback = document.querySelector("#overlayPasswordFeedback");
+  if (!overlay) return;
+  title.textContent = userName || "Usuário";
+  newPw.value = "";
+  confirmPw.value = "";
+  feedback.textContent = "";
+  overlay.hidden = false;
+  newPw.focus();
+}
+
+function closePasswordOverlay() {
+  const overlay = document.querySelector("#passwordOverlay");
+  if (overlay) overlay.hidden = true;
+  _pendingPasswordUserId = null;
 }
 
 async function toggleUserStatus(userId, status) {
@@ -5790,7 +5797,7 @@ document.addEventListener("click", (event) => {
   if (deleteLeadButton) deleteLead(deleteLeadButton.dataset.deleteLead);
 
   const setPasswordButton = event.target.closest("[data-set-password]");
-  if (setPasswordButton) setUserPassword(setPasswordButton.dataset.setPassword);
+  if (setPasswordButton) setUserPassword(setPasswordButton.dataset.setPassword, setPasswordButton.dataset.setPasswordName);
 
   const toggleUserButton = event.target.closest("[data-toggle-user]");
   if (toggleUserButton) toggleUserStatus(toggleUserButton.dataset.toggleUser, toggleUserButton.dataset.userStatus);
@@ -6242,6 +6249,51 @@ document.querySelector("#settingsForm").addEventListener("submit", (event) => {
 document.querySelector("#loginForm")?.addEventListener("submit", handleLogin);
 document.querySelector("#logoutButton")?.addEventListener("click", logout);
 document.querySelector("#refreshUsersButton")?.addEventListener("click", renderAccessUsers);
+
+// Change own password
+document.querySelector("#changePasswordForm")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const feedback = document.querySelector("#changePasswordFeedback");
+  const newPw = document.querySelector("#changePasswordNew").value;
+  const confirmPw = document.querySelector("#changePasswordConfirm").value;
+  feedback.textContent = "";
+  if (newPw !== confirmPw) { feedback.textContent = "As senhas não coincidem."; return; }
+  if (newPw.length < 6) { feedback.textContent = "Use no mínimo 6 caracteres."; return; }
+  const user = currentUser();
+  if (!user) return;
+  try {
+    await window.PhysiofitData.updateUser(user.id, { password: newPw });
+    document.querySelector("#changePasswordNew").value = "";
+    document.querySelector("#changePasswordConfirm").value = "";
+    toast("Senha alterada com sucesso.");
+  } catch (err) {
+    feedback.textContent = err.message || "Não foi possível alterar a senha.";
+  }
+});
+
+// Admin overlay: set password for another user
+document.querySelector("#passwordOverlayForm")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const feedback = document.querySelector("#overlayPasswordFeedback");
+  const newPw = document.querySelector("#overlayNewPassword").value;
+  const confirmPw = document.querySelector("#overlayConfirmPassword").value;
+  feedback.textContent = "";
+  if (newPw !== confirmPw) { feedback.textContent = "As senhas não coincidem."; return; }
+  if (newPw.length < 6) { feedback.textContent = "Use no mínimo 6 caracteres."; return; }
+  if (!_pendingPasswordUserId) return;
+  try {
+    await window.PhysiofitData.updateUser(_pendingPasswordUserId, { password: newPw });
+    closePasswordOverlay();
+    await renderAccessUsers();
+    toast("Senha atualizada.");
+  } catch (err) {
+    feedback.textContent = err.message || "Não foi possível atualizar a senha.";
+  }
+});
+document.querySelector("#passwordOverlayCancel")?.addEventListener("click", closePasswordOverlay);
+document.querySelector("#passwordOverlay")?.addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) closePasswordOverlay();
+});
 
 document.querySelector("#copyPortalButton").addEventListener("click", async () => {
   await navigator.clipboard?.writeText("https://studioflow.local/agendar");

@@ -1,4 +1,4 @@
-import { getAuthSql, hashPassword, requireAdmin } from "./_auth.mjs";
+import { getAuthSql, hashPassword, requireAdmin, verifyToken } from "./_auth.mjs";
 import { json } from "./_db.mjs";
 
 function parseBody(event) {
@@ -6,14 +6,19 @@ function parseBody(event) {
   return JSON.parse(event.body);
 }
 
+function getCallerUser(event) {
+  const token = event.headers.authorization?.replace(/^Bearer\s+/i, "");
+  return verifyToken(token);
+}
+
 export async function handler(event) {
   if (event.httpMethod === "OPTIONS") return json(204, {});
 
   try {
-    await requireAdmin(event);
     const sql = await getAuthSql();
 
     if (event.httpMethod === "GET") {
+      await requireAdmin(event);
       const users = await sql`
         select id, professional_id, name, username, email, role, status, password_hash is not null as has_password, must_change_password, updated_at
         from public.auth_users
@@ -26,8 +31,18 @@ export async function handler(event) {
       const body = parseBody(event);
       if (!body.userId) return json(400, { error: "Usuario obrigatorio." });
 
+      const caller = getCallerUser(event);
+      if (!caller) return json(401, { error: "Não autenticado." });
+
+      const isAdmin = caller.role === "Administrador";
+      const isSelf = caller.id === body.userId;
+
+      // Non-admin can only change their own password (no status changes)
+      if (!isAdmin && !isSelf) return json(403, { error: "Acesso restrito ao administrador." });
+      if (!isAdmin && body.status) return json(403, { error: "Acesso restrito ao administrador." });
+
       const passwordHash = body.password ? hashPassword(body.password) : null;
-      const status = body.status || null;
+      const status = isAdmin ? (body.status || null) : null;
 
       const rows = await sql`
         update public.auth_users
