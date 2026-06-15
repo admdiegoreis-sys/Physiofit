@@ -1,5 +1,5 @@
 const storageKey = "studioflow-pilates-v2";
-const demoToday = "2026-05-11";
+const demoToday = new Date().toISOString().slice(0, 10);
 
 const seedStudents = [
   { id: "s1", name: "Ana Carol", email: "ana@studio.com", phone: "(48) 98811-2345", cpf: "752.335.251-00", birthDate: "1994-03-30", gender: "F", plan: "Mensal 2x semana", status: "Ativo", membership: "Matriculado", lastPresence: "2026-05-10" },
