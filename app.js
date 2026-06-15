@@ -486,6 +486,8 @@ let editingLeadId = null;
 let editingAccountId = null;
 let settlingAccountId = null;
 let editingContractId = null;
+let selectedReconMovementId = null;
+let selectedReconTitleId = null;
 
 const viewTitles = {
   dashboard: "Painel de controle",
@@ -3800,46 +3802,96 @@ function reconciliationRows() {
 
 function renderBankReconciliation() {
   const summary = document.querySelector("#bankReconciliationSummary");
-  const table = document.querySelector("#bankReconciliationTable");
-  if (!summary || !table) return;
-  const rows = reconciliationRows();
-  const unreconciled = state.bankMovements.filter((item) => item.reconciliationStatus === "unreconciled").length;
-  const reconciled = state.bankMovements.filter((item) => item.reconciliationStatus === "reconciled").length;
-  const ignored = state.bankMovements.filter((item) => item.reconciliationStatus === "ignored").length;
+  const leftPanel = document.querySelector("#bankMovementsPanel");
+  const rightPanel = document.querySelector("#systemAccountsPanel");
+  const reconcileBtn = document.querySelector("#reconcileSelectedButton");
+  if (!summary || !leftPanel || !rightPanel) return;
+
+  const unreconciled = state.bankMovements.filter((m) => m.reconciliationStatus === "unreconciled").length;
+  const reconciled = state.bankMovements.filter((m) => m.reconciliationStatus === "reconciled").length;
+  const ignored = state.bankMovements.filter((m) => m.reconciliationStatus === "ignored").length;
   summary.innerHTML = `
-    <article class="summary-item"><span>Não conciliados</span><strong>${unreconciled}</strong><small>Movimentos pendentes de vínculo</small></article>
-    <article class="summary-item"><span>Conciliados</span><strong>${reconciled}</strong><small>Baixas vinculadas a títulos</small></article>
-    <article class="summary-item"><span>Ignorados</span><strong>${ignored}</strong><small>Movimentos fora do financeiro</small></article>
+    <article class="summary-item"><span>Não conciliados</span><strong>${unreconciled}</strong><small>Pendentes de vínculo</small></article>
+    <article class="summary-item"><span>Conciliados</span><strong>${reconciled}</strong><small>Vinculados a títulos</small></article>
+    <article class="summary-item"><span>Ignorados</span><strong>${ignored}</strong><small>Fora do financeiro</small></article>
   `;
-  table.innerHTML = rows.length
-    ? rows.map((movement) => {
-        const suggestions = compatibleTitlesForMovement(movement);
-        const selectedId = movement.linkedFinancialTitleId || suggestions[0]?.id || "";
-        const locked = movement.reconciliationStatus !== "unreconciled" ? "disabled" : "";
-        const titleOptions = suggestions.length
-          ? suggestions.map((account) => `<option value="${account.id}" ${account.id === selectedId ? "selected" : ""}>${account.person || supplierName(account.supplierId) || account.description} · ${currency(accountOpenAmount(account))} · ${dateLabel(accountExpectedDate(account))}</option>`).join("")
-          : `<option value="">Nenhum título sugerido</option>`;
+
+  // ─── Left panel: bank movements ──────────────────────────────────────────
+  const movements = reconciliationRows();
+  const selectedMovement = selectedReconMovementId
+    ? state.bankMovements.find((m) => m.id === selectedReconMovementId)
+    : null;
+
+  leftPanel.innerHTML = movements.length
+    ? movements.map((m) => {
+        const isSelected = m.id === selectedReconMovementId;
+        const isReconciled = m.reconciliationStatus === "reconciled";
+        const isIgnored = m.reconciliationStatus === "ignored";
+        const amount = Number(m.amount || 0);
+        let statusPill = "";
+        if (isReconciled) statusPill = `<span class="source-pill ofx">Conciliado</span>`;
+        else if (isIgnored) statusPill = `<span class="source-pill manual">Ignorado</span>`;
         return `
-          <tr>
-            <td>${dateLabel(movement.date)}</td>
-            <td><strong>${movement.description}</strong><br><small>${movement.ofxIdentifier || movement.notes || "-"}</small></td>
-            <td>${movement.bankName || bankAccountLabel(movement.bankAccountId)}</td>
-            <td><strong class="${Number(movement.amount || 0) >= 0 ? "amount-in" : "amount-out"}">${currency(Math.abs(Number(movement.amount || 0)))}</strong></td>
-            <td><span class="source-pill ${movement.reconciliationStatus === "reconciled" ? "ofx" : "manual"}">${reconciliationStatusLabel(movement.reconciliationStatus)}</span></td>
-            <td>
-              <select class="inline-field" data-reconciliation-title="${movement.id}" ${locked}>
-                ${titleOptions}
-              </select>
-            </td>
-            <td class="row-actions">
-              <button class="row-action-button settle-icon-button" data-reconcile-movement="${movement.id}" type="button" title="Conciliar" aria-label="Conciliar movimento" ${locked}>$</button>
-              <button class="row-action-button edit-icon-button" data-create-title-from-movement="${movement.id}" type="button" title="Criar título" aria-label="Criar título a partir do movimento" ${locked}>+</button>
-              <button class="row-action-button delete-icon-button" data-ignore-movement="${movement.id}" type="button" title="Ignorar" aria-label="Ignorar movimento" ${locked}>&times;</button>
-            </td>
-          </tr>
-        `;
+          <div class="recon-row${isSelected ? " recon-row--selected" : ""}${isReconciled ? " recon-row--done" : ""}${isIgnored ? " recon-row--done" : ""}"
+               data-select-movement="${m.id}">
+            <span class="recon-row-date">${dateLabel(m.date)}</span>
+            <span class="recon-row-desc"><strong>${m.description}</strong><br><small>${m.bankName || bankAccountLabel(m.bankAccountId)}</small></span>
+            <span class="recon-row-amount ${amount >= 0 ? "amount-in" : "amount-out"}">${currency(Math.abs(amount))}</span>
+            <span class="recon-row-status">${statusPill}</span>
+            ${isSelected && !isReconciled && !isIgnored ? `
+              <span class="recon-row-actions">
+                <button class="row-action-button edit-icon-button" data-create-title-from-movement="${m.id}" title="Criar título">+</button>
+                <button class="row-action-button delete-icon-button" data-ignore-movement="${m.id}" title="Ignorar">&times;</button>
+              </span>` : ""}
+          </div>`;
       }).join("")
-    : `<tr><td colspan="7"><div class="empty-state">Nenhum movimento OFX encontrado para os filtros selecionados.</div></td></tr>`;
+    : `<div class="empty-state">Nenhum movimento encontrado.</div>`;
+
+  // ─── Right panel: system accounts ────────────────────────────────────────
+  const compatibleIds = selectedMovement
+    ? new Set(compatibleTitlesForMovement(selectedMovement).map((a) => a.id))
+    : new Set();
+  const directionFilter = selectedMovement ? bankMovementDirection(selectedMovement) : null;
+  const reconMonth = document.querySelector("#bankReconciliationMonthFilter")?.value || "";
+
+  const systemAccounts = state.accounts
+    .filter((a) => a.origin !== "Importação OFX" && a.origin !== "ImportaÃ§Ã£o OFX")
+    .filter((a) => a.status !== "Cancelado")
+    .filter((a) => !directionFilter || a.direction === directionFilter)
+    .filter((a) => {
+      const d = a.forecastDate || a.competenceDate || "";
+      return reconMonth ? d.startsWith(reconMonth) : true;
+    })
+    .filter((a) => accountOpenAmount(a) > 0)
+    .sort((a, b) => {
+      const da = a.forecastDate || a.competenceDate || "";
+      const db = b.forecastDate || b.competenceDate || "";
+      return da.localeCompare(db);
+    });
+
+  rightPanel.innerHTML = systemAccounts.length
+    ? systemAccounts.map((a) => {
+        const isSelected = a.id === selectedReconTitleId;
+        const isCompatible = compatibleIds.has(a.id);
+        return `
+          <div class="recon-row${isSelected ? " recon-row--selected" : ""}${isCompatible ? " recon-row--compatible" : ""}"
+               data-select-title="${a.id}">
+            <span class="recon-row-date">${dateLabel(a.forecastDate || a.competenceDate)}</span>
+            <span class="recon-row-desc"><strong>${a.description}</strong><br><small>${supplierName(a.supplierId) || a.person || ""}</small></span>
+            <span class="recon-row-amount ${a.direction === "Receber" ? "amount-in" : "amount-out"}">${currency(accountOpenAmount(a))}</span>
+            <span class="recon-row-status">${isCompatible ? `<span class="source-pill ofx">Sugerido</span>` : ""}</span>
+          </div>`;
+      }).join("")
+    : `<div class="empty-state">${directionFilter
+        ? "Nenhuma conta em aberto encontrada."
+        : "Selecione um movimento para ver as contas compatíveis."}</div>`;
+
+  if (reconcileBtn) {
+    const canReconcile = !!(selectedReconMovementId && selectedReconTitleId);
+    reconcileBtn.disabled = !canReconcile;
+    reconcileBtn.classList.toggle("primary-button", canReconcile);
+    reconcileBtn.classList.toggle("ghost-button", !canReconcile);
+  }
 }
 
 function resetBankReconciliationFilters() {
@@ -5665,11 +5717,27 @@ document.addEventListener("click", (event) => {
     }
   }
 
-  const reconcileButton = event.target.closest("[data-reconcile-movement]");
-  if (reconcileButton) {
-    const movementId = reconcileButton.dataset.reconcileMovement;
-    const titleId = document.querySelector(`[data-reconciliation-title="${movementId}"]`)?.value || "";
-    reconcileBankMovement(movementId, titleId);
+  const selectMovementRow = event.target.closest("[data-select-movement]");
+  if (selectMovementRow && !event.target.closest("button")) {
+    const id = selectMovementRow.dataset.selectMovement;
+    const movement = state.bankMovements.find((m) => m.id === id);
+    if (movement && movement.reconciliationStatus === "unreconciled") {
+      selectedReconMovementId = selectedReconMovementId === id ? null : id;
+      selectedReconTitleId = null;
+      // Auto-set month filter to movement month
+      const monthInput = document.querySelector("#bankReconciliationMonthFilter");
+      if (monthInput && selectedReconMovementId && movement.date) {
+        monthInput.value = movement.date.slice(0, 7);
+      }
+      renderBankReconciliation();
+    }
+  }
+
+  const selectTitleRow = event.target.closest("[data-select-title]");
+  if (selectTitleRow) {
+    const id = selectTitleRow.dataset.selectTitle;
+    selectedReconTitleId = selectedReconTitleId === id ? null : id;
+    renderBankReconciliation();
   }
 
   const createTitleButton = event.target.closest("[data-create-title-from-movement]");
@@ -6135,14 +6203,22 @@ document.querySelector("#importAccountsReceivableFile")?.addEventListener("chang
 });
 document.querySelector("#approveOfxValidButton")?.addEventListener("click", approveValidOfxDraftsToFinance);
 document.querySelector("#clearOfxImportButton")?.addEventListener("click", clearOfxImport);
-["bankReconciliationStatusFilter", "bankReconciliationTypeFilter", "bankReconciliationAccountFilter", "bankReconciliationSearch"].forEach((id) => {
+["bankReconciliationStatusFilter", "bankReconciliationTypeFilter", "bankReconciliationAccountFilter", "bankReconciliationSearch", "bankReconciliationMonthFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderBankReconciliation);
   document.querySelector(`#${id}`)?.addEventListener("change", renderBankReconciliation);
 });
 document.querySelector("#bankReconciliationSearchButton")?.addEventListener("click", renderBankReconciliation);
 document.querySelector("#bankReconciliationClearFiltersButton")?.addEventListener("click", () => {
+  selectedReconMovementId = null;
+  selectedReconTitleId = null;
   resetBankReconciliationFilters();
   renderBankReconciliation();
+});
+document.querySelector("#reconcileSelectedButton")?.addEventListener("click", () => {
+  if (!selectedReconMovementId || !selectedReconTitleId) return;
+  reconcileBankMovement(selectedReconMovementId, selectedReconTitleId);
+  selectedReconMovementId = null;
+  selectedReconTitleId = null;
 });
 document.querySelector("#ofxReviewTable")?.addEventListener("change", (event) => {
   const field = event.target.closest("[data-ofx-field]");

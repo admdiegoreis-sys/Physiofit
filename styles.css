@@ -1340,6 +1340,147 @@ button {
   white-space: nowrap;
 }
 
+/* ─── Conciliação Bancária — layout lado a lado ──────────────────────────── */
+
+.recon-titlebar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#reconcileSelectedButton:not([disabled]) {
+  background: var(--primary, #5b5ef4);
+  color: #fff;
+  border-color: transparent;
+}
+
+.reconciliation-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.recon-panel {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #dbe3ed;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.recon-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f5f7fa;
+  border-bottom: 1px solid #dbe3ed;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.recon-panel-header small {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 0.72rem;
+}
+
+.recon-panel-body {
+  flex: 1;
+  max-height: 540px;
+  overflow-y: auto;
+}
+
+.recon-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.12s;
+  font-size: 0.8rem;
+}
+
+.recon-row:last-child {
+  border-bottom: none;
+}
+
+.recon-row:hover {
+  background: #f8fafc;
+}
+
+.recon-row--selected {
+  background: #eff6ff !important;
+  border-left: 3px solid #3b82f6;
+}
+
+.recon-row--compatible {
+  background: #f0fdf4;
+  border-left: 3px solid #22c55e;
+}
+
+.recon-row--done {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.recon-row-date {
+  color: #6b7280;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.recon-row-desc {
+  min-width: 0;
+}
+
+.recon-row-desc strong {
+  display: block;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recon-row-desc small {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.recon-row-amount {
+  font-weight: 700;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.recon-row-status {
+  white-space: nowrap;
+}
+
+.recon-row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.recon-row-actions .row-action-button {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
+  font-size: 0.6rem;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
 .bank-reconciliation-table-wrap table {
   min-width: 1240px;
 }

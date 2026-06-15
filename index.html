@@ -1342,7 +1342,10 @@
                 <p class="eyebrow">Financeiro</p>
                 <h2>Conciliação Bancária</h2>
               </div>
-              <button class="ghost-button" id="bankReconciliationClearFiltersButton" type="button">Limpar filtros</button>
+              <div class="recon-titlebar-actions">
+                <button class="ghost-button" id="reconcileSelectedButton" type="button" disabled>Conciliar</button>
+                <button class="ghost-button" id="bankReconciliationClearFiltersButton" type="button">Limpar filtros</button>
+              </div>
             </div>
             <div class="module-body">
               <div class="accounts-toolbar">
@@ -1365,27 +1368,28 @@
                   <option value="santander">Santander</option>
                   <option value="outro">Outro banco</option>
                 </select>
+                <input type="month" id="bankReconciliationMonthFilter" aria-label="Mês do sistema" />
                 <div class="patient-search-row accounts-search-row">
-                  <input id="bankReconciliationSearch" type="search" placeholder="Buscar por histórico, pessoa ou descrição" />
+                  <input id="bankReconciliationSearch" type="search" placeholder="Buscar no extrato..." />
                   <button class="action-button blue" id="bankReconciliationSearchButton" type="button">Buscar</button>
                 </div>
               </div>
               <div class="ofx-summary" id="bankReconciliationSummary"></div>
-              <div class="table-wrap bank-reconciliation-table-wrap accounts-table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Data</th>
-                      <th>Histórico</th>
-                      <th>Banco</th>
-                      <th>Valor</th>
-                      <th>Status</th>
-                      <th>Título sugerido</th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody id="bankReconciliationTable"></tbody>
-                </table>
+              <div class="reconciliation-panels">
+                <div class="recon-panel">
+                  <div class="recon-panel-header">
+                    <span>Extrato Bancário</span>
+                    <small>Clique para selecionar</small>
+                  </div>
+                  <div class="recon-panel-body" id="bankMovementsPanel"></div>
+                </div>
+                <div class="recon-panel">
+                  <div class="recon-panel-header">
+                    <span>Sistema</span>
+                    <small>Clique para selecionar</small>
+                  </div>
+                  <div class="recon-panel-body" id="systemAccountsPanel"></div>
+                </div>
               </div>
             </div>
           </div>
