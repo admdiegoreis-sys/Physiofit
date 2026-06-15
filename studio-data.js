@@ -1,5 +1,5 @@
 window.studioImportedData = {
-  "version": "importacao-manual-2026-06-09",
+  "version": "importacao-manual-2026-06-15",
   "students": [
     {
       "id": "s1",
