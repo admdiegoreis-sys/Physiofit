@@ -3809,9 +3809,18 @@ function renderBankReconciliation() {
   const reconcileBtn = document.querySelector("#reconcileSelectedButton");
   if (!summary || !leftPanel || !rightPanel) return;
 
-  const unreconciled = state.bankMovements.filter((m) => m.reconciliationStatus === "unreconciled").length;
-  const reconciled = state.bankMovements.filter((m) => m.reconciliationStatus === "reconciled").length;
-  const ignored = state.bankMovements.filter((m) => m.reconciliationStatus === "ignored").length;
+  const term = normalizedText(document.querySelector("#bankReconciliationSearch")?.value.trim() || "");
+  const type = document.querySelector("#bankReconciliationTypeFilter")?.value || "all";
+  const accountId = document.querySelector("#bankReconciliationAccountFilter")?.value || "all";
+  const reconMonth = document.querySelector("#bankReconciliationMonthFilter")?.value || "";
+  const filteredBase = state.bankMovements
+    .filter((m) => type === "all" || (type === "receivable" ? Number(m.amount || 0) >= 0 : Number(m.amount || 0) < 0))
+    .filter((m) => accountId === "all" || m.bankAccountId === accountId)
+    .filter((m) => !reconMonth || String(m.date || "").startsWith(reconMonth))
+    .filter((m) => !term || normalizedText(`${m.description} ${m.bankName} ${m.notes}`).includes(term));
+  const unreconciled = filteredBase.filter((m) => m.reconciliationStatus === "unreconciled").length;
+  const reconciled = filteredBase.filter((m) => m.reconciliationStatus === "reconciled").length;
+  const ignored = filteredBase.filter((m) => m.reconciliationStatus === "ignored").length;
   summary.innerHTML = `
     <article class="summary-item"><span>Não conciliados</span><strong>${unreconciled}</strong><small>Pendentes de vínculo</small></article>
     <article class="summary-item"><span>Conciliados</span><strong>${reconciled}</strong><small>Vinculados a títulos</small></article>
