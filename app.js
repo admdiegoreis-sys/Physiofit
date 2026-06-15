@@ -5553,7 +5553,8 @@ function renderField(field) {
     `;
   }
   if (field.type === "textarea") return `<label>${field.label}<textarea name="${field.name}" rows="4" ${required}>${field.value ?? ""}</textarea></label>`;
-  return `<label>${field.label}<input name="${field.name}" type="${field.type}" value="${field.value ?? ""}" ${required} /></label>`;
+  const extraAttrs = field.type === "number" ? ' step="any"' : "";
+  return `<label>${field.label}<input name="${field.name}" type="${field.type}" value="${field.value ?? ""}"${extraAttrs} ${required} /></label>`;
 }
 
 function closeModal() {
