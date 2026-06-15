@@ -2224,6 +2224,7 @@ button {
 .reverse-icon-button {
   background: #e07b2a;
   box-shadow: 0 5px 12px rgba(224, 123, 42, 0.2);
+  border-radius: 4px;
 }
 
 .reverse-icon-button:hover {
@@ -2885,6 +2886,14 @@ td.row-actions .row-action-button:last-child {
 
 .accounts-table-wrap .settle-icon-button:hover {
   box-shadow: 0 4px 10px rgba(91, 156, 83, 0.22);
+}
+
+.accounts-table-wrap .reverse-icon-button {
+  box-shadow: 0 2px 6px rgba(224, 123, 42, 0.16);
+}
+
+.accounts-table-wrap .reverse-icon-button:hover {
+  box-shadow: 0 4px 10px rgba(224, 123, 42, 0.22);
 }
 
 .accounts-table-wrap .delete-icon-button {
