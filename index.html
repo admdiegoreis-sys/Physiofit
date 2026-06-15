@@ -77,6 +77,7 @@
               <div class="top-menu-panel">
                 <button class="top-menu-option" data-view="monthlyPayments" type="button">Mensalidades</button>
                 <button class="top-menu-option" data-view="fiscal" type="button">NFS-e</button>
+                <button class="top-menu-option" data-view="contracts" type="button">Contratos</button>
                 <button class="top-menu-option" data-view="accountsPayable" type="button">Contas a Pagar</button>
                 <button class="top-menu-option" data-view="accountsReceivable" type="button">Contas a Receber</button>
                 <button class="top-menu-option" data-view="ofxImport" type="button">Importar OFX</button>
@@ -1067,6 +1068,41 @@
                     </tr>
                   </thead>
                   <tbody id="fiscalTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="contractsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-titlebar">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Contratos / Pagamentos Recorrentes</h2>
+              </div>
+              <div class="title-actions">
+                <button class="primary-button" id="addContractButton" type="button">Adicionar Contrato</button>
+              </div>
+            </div>
+            <div class="module-body">
+              <div class="financial-summary-cards" id="contractsSummary"></div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Descrição</th>
+                      <th>Fornecedor</th>
+                      <th>Plano de contas</th>
+                      <th>Dia</th>
+                      <th>Início</th>
+                      <th>Fim</th>
+                      <th>Valor previsto</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="contractsTable"></tbody>
                 </table>
               </div>
             </div>

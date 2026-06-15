@@ -418,6 +418,7 @@ const seedData = {
   plans: importedArray("plans", seedPlans),
   enrollments: importedArray("enrollments", seedEnrollments),
   chartAccounts: seedChartAccounts,
+  contracts: importedArray("contracts", []),
   accounts: importedArray("accounts", seedAccounts),
   bankMovements: importedArray("bankMovements", []),
   ofxBatches: [],
@@ -484,6 +485,7 @@ let editingAppointmentId = null;
 let editingLeadId = null;
 let editingAccountId = null;
 let settlingAccountId = null;
+let editingContractId = null;
 
 const viewTitles = {
   dashboard: "Painel de controle",
@@ -501,6 +503,7 @@ const viewTitles = {
   planEditor: "Cadastro de plano",
   monthlyPayments: "Mensalidades",
   fiscal: "NFS-e",
+  contracts: "Contratos",
   accountsPayable: "Contas a Pagar",
   accountsReceivable: "Contas a Receber",
   ofxImport: "Importar OFX",
@@ -529,6 +532,7 @@ const menuGroupByView = {
   planEditor: "registers",
   monthlyPayments: "finance",
   fiscal: "finance",
+  contracts: "finance",
   accountsPayable: "finance",
   accountsReceivable: "finance",
   ofxImport: "finance",
@@ -795,6 +799,46 @@ const modalSchemas = {
     ],
     handler: (values) => state.payments.push({ id: uid("p"), ...values, amount: Number(values.amount) }),
   },
+  contract: {
+    title: "Adicionar contrato",
+    submit: "Salvar contrato",
+    fields: [
+      { name: "description", label: "Descrição", type: "text", value: "" },
+      { name: "person", label: "Fornecedor", type: "text", value: "" },
+      { name: "document", label: "CPF/CNPJ", type: "text", value: "", required: false },
+      { name: "chartAccountId", label: "Plano de contas", type: "chartAccount" },
+      { name: "amount", label: "Valor previsto (R$)", type: "number", value: 0 },
+      { name: "dayOfMonth", label: "Dia do mês", type: "select", options: Array.from({length: 28}, (_, i) => String(i + 1)), value: "5" },
+      { name: "startDate", label: "Início", type: "date", value: demoToday },
+      { name: "endDate", label: "Fim (deixe vazio = indefinido)", type: "date", value: "", required: false },
+      { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Boleto", "Débito automático", "Transferência", "Cartão de Crédito", "Dinheiro"], value: "Pix" },
+      { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
+    ],
+    handler: (values) => {
+      const payload = {
+        id: editingContractId || uid("ct"),
+        description: values.description || "",
+        person: values.person || "",
+        document: values.document || "",
+        supplierId: upsertSupplierFromAccount(values.person, values.document) || "",
+        chartAccountId: values.chartAccountId || "",
+        amount: Number(values.amount || 0),
+        dayOfMonth: Number(values.dayOfMonth || 5),
+        startDate: values.startDate || demoToday,
+        endDate: values.endDate || "",
+        paymentMethod: values.paymentMethod || "Pix",
+        status: values.status || "Ativo",
+      };
+      if (editingContractId) {
+        state.contracts = state.contracts.map((c) => c.id === editingContractId ? payload : c);
+        removeContractForecastTitles(editingContractId, false);
+      } else {
+        state.contracts.push(payload);
+      }
+      generateContractForecastTitles(payload);
+      editingContractId = null;
+    },
+  },
   account: {
     title: "Adicionar conta",
     submit: "Salvar conta",
@@ -833,8 +877,31 @@ const modalSchemas = {
         reconciliationStatus: current?.reconciliationStatus || "unreconciled",
       };
       payload.status = accountAutoStatus(payload);
-      if (editingAccountId) state.accounts = state.accounts.map((item) => (item.id === editingAccountId ? payload : item));
-      else state.accounts.push(payload);
+      if (editingAccountId) {
+        state.accounts = state.accounts.map((item) => (item.id === editingAccountId ? payload : item));
+      } else {
+        // Duplicate detection: warn if a contract forecast already exists for same direction+month+supplier
+        if (payload.direction === "Pagar" && payload.forecastDate) {
+          const month = payload.forecastDate.slice(0, 7);
+          const duplicate = state.accounts.find(
+            (acc) =>
+              acc.id !== payload.id &&
+              acc.contractId &&
+              acc.direction === "Pagar" &&
+              acc.forecastDate &&
+              acc.forecastDate.startsWith(month) &&
+              acc.supplierId &&
+              acc.supplierId === payload.supplierId
+          );
+          if (duplicate) {
+            const ok = confirm(
+              `Atenção: já existe um título de previsão de contrato para "${payload.person || "este fornecedor"}" em ${month}.\n\nDeseja continuar e incluir mesmo assim?`
+            );
+            if (!ok) return;
+          }
+        }
+        state.accounts.push(payload);
+      }
       syncEnrollmentPaymentFromAccount(payload);
       editingAccountId = null;
     },
@@ -986,6 +1053,7 @@ function normalizeState(data) {
   normalized.fiscalInvoices = (Array.isArray(data.fiscalInvoices) ? data.fiscalInvoices : structuredClone(seedData.fiscalInvoices)).map((item, index) => normalizeFiscalInvoice(normalizeTextFields(item), index));
   normalized.appointments = normalized.appointments.map((item) => normalizeAppointmentTeacher(item));
   normalized.blocks = normalized.blocks.map((item) => normalizeAppointmentTeacher(item));
+  normalized.contracts = Array.isArray(data.contracts) ? data.contracts : structuredClone(seedData.contracts);
   return normalized;
 }
 
@@ -2182,6 +2250,7 @@ function render() {
   renderMonthlyPayments();
   renderFiscalOptions();
   renderFiscalInvoices();
+  renderContracts();
   renderAccountOptions();
   renderAccounts();
   renderOfxImport();
@@ -3445,6 +3514,159 @@ function renderAccountTable(config) {
         .join("")
     : `<tr><td colspan="10"><div class="empty-state">${config.emptyMessage}</div></td></tr>`;
 }
+
+// ─── Contracts ───────────────────────────────────────────────────────────────
+
+function contractStatus(contract) {
+  if (contract.status === "Inativo") return "Inativo";
+  const today = demoToday;
+  if (contract.endDate && contract.endDate < today) return "Encerrado";
+  return "Ativo";
+}
+
+function removeContractForecastTitles(contractId, onlyFuture = true) {
+  const today = demoToday;
+  state.accounts = state.accounts.filter((acc) => {
+    if (acc.contractId !== contractId) return true;
+    if (acc.reconciliationStatus === "manual" || acc.paidDate) return true;
+    if (onlyFuture && acc.forecastDate < today) return true;
+    return false;
+  });
+}
+
+function generateContractForecastTitles(contract) {
+  const start = contract.startDate || demoToday;
+  const end = contract.endDate || "2099-12-31";
+  const day = String(contract.dayOfMonth || 5).padStart(2, "0");
+  const today = demoToday;
+
+  let [startYear, startMonth] = start.split("-").map(Number);
+  const [endYear, endMonth] = end.split("-").map(Number);
+
+  const generated = [];
+  for (let y = startYear, m = startMonth; y < endYear || (y === endYear && m <= endMonth); ) {
+    const mm = String(m).padStart(2, "0");
+    const maxDay = new Date(y, m, 0).getDate();
+    const actualDay = Math.min(Number(day), maxDay);
+    const forecastDate = `${y}-${mm}-${String(actualDay).padStart(2, "0")}`;
+
+    // skip if already past and already has matching settled account
+    const alreadyHasReal = state.accounts.some(
+      (acc) =>
+        acc.contractId === contract.id &&
+        acc.forecastDate &&
+        acc.forecastDate.startsWith(`${y}-${mm}`) &&
+        (acc.paidDate || acc.reconciliationStatus === "manual")
+    );
+    // skip if no forecast yet exists for this month
+    const alreadyHasForecast = state.accounts.some(
+      (acc) =>
+        acc.contractId === contract.id &&
+        acc.forecastDate &&
+        acc.forecastDate.startsWith(`${y}-${mm}`) &&
+        !acc.paidDate &&
+        acc.reconciliationStatus !== "manual"
+    );
+
+    if (!alreadyHasReal && !alreadyHasForecast) {
+      generated.push({
+        id: uid("acc"),
+        contractId: contract.id,
+        direction: "Pagar",
+        description: contract.description || "",
+        person: contract.person || "",
+        document: contract.document || "",
+        supplierId: contract.supplierId || "",
+        chartAccountId: contract.chartAccountId || "",
+        amount: contract.amount,
+        forecastDate,
+        competenceDate: forecastDate,
+        paymentMethod: contract.paymentMethod || "Pix",
+        status: forecastDate < today ? "Em aberto" : "A vencer",
+        openAmount: contract.amount,
+        paidAmount: 0,
+        paidDate: "",
+        reconciliationStatus: "pendente",
+        notes: "",
+        createdAt: today,
+      });
+    }
+
+    m++;
+    if (m > 12) { m = 1; y++; }
+  }
+  state.accounts.push(...generated);
+}
+
+function openContractModal(id, defaults = {}) {
+  const existing = id ? state.contracts.find((c) => c.id === id) : null;
+  editingContractId = id || null;
+  const schema = modalSchemas.contract;
+  schema.title = existing ? "Editar contrato" : "Adicionar contrato";
+  const values = existing ? { ...existing } : { ...defaults };
+  openModal("contract", values);
+}
+
+function deleteContract(id) {
+  const contract = state.contracts.find((c) => c.id === id);
+  if (!contract) return;
+  const hasFuture = state.accounts.some(
+    (acc) => acc.contractId === id && !acc.paidDate && acc.reconciliationStatus !== "manual"
+  );
+  let msg = `Excluir o contrato "${contract.description}"?`;
+  if (hasFuture) msg += "\n\nOs títulos de previsão futuros (não pagos) também serão removidos.";
+  if (!confirm(msg)) return;
+  removeContractForecastTitles(id, false);
+  state.contracts = state.contracts.filter((c) => c.id !== id);
+  saveState();
+  render();
+}
+
+function renderContracts() {
+  const tbody = document.querySelector("#contractsTable");
+  const summaryEl = document.querySelector("#contractsSummary");
+  if (!tbody) return;
+
+  const contracts = state.contracts || [];
+  const active = contracts.filter((c) => contractStatus(c) === "Ativo");
+  const monthly = active.reduce((s, c) => s + Number(c.amount || 0), 0);
+
+  if (summaryEl) {
+    summaryEl.innerHTML = `
+      <div class="summary-card"><span class="card-label">Contratos ativos</span><span class="card-value">${active.length}</span></div>
+      <div class="summary-card"><span class="card-label">Total mensal previsto</span><span class="card-value">${currency(monthly)}</span></div>
+      <div class="summary-card"><span class="card-label">Total anual previsto</span><span class="card-value">${currency(monthly * 12)}</span></div>
+    `;
+  }
+
+  if (!contracts.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">Nenhum contrato cadastrado.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = contracts
+    .map((c) => {
+      const st = contractStatus(c);
+      const stPill = st === "Ativo" ? "ativo" : st === "Inativo" ? "inativo" : "atrasado";
+      return `<tr>
+        <td><span class="status-pill ${stPill}">${st}</span></td>
+        <td>${c.description || ""}</td>
+        <td>${c.person || ""}</td>
+        <td>${chartAccountName(c.chartAccountId)}</td>
+        <td>${c.dayOfMonth}</td>
+        <td>${c.startDate || ""}</td>
+        <td>${c.endDate || "Indefinido"}</td>
+        <td>${currency(c.amount)}</td>
+        <td>
+          <button class="action-btn" onclick="openContractModal('${c.id}')">Editar</button>
+          <button class="action-btn danger" onclick="deleteContract('${c.id}')">Excluir</button>
+        </td>
+      </tr>`;
+    })
+    .join("");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function renderAccounts() {
   Object.values(accountViewConfigs).forEach(renderAccountTable);
@@ -5788,6 +6010,7 @@ document.querySelector("#chartAccountSearch")?.addEventListener("input", renderC
 document.querySelector("#chartAccountSearchButton")?.addEventListener("click", renderChartAccounts);
 document.querySelector("#chartAccountClearFiltersButton")?.addEventListener("click", clearChartAccountFilters);
 document.querySelector("#processOfxButton")?.addEventListener("click", processOfxFile);
+document.querySelector("#addContractButton")?.addEventListener("click", () => openContractModal(null));
 document.querySelector("#importAccountsPayableFile")?.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (file) { importAccountsFromXlsx(file, "Pagar"); e.target.value = ""; }
