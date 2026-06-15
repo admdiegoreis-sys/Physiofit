@@ -1550,6 +1550,7 @@ async function hydrateStateFromNeon() {
     if (data.data.dataVersion !== seedData.dataVersion) {
       applyingRemoteState = true;
       state = normalizeState(structuredClone(seedData));
+      ensureContractForecasts();
       localStorage.setItem(storageKey, JSON.stringify(state));
       applyingRemoteState = false;
       remoteStateReady = true;
@@ -1561,6 +1562,7 @@ async function hydrateStateFromNeon() {
     }
     applyingRemoteState = true;
     state = normalizeState(data.data);
+    ensureContractForecasts();
     localStorage.setItem(storageKey, JSON.stringify(state));
     applyingRemoteState = false;
     remoteStateReady = true;
@@ -3516,6 +3518,12 @@ function renderAccountTable(config) {
 }
 
 // ─── Contracts ───────────────────────────────────────────────────────────────
+
+function ensureContractForecasts() {
+  (state.contracts || []).forEach((contract) => {
+    if (contractStatus(contract) !== "Inativo") generateContractForecastTitles(contract);
+  });
+}
 
 function contractStatus(contract) {
   if (contract.status === "Inativo") return "Inativo";
@@ -6053,11 +6061,13 @@ document.querySelector("#copyPortalButton").addEventListener("click", async () =
 
 document.querySelector("#seedButton")?.addEventListener("click", () => {
   state = normalizeState(structuredClone(seedData));
+  ensureContractForecasts();
   saveState();
   render();
   toast("Dados exemplo restaurados.");
 });
 
 applyAuthSession();
+ensureContractForecasts();
 render();
 hydrateStateFromNeon();
