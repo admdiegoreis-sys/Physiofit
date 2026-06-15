@@ -3520,6 +3520,10 @@ function renderAccountTable(config) {
 // ─── Contracts ───────────────────────────────────────────────────────────────
 
 function ensureContractForecasts() {
+  // Remove all unsettled auto-generated forecasts before regenerating (makes this idempotent)
+  state.accounts = state.accounts.filter(
+    (acc) => !acc.contractId || acc.paidDate || acc.reconciliationStatus === "manual"
+  );
   (state.contracts || []).forEach((contract) => {
     if (contractStatus(contract) !== "Inativo") generateContractForecastTitles(contract, "2026-07-01");
   });
@@ -3667,8 +3671,8 @@ function renderContracts() {
         <td>${c.endDate || "Indefinido"}</td>
         <td>${currency(c.amount)}</td>
         <td>
-          <button class="action-btn" onclick="openContractModal('${c.id}')">Editar</button>
-          <button class="action-btn danger" onclick="deleteContract('${c.id}')">Excluir</button>
+          <button class="row-action-button edit-icon-button" data-edit-contract="${c.id}" type="button" title="Editar contrato" aria-label="Editar contrato">&#9998;</button>
+          <button class="row-action-button delete-icon-button" data-delete-contract="${c.id}" type="button" title="Excluir contrato" aria-label="Excluir contrato">&times;</button>
         </td>
       </tr>`;
     })
@@ -5557,6 +5561,9 @@ document.addEventListener("click", (event) => {
   const editPlanButton = event.target.closest("[data-edit-plan]");
   if (editPlanButton) openPlanEditor(editPlanButton.dataset.editPlan);
 
+  const editContractButton = event.target.closest("[data-edit-contract]");
+  if (editContractButton) openContractModal(editContractButton.dataset.editContract);
+
   const editSupplierButton = event.target.closest("[data-edit-supplier]");
   if (editSupplierButton) openSupplierModal(editSupplierButton.dataset.editSupplier);
 
@@ -5593,6 +5600,9 @@ document.addEventListener("click", (event) => {
 
   const deleteProfessionalButton = event.target.closest("[data-delete-professional]");
   if (deleteProfessionalButton) deleteProfessional(deleteProfessionalButton.dataset.deleteProfessional);
+
+  const deleteContractButton = event.target.closest("[data-delete-contract]");
+  if (deleteContractButton) deleteContract(deleteContractButton.dataset.deleteContract);
 
   const deleteSupplierButton = event.target.closest("[data-delete-supplier]");
   if (deleteSupplierButton) deleteSupplier(deleteSupplierButton.dataset.deleteSupplier);
