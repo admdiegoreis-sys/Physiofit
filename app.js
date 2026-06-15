@@ -3523,8 +3523,10 @@ function ensureContractForecasts() {
   state.accounts = state.accounts.filter(
     (acc) => !acc.contractId || acc.paidDate || acc.reconciliationStatus === "manual"
   );
+  // Use first day of current month as floor so past historical months aren't generated
+  const minDate = demoToday.slice(0, 7) + "-01";
   (state.contracts || []).forEach((contract) => {
-    if (contractStatus(contract) !== "Inativo") generateContractForecastTitles(contract, "2026-07-01");
+    if (contractStatus(contract) !== "Inativo") generateContractForecastTitles(contract, minDate);
   });
 }
 
