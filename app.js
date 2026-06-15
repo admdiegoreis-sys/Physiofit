@@ -3444,7 +3444,11 @@ function accountRows(config) {
     .filter((item) => reconciliation === "all" || (item.reconciliationStatus || "unreconciled") === reconciliation)
     .filter((item) => chartAccount === "all" || item.chartAccountId === chartAccount)
     .filter((item) => supplier === "all" || item.supplierId === supplier)
-    .sort((a, b) => (accountExpectedDate(a) || "").localeCompare(accountExpectedDate(b) || ""));
+    .sort((a, b) => {
+      const dateA = a.paidDate || accountExpectedDate(a) || "";
+      const dateB = b.paidDate || accountExpectedDate(b) || "";
+      return dateA.localeCompare(dateB);
+    });
 }
 
 function renderAccountSummary(config, rows = []) {
