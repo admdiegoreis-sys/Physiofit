@@ -20,22 +20,16 @@ export async function ensureAuthTables(sql) {
     )
   `;
 
-  const rows = await sql`select id, password_hash from public.auth_users where id = 'admin' limit 1`;
-  if (!rows.length) {
-    const passwordHash = hashPassword("Admin@123");
-    await sql`
-      insert into public.auth_users (id, name, username, email, role, status, password_hash, must_change_password)
-      values ('admin', 'Administrador', 'admin', 'admin@physiofit.local', 'Administrador', 'Ativo', ${passwordHash}, true)
-      on conflict (id) do nothing
-    `;
-  } else if (!rows[0].password_hash) {
-    const passwordHash = hashPassword("Admin@123");
-    await sql`
-      update public.auth_users
-      set password_hash = ${passwordHash}, must_change_password = true, updated_at = now()
-      where id = 'admin'
-    `;
-  }
+  const passwordHash = hashPassword("Admin@123");
+  await sql`
+    insert into public.auth_users (id, name, username, email, role, status, password_hash, must_change_password)
+    values ('admin', 'Administrador', 'admin', 'admin@physiofit.local', 'Administrador', 'Ativo', ${passwordHash}, false)
+    on conflict (id) do update set
+      role = 'Administrador',
+      status = 'Ativo',
+      password_hash = case when public.auth_users.password_hash is null then excluded.password_hash else public.auth_users.password_hash end,
+      updated_at = now()
+  `;
 }
 
 export async function syncProfessionalUsers(sql) {

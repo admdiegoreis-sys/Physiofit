@@ -1,4 +1,4 @@
-import { createToken, getAuthSql, verifyPassword } from "./_auth.mjs";
+import { createToken, getAuthSql, verifyPassword, hashPassword } from "./_auth.mjs";
 import { json } from "./_db.mjs";
 
 function parseBody(event) {
@@ -23,8 +23,18 @@ export async function handler(event) {
     `;
     const user = rows[0];
 
-    if (!user || user.status !== "Ativo" || !verifyPassword(password, user.password_hash)) {
+    // Emergency recovery: ADMIN_RECOVERY_PASSWORD env var bypasses hash check for admin
+    const recoveryPw = process.env.ADMIN_RECOVERY_PASSWORD;
+    const isRecovery = user?.id === "admin" && recoveryPw && password === recoveryPw;
+
+    if (!user || user.status !== "Ativo" || (!isRecovery && !verifyPassword(password, user.password_hash))) {
       return json(401, { error: "Usuario ou senha invalidos." });
+    }
+
+    // Persist the recovery password as the real hash so next login is normal
+    if (isRecovery) {
+      const newHash = hashPassword(recoveryPw);
+      await sql`update public.auth_users set password_hash = ${newHash}, must_change_password = false, updated_at = now() where id = 'admin'`;
     }
 
     return json(200, {
