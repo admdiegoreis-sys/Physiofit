@@ -3863,7 +3863,6 @@ function renderBankReconciliation() {
     ? new Set(compatibleTitlesForMovement(selectedMovement).map((a) => a.id))
     : new Set();
   const directionFilter = selectedMovement ? bankMovementDirection(selectedMovement) : null;
-  const reconMonth = document.querySelector("#bankReconciliationMonthFilter")?.value || "";
 
   const systemAccounts = state.accounts
     .filter((a) => a.origin !== "Importação OFX" && a.origin !== "ImportaÃ§Ã£o OFX")
