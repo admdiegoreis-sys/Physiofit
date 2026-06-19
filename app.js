@@ -5605,14 +5605,14 @@ function switchView(view) {
   const activeParent = document.querySelector(`[data-menu-wrapper="${menuGroupByView[view]}"] .nav-parent, [data-menu-wrapper="${menuGroupByView[view]}"] .top-menu-button`);
   activeParent?.classList.add("active");
   document.querySelectorAll("[data-agenda-mode-target]").forEach((button) => button.classList.toggle("active", view === "agenda" && button.dataset.agendaModeTarget === agendaMode));
-  closeTopMenus();
   document.body.classList.remove("mobile-menu-open");
   document.querySelector("#viewTitle").textContent = viewTitles[view];
 }
 
-function openMenuGroup() {
+function openMenuGroup(groupName) {
   document.querySelectorAll("[data-menu-wrapper]").forEach((wrapper) => {
-    wrapper.classList.add("open");
+    const hasPanel = Boolean(wrapper.querySelector(".top-menu-panel"));
+    wrapper.classList.toggle("open", hasPanel && wrapper.dataset.menuWrapper === groupName);
   });
 }
 
@@ -5882,7 +5882,7 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  if (!event.target.closest(".top-menu-group")) closeTopMenus();
+  if (!event.target.closest(".top-menu-group") && document.body.classList.contains("mobile-menu-open")) closeTopMenus();
 
   const nav = event.target.closest("[data-view]");
   if (nav) switchView(nav.dataset.view);
