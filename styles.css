@@ -4177,3 +4177,273 @@ table small,
 .top-menu-group.open .top-menu-button .menu-icon {
   color: #0ea5a4;
 }
+
+/* PhysioFit compact dashboard shell, aligned to the latest visual reference. */
+:root {
+  --topbar-height: 68px;
+  --side-menu-width: 224px;
+  --app-font-size: 13px;
+  --ui-font-size: 0.8rem;
+  --table-font-size: 0.78rem;
+  --field-height: 34px;
+}
+
+body {
+  background: #f7fafc;
+}
+
+.topbar {
+  grid-template-columns: var(--side-menu-width) minmax(360px, 1fr) auto;
+  min-height: var(--topbar-height);
+  gap: 16px;
+  padding: 8px 18px;
+  border-bottom-color: #edf2f7;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.logo-brand {
+  width: 158px;
+  height: 48px;
+}
+
+.top-menu {
+  top: var(--topbar-height);
+  width: var(--side-menu-width);
+  gap: 7px;
+  padding: 22px 18px 20px;
+  border-right-color: #edf2f7;
+  box-shadow: 12px 0 34px rgba(15, 23, 42, 0.025);
+}
+
+.top-menu-button {
+  grid-template-columns: 18px 1fr;
+  gap: 12px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: #202a3a;
+}
+
+.top-menu-button strong {
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.top-menu-button.active,
+.top-menu-group.open .top-menu-button,
+.top-menu-button:hover {
+  background: #eaf8f5;
+  color: #0f766e;
+}
+
+.top-menu-button.active::before,
+.top-menu-group.open .top-menu-button::before {
+  left: -18px;
+  width: 3px;
+  height: 38px;
+  background: #0ea5a4;
+}
+
+.top-menu-panel {
+  padding: 2px 0 7px 30px;
+}
+
+.top-menu-option {
+  min-height: 28px;
+  padding: 0 7px;
+  border-radius: 9px;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.top-menu .menu-icon {
+  width: 18px;
+  height: 18px;
+  color: #526174;
+}
+
+.top-menu .menu-icon::before {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.topbar-tools {
+  gap: 8px;
+}
+
+.global-search {
+  width: min(500px, 36vw);
+  min-width: 280px;
+}
+
+.global-search input {
+  min-height: 34px;
+  padding-left: 34px;
+  border-color: #dde7ef;
+  border-radius: 10px;
+  font-size: 0.74rem;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.035);
+}
+
+.global-search span {
+  left: 12px;
+  font-size: 0.82rem;
+}
+
+.quick-action {
+  min-height: 34px;
+  padding: 0 13px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.notification-button {
+  width: 34px;
+  min-height: 34px;
+  font-size: 0.9rem;
+}
+
+.session-chip {
+  min-height: 34px;
+  padding: 0 8px 0 10px;
+  border-radius: 10px;
+  font-size: 0.74rem;
+}
+
+.workspace {
+  padding: calc(var(--topbar-height) + 22px) 18px 28px calc(var(--side-menu-width) + 18px);
+}
+
+#dashboardView {
+  max-width: 100%;
+}
+
+.executive-hero {
+  min-height: 118px;
+  margin-bottom: 16px;
+  padding: 22px 24px;
+  border-color: #e7eef6;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 84% 18%, rgba(14, 165, 164, 0.11), transparent 25%),
+    linear-gradient(135deg, #ffffff 0%, #fbfffd 100%);
+}
+
+.executive-hero h2 {
+  margin-bottom: 5px;
+  font-size: clamp(1.15rem, 1.45vw, 1.48rem);
+}
+
+.executive-hero span {
+  font-size: 0.78rem;
+}
+
+.metric-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.metric {
+  min-height: 128px;
+  padding: 18px 14px 14px 70px;
+  border-color: #e7eef6;
+  border-radius: 15px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+.metric::before {
+  top: 19px;
+  left: 18px;
+  width: 34px;
+  height: 34px;
+}
+
+.metric::after {
+  right: 16px;
+  bottom: 15px;
+  width: 78px;
+  height: 22px;
+  opacity: 0.72;
+}
+
+.metric strong {
+  margin: 18px 0 3px;
+  font-size: clamp(1.3rem, 1.75vw, 1.72rem);
+  letter-spacing: 0;
+}
+
+.metric small {
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.dashboard-grid,
+.dashboard-grid-secondary {
+  gap: 16px;
+}
+
+.dashboard-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+}
+
+.panel {
+  padding: 16px;
+  border-color: #e7eef6;
+  border-radius: 15px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.055);
+}
+
+.panel-heading {
+  min-height: 38px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+}
+
+.panel-heading h2 {
+  font-size: 0.92rem;
+}
+
+.eyebrow {
+  margin-bottom: 4px;
+  font-size: 0.65rem;
+  letter-spacing: 0;
+}
+
+.timeline-item,
+.alert-item,
+.class-card,
+.record-card,
+.summary-item,
+.dashboard-list-item,
+.portal-preview {
+  padding: 11px;
+  border-radius: 11px;
+}
+
+.dashboard-list-item span,
+.timeline-item,
+.alert-item {
+  font-size: 0.74rem;
+}
+
+@media (max-width: 1500px) {
+  .metric-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1060px) {
+  :root {
+    --side-menu-width: 204px;
+  }
+
+  .topbar {
+    grid-template-columns: var(--side-menu-width) minmax(0, 1fr);
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
