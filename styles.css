@@ -5499,3 +5499,106 @@ td.row-actions .row-action-button {
   min-height: 30px;
   font-size: 0.74rem;
 }
+
+#accountsPayableView .accounts-toolbar,
+#accountsReceivableView .accounts-toolbar {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+
+#accountsPayableView .accounts-toolbar > select,
+#accountsPayableView .accounts-toolbar > input,
+#accountsReceivableView .accounts-toolbar > select,
+#accountsReceivableView .accounts-toolbar > input {
+  min-width: 0;
+  min-height: 36px;
+  padding-inline: 9px;
+  font-size: 0.76rem;
+}
+
+#accountsPayableView .accounts-toolbar > select,
+#accountsReceivableView .accounts-toolbar > select {
+  grid-column: span 2;
+}
+
+#accountsPayableView .accounts-toolbar > input[type="month"],
+#accountsReceivableView .accounts-toolbar > input[type="month"] {
+  grid-column: span 2;
+}
+
+#accountsPayableView .accounts-toolbar .date-range-inputs,
+#accountsReceivableView .accounts-toolbar .date-range-inputs {
+  grid-column: span 4;
+  gap: 5px;
+  min-width: 0;
+}
+
+#accountsPayableView .accounts-toolbar .date-range-inputs span,
+#accountsReceivableView .accounts-toolbar .date-range-inputs span {
+  font-size: 0.72rem;
+}
+
+#accountsPayableView .accounts-toolbar .accounts-search-row,
+#accountsReceivableView .accounts-toolbar .accounts-search-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(82px, auto) minmax(112px, auto);
+  grid-column: span 5;
+  min-width: 0;
+}
+
+#accountsPayableView .accounts-search-row input,
+#accountsReceivableView .accounts-search-row input {
+  min-width: 0;
+  min-height: 36px;
+  padding-inline: 10px;
+  font-size: 0.76rem;
+}
+
+#accountsPayableView .accounts-search-row .action-button,
+#accountsReceivableView .accounts-search-row .action-button {
+  min-height: 36px;
+  padding-inline: 12px;
+  font-size: 0.74rem;
+}
+
+#accountsPayableView .accounts-search-row .clear-filter-button,
+#accountsReceivableView .accounts-search-row .clear-filter-button {
+  min-width: 112px;
+  padding-inline: 12px;
+}
+
+@media (max-width: 1280px) {
+  #accountsPayableView .accounts-toolbar,
+  #accountsReceivableView .accounts-toolbar {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  #accountsPayableView .accounts-toolbar .date-range-inputs,
+  #accountsReceivableView .accounts-toolbar .date-range-inputs {
+    grid-column: span 4;
+  }
+
+  #accountsPayableView .accounts-toolbar .accounts-search-row,
+  #accountsReceivableView .accounts-toolbar .accounts-search-row {
+    grid-column: span 4;
+  }
+}
+
+@media (max-width: 820px) {
+  #accountsPayableView .accounts-toolbar,
+  #accountsReceivableView .accounts-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  #accountsPayableView .accounts-toolbar > select,
+  #accountsPayableView .accounts-toolbar > input,
+  #accountsPayableView .accounts-toolbar .date-range-inputs,
+  #accountsPayableView .accounts-toolbar .accounts-search-row,
+  #accountsReceivableView .accounts-toolbar > select,
+  #accountsReceivableView .accounts-toolbar > input,
+  #accountsReceivableView .accounts-toolbar .date-range-inputs,
+  #accountsReceivableView .accounts-toolbar .accounts-search-row {
+    grid-column: 1 / -1;
+  }
+}
