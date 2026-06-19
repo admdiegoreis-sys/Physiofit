@@ -18,14 +18,19 @@
   --shadow-soft: 0 18px 44px rgba(15, 23, 42, 0.07);
   --topbar-height: 76px;
   --side-menu-width: 232px;
-  --button-radius: 0;
-  --button-radius-sm: 0;
+  --button-radius: 18px;
+  --button-radius-sm: 12px;
+  --button-primary: #559eac;
+  --button-primary-strong: #3f8795;
+  --button-secondary: #3f756f;
+  --button-secondary-border: #b9ece5;
+  --button-shadow: 0 14px 30px rgba(70, 151, 164, 0.22);
   --app-font-size: 14px;
   --ui-font-size: 0.86rem;
   --ui-font-size-sm: 0.76rem;
   --table-font-size: 0.84rem;
   --table-font-size-sm: 0.7rem;
-  --button-font-size: 0.86rem;
+  --button-font-size: 0.76rem;
   --field-height: 38px;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -5012,4 +5017,232 @@ body {
     grid-template-columns: 1fr;
     gap: 5px;
   }
+}
+
+/* Global button system: rounded, compact and consistent across modules. */
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.primary-button,
+.ghost-button,
+.secondary-button,
+.action-button,
+.clear-filter-button,
+.mini-button,
+.linked-edit-button,
+.monthly-status-button,
+.top-menu-button,
+.top-menu-option,
+.menu-button,
+.help-button,
+.user-button,
+.session-chip button,
+.today-button,
+.mode-button {
+  border-radius: var(--button-radius);
+}
+
+.primary-button,
+.success-button,
+.action-button.blue,
+.action-button.navy,
+.quick-action.primary-button,
+.executive-hero .primary-button,
+.topbar .primary-button,
+#ofxImportView .title-actions .primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--button-radius);
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--button-primary), var(--button-primary-strong));
+  box-shadow: var(--button-shadow);
+  font-size: var(--button-font-size);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.primary-button:hover,
+.success-button:hover,
+.action-button.blue:hover,
+.action-button.navy:hover,
+.quick-action.primary-button:hover,
+.executive-hero .primary-button:hover,
+.topbar .primary-button:hover {
+  background: linear-gradient(135deg, #4b94a2, #347b88);
+  box-shadow: 0 16px 34px rgba(70, 151, 164, 0.28);
+  transform: translateY(-1px);
+}
+
+.ghost-button,
+.secondary-button,
+.clear-filter-button,
+.action-button.light,
+.quick-action.ghost-button,
+.dashboard-card .ghost-button,
+.executive-hero .ghost-button,
+.topbar .ghost-button,
+#ofxImportView .title-actions .ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--button-secondary-border);
+  border-radius: var(--button-radius);
+  color: var(--button-secondary);
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+  font-size: var(--button-font-size);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.ghost-button:hover,
+.secondary-button:hover,
+.clear-filter-button:hover,
+.action-button.light:hover,
+.quick-action.ghost-button:hover,
+.dashboard-card .ghost-button:hover,
+.executive-hero .ghost-button:hover,
+.topbar .ghost-button:hover {
+  border-color: #8edbd2;
+  background: #f7fffd;
+  color: #2f6f68;
+  transform: translateY(-1px);
+}
+
+.primary-button > span:first-child,
+.ghost-button > span:first-child,
+.secondary-button > span:first-child,
+.quick-action > span:first-child {
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  font-size: 0.86rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: var(--button-radius);
+  font-size: var(--button-font-size);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.action-button.green {
+  background: #5b9f54;
+  box-shadow: 0 12px 24px rgba(91, 159, 84, 0.2);
+}
+
+.action-button.purple {
+  background: #7560c6;
+  box-shadow: 0 12px 24px rgba(117, 96, 198, 0.2);
+}
+
+.action-button.light-blue {
+  background: linear-gradient(135deg, #6aaec1, #529bad);
+  box-shadow: 0 12px 24px rgba(82, 155, 173, 0.2);
+}
+
+.agenda-search-row .action-button,
+.patient-search-row .action-button {
+  border-radius: var(--button-radius);
+}
+
+.agenda-search-row input,
+.patient-search-row input {
+  border-radius: var(--button-radius);
+}
+
+.nav-square:first-child,
+.mode-button:first-child {
+  border-radius: var(--button-radius) 0 0 var(--button-radius);
+}
+
+.nav-square + .nav-square,
+.mode-button:last-child {
+  border-radius: 0 var(--button-radius) var(--button-radius) 0;
+}
+
+.icon-button,
+.notification-button {
+  display: inline-grid;
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  place-items: center;
+  border: 1px solid #dbe6ec;
+  border-radius: 14px;
+  background: #f6fbfb;
+  color: var(--button-secondary);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+.row-action-button,
+.accounts-table-wrap .row-action-button,
+.ofx-review-table-wrap .row-action-button,
+.patients-table-wrap .row-action-button,
+.professionals-table-wrap .row-action-button,
+.modalities-table-wrap .row-action-button,
+.plans-table-wrap .row-action-button,
+.enrollments-table-wrap .row-action-button,
+.crm-table-wrap .row-action-button,
+.fiscal-table-wrap .row-action-button,
+.chart-accounts-table-wrap .row-action-button,
+.patient-enrollment-history-wrap .row-action-button {
+  display: inline-grid;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  place-items: center;
+  border: 0;
+  border-radius: var(--button-radius-sm);
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 7px 16px rgba(15, 23, 42, 0.08);
+}
+
+.edit-icon-button {
+  background: #78adc0;
+}
+
+.settle-icon-button {
+  background: #5d9b51;
+}
+
+.reverse-icon-button {
+  border-radius: var(--button-radius-sm);
+  background: #d98235;
+}
+
+.delete-icon-button {
+  background: #b84e56;
+}
+
+td.row-actions .row-action-button {
+  margin-right: 5px;
+}
+
+.linked-edit-button {
+  border-radius: var(--button-radius-sm);
 }
