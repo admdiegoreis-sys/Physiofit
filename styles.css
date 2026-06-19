@@ -4134,18 +4134,20 @@ table small,
 
 /* Minimal sidebar icons, closer to the PhysioFit reference. */
 .top-menu .menu-icon {
-  width: 22px;
-  height: 22px;
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
   border-radius: 0;
-  color: #475569;
+  color: #536174;
   background: transparent;
   box-shadow: none;
 }
 
 .top-menu .menu-icon::before {
   color: currentColor;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.18rem;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -4154,15 +4156,15 @@ table small,
 }
 
 .top-menu .menu-icon-crm::before {
-  content: "\25C7";
+  content: "\25CE";
 }
 
 .top-menu .menu-icon-agenda::before {
-  content: "\25A6";
+  content: "\25A3";
 }
 
 .top-menu .menu-icon-registers::before {
-  content: "\25CB";
+  content: "\25C9";
 }
 
 .top-menu .menu-icon-finance::before {
@@ -4170,7 +4172,7 @@ table small,
 }
 
 .top-menu .menu-icon-records::before {
-  content: "+";
+  content: "\271A";
 }
 
 .top-menu .menu-icon-settings::before {
@@ -4262,14 +4264,14 @@ body {
 }
 
 .top-menu .menu-icon {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   color: #526174;
 }
 
 .top-menu .menu-icon::before {
-  font-size: 0.86rem;
-  font-weight: 600;
+  font-size: 1.12rem;
+  font-weight: 700;
 }
 
 .topbar-tools {
