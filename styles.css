@@ -5356,3 +5356,146 @@ td.row-actions .row-action-button {
   border-radius: 1px;
   transform: rotate(42deg);
 }
+
+.agenda-module {
+  font-size: 0.9rem;
+}
+
+.agenda-titlebar {
+  min-height: 58px;
+  padding: 10px 12px;
+}
+
+.agenda-titlebar h2 {
+  font-size: 1.12rem;
+  letter-spacing: 0;
+}
+
+.agenda-actions {
+  gap: 8px;
+}
+
+.agenda-actions .action-button {
+  min-height: 38px;
+  padding: 0 17px;
+  font-size: 0.84rem;
+}
+
+.agenda-filters {
+  gap: 9px;
+  padding: 14px 0 12px;
+}
+
+.agenda-filters select,
+.agenda-filters input {
+  min-height: 38px;
+  padding: 0 11px;
+  font-size: 0.82rem;
+}
+
+.agenda-search-row .action-button {
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 0.82rem;
+}
+
+.agenda-list-toggle {
+  min-width: 168px;
+  min-height: 38px;
+  padding-inline: 18px;
+  font-size: 0.82rem;
+}
+
+.calendar-shell {
+  padding: 18px;
+}
+
+.calendar-top {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.calendar-top h2 {
+  font-size: clamp(1.4rem, 2vw, 1.72rem);
+  line-height: 1.12;
+}
+
+.nav-square,
+.today-button,
+.mode-button {
+  min-height: 38px;
+  font-size: 0.86rem;
+}
+
+.nav-square {
+  width: 44px;
+  font-size: 1.25rem;
+}
+
+.today-button {
+  min-width: 62px;
+}
+
+.mode-button {
+  min-width: 58px;
+  padding: 0 11px;
+}
+
+.calendar-grid {
+  grid-template-columns: 34px repeat(var(--day-count), minmax(132px, 1fr));
+}
+
+.calendar-day-head {
+  min-height: 32px;
+  padding: 6px;
+  font-size: 0.88rem;
+}
+
+.calendar-hour {
+  min-height: 58px;
+  padding: 8px 5px;
+  font-size: 0.88rem;
+}
+
+.calendar-cell {
+  min-height: 58px;
+  padding: 2px;
+}
+
+.calendar-event,
+.calendar-block {
+  min-width: 42px;
+  padding: 4px;
+}
+
+.calendar-event span,
+.calendar-block span {
+  font-size: 0.62rem;
+}
+
+.calendar-event strong {
+  font-size: 0.68rem;
+}
+
+.calendar-event small {
+  font-size: 0.58rem;
+}
+
+.agenda-list table {
+  font-size: 0.84rem;
+}
+
+.agenda-list th {
+  font-size: 0.72rem;
+}
+
+.agenda-list td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.agenda-list .mini-button {
+  min-width: 78px;
+  min-height: 30px;
+  font-size: 0.74rem;
+}
