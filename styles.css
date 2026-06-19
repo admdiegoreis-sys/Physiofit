@@ -17,7 +17,7 @@
   --shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
   --shadow-soft: 0 18px 44px rgba(15, 23, 42, 0.07);
   --topbar-height: 76px;
-  --side-menu-width: 280px;
+  --side-menu-width: 232px;
   --button-radius: 0;
   --button-radius-sm: 0;
   --app-font-size: 14px;
@@ -373,7 +373,7 @@ button {
 
 .workspace {
   min-width: 0;
-  padding: calc(var(--topbar-height) + 22px) 22px 28px calc(var(--side-menu-width) + 22px);
+  padding: calc(var(--topbar-height) + 22px) 18px 28px calc(var(--side-menu-width) + 18px);
   overflow: auto;
 }
 
@@ -432,8 +432,8 @@ button {
 
 .logo-brand {
   display: inline-flex;
-  width: 196px;
-  height: 54px;
+  width: 178px;
+  height: 50px;
   align-items: center;
   justify-content: flex-start;
   overflow: hidden;
@@ -497,10 +497,10 @@ button {
   width: var(--side-menu-width);
   flex-direction: column;
   align-items: stretch;
-  gap: 7px;
+  gap: 5px;
   min-width: 0;
   overflow: auto;
-  padding: 24px 22px 22px;
+  padding: 18px 14px 20px;
   border-right: 1px solid #e7edf4;
   background: #ffffff;
   box-shadow: 14px 0 34px rgba(15, 23, 42, 0.035);
@@ -513,13 +513,13 @@ button {
 .top-menu-button {
   position: relative;
   display: grid;
-  grid-template-columns: 24px 1fr;
+  grid-template-columns: 22px 1fr;
   align-items: center;
-  gap: 14px;
+  gap: 11px;
   width: 100%;
   min-width: 0;
-  min-height: 44px;
-  padding: 0 12px;
+  min-height: 40px;
+  padding: 0 10px;
   border: 1px solid transparent;
   border-radius: 14px;
   color: #1f2937;
@@ -535,7 +535,7 @@ button {
 }
 
 .top-menu-button strong {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 700;
 }
 
@@ -555,9 +555,9 @@ button {
 .top-menu-group.open .top-menu-button::before {
   content: "";
   position: absolute;
-  left: -22px;
+  left: -14px;
   width: 4px;
-  height: 44px;
+  height: 40px;
   border-radius: 0 999px 999px 0;
   background: #0ea5a4;
 }
@@ -568,7 +568,7 @@ button {
   display: none;
   width: 100%;
   min-width: 0;
-  padding: 4px 0 8px 38px;
+  padding: 3px 0 7px 33px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -582,14 +582,14 @@ button {
 
 .top-menu-option {
   width: 100%;
-  min-height: 32px;
-  padding: 0 9px;
+  min-height: 30px;
+  padding: 0 8px;
   border: 0;
   border-radius: 10px;
   color: #475569;
   background: transparent;
   text-align: left;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 600;
 }
 
@@ -3514,7 +3514,7 @@ td.row-actions .row-action-button:last-child {
 
 @media (max-width: 1060px) {
   :root {
-    --side-menu-width: 230px;
+    --side-menu-width: 210px;
   }
 
   .app-shell {
