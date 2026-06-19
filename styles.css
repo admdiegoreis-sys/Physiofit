@@ -5628,3 +5628,131 @@ td.row-actions .row-action-button {
 .accounts-search-row .action-button:only-of-type {
   border-radius: var(--button-radius) !important;
 }
+
+/* Fluxo de Caixa e DRE: leitura compacta e colunas fixas opacas */
+.cashflow-table-wrap {
+  max-height: calc(100vh - 238px);
+  overflow: auto;
+  border: 1px solid #d8dee8;
+  border-radius: 10px;
+  background: #fff;
+  isolation: isolate;
+  scrollbar-gutter: stable;
+}
+
+.cashflow-table-wrap table,
+.cashflow-grid-table {
+  min-width: 1680px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  font-size: 0.66rem;
+  line-height: 1.12;
+}
+
+.dre-table-wrap table {
+  min-width: 1760px;
+}
+
+.cashflow-grid-table th,
+.cashflow-grid-table td {
+  min-width: 74px;
+  padding: 4px 7px;
+  border: 0;
+  font-size: 0.66rem;
+  line-height: 1.12;
+  white-space: nowrap;
+}
+
+.cashflow-grid-table th {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  color: #fff;
+  background: #1a2b43;
+  box-shadow: 0 1px 0 #162236;
+  font-weight: 800;
+}
+
+.cashflow-grid-table th:nth-child(2),
+.cashflow-grid-table td:nth-child(2) {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+  min-width: 310px;
+  max-width: 310px;
+  white-space: normal;
+  text-align: left;
+  box-shadow: 1px 0 0 #dce3ec;
+  background: #fff;
+  background-clip: padding-box;
+}
+
+.cashflow-grid-table th:nth-child(2) {
+  z-index: 10;
+  color: #fff;
+  background: #1a2b43;
+}
+
+.cashflow-grid-table tbody tr:not(.cashflow-group-row):not(.cashflow-subtotal-row):not(.cashflow-balance-row):nth-child(even) td {
+  background: #f7f9fc;
+}
+
+.cashflow-grid-table tbody tr:not(.cashflow-group-row):not(.cashflow-subtotal-row):not(.cashflow-balance-row):nth-child(even) td:nth-child(2) {
+  background: #f7f9fc;
+}
+
+.cashflow-grid-table tbody tr:not(.cashflow-group-row):not(.cashflow-subtotal-row):not(.cashflow-balance-row):nth-child(odd) td,
+.cashflow-grid-table tbody tr:not(.cashflow-group-row):not(.cashflow-subtotal-row):not(.cashflow-balance-row):nth-child(odd) td:nth-child(2) {
+  background: #fff;
+}
+
+.cashflow-grid-table tbody tr:not(.cashflow-group-row):not(.cashflow-subtotal-row):not(.cashflow-balance-row):hover td,
+.cashflow-grid-table tbody tr:not(.cashflow-group-row):not(.cashflow-subtotal-row):not(.cashflow-balance-row):hover td:nth-child(2) {
+  background: #eef6f7;
+}
+
+.cashflow-grid-table .cashflow-group-row td,
+.cashflow-grid-table .cashflow-group-row td:nth-child(2) {
+  color: #fff;
+  background: #4a5668;
+  font-weight: 800;
+}
+
+.cashflow-grid-table .cashflow-subtotal-row td,
+.cashflow-grid-table .cashflow-subtotal-row td:nth-child(2) {
+  color: #1f2a37;
+  background: #eef2f6;
+  font-weight: 800;
+}
+
+.cashflow-grid-table .cashflow-balance-row td,
+.cashflow-grid-table .cashflow-balance-row td:nth-child(2) {
+  color: #fff;
+  background: #2d3e52;
+  font-weight: 800;
+}
+
+.cashflow-grid-table td.projected {
+  color: #c8612f;
+}
+
+.cashflow-grid-table .cashflow-group-row td.projected,
+.cashflow-grid-table .cashflow-balance-row td.projected {
+  color: #fff;
+}
+
+.cashflow-grid-table td.negative {
+  color: #85353a;
+}
+
+.cashflow-grid-table td.positive {
+  color: #2b6847;
+}
+
+.cashflow-grid-table .cashflow-group-row td.negative,
+.cashflow-grid-table .cashflow-group-row td.positive,
+.cashflow-grid-table .cashflow-balance-row td.negative,
+.cashflow-grid-table .cashflow-balance-row td.positive {
+  color: #fff;
+}
