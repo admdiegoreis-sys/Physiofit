@@ -961,7 +961,7 @@ function chartAccountFields() {
     { name: "dfcDescription", label: "Descrição DFC", type: "text", value: "Despesas" },
     { name: "dfcGroup", label: "Grupo DFC", type: "select", options: ["Atividades Operacionais", "Atividades de Investimento", "Atividades de Financiamento", "Transitório"], value: "Atividades Operacionais" },
     { name: "activity", label: "ESTRUTURA DFC", type: "select", options: ["Operacional", "Investimento", "Financiamento", "Transitório"], value: "Operacional" },
-    { name: "nature", label: "Natureza", type: "select", options: ["Receita", "Despesa", "Patrimonial", "Entrada", "Saida"], value: "Despesa" },
+    { name: "nature", label: "Natureza", type: "select", options: ["Receita", "Despesa", "Patrimonial", "Entrada", "Saída"], value: "Despesa" },
     { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
   ];
 }
@@ -1264,6 +1264,7 @@ function normalizeEnrollment(item, index) {
 
 function normalizeChartAccount(item, index) {
   const defaults = seedChartAccounts.find((account) => account.code === item.code) ?? seedChartAccounts[index % seedChartAccounts.length] ?? seedChartAccounts[0];
+  const nature = item.nature === "Saida" ? "Saída" : item.nature;
   return {
     id: item.id || defaults.id || uid("pc"),
     code: defaults.code,
@@ -1276,6 +1277,7 @@ function normalizeChartAccount(item, index) {
     nature: defaults.nature,
     status: "Ativo",
     ...item,
+    nature: nature || item.nature || defaults.nature,
   };
 }
 
@@ -1744,8 +1746,8 @@ function revenueChartAccountForModalityFromLists(chartAccounts = [], modalities 
   const modality = modalities.find((item) => item.id === modalityId)?.name || modalityId;
   const modalityTerm = normalizedText(modality);
   return (
-    chartAccounts.find((item) => item.nature === "Receita" && modalityTerm && normalizedText(item.name).includes(modalityTerm)) ||
-    chartAccounts.find((item) => item.nature === "Receita") ||
+    chartAccounts.find((item) => isRevenueChartAccount(item) && modalityTerm && normalizedText(item.name).includes(modalityTerm)) ||
+    chartAccounts.find((item) => isRevenueChartAccount(item)) ||
     chartAccounts[0]
   );
 }
@@ -1755,7 +1757,7 @@ function revenueChartAccountForModality(modalityId = "") {
 }
 
 function activeRevenueChartAccounts() {
-  return activeChartAccounts().filter((item) => item.nature === "Receita");
+  return activeChartAccounts().filter((item) => isRevenueChartAccount(item));
 }
 
 function addMonthsToIsoDate(value, months) {
@@ -1986,6 +1988,30 @@ function sortChartAccountsByCode(accounts = []) {
   return [...accounts].sort(compareChartAccountsByCode);
 }
 
+function isRevenueChartAccount(account = {}) {
+  const code = String(account.code || "").trim();
+  const content = normalizedText([
+    account.nature,
+    account.name,
+    account.dreGroup,
+    account.dfcDescription,
+    account.package,
+    account.activity
+  ].join(" "));
+
+  return (
+    account.nature === "Receita" ||
+    account.nature === "Entrada" ||
+    code.startsWith("1.") ||
+    content.includes("receita") ||
+    content.includes("faturamento bruto") ||
+    content.includes("recebimento") ||
+    content.includes("venda de servico") ||
+    content.includes("venda de produto") ||
+    content.includes("locacao")
+  );
+}
+
 function chartAccountFinancialDirection(account = {}) {
   const content = normalizedText([
     account.nature,
@@ -1996,7 +2022,7 @@ function chartAccountFinancialDirection(account = {}) {
     account.activity
   ].join(" "));
 
-  if (account.nature === "Receita") return "Receber";
+  if (isRevenueChartAccount(account)) return "Receber";
   if (account.nature === "Despesa") return "Pagar";
   if (content.includes("transferencia")) return "both";
 
@@ -5796,7 +5822,7 @@ function renderField(field) {
     const options = activeRevenueChartAccounts();
     return `
       <label>${field.label}
-        <select name="${field.name}" ${required}>
+        <select name="${field.name}" ${required} data-revenue-chart-account-select>
           ${options.map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.code} - ${item.name}</option>`).join("")}
         </select>
       </label>
