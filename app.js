@@ -2496,58 +2496,146 @@ function renderDashboard() {
   document.querySelector("#confirmedRateMetric").textContent = `${confirmedRate}%`;
   document.querySelector("#executiveSummary").textContent = `${weekAppointments.length} atendimentos na semana, ${currency(openInvoices)} em aberto e ${atRisk} pacientes exigindo atenção comercial.`;
 
-  document.querySelector("#todayTimeline").innerHTML = todayClasses
-    .sort((a, b) => a.time.localeCompare(b.time))
-    .map(
-      (item) => `
-        <article class="timeline-item">
-          <span class="time-pill">${item.time}</span>
-          <div>
-            <strong>${studentName(item.studentId)}</strong>
-            <div class="meta">${item.type} com ${professionalName(item.teacherId)} · ${item.room}</div>
-          </div>
-          <span class="status-pill ${statusClass(item.status)}">${item.status}</span>
-        </article>
-      `,
-    )
-    .join("");
-
-  const alerts = [
-    ...state.payments.filter((item) => item.status === "Atrasado").map((item) => `${studentName(item.studentId)} possui cobrança atrasada de ${currency(item.amount)}.`),
-    ...state.appointments.filter((item) => item.status === "Aguardando").map((item) => `${studentName(item.studentId)} ainda precisa confirmar a aula de ${dateLabel(item.date)}.`),
-  ];
-  document.querySelector("#alertsList").innerHTML = alerts.length ?alerts.map((alert) => `<div class="alert-item">${alert}</div>`).join("") : `<div class="empty-state">Sem pendências críticas agora.</div>`;
-
-  document.querySelector("#dashboardFinanceSummary").innerHTML = `
-    <article class="summary-item"><span>A receber vencido</span><strong>${currency(receivableOverdue)}</strong></article>
-    <article class="summary-item"><span>A pagar vencido</span><strong>${currency(payableOverdue)}</strong></article>
-    <article class="summary-item"><span>Saldo previsto mês</span><strong>${currency(predictedMonthBalance)}</strong></article>
-    <article class="summary-item"><span>Saldo realizado mês</span><strong>${currency(realizedMonthBalance)}</strong></article>
-    <article class="summary-item"><span>OFX não conciliado</span><strong>${unreconciledMovements}</strong></article>
-  `;
-
-  const modalityRows = activeModalities()
-    .map((modality) => ({
-      name: modality.name,
-      count: state.appointments.filter((item) => normalizedText(item.type).includes(normalizedText(modality.name))).length,
-      plans: state.plans.filter((plan) => plan.modalityId === modality.id && plan.status === "Ativo").length,
-    }))
-    .sort((a, b) => b.count - a.count);
-  document.querySelector("#modalitySummaryList").innerHTML = modalityRows.length
-    ?modalityRows
+  document.querySelector("#todayTimeline").innerHTML = todayClasses.length
+    ? todayClasses
+        .sort((a, b) => a.time.localeCompare(b.time))
+        .slice(0, 7)
         .map(
           (item) => `
-            <article class="dashboard-list-item">
-              <div>
-                <strong>${item.name}</strong>
-                <span>${item.plans} planos ativos vinculados</span>
-              </div>
-              <span class="status-pill ativo">${item.count} aulas</span>
+            <article class="dashboard-schedule-row">
+              <span class="dashboard-dot"></span>
+              <strong>${item.time}</strong>
+              <span>${studentName(item.studentId)}</span>
+              <small>${item.type}</small>
+              <span class="status-pill ${statusClass(item.status)}">${item.status}</span>
             </article>
           `,
         )
         .join("")
-    : `<div class="empty-state">Nenhuma modalidade ativa cadastrada.</div>`;
+    : `<div class="empty-state">Nenhuma aula prevista para hoje.</div>`;
+
+  const heatmapDays = weekDays().slice(0, 6);
+  const heatmapHours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21];
+  const maxHourCount = Math.max(
+    1,
+    ...heatmapDays.flatMap((day) => {
+      const date = isoDate(day);
+      return heatmapHours.map((hour) => state.appointments.filter((item) => item.date === date && Number(String(item.time || "").slice(0, 2)) === hour).length);
+    }),
+  );
+  document.querySelector("#occupancyHeatmap").innerHTML = `
+    <div class="heatmap-grid">
+      <span></span>
+      ${["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => `<strong>${day}</strong>`).join("")}
+      ${heatmapHours
+        .map((hour) => {
+          const cells = heatmapDays
+            .map((day) => {
+              const date = isoDate(day);
+              const count = state.appointments.filter((item) => item.date === date && Number(String(item.time || "").slice(0, 2)) === hour).length;
+              const level = count === 0 ? 0 : Math.max(1, Math.ceil((count / maxHourCount) * 4));
+              return `<span class="heat-cell level-${level}" title="${count} aulas"></span>`;
+            })
+            .join("");
+          return `<small>${String(hour).padStart(2, "0")}h</small>${cells}`;
+        })
+        .join("")}
+    </div>
+    <div class="heatmap-legend">
+      <span><i class="level-0"></i>Livre</span>
+      <span><i class="level-1"></i>Leve</span>
+      <span><i class="level-2"></i>Moderado</span>
+      <span><i class="level-4"></i>Alto</span>
+    </div>
+  `;
+
+  const paidReceivables = financialTitles.filter((item) => item.direction === "Receber" && accountPaidAmount(item) > 0);
+  const modalityRevenueRows = activeModalities()
+    .map((modality) => {
+      const modalityPlans = new Set(state.plans.filter((plan) => plan.modalityId === modality.id).map((plan) => plan.id));
+      const modalityEnrollments = new Set(state.enrollments.filter((enrollment) => enrollment.modalityId === modality.id || modalityPlans.has(enrollment.planId)).map((enrollment) => enrollment.id));
+      const amount = paidReceivables.filter((account) => modalityEnrollments.has(account.enrollmentId)).reduce((sum, account) => sum + accountPaidAmount(account), 0);
+      return { name: modality.name, amount };
+    })
+    .filter((item) => item.amount > 0)
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 3);
+  const revenueTotal = Math.max(1, modalityRevenueRows.reduce((sum, item) => sum + item.amount, 0));
+  const donutStops = modalityRevenueRows.length
+    ? modalityRevenueRows
+        .reduce(
+          (acc, item, index) => {
+            const start = acc.cursor;
+            const end = start + (item.amount / revenueTotal) * 100;
+            acc.parts.push(`${["#52b977", "#8057d8", "#f28b2e"][index] || "#0ea5a4"} ${start}% ${end}%`);
+            acc.cursor = end;
+            return acc;
+          },
+          { cursor: 0, parts: [] },
+        )
+        .parts.join(", ")
+    : "#e5edf5 0% 100%";
+  document.querySelector("#dashboardRevenuePanel").innerHTML = `
+    <div class="revenue-line-block">
+      <span>Receita mensal</span>
+      <strong>${currency(monthRevenue)}</strong>
+      <small>↗ 15% vs mês anterior</small>
+      <div class="mini-line-chart"></div>
+    </div>
+    <div class="revenue-donut-block">
+      <span>Receita por modalidade</span>
+      <div class="donut-chart" style="--donut: ${donutStops};"></div>
+      <div class="donut-legend">
+        ${
+          modalityRevenueRows.length
+            ? modalityRevenueRows
+                .map((item, index) => `<span><i style="background:${["#52b977", "#8057d8", "#f28b2e"][index] || "#0ea5a4"}"></i>${item.name}<b>${Math.round((item.amount / revenueTotal) * 100)}%</b><small>${currency(item.amount)}</small></span>`)
+                .join("")
+            : `<span><i></i>Sem receita classificada<b>0%</b><small>${currency(0)}</small></span>`
+        }
+      </div>
+    </div>
+  `;
+
+  const funnelRows = [
+    ["Leads", state.leads.length],
+    ["Avaliações agendadas", state.leads.filter((item) => ["Visita agendada", "Visita realizada"].includes(item.status)).length],
+    ["Primeira aula", state.leads.filter((item) => ["Visita realizada", "Proposta enviada", "Matriculado"].includes(item.status)).length],
+    ["Conversão", state.leads.filter((item) => item.status === "Matriculado").length],
+    ["Renovação", activeEnrollments().length],
+  ];
+  const maxFunnel = Math.max(1, ...funnelRows.map((item) => item[1]));
+  document.querySelector("#dashboardFunnel").innerHTML = funnelRows
+    .map(([label, value], index) => `<article style="--funnel-width:${Math.max(24, (value / maxFunnel) * 100)}%;"><span></span><strong>${label}</strong><b>${value}</b>${index ? `<small>${Math.round((value / maxFunnel) * 100)}%</small>` : ""}</article>`)
+    .join("");
+
+  const upcomingAccounts = financialTitles
+    .filter((item) => item.direction === "Receber" && accountOpenAmount(item) > 0)
+    .sort((a, b) => dateValue(accountExpectedDate(a)) - dateValue(accountExpectedDate(b)))
+    .slice(0, 5);
+  document.querySelector("#dashboardDueList").innerHTML = upcomingAccounts.length
+    ? upcomingAccounts
+        .map((item) => `
+          <article>
+            <span class="avatar-dot">${(item.person || studentName(item.studentId) || "?").trim().charAt(0).toUpperCase()}</span>
+            <strong>${item.person || studentName(item.studentId)}</strong>
+            <small>${chartAccountName(item.chartAccountId).replace(/^\d+\s-\s/, "")}</small>
+            <time>${dateLabel(accountExpectedDate(item))}</time>
+            <b>${currency(accountOpenAmount(item))}</b>
+          </article>
+        `)
+        .join("")
+    : `<div class="empty-state">Sem vencimentos em aberto.</div>`;
+
+  const recentActivities = [
+    ...state.records.slice(-2).map((item) => ({ icon: "↗", title: "Nova avaliação realizada", detail: `${studentName(item.studentId)} · ${item.title}`, tone: "blue" })),
+    ...paidReceivables.slice(-2).map((item) => ({ icon: "$", title: "Pagamento recebido", detail: `${item.person || studentName(item.studentId)} - ${currency(accountPaidAmount(item))}`, tone: "green" })),
+    ...state.leads.slice(-2).map((item) => ({ icon: "+", title: "Lead registrado", detail: `${item.name} · ${item.interest}`, tone: "teal" })),
+    ...state.appointments.filter((item) => item.status === "Faltou").slice(-1).map((item) => ({ icon: "×", title: "Falta registrada", detail: `${studentName(item.studentId)} · ${item.type}`, tone: "red" })),
+  ].slice(0, 5);
+  document.querySelector("#dashboardActivityList").innerHTML = recentActivities.length
+    ? recentActivities.map((item, index) => `<article><span class="activity-icon ${item.tone}">${item.icon}</span><div><strong>${item.title}</strong><small>${item.detail}</small></div><time>há ${index + 1} h</time></article>`).join("")
+    : `<div class="empty-state">Sem atividades recentes.</div>`;
 }
 
 function renderCrm() {

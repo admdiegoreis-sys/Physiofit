@@ -138,83 +138,109 @@
           </div>
 
           <div class="metric-grid">
-            <article class="metric">
+            <article class="metric metric-students">
+              <span class="metric-icon" aria-hidden="true">👥</span>
               <strong id="activeStudentsMetric">0</strong>
               <small>Alunos ativos</small>
             </article>
-            <article class="metric">
+            <article class="metric metric-schedule">
+              <span class="metric-icon" aria-hidden="true">📅</span>
               <strong id="todayClassesMetric">0</strong>
               <small>Sessões de hoje</small>
             </article>
-            <article class="metric">
+            <article class="metric metric-revenue">
+              <span class="metric-icon" aria-hidden="true">$</span>
               <strong id="monthRevenueMetric">R$ 0</strong>
               <small>Receita recebida</small>
             </article>
-            <article class="metric">
+            <article class="metric metric-open">
+              <span class="metric-icon" aria-hidden="true">◎</span>
               <strong id="openInvoicesMetric">R$ 0</strong>
               <small>Valores em aberto</small>
             </article>
-            <article class="metric">
+            <article class="metric metric-occupancy">
+              <span class="metric-icon" aria-hidden="true">↻</span>
               <strong id="occupancyMetric">0%</strong>
               <small>Ocupação estimada</small>
             </article>
-            <article class="metric">
+            <article class="metric metric-professionals">
+              <span class="metric-icon" aria-hidden="true">+</span>
               <strong id="activeProfessionalsMetric">0</strong>
               <small>Profissionais ativos</small>
             </article>
-            <article class="metric">
+            <article class="metric metric-plans">
+              <span class="metric-icon" aria-hidden="true">✓</span>
               <strong id="activePlansMetric">0</strong>
               <small>Planos ativos</small>
             </article>
-            <article class="metric">
+            <article class="metric metric-confirmed">
+              <span class="metric-icon" aria-hidden="true">↻</span>
               <strong id="confirmedRateMetric">0%</strong>
               <small>Sessões confirmadas</small>
             </article>
           </div>
 
-          <div class="dashboard-grid">
-            <section class="panel">
+          <div class="dashboard-main-grid">
+            <section class="panel dashboard-card dashboard-card-schedule">
               <div class="panel-heading">
                 <div>
-                  <p class="eyebrow">Hoje</p>
-                  <h2>Próximas aulas</h2>
+                  <h2><span aria-hidden="true">📅</span> Agenda de hoje</h2>
                 </div>
                 <button class="ghost-button" data-view-target="agenda" type="button">Ver agenda</button>
               </div>
               <div class="timeline" id="todayTimeline"></div>
             </section>
 
-            <section class="panel">
+            <section class="panel dashboard-card">
               <div class="panel-heading">
                 <div>
-                  <p class="eyebrow">Atenção</p>
-                  <h2>Pendências</h2>
+                  <h2><span aria-hidden="true">▦</span> Mapa de ocupação - hoje</h2>
                 </div>
               </div>
-              <div class="alert-list" id="alertsList"></div>
+              <div class="occupancy-heatmap" id="occupancyHeatmap"></div>
+            </section>
+
+            <section class="panel dashboard-card dashboard-card-revenue">
+              <div class="panel-heading">
+                <div>
+                  <h2>Receita</h2>
+                </div>
+                <select class="dashboard-period-select" aria-label="Período da receita">
+                  <option>Este mês</option>
+                </select>
+              </div>
+              <div class="dashboard-revenue-panel" id="dashboardRevenuePanel"></div>
             </section>
           </div>
 
-          <div class="dashboard-grid dashboard-grid-secondary">
-            <section class="panel">
+          <div class="dashboard-main-grid dashboard-main-grid-secondary">
+            <section class="panel dashboard-card">
               <div class="panel-heading">
                 <div>
-                  <p class="eyebrow">Financeiro</p>
-                  <h2>Resumo de recebimentos</h2>
+                  <h2><span aria-hidden="true">▾</span> Funil comercial</h2>
                 </div>
-                <button class="ghost-button" data-view-target="finance" type="button">Ver financeiro</button>
               </div>
-              <div class="finance-summary" id="dashboardFinanceSummary"></div>
+              <div class="dashboard-funnel" id="dashboardFunnel"></div>
             </section>
 
-            <section class="panel">
+            <section class="panel dashboard-card">
               <div class="panel-heading">
                 <div>
-                  <p class="eyebrow">Operação</p>
-                  <h2>Modalidades e agenda</h2>
+                  <h2>Próximos vencimentos</h2>
                 </div>
+                <button class="link-button" data-view-target="accountsReceivable" type="button">Ver todos</button>
               </div>
-              <div class="dashboard-list" id="modalitySummaryList"></div>
+              <div class="dashboard-due-list" id="dashboardDueList"></div>
+            </section>
+
+            <section class="panel dashboard-card">
+              <div class="panel-heading">
+                <div>
+                  <h2><span aria-hidden="true">⚕</span> Atividades recentes</h2>
+                </div>
+                <button class="link-button" data-view-target="crm" type="button">Ver todas</button>
+              </div>
+              <div class="dashboard-activity-list" id="dashboardActivityList"></div>
             </section>
           </div>
         </section>
