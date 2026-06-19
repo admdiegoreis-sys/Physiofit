@@ -17,7 +17,7 @@
   --shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
   --shadow-soft: 0 18px 44px rgba(15, 23, 42, 0.07);
   --topbar-height: 76px;
-  --side-menu-width: 262px;
+  --side-menu-width: 280px;
   --button-radius: 0;
   --button-radius-sm: 0;
   --app-font-size: 14px;
@@ -497,13 +497,13 @@ button {
   width: var(--side-menu-width);
   flex-direction: column;
   align-items: stretch;
-  gap: 5px;
+  gap: 7px;
   min-width: 0;
   overflow: auto;
-  padding: 18px 18px 22px;
+  padding: 24px 22px 22px;
   border-right: 1px solid #e7edf4;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfefd 100%);
-  box-shadow: 16px 0 34px rgba(15, 23, 42, 0.04);
+  background: #ffffff;
+  box-shadow: 14px 0 34px rgba(15, 23, 42, 0.035);
 }
 
 .top-menu-group {
@@ -511,17 +511,18 @@ button {
 }
 
 .top-menu-button {
+  position: relative;
   display: grid;
-  grid-template-columns: 34px 1fr;
+  grid-template-columns: 24px 1fr;
   align-items: center;
-  gap: 11px;
+  gap: 14px;
   width: 100%;
   min-width: 0;
-  min-height: 46px;
-  padding: 7px 10px;
+  min-height: 44px;
+  padding: 0 12px;
   border: 1px solid transparent;
-  border-radius: 13px;
-  color: #1e293b;
+  border-radius: 14px;
+  color: #1f2937;
   background: transparent;
   box-shadow: none;
   text-align: left;
@@ -535,20 +536,30 @@ button {
 
 .top-menu-button strong {
   font-size: 0.88rem;
+  font-weight: 700;
 }
 
 .top-menu-button small {
-  margin-top: 3px;
-  color: #747d8a;
-  font-size: 0.72rem;
+  display: none;
 }
 
 .top-menu-button:hover,
 .top-menu-button.active,
 .top-menu-group.open .top-menu-button {
-  border-color: #d7f2ef;
-  background: linear-gradient(90deg, rgba(14, 165, 164, 0.13), rgba(20, 184, 166, 0.04));
+  border-color: transparent;
+  background: #eaf8f5;
   color: #075e5d;
+}
+
+.top-menu-button.active::before,
+.top-menu-group.open .top-menu-button::before {
+  content: "";
+  position: absolute;
+  left: -22px;
+  width: 4px;
+  height: 44px;
+  border-radius: 0 999px 999px 0;
+  background: #0ea5a4;
 }
 
 .top-menu-panel {
@@ -557,7 +568,7 @@ button {
   display: none;
   width: 100%;
   min-width: 0;
-  padding: 4px 0 6px 46px;
+  padding: 4px 0 8px 38px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -571,15 +582,15 @@ button {
 
 .top-menu-option {
   width: 100%;
-  min-height: 34px;
-  padding: 0 10px;
+  min-height: 32px;
+  padding: 0 9px;
   border: 0;
   border-radius: 10px;
   color: #475569;
   background: transparent;
   text-align: left;
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .top-menu-option:hover,
@@ -4114,4 +4125,55 @@ table small,
 
 .top-menu-option {
   border-radius: 10px;
+}
+
+/* Minimal sidebar icons, closer to the PhysioFit reference. */
+.top-menu .menu-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 0;
+  color: #475569;
+  background: transparent;
+  box-shadow: none;
+}
+
+.top-menu .menu-icon::before {
+  color: currentColor;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.top-menu .menu-icon-dashboard::before {
+  content: "\2302";
+}
+
+.top-menu .menu-icon-crm::before {
+  content: "\25C7";
+}
+
+.top-menu .menu-icon-agenda::before {
+  content: "\25A6";
+}
+
+.top-menu .menu-icon-registers::before {
+  content: "\25CB";
+}
+
+.top-menu .menu-icon-finance::before {
+  content: "$";
+}
+
+.top-menu .menu-icon-records::before {
+  content: "+";
+}
+
+.top-menu .menu-icon-settings::before {
+  content: "\2699";
+}
+
+.top-menu-button:hover .menu-icon,
+.top-menu-button.active .menu-icon,
+.top-menu-group.open .top-menu-button .menu-icon {
+  color: #0ea5a4;
 }
