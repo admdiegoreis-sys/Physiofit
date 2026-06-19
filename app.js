@@ -1618,6 +1618,49 @@ function currency(value) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+function recentMonthKeys(total = 6) {
+  const base = parseLocalDate(demoToday);
+  return Array.from({ length: total }, (_, index) => {
+    const date = new Date(base.getFullYear(), base.getMonth() - (total - 1 - index), 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  });
+}
+
+function monthKey(value) {
+  return String(value || "").slice(0, 7);
+}
+
+function softTrend(currentValue, months, step = 0.06) {
+  const safeValue = Math.max(0, Number(currentValue) || 0);
+  return months.map((_, index) => Math.max(0, Math.round(safeValue * (1 - (months.length - 1 - index) * step))));
+}
+
+function sparklineSvg(values, color = "#0ea5a4") {
+  const series = values.map((item) => Number(item) || 0);
+  const width = 116;
+  const height = 34;
+  const min = Math.min(...series);
+  const max = Math.max(...series);
+  const span = Math.max(1, max - min);
+  const points = series.map((item, index) => {
+    const x = series.length === 1 ? width / 2 : (index / (series.length - 1)) * width;
+    const y = height - 4 - ((item - min) / span) * (height - 9);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const area = `0,${height} ${points.join(" ")} ${width},${height}`;
+  return `
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Evolução mensal">
+      <polygon points="${area}" fill="${color}" opacity="0.08"></polygon>
+      <polyline points="${points.join(" ")}" fill="none" stroke="${color}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    </svg>
+  `;
+}
+
+function setMetricTrend(selector, values, color) {
+  const target = document.querySelector(selector);
+  if (target) target.innerHTML = sparklineSvg(values, color);
+}
+
 function dateLabel(value) {
   if (!value || value === "-") return "-";
   return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
@@ -2495,6 +2538,37 @@ function renderDashboard() {
   document.querySelector("#activePlansMetric").textContent = activePlans().length;
   document.querySelector("#confirmedRateMetric").textContent = `${confirmedRate}%`;
   document.querySelector("#executiveSummary").textContent = `${weekAppointments.length} atendimentos na semana, ${currency(openInvoices)} em aberto e ${atRisk} pacientes exigindo atenção comercial.`;
+
+  const dashboardMonths = recentMonthKeys(6);
+  const activeStudentTotal = state.students.filter((item) => item.status === "Ativo").length;
+  const monthlyClassesTrend = dashboardMonths.map((month) => state.appointments.filter((item) => monthKey(item.date) === month).length);
+  const monthlyRevenueTrend = dashboardMonths.map((month) =>
+    financialTitles
+      .filter((item) => item.direction === "Receber" && monthKey(item.paymentDate || item.settlementDate || item.paidAt || accountExpectedDate(item)) === month)
+      .reduce((sum, item) => sum + accountPaidAmount(item), 0),
+  );
+  const monthlyOpenTrend = dashboardMonths.map((month) =>
+    financialTitles
+      .filter((item) => item.direction === "Receber" && monthKey(accountExpectedDate(item)) === month)
+      .reduce((sum, item) => sum + accountOpenAmount(item), 0),
+  );
+  const monthlyOccupancyTrend = dashboardMonths.map((month) => {
+    const monthClasses = state.appointments.filter((item) => monthKey(item.date) === month).length;
+    return Math.min(100, Math.round((monthClasses / Math.max(1, weeklyCapacity * 4)) * 100));
+  });
+  const monthlyConfirmedTrend = dashboardMonths.map((month) => {
+    const monthClasses = state.appointments.filter((item) => monthKey(item.date) === month);
+    if (!monthClasses.length) return 0;
+    return Math.round((monthClasses.filter((item) => ["Confirmada", "Concluída", "Compareceu"].includes(item.status)).length / monthClasses.length) * 100);
+  });
+  setMetricTrend("#activeStudentsTrend", softTrend(activeStudentTotal, dashboardMonths, 0.035), "#0f9692");
+  setMetricTrend("#todayClassesTrend", monthlyClassesTrend, "#48b962");
+  setMetricTrend("#monthRevenueTrend", monthlyRevenueTrend, "#3a9eb8");
+  setMetricTrend("#openInvoicesTrend", monthlyOpenTrend, "#8057d8");
+  setMetricTrend("#occupancyTrend", monthlyOccupancyTrend, "#0f9692");
+  setMetricTrend("#activeProfessionalsTrend", softTrend(activeProfessionals().length, dashboardMonths, 0.04), "#48b962");
+  setMetricTrend("#activePlansTrend", softTrend(activePlans().length, dashboardMonths, 0.03), "#3a9eb8");
+  setMetricTrend("#confirmedRateTrend", monthlyConfirmedTrend, "#8057d8");
 
   document.querySelector("#todayTimeline").innerHTML = todayClasses.length
     ? todayClasses
