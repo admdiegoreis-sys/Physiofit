@@ -1914,6 +1914,56 @@ function activeChartAccounts() {
   return state.chartAccounts.filter((item) => item.status === "Ativo");
 }
 
+function chartAccountFinancialDirection(account = {}) {
+  const content = normalizedText([
+    account.nature,
+    account.name,
+    account.dfcDescription,
+    account.dfcGroup,
+    account.package,
+    account.activity
+  ].join(" "));
+
+  if (account.nature === "Receita") return "Receber";
+  if (account.nature === "Despesa") return "Pagar";
+  if (content.includes("transferencia")) return "both";
+
+  const receivableTerms = [
+    "recebimento",
+    "resgate",
+    "rendimento",
+    "aporte",
+    "emprestimo contratado",
+    "venda de imobilizado"
+  ];
+  if (receivableTerms.some((term) => content.includes(term))) return "Receber";
+
+  const payableTerms = [
+    "pagamento",
+    "aplicacao",
+    "distribuicao",
+    "instalacoes",
+    "maquinas",
+    "equipamentos",
+    "computadores",
+    "perifericos",
+    "moveis",
+    "utensilios",
+    "veiculos",
+    "consorcio"
+  ];
+  if (payableTerms.some((term) => content.includes(term))) return "Pagar";
+
+  return "both";
+}
+
+function chartAccountsForFinancialDirection(direction = "") {
+  return activeChartAccounts().filter((account) => {
+    const accountDirection = chartAccountFinancialDirection(account);
+    return accountDirection === "both" || accountDirection === direction;
+  });
+}
+
 function activeSuppliers() {
   return state.suppliers.filter((item) => item.status === "Ativo");
 }
@@ -2400,9 +2450,9 @@ function renderAccountOptions() {
     const chartFilter = document.querySelector(`#${config.chartId}`);
     if (chartFilter) {
       const selected = chartFilter.value || "all";
-      const nature = config.direction === "Pagar" ? "Despesa" : "Receita";
-      const chartOptions = activeChartAccounts().filter((item) => item.nature === nature);
-      chartFilter.innerHTML = `<option value="all">Plano de contas</option>${chartOptions.map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("")}`;
+      const chartOptions = chartAccountsForFinancialDirection(config.direction);
+      const label = config.direction === "Pagar" ? "Plano de contas (a pagar)" : "Plano de contas (a receber)";
+      chartFilter.innerHTML = `<option value="all">${label}</option>${chartOptions.map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("")}`;
       chartFilter.value = selected === "all" || chartOptions.some((item) => item.id === selected) ? selected : "all";
     }
     const supplierFilter = document.querySelector(`#${config.supplierId}`);
