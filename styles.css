@@ -5254,3 +5254,105 @@ td.row-actions .row-action-button {
 .patient-search-row .clear-filter-button {
   border-radius: var(--button-radius) !important;
 }
+
+.crm-table-wrap .lead-action-button,
+.crm-table-wrap .delete-icon-button {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+}
+
+.crm-table-wrap .lead-action-button {
+  background: #79adbf;
+}
+
+.crm-table-wrap .delete-icon-button {
+  position: relative;
+  color: transparent;
+  font-size: 0;
+  background: #b0545c;
+}
+
+.crm-table-wrap .delete-icon-button::before,
+.crm-table-wrap .delete-icon-button::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 15px;
+  height: 3px;
+  border-radius: 999px;
+  background: #fff;
+  transform-origin: center;
+}
+
+.crm-table-wrap .delete-icon-button::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.crm-table-wrap .delete-icon-button::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.crm-table-wrap .lead-action-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.crm-table-wrap .lead-action-edit::before {
+  left: 8px;
+  top: 1px;
+  width: 5px;
+  height: 17px;
+  border-radius: 2px;
+  background: #fff;
+  transform: rotate(-42deg);
+}
+
+.crm-table-wrap .lead-action-edit::after {
+  right: 1px;
+  bottom: 1px;
+  border-left-width: 6px;
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  transform: rotate(-42deg);
+}
+
+.crm-table-wrap .lead-action-calendar {
+  width: 19px;
+  height: 19px;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.crm-table-wrap .lead-action-calendar::before {
+  left: 2px;
+  right: 2px;
+  top: 4px;
+  width: auto;
+  height: 2px;
+  background: #fff;
+}
+
+.crm-table-wrap .lead-action-calendar::after {
+  left: 4px;
+  top: 9px;
+  width: 3px;
+  height: 3px;
+  border-radius: 1px;
+  background: #fff;
+  box-shadow: 5px 0 0 #fff, 10px 0 0 #fff, 0 5px 0 #fff, 5px 5px 0 #fff, 10px 5px 0 #fff;
+}
+
+.crm-table-wrap .lead-action-check::before {
+  left: 6px;
+  top: 1px;
+  width: 8px;
+  height: 16px;
+  border-right: 4px solid #fff;
+  border-bottom: 4px solid #fff;
+  border-radius: 1px;
+  transform: rotate(42deg);
+}
