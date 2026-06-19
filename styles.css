@@ -5248,3 +5248,9 @@ td.row-actions .row-action-button {
 .linked-edit-button {
   border-radius: var(--button-radius-sm);
 }
+
+.clear-filter-button,
+.agenda-search-row .clear-filter-button,
+.patient-search-row .clear-filter-button {
+  border-radius: var(--button-radius) !important;
+}
