@@ -1954,7 +1954,36 @@ function activeEnrollments() {
 }
 
 function activeChartAccounts() {
-  return state.chartAccounts.filter((item) => item.status === "Ativo");
+  return sortChartAccountsByCode(state.chartAccounts.filter((item) => item.status === "Ativo"));
+}
+
+function chartAccountCodeParts(code = "") {
+  return String(code)
+    .split(".")
+    .map((part) => Number.parseInt(part, 10))
+    .map((part) => (Number.isFinite(part) ? part : 0));
+}
+
+function compareChartAccountCodes(left = "", right = "") {
+  const leftParts = chartAccountCodeParts(left);
+  const rightParts = chartAccountCodeParts(right);
+  const length = Math.max(leftParts.length, rightParts.length);
+  for (let index = 0; index < length; index += 1) {
+    const diff = (leftParts[index] ?? 0) - (rightParts[index] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return String(left).localeCompare(String(right), "pt-BR", { numeric: true, sensitivity: "base" });
+}
+
+function compareChartAccountsByCode(left = {}, right = {}) {
+  return (
+    compareChartAccountCodes(left.code, right.code) ||
+    String(left.name ?? "").localeCompare(String(right.name ?? ""), "pt-BR", { sensitivity: "base" })
+  );
+}
+
+function sortChartAccountsByCode(accounts = []) {
+  return [...accounts].sort(compareChartAccountsByCode);
 }
 
 function chartAccountFinancialDirection(account = {}) {
@@ -2001,10 +2030,10 @@ function chartAccountFinancialDirection(account = {}) {
 }
 
 function chartAccountsForFinancialDirection(direction = "") {
-  return activeChartAccounts().filter((account) => {
+  return sortChartAccountsByCode(activeChartAccounts().filter((account) => {
     const accountDirection = chartAccountFinancialDirection(account);
     return accountDirection === "both" || accountDirection === direction;
-  });
+  }));
 }
 
 function activeSuppliers() {
@@ -4447,18 +4476,13 @@ function dreMonthValue(month, predicate) {
 function dreRowsByAccounts(months, groupPredicate) {
   return state.chartAccounts
     .filter(groupPredicate)
-    .sort((a, b) => chartAccountOrder(a.code) - chartAccountOrder(b.code))
+    .sort(compareChartAccountsByCode)
     .map((account) => ({
       kind: "account",
       code: account.code,
       label: account.name,
       values: months.map((month) => dreMonthValue(month, (item) => item.chartAccountId === account.id)),
     }));
-}
-
-function chartAccountOrder(code) {
-  const index = seedChartAccounts.findIndex((account) => account.code === code);
-  return index === -1 ?9999 : index;
 }
 
 function dreSum(rows, months) {
@@ -4618,7 +4642,9 @@ function renderChartAccounts() {
   const table = document.querySelector("#chartAccountsTable");
   if (!table) return;
   const term = normalizedText(document.querySelector("#chartAccountSearch")?.value.trim() ?? "");
-  const rows = state.chartAccounts.filter((item) => !term || normalizedText(`${item.code} ${item.name} ${item.activity} ${item.dfcGroup ?? ""} ${item.dreGroup ?? ""} ${item.package ?? ""}`).includes(term));
+  const rows = sortChartAccountsByCode(
+    state.chartAccounts.filter((item) => !term || normalizedText(`${item.code} ${item.name} ${item.activity} ${item.dfcGroup ?? ""} ${item.dreGroup ?? ""} ${item.package ?? ""}`).includes(term)),
+  );
   table.innerHTML = rows.length
     ?rows
         .map(
