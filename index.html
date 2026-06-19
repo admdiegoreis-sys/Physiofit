@@ -102,12 +102,22 @@
             <div class="top-menu-group top-menu-group--icon-only" data-menu-wrapper="settings" data-admin-only>
               <button class="top-menu-button top-menu-button--icon-only" data-top-menu-toggle="settings" type="button" title="Configurações" aria-label="Configurações">
                 <span class="menu-icon menu-icon-settings" aria-hidden="true"></span>
+                <span><strong>Configurações</strong><small>Estúdio</small></span>
               </button>
               <div class="top-menu-panel">
                 <button class="top-menu-option" data-view="settings" type="button">Configurações</button>
               </div>
             </div>
           </nav>
+          <div class="topbar-tools">
+            <label class="global-search">
+              <span aria-hidden="true">⌕</span>
+              <input id="globalSearch" type="search" placeholder="Buscar alunos, agenda, financeiro..." />
+            </label>
+            <button class="quick-action primary-button" data-view-target="students" type="button"><span aria-hidden="true">+</span>Novo aluno</button>
+            <button class="quick-action ghost-button" data-view-target="records" type="button"><span aria-hidden="true">+</span>Nova avaliação</button>
+            <button class="notification-button" type="button" aria-label="Notificações">●<span>2</span></button>
+          </div>
           <div class="session-chip" id="sessionChip" hidden>
             <span id="sessionUserName">Usuário</span>
             <button id="logoutButton" type="button">Sair</button>
@@ -117,8 +127,8 @@
         <section class="view active" id="dashboardView" aria-labelledby="viewTitle">
           <div class="executive-hero">
             <div>
-              <p class="eyebrow">Resumo executivo</p>
-              <h2>Visão geral do estúdio</h2>
+              <p class="eyebrow">Dashboard</p>
+              <h2>Olá, Administrador</h2>
               <span id="executiveSummary">Carregando indicadores...</span>
             </div>
             <div class="executive-actions">
@@ -130,35 +140,35 @@
           <div class="metric-grid">
             <article class="metric">
               <strong id="activeStudentsMetric">0</strong>
-              <small>com plano vigente</small>
+              <small>Alunos ativos</small>
             </article>
             <article class="metric">
               <strong id="todayClassesMetric">0</strong>
-              <small>agenda operacional</small>
+              <small>Sessões de hoje</small>
             </article>
             <article class="metric">
               <strong id="monthRevenueMetric">R$ 0</strong>
-              <small>pagamentos recebidos</small>
+              <small>Receita recebida</small>
             </article>
             <article class="metric">
               <strong id="openInvoicesMetric">R$ 0</strong>
-              <small>cobranças pendentes</small>
+              <small>Valores em aberto</small>
             </article>
             <article class="metric">
               <strong id="occupancyMetric">0%</strong>
-              <small>capacidade estimada</small>
+              <small>Ocupação estimada</small>
             </article>
             <article class="metric">
               <strong id="activeProfessionalsMetric">0</strong>
-              <small>disponíveis na agenda</small>
+              <small>Profissionais ativos</small>
             </article>
             <article class="metric">
               <strong id="activePlansMetric">0</strong>
-              <small>ofertas comerciais</small>
+              <small>Planos ativos</small>
             </article>
             <article class="metric">
               <strong id="confirmedRateMetric">0%</strong>
-              <small>aulas confirmadas</small>
+              <small>Sessões confirmadas</small>
             </article>
           </div>
 
