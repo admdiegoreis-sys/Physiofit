@@ -5756,3 +5756,63 @@ td.row-actions .row-action-button {
 .cashflow-grid-table .cashflow-balance-row td.positive {
   color: #fff;
 }
+
+/* Agenda: botões independentes, arredondados e alinhados */
+.calendar-top {
+  align-items: center;
+}
+
+.calendar-nav,
+.calendar-modes {
+  gap: 8px;
+}
+
+.calendar-nav .nav-square,
+.calendar-nav .today-button,
+.calendar-modes .mode-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 0;
+  border-radius: var(--button-radius) !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.calendar-nav .nav-square {
+  width: 48px;
+  padding: 0;
+  color: #ffffff;
+  background: #243047;
+  font-size: 1.08rem;
+}
+
+.calendar-nav .today-button {
+  min-width: 70px;
+  margin-left: 6px;
+  padding: 0 18px;
+  color: #ffffff;
+  background: #8f96a4;
+}
+
+.calendar-modes .mode-button {
+  min-width: 76px;
+  padding: 0 18px;
+  color: #ffffff;
+  background: #26324a;
+  border-right: 0;
+}
+
+.calendar-modes .mode-button.active {
+  background: #111a2a;
+}
+
+.calendar-nav .nav-square:hover,
+.calendar-nav .today-button:hover,
+.calendar-modes .mode-button:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
