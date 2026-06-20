@@ -2861,8 +2861,8 @@ function renderCrm() {
                   <button class="row-action-button lead-action-button edit-icon-button" data-edit-lead="${lead.id}" type="button" title="Editar lead" aria-label="Editar lead"><span class="lead-action-icon lead-action-edit" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button edit-icon-button" data-schedule-lead="${lead.id}" type="button" title="Agendar visita" aria-label="Agendar visita"><span class="lead-action-icon lead-action-calendar" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button edit-icon-button" data-convert-lead="${lead.id}" type="button" title="Converter em aluno" aria-label="Converter em aluno"><span class="lead-action-icon lead-action-check" aria-hidden="true"></span></button>
-                  <button class="row-action-button lead-action-button lose-lead-button" data-lose-lead="${lead.id}" type="button" title="Marcar como perdido" aria-label="Marcar como perdido">✗</button>
-                  <button class="row-action-button delete-icon-button" data-delete-lead="${lead.id}" type="button" title="Excluir lead" aria-label="Excluir lead">&times;</button>
+                  <button class="row-action-button lead-action-button lead-lose-btn" data-lose-lead="${lead.id}" type="button" title="Marcar como perdido" aria-label="Marcar como perdido"><span class="lead-action-icon lead-action-x" aria-hidden="true"></span></button>
+                  <button class="row-action-button lead-action-button lead-del-btn" data-delete-lead="${lead.id}" type="button" title="Excluir lead" aria-label="Excluir lead"><span class="lead-action-icon lead-action-trash" aria-hidden="true"></span></button>
                 </div>
               </td>
               <td><div class="patient-name"><strong>${lead.name.toUpperCase()}</strong><span>${lead.phone || "-"} · ${lead.email || lead.instagram || "-"}</span></div></td>

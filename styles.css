@@ -5842,5 +5842,47 @@ td.row-actions .row-action-button {
 .sv-other-more { color: var(--muted); font-style: italic; }
 .sv-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
 
-.lose-lead-button { color: #dc2626 !important; font-weight: 700; font-size: 1rem; border: 1px solid #fecaca !important; background: #fff5f5 !important; }
-.lose-lead-button:hover { background: #fee2e2 !important; border-color: #dc2626 !important; }
+/* Lead action: X (perda) */
+.crm-table-wrap .lead-lose-btn { background: #b0545c; }
+.lead-action-x { position: relative; }
+.lead-action-x::before,
+.lead-action-x::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 13px; height: 3px;
+  background: #fff;
+  border-radius: 999px;
+  transform-origin: center;
+}
+.lead-action-x::before { transform: translate(-50%, -50%) rotate(45deg); }
+.lead-action-x::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* Lead action: Lixeira (excluir) */
+.crm-table-wrap .lead-del-btn { background: #7a5c6e; }
+.crm-table-wrap .lead-action-trash {
+  width: 11px; height: 12px;
+  border: 2.5px solid #fff;
+  border-top: none;
+  border-radius: 0 0 2px 2px;
+  position: relative;
+  margin: 6px auto 0;
+  display: block;
+}
+.crm-table-wrap .lead-action-trash::before {
+  content: "";
+  position: absolute;
+  top: -4px; left: -4px; right: -4px;
+  height: 2.5px;
+  background: #fff;
+  border-radius: 1px;
+}
+.crm-table-wrap .lead-action-trash::after {
+  content: "";
+  position: absolute;
+  top: -8px; left: 1px; right: 1px;
+  height: 4px;
+  border: 2px solid #fff;
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+}
