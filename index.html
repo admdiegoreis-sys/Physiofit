@@ -994,11 +994,9 @@
             <div class="module-body">
               <div class="monthly-toolbar">
                 <button class="nav-square" id="prevMonthlyPeriod" type="button">&lt;</button>
-                <select id="monthlyPeriodFilter" aria-label="Período de mensalidades">
-                  <option value="2026-05" selected>maio/2026</option>
-                  <option value="2026-04">abril/2026</option>
-                  <option value="2026-06">junho/2026</option>
-                </select>
+                <input type="month" id="monthlyPeriodFilter" aria-label="De" title="De" />
+                <span class="filter-range-label">até</span>
+                <input type="month" id="monthlyPeriodEndFilter" aria-label="Até" title="Até" />
                 <button class="nav-square" id="nextMonthlyPeriod" type="button">&gt;</button>
                 <select id="monthlyPaidFilter">
                   <option value="all">Ver Pago?</option>

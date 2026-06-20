@@ -5816,3 +5816,10 @@ td.row-actions .row-action-button {
   filter: brightness(1.04);
   transform: translateY(-1px);
 }
+
+.filter-range-label {
+  font-size: 0.82rem;
+  color: #666;
+  align-self: center;
+  white-space: nowrap;
+}

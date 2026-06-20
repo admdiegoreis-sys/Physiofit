@@ -2570,6 +2570,8 @@ function renderMonthlyOptions() {
     teacherFilter.innerHTML = `<option value="all">Professor</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
     teacherFilter.value = selected === "all" || activeProfessionals().some((item) => item.id === selected) ?selected : "all";
   }
+  const periodEl = document.querySelector("#monthlyPeriodFilter");
+  if (periodEl && !periodEl.value) periodEl.value = demoToday.slice(0, 7);
 }
 
 function accountMonthOptions() {
@@ -3510,6 +3512,8 @@ function renderMonthlyPayments() {
   const invoiceFilter = document.querySelector("#monthlyInvoiceFilter")?.value ?? "all";
   const teacherFilter = document.querySelector("#monthlyTeacherFilter")?.value ?? "all";
   const externalFilter = document.querySelector("#monthlyExternalFilter")?.value ?? "all";
+  const periodFrom = document.querySelector("#monthlyPeriodFilter")?.value || "";
+  const periodTo = document.querySelector("#monthlyPeriodEndFilter")?.value || "";
   const rows = monthlyRows()
     .filter((item) => !term || normalizedText(item.patient).includes(term))
     .filter((item) => paidFilter === "all" || item.status === paidFilter)
@@ -3519,6 +3523,8 @@ function renderMonthlyPayments() {
     .filter((item) => invoiceFilter === "all" || (invoiceFilter === "Com nota" ? Boolean(invoiceByMonthlyId(item.id)) : !invoiceByMonthlyId(item.id)))
     .filter((item) => teacherFilter === "all" || item.teacherId === teacherFilter)
     .filter((item) => externalFilter === "all" || item.external === externalFilter)
+    .filter((item) => !periodFrom || String(item.dueDate || "").slice(0, 7) >= periodFrom)
+    .filter((item) => !periodTo || String(item.dueDate || "").slice(0, 7) <= periodTo)
     .sort((a, b) => a.patient.localeCompare(b.patient, "pt-BR"));
 
   table.innerHTML = rows.length
@@ -6367,6 +6373,10 @@ function clearMonthlyFilters() {
   setControlValue("monthlyReceiptFilter", "all");
   setControlValue("monthlyTeacherFilter", "all");
   setControlValue("monthlyExternalFilter", "all");
+  const periodEl = document.querySelector("#monthlyPeriodFilter");
+  if (periodEl) periodEl.value = demoToday.slice(0, 7);
+  const periodEndEl = document.querySelector("#monthlyPeriodEndFilter");
+  if (periodEndEl) periodEndEl.value = "";
   renderMonthlyPayments();
 }
 
@@ -6504,12 +6514,27 @@ document.querySelector("#planEditorForm").addEventListener("change", (event) => 
 });
 document.querySelector("#enrollmentSearchButton")?.addEventListener("click", renderEnrollments);
 document.querySelector("#enrollmentClearFiltersButton")?.addEventListener("click", clearEnrollmentFilters);
-["monthlySearch", "monthlyPaidFilter", "monthlyMembershipFilter", "monthlyModalityFilter", "monthlyInvoiceFilter", "monthlyReceiptFilter", "monthlyTeacherFilter", "monthlyExternalFilter", "monthlyPeriodFilter"].forEach((id) => {
+["monthlySearch", "monthlyPaidFilter", "monthlyMembershipFilter", "monthlyModalityFilter", "monthlyInvoiceFilter", "monthlyReceiptFilter", "monthlyTeacherFilter", "monthlyExternalFilter", "monthlyPeriodFilter", "monthlyPeriodEndFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderMonthlyPayments);
   document.querySelector(`#${id}`)?.addEventListener("change", renderMonthlyPayments);
 });
 document.querySelector("#monthlySearchButton")?.addEventListener("click", renderMonthlyPayments);
 document.querySelector("#monthlyClearFiltersButton")?.addEventListener("click", clearMonthlyFilters);
+
+document.querySelector("#prevMonthlyPeriod")?.addEventListener("click", () => {
+  const el = document.querySelector("#monthlyPeriodFilter");
+  if (!el) return;
+  const [y, m] = (el.value || demoToday.slice(0, 7)).split("-").map(Number);
+  el.value = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, "0")}`;
+  renderMonthlyPayments();
+});
+document.querySelector("#nextMonthlyPeriod")?.addEventListener("click", () => {
+  const el = document.querySelector("#monthlyPeriodFilter");
+  if (!el) return;
+  const [y, m] = (el.value || demoToday.slice(0, 7)).split("-").map(Number);
+  el.value = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+  renderMonthlyPayments();
+});
 
 ["fiscalSearch", "fiscalStatusFilter", "fiscalModalityFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderFiscalInvoices);
