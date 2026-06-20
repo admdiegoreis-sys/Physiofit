@@ -1015,7 +1015,14 @@ function normalizeState(data) {
   const mergedSuppliers = savedSuppliers.length
     ? [...savedSuppliers, ...filterDeletedEntities(normalized, "suppliers", seedData.suppliers).filter((item) => !savedSupplierKeys.has(normalizedText(`${item.name}-${item.document}`)))]
     : filterDeletedEntities(normalized, "suppliers", structuredClone(seedData.suppliers));
-  normalized.suppliers = mergedSuppliers.map((item, index) => normalizeSupplier(normalizeTextFields(item), index));
+  const allNormalizedSuppliers = mergedSuppliers.map((item, index) => normalizeSupplier(normalizeTextFields(item), index));
+  const seenSupplierKeys = new Set();
+  normalized.suppliers = allNormalizedSuppliers.filter((item) => {
+    const key = normalizedText(`${item.name}-${item.document}`);
+    if (seenSupplierKeys.has(key)) return false;
+    seenSupplierKeys.add(key);
+    return true;
+  });
   normalized.modalities = filterDeletedEntities(normalized, "modalities", Array.isArray(data.modalities) ? data.modalities : structuredClone(seedData.modalities)).map((item, index) => normalizeModality(normalizeTextFields(item), index));
   const savedPlans = filterDeletedEntities(normalized, "plans", Array.isArray(data.plans) ? data.plans : []);
   const savedPlanNames = new Set(savedPlans.map((item) => normalizedText(item.name ?? "")));
@@ -1182,6 +1189,10 @@ function normalizeLead(item, index) {
 
 function normalizeSupplier(item, index) {
   const defaults = seedSuppliers[index % seedSuppliers.length] ?? {};
+  const cleanNotes = String(item.notes || "")
+    .replace(/Importado da aba BD_Physiofit/gi, "")
+    .replace(/Importa[çc][aã]o Manual/gi, "")
+    .trim();
   return {
     id: item.id || defaults.id || uid("f"),
     name: defaults.name || "",
@@ -1193,8 +1204,8 @@ function normalizeSupplier(item, index) {
     movementCount: 0,
     totalPaid: 0,
     lastMovementDate: "",
-    notes: "",
     ...item,
+    notes: cleanNotes,
     movementCount: Number(item.movementCount ?? defaults.movementCount ?? 0),
     totalPaid: Number(item.totalPaid ?? defaults.totalPaid ?? 0),
   };
@@ -3230,7 +3241,7 @@ function renderSuppliers() {
                 <button class="row-action-button delete-icon-button" data-delete-supplier="${item.id}" type="button" title="Excluir fornecedor" aria-label="Excluir fornecedor">&times;</button>
               </div>
             </td>
-            <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${(item.email || item.phone || item.notes || "").replace("Importado da aba BD_Physiofit", "Importação Manual")}</span></div></td>
+            <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.email || item.phone || item.notes || ""}</span></div></td>
             <td>${item.document || "-"}</td>
             <td>${item.supplierType || "-"}</td>
             <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
@@ -4778,7 +4789,7 @@ function openSupplierModal(supplierId = null) {
   openModal("supplier", {
     ...item,
     name: displayName(item.name),
-    notes: String(item.notes || "").replace("Importado da aba BD_Physiofit", "Importação Manual"),
+    notes: item.notes || "",
   });
   document.querySelector("#modalTitle").textContent = "Editar fornecedor";
 }
