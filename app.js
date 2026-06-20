@@ -558,7 +558,7 @@ const modalSchemas = {
     fields: [
       { name: "name", label: "Nome", type: "text" },
       { name: "phone", label: "Telefone", type: "tel" },
-      { name: "email", label: "E-mail", type: "email", required: false },
+      { name: "email", label: "E-mail", type: "email" },
       { name: "instagram", label: "Instagram", type: "text", required: false },
       { name: "origin", label: "Origem do lead", type: "select", options: leadOrigins, value: "Instagram" },
       { name: "entryChannel", label: "Canal de entrada", type: "select", options: leadChannels, value: "WhatsApp" },
@@ -3051,7 +3051,7 @@ function saveScheduleVisit() {
   const dow = apptDate.getDay(); // 0=Sun..6=Sat
   const toMonday = dow === 0 ? -6 : 1 - dow;
   currentWeekStart = addDays(apptDate, toMonday);
-  navigateTo("schedule");
+  switchView("schedule");
   toast("Visita agendada! Redirecionando para a agenda.");
 }
 
@@ -3110,7 +3110,10 @@ function convertLead(leadId) {
   lead.history = `${lead.history || ""}\nLead convertido em paciente em ${dateLabel(demoToday)}.`.trim();
   saveState();
   render();
-  toast("Lead convertido em paciente.");
+  switchView("enrollments");
+  editingEnrollmentId = null;
+  openModal("enrollment", { studentId: student.id });
+  document.querySelector("#modalTitle").textContent = "Nova matrícula";
 }
 
 function deleteLead(leadId) {
