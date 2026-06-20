@@ -1233,7 +1233,7 @@ function normalizeLead(item, index) {
     initialMessage: item.initialMessage || item.message || defaults.initialMessage || defaults.message || "",
     interest: item.interest || defaults.interest || "Pilates",
     status,
-    ownerId: item.ownerId || defaults.ownerId || "",
+    ownerId: item.ownerId || "",
     entryDate: item.entryDate || defaults.entryDate || item.firstContactDate || defaults.firstContactDate || demoToday,
     visitDate: item.visitDate || defaults.visitDate || "",
     firstContactDate: item.firstContactDate || defaults.firstContactDate || demoToday,
