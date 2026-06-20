@@ -1189,10 +1189,8 @@ function normalizeLead(item, index) {
 
 function normalizeSupplier(item, index) {
   const defaults = seedSuppliers[index % seedSuppliers.length] ?? {};
-  const cleanNotes = String(item.notes || "")
-    .replace(/Importado da aba BD_Physiofit/gi, "")
-    .replace(/Importa[çc][aã]o Manual/gi, "")
-    .trim();
+  const rawNotes = String(item.notes || "");
+  const cleanNotes = /fornecedor importado|importado da (aba|planilha)/i.test(rawNotes) ? "" : rawNotes.trim();
   return {
     id: item.id || defaults.id || uid("f"),
     name: defaults.name || "",
