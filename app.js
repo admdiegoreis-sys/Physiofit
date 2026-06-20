@@ -1010,26 +1010,26 @@ function normalizeState(data) {
   normalized.students = filterDeletedEntities(normalized, "students", normalized.students).map((item, index) => normalizeStudent(normalizeTextFields(item), index));
   normalized.leads = filterDeletedEntities(normalized, "leads", Array.isArray(data.leads) ? data.leads : structuredClone(seedData.leads)).map((item, index) => normalizeLead(normalizeTextFields(item), index));
   normalized.professionals = filterDeletedEntities(normalized, "professionals", Array.isArray(data.professionals) ? data.professionals : structuredClone(seedData.professionals)).map((item, index) => normalizeProfessional(normalizeTextFields(item), index));
-  const savedSuppliers = Array.isArray(data.suppliers) ? data.suppliers : [];
+  const savedSuppliers = filterDeletedEntities(normalized, "suppliers", Array.isArray(data.suppliers) ? data.suppliers : []);
   const savedSupplierKeys = new Set(savedSuppliers.map((item) => normalizedText(`${item.name ?? ""}-${item.document ?? ""}`)));
   const mergedSuppliers = savedSuppliers.length
     ? [...savedSuppliers, ...filterDeletedEntities(normalized, "suppliers", seedData.suppliers).filter((item) => !savedSupplierKeys.has(normalizedText(`${item.name}-${item.document}`)))]
     : filterDeletedEntities(normalized, "suppliers", structuredClone(seedData.suppliers));
   normalized.suppliers = mergedSuppliers.map((item, index) => normalizeSupplier(normalizeTextFields(item), index));
   normalized.modalities = filterDeletedEntities(normalized, "modalities", Array.isArray(data.modalities) ? data.modalities : structuredClone(seedData.modalities)).map((item, index) => normalizeModality(normalizeTextFields(item), index));
-  const savedPlans = Array.isArray(data.plans) ? data.plans : [];
+  const savedPlans = filterDeletedEntities(normalized, "plans", Array.isArray(data.plans) ? data.plans : []);
   const savedPlanNames = new Set(savedPlans.map((item) => normalizedText(item.name ?? "")));
   const mergedPlans = savedPlans.length
     ? [...savedPlans, ...filterDeletedEntities(normalized, "plans", seedData.plans).filter((item) => !savedPlanNames.has(normalizedText(item.name)))]
     : filterDeletedEntities(normalized, "plans", structuredClone(seedData.plans));
   normalized.plans = mergedPlans.map((item, index) => normalizePlan(normalizeTextFields(item), index));
-  const savedEnrollments = Array.isArray(data.enrollments) ? data.enrollments : [];
+  const savedEnrollments = filterDeletedEntities(normalized, "enrollments", Array.isArray(data.enrollments) ? data.enrollments : []);
   const savedEnrollmentKeys = new Set(savedEnrollments.map((item) => normalizedText(`${item.studentId ?? ""}-${item.planId ?? ""}-${item.startDate ?? ""}`)));
   const mergedEnrollments = savedEnrollments.length
     ? [...savedEnrollments, ...filterDeletedEntities(normalized, "enrollments", seedData.enrollments).filter((item) => !savedEnrollmentKeys.has(normalizedText(`${item.studentId}-${item.planId}-${item.startDate}`)))]
     : filterDeletedEntities(normalized, "enrollments", structuredClone(seedData.enrollments));
   normalized.enrollments = mergedEnrollments.map((item, index) => normalizeEnrollment(normalizeTextFields(item), index));
-  const savedChartAccounts = Array.isArray(data.chartAccounts) ? data.chartAccounts : [];
+  const savedChartAccounts = filterDeletedEntities(normalized, "chartAccounts", Array.isArray(data.chartAccounts) ? data.chartAccounts : []);
   const savedChartCodes = new Set(savedChartAccounts.map((item) => String(item.code ?? "")));
   const mergedChartAccounts = savedChartAccounts.length
     ? [...savedChartAccounts, ...filterDeletedEntities(normalized, "chartAccounts", seedChartAccounts).filter((item) => !savedChartCodes.has(String(item.code)))]
@@ -1039,7 +1039,7 @@ function normalizeState(data) {
     ...item,
     chartAccountId: item.chartAccountId || revenueChartAccountForModalityFromLists(normalized.chartAccounts, normalized.modalities, item.modalityId)?.id || "",
   }));
-  const savedAccounts = Array.isArray(data.accounts) ? data.accounts : [];
+  const savedAccounts = filterDeletedEntities(normalized, "accounts", Array.isArray(data.accounts) ? data.accounts : []);
   const savedAccountDescriptions = new Set(savedAccounts.map((item) => normalizedText(`${item.description ?? ""}-${item.person ?? ""}-${item.amount ?? ""}`)));
   const availableSeedAccounts = filterDeletedEntities(normalized, "accounts", seedAccounts);
   const mergedAccounts = savedAccounts.length
@@ -1062,7 +1062,7 @@ function normalizeState(data) {
       ? { ...item, chartAccountId: planChartByEnrollment.get(item.enrollmentId) }
       : item
   ));
-  const savedBankMovements = Array.isArray(data.bankMovements) ? data.bankMovements : [];
+  const savedBankMovements = filterDeletedEntities(normalized, "bankMovements", Array.isArray(data.bankMovements) ? data.bankMovements : []);
   const legacyOfxMovements = savedAccounts
     .filter((item) => item.origin === "Importação OFX" || item.origin === "ImportaÃ§Ã£o OFX")
     .map((item) => bankMovementFromAccount(item));
@@ -3346,7 +3346,7 @@ function renderPlans() {
     .filter((item) => typeFilter === "all" || planTypeLabel(item.type) === planTypeLabel(typeFilter))
     .filter((item) => sessionsFilter === "all" || Number(item.sessions || 0) === Number(sessionsFilter))
     .filter((item) => normalizedText([item.name, modalityName(item.modalityId), chartAccountName(item.chartAccountId), item.type, item.status, item.notes].join(" ")).includes(term))
-    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    .sort((a, b) => normalizedText(a.name).localeCompare(normalizedText(b.name), "pt-BR", { sensitivity: "base" }));
 
   table.innerHTML = list.length
     ?list
