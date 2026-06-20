@@ -750,8 +750,8 @@ const modalSchemas = {
     fields: [
       { name: "studentId", label: "Aluno/Paciente", type: "student" },
       { name: "modalityId", label: "Modalidade", type: "modalityId" },
+      { name: "planType", label: "Tipo de plano", type: "select", options: ["", "Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "" },
       { name: "planId", label: "Plano", type: "planId" },
-      { name: "planType", label: "Tipo de plano", type: "select", options: ["Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "Mensal" },
       { name: "professionalId", label: "Profissional", type: "professionalOptional" },
       { name: "startDate", label: "Data da matrícula", type: "date", value: demoToday },
       { name: "endDate", label: "Data final", type: "date", value: "2026-12-31" },
@@ -5958,11 +5958,13 @@ function updateEnrollmentPlanOptions(form) {
   const planSelect = form.elements.planId;
   if (!planSelect) return;
   const modalityId = form.elements.modalityId?.value || "";
+  const planType = form.elements.planType?.value || "";
   const selected = planSelect.value;
-  const plans = plansForModality(modalityId);
+  let plans = plansForModality(modalityId);
+  if (planType) plans = plans.filter((item) => planTypeLabel(item.type) === planTypeLabel(planType));
   planSelect.innerHTML = plans.length
     ? plans.map((item) => `<option value="${item.id}">${escapeHtml(displayName(item.name))}</option>`).join("")
-    : `<option value="">Nenhum plano vinculado</option>`;
+    : `<option value="">Nenhum plano para este tipo</option>`;
   planSelect.value = plans.some((item) => item.id === selected) ? selected : plans[0]?.id || "";
 }
 
@@ -6452,12 +6454,12 @@ document.querySelector("#modalForm").addEventListener("input", (event) => {
 
 document.querySelector("#modalForm").addEventListener("change", (event) => {
   const form = event.currentTarget;
-  if (form.dataset.type === "enrollment" && event.target.name === "modalityId") {
+  if (form.dataset.type === "enrollment" && ["modalityId", "planType"].includes(event.target.name)) {
     updateEnrollmentPlanOptions(form);
     applyEnrollmentPlanDefaults(form, true);
     return;
   }
-  if (form.dataset.type === "enrollment" && ["planId", "startDate", "planType"].includes(event.target.name)) {
+  if (form.dataset.type === "enrollment" && ["planId", "startDate"].includes(event.target.name)) {
     applyEnrollmentPlanDefaults(form, true);
     return;
   }
