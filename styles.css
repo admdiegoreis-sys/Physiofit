@@ -1044,7 +1044,21 @@ button {
   overflow: hidden;
   color: #fff;
   font-weight: 700;
+  position: relative;
 }
+.cal-event-delete {
+  position: absolute;
+  top: 3px; right: 3px;
+  width: 18px; height: 18px;
+  background: rgba(0,0,0,0.35);
+  border: none; border-radius: 50%;
+  color: #fff; font-size: 13px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .15s;
+  padding: 0;
+}
+.calendar-event:hover .cal-event-delete { opacity: 1; }
+.cal-event-delete:hover { background: rgba(180,0,0,0.7); }
 
 .calendar-event {
   background: #373ee6;
@@ -5831,7 +5845,7 @@ td.row-actions .row-action-button {
 .sv-label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; font-weight: 600; color: var(--muted); }
 .sv-label input, .sv-label select { font-size: 0.9rem; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; width: 100%; box-sizing: border-box; }
 .sv-label:first-child { grid-column: 1 / -1; }
-.sv-availability { background: #f8fafc; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+.sv-availability { background: #f8fafc; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; max-height: 220px; overflow-y: auto; }
 .sv-avail-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 8px; }
 .sv-free { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #15803d; font-weight: 600; padding: 6px 0; }
 .sv-free-icon { font-size: 1.1rem; }

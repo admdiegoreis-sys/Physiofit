@@ -3192,6 +3192,7 @@ function renderCalendarEvent(item) {
       <span>${item.time} - ${item.endTime}</span>
       <strong>${studentName(item.studentId).toUpperCase()}</strong>
       <small>${professionalName(item.teacherId)} · ${relatedStudent?.plan ?? item.sessionKind}</small>
+      <button class="cal-event-delete" data-action="delete-appointment" data-id="${item.id}" type="button" title="Excluir agendamento" aria-label="Excluir agendamento">×</button>
     </article>
   `;
 }
@@ -6398,6 +6399,15 @@ document.addEventListener("click", (event) => {
   const scheduleAction = event.target.closest("[data-action]");
   if (scheduleAction) {
     const appointment = state.appointments.find((item) => item.id === scheduleAction.dataset.id);
+    if (scheduleAction.dataset.action === "delete-appointment" && appointment) {
+      if (!confirm(`Excluir agendamento de ${studentName(appointment.studentId)} em ${dateLabel(appointment.date)} às ${appointment.time}?`)) return;
+      rememberDeletedEntities("appointments", appointment.id);
+      state.appointments = state.appointments.filter((a) => a.id !== appointment.id);
+      saveState();
+      renderSchedule();
+      toast("Agendamento excluído.");
+      return;
+    }
     if (scheduleAction.dataset.action === "reschedule" && appointment) {
       openAppointmentModal(appointment.id);
       return;
