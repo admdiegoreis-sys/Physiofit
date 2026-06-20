@@ -483,6 +483,7 @@ let editingChartAccountId = null;
 let editingEnrollmentId = null;
 let editingAppointmentId = null;
 let editingLeadId = null;
+let _pendingEnrollLeadId = null;
 let editingAccountId = null;
 let settlingAccountId = null;
 let editingContractId = null;
@@ -792,11 +793,24 @@ const modalSchemas = {
         dueDay: Number(values.dueDay || 0),
         registrationFee: Number(values.registrationFee || 0),
         sessions: Number(values.sessions || weeklySessionsFromPlan(plan) || 0),
+        leadId: _pendingEnrollLeadId || (editingEnrollmentId ? state.enrollments.find((e) => e.id === editingEnrollmentId)?.leadId : "") || "",
       }, state.enrollments.length);
       if (editingEnrollmentId) {
         state.enrollments = state.enrollments.map((item) => (item.id === editingEnrollmentId ? normalized : item));
       } else {
         state.enrollments.push(normalized);
+      }
+      if (!editingEnrollmentId && _pendingEnrollLeadId) {
+        state.leads = state.leads.map((lead) => {
+          if (lead.id !== _pendingEnrollLeadId) return lead;
+          return {
+            ...lead,
+            status: "Matriculado",
+            linkedEnrollmentId: enrollmentId,
+            history: `${lead.history || ""}\nMatriculado em ${dateLabel(demoToday)}.`.trim(),
+          };
+        });
+        _pendingEnrollLeadId = null;
       }
       ensureEnrollmentFinancialTitles(normalized);
       ensureEnrollmentAppointments(normalized);
@@ -3094,22 +3108,17 @@ function convertLead(leadId) {
       phone: lead.phone,
       plan: lead.interest,
       status: "Ativo",
-      membership: "Matriculado",
+      membership: "Ativo",
       origin: lead.origin,
       registrationDate: demoToday,
       commercialNotes: lead.notes,
     }, state.students.length);
     state.students.push(student);
-  } else {
-    student.status = "Ativo";
-    student.membership = "Matriculado";
-    student.plan = lead.interest;
   }
-  lead.status = "Matriculado";
   lead.linkedStudentId = student.id;
-  lead.history = `${lead.history || ""}\nLead convertido em paciente em ${dateLabel(demoToday)}.`.trim();
   saveState();
   render();
+  _pendingEnrollLeadId = leadId;
   switchView("enrollments");
   editingEnrollmentId = null;
   openModal("enrollment", { studentId: student.id });
@@ -6152,6 +6161,7 @@ function closeModal() {
   editingLeadId = null;
   editingAccountId = null;
   settlingAccountId = null;
+  _pendingEnrollLeadId = null;
   document.querySelector("#modalBackdrop").hidden = true;
 }
 
