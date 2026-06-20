@@ -6465,7 +6465,19 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
   schema.handler(values);
   saveState();
   closeModal();
+  const savedLeadId = form.dataset.type === "lead" ? editingLeadId : null;
   render();
+  if (savedLeadId) {
+    const savedLead = state.leads.find((l) => l.id === savedLeadId);
+    if (savedLead?.visitDate && savedLead?.linkedAppointmentId) {
+      const apptDate = parseLocalDate(savedLead.visitDate);
+      const dow = apptDate.getDay();
+      currentWeekStart = addDays(apptDate, dow === 0 ? -6 : 1 - dow);
+      switchView("schedule");
+      toast("Lead salvo. Exibindo semana do agendamento.");
+      return;
+    }
+  }
   toast(form.dataset.type === "accountSettlement" ? "Baixa registrada com sucesso." : "Cadastro salvo com sucesso.");
 });
 
