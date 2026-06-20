@@ -6558,6 +6558,19 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
       return;
     }
   }
+  if (form.dataset.type === "student" && !editingStudentId) {
+    const cpfVal = form.elements.cpf?.value?.trim().replace(/\D/g, "");
+    if (cpfVal) {
+      const duplicate = state.students.find((s) => s.cpf && s.cpf.replace(/\D/g, "") === cpfVal);
+      if (duplicate) {
+        const cpfField = form.elements.cpf;
+        cpfField.setCustomValidity(`CPF já cadastrado para o aluno "${duplicate.name}".`);
+        cpfField.reportValidity();
+        cpfField.setCustomValidity("");
+        return;
+      }
+    }
+  }
   const schema = modalSchemas[form.dataset.type];
   const values = Object.fromEntries(new FormData(form).entries());
   form.querySelectorAll("[data-student-search]").forEach((input) => {
