@@ -978,39 +978,62 @@ function loadState() {
   }
 }
 
+function deletedEntityKey(collection, id) {
+  return id ? `${collection}:${id}` : "";
+}
+
+function deletedEntityKeys(collection, ids) {
+  return ids.map((id) => deletedEntityKey(collection, id)).filter(Boolean);
+}
+
+function isDeletedEntity(data, collection, id) {
+  return Array.isArray(data.deletedEntityIds) && data.deletedEntityIds.includes(deletedEntityKey(collection, id));
+}
+
+function rememberDeletedEntities(collection, ids) {
+  const keys = deletedEntityKeys(collection, Array.isArray(ids) ? ids : [ids]);
+  if (!keys.length) return;
+  state.deletedEntityIds = [...new Set([...(state.deletedEntityIds || []), ...keys])];
+}
+
+function filterDeletedEntities(data, collection, items) {
+  return items.filter((item) => !isDeletedEntity(data, collection, item.id));
+}
+
 function normalizeState(data) {
   const normalized = {
     ...structuredClone(seedData),
     ...data,
     blocks: Array.isArray(data.blocks) ? data.blocks : structuredClone(seedData.blocks),
   };
-  normalized.students = normalized.students.map((item, index) => normalizeStudent(normalizeTextFields(item), index));
-  normalized.leads = (Array.isArray(data.leads) ? data.leads : structuredClone(seedData.leads)).map((item, index) => normalizeLead(normalizeTextFields(item), index));
-  normalized.professionals = (Array.isArray(data.professionals) ? data.professionals : structuredClone(seedData.professionals)).map((item, index) => normalizeProfessional(normalizeTextFields(item), index));
+  normalized.deletedEntityIds = Array.isArray(data.deletedEntityIds) ? [...new Set(data.deletedEntityIds.filter(Boolean))] : [];
+  normalized.students = filterDeletedEntities(normalized, "students", normalized.students).map((item, index) => normalizeStudent(normalizeTextFields(item), index));
+  normalized.leads = filterDeletedEntities(normalized, "leads", Array.isArray(data.leads) ? data.leads : structuredClone(seedData.leads)).map((item, index) => normalizeLead(normalizeTextFields(item), index));
+  normalized.professionals = filterDeletedEntities(normalized, "professionals", Array.isArray(data.professionals) ? data.professionals : structuredClone(seedData.professionals)).map((item, index) => normalizeProfessional(normalizeTextFields(item), index));
   const savedSuppliers = Array.isArray(data.suppliers) ? data.suppliers : [];
   const savedSupplierKeys = new Set(savedSuppliers.map((item) => normalizedText(`${item.name ?? ""}-${item.document ?? ""}`)));
   const mergedSuppliers = savedSuppliers.length
-    ? [...savedSuppliers, ...seedData.suppliers.filter((item) => !savedSupplierKeys.has(normalizedText(`${item.name}-${item.document}`)))]
-    : structuredClone(seedData.suppliers);
+    ? [...savedSuppliers, ...filterDeletedEntities(normalized, "suppliers", seedData.suppliers).filter((item) => !savedSupplierKeys.has(normalizedText(`${item.name}-${item.document}`)))]
+    : filterDeletedEntities(normalized, "suppliers", structuredClone(seedData.suppliers));
   normalized.suppliers = mergedSuppliers.map((item, index) => normalizeSupplier(normalizeTextFields(item), index));
-  normalized.modalities = (Array.isArray(data.modalities) ? data.modalities : structuredClone(seedData.modalities)).map((item, index) => normalizeModality(normalizeTextFields(item), index));
+  normalized.modalities = filterDeletedEntities(normalized, "modalities", Array.isArray(data.modalities) ? data.modalities : structuredClone(seedData.modalities)).map((item, index) => normalizeModality(normalizeTextFields(item), index));
   const savedPlans = Array.isArray(data.plans) ? data.plans : [];
   const savedPlanNames = new Set(savedPlans.map((item) => normalizedText(item.name ?? "")));
   const mergedPlans = savedPlans.length
-    ? [...savedPlans, ...seedData.plans.filter((item) => !savedPlanNames.has(normalizedText(item.name)))]
-    : structuredClone(seedData.plans);
+    ? [...savedPlans, ...filterDeletedEntities(normalized, "plans", seedData.plans).filter((item) => !savedPlanNames.has(normalizedText(item.name)))]
+    : filterDeletedEntities(normalized, "plans", structuredClone(seedData.plans));
   normalized.plans = mergedPlans.map((item, index) => normalizePlan(normalizeTextFields(item), index));
   const savedEnrollments = Array.isArray(data.enrollments) ? data.enrollments : [];
   const savedEnrollmentKeys = new Set(savedEnrollments.map((item) => normalizedText(`${item.studentId ?? ""}-${item.planId ?? ""}-${item.startDate ?? ""}`)));
   const mergedEnrollments = savedEnrollments.length
-    ? [...savedEnrollments, ...seedData.enrollments.filter((item) => !savedEnrollmentKeys.has(normalizedText(`${item.studentId}-${item.planId}-${item.startDate}`)))]
-    : structuredClone(seedData.enrollments);
+    ? [...savedEnrollments, ...filterDeletedEntities(normalized, "enrollments", seedData.enrollments).filter((item) => !savedEnrollmentKeys.has(normalizedText(`${item.studentId}-${item.planId}-${item.startDate}`)))]
+    : filterDeletedEntities(normalized, "enrollments", structuredClone(seedData.enrollments));
   normalized.enrollments = mergedEnrollments.map((item, index) => normalizeEnrollment(normalizeTextFields(item), index));
   const savedChartAccounts = Array.isArray(data.chartAccounts) ? data.chartAccounts : [];
   const savedChartCodes = new Set(savedChartAccounts.map((item) => String(item.code ?? "")));
   const mergedChartAccounts = savedChartAccounts.length
-    ? [...savedChartAccounts, ...seedChartAccounts.filter((item) => !savedChartCodes.has(String(item.code)))]
-    : structuredClone(seedChartAccounts);
+    ? [...savedChartAccounts, ...filterDeletedEntities(normalized, "chartAccounts", seedChartAccounts).filter((item) => !savedChartCodes.has(String(item.code)))]
+    : filterDeletedEntities(normalized, "chartAccounts", structuredClone(seedChartAccounts));
   normalized.chartAccounts = mergedChartAccounts.map((item, index) => normalizeChartAccount(normalizeTextFields(item), index));
   normalized.plans = normalized.plans.map((item) => ({
     ...item,
@@ -1018,12 +1041,13 @@ function normalizeState(data) {
   }));
   const savedAccounts = Array.isArray(data.accounts) ? data.accounts : [];
   const savedAccountDescriptions = new Set(savedAccounts.map((item) => normalizedText(`${item.description ?? ""}-${item.person ?? ""}-${item.amount ?? ""}`)));
+  const availableSeedAccounts = filterDeletedEntities(normalized, "accounts", seedAccounts);
   const mergedAccounts = savedAccounts.length
     ? [
         ...savedAccounts,
-        ...(hasImportedAccounts ? [] : seedAccounts.filter((item) => !savedAccountDescriptions.has(normalizedText(`${item.description}-${item.person}-${item.amount}`)))),
+        ...(hasImportedAccounts ? [] : availableSeedAccounts.filter((item) => !savedAccountDescriptions.has(normalizedText(`${item.description}-${item.person}-${item.amount}`)))),
       ]
-    : structuredClone(seedAccounts);
+    : structuredClone(availableSeedAccounts);
   normalized.accounts = mergedAccounts.map((item, index) => normalizeAccount(normalizeTextFields(item), index));
   normalized.accounts = normalized.accounts.map((item) => ({
     ...item,
@@ -1043,18 +1067,19 @@ function normalizeState(data) {
     .filter((item) => item.origin === "Importação OFX" || item.origin === "ImportaÃ§Ã£o OFX")
     .map((item) => bankMovementFromAccount(item));
   const movementKeys = new Set(savedBankMovements.map((item) => item.ofxIdentifier || item.duplicateHash || item.id));
-  normalized.bankMovements = [...savedBankMovements, ...legacyOfxMovements.filter((item) => !movementKeys.has(item.ofxIdentifier || item.duplicateHash || item.id))]
+  normalized.bankMovements = filterDeletedEntities(normalized, "bankMovements", [...savedBankMovements, ...legacyOfxMovements.filter((item) => !movementKeys.has(item.ofxIdentifier || item.duplicateHash || item.id))])
     .map((item, index) => normalizeBankMovement(normalizeTextFields(item), index));
-  normalized.ofxBatches = (Array.isArray(data.ofxBatches) ? data.ofxBatches : []).map((item, index) => normalizeOfxBatch(normalizeTextFields(item), index));
-  normalized.ofxDrafts = (Array.isArray(data.ofxDrafts) ? data.ofxDrafts : []).map((item, index) => normalizeOfxDraft(normalizeTextFields(item), index));
+  normalized.ofxBatches = filterDeletedEntities(normalized, "ofxBatches", Array.isArray(data.ofxBatches) ? data.ofxBatches : []).map((item, index) => normalizeOfxBatch(normalizeTextFields(item), index));
+  normalized.ofxDrafts = filterDeletedEntities(normalized, "ofxDrafts", Array.isArray(data.ofxDrafts) ? data.ofxDrafts : []).map((item, index) => normalizeOfxDraft(normalizeTextFields(item), index));
   normalized.ofxRules = (Array.isArray(data.ofxRules) && data.ofxRules.length ? data.ofxRules : structuredClone(seedOfxRules)).map((item, index) => normalizeOfxRule(normalizeTextFields(item), index));
-  normalized.appointments = normalized.appointments.map((item) => normalizeTextFields(item));
-  normalized.blocks = normalized.blocks.map((item) => normalizeTextFields(item));
-  normalized.records = normalized.records.map((item) => normalizeTextFields(item));
-  normalized.fiscalInvoices = (Array.isArray(data.fiscalInvoices) ? data.fiscalInvoices : structuredClone(seedData.fiscalInvoices)).map((item, index) => normalizeFiscalInvoice(normalizeTextFields(item), index));
+  normalized.appointments = filterDeletedEntities(normalized, "appointments", normalized.appointments).map((item) => normalizeTextFields(item));
+  normalized.blocks = filterDeletedEntities(normalized, "blocks", normalized.blocks).map((item) => normalizeTextFields(item));
+  normalized.payments = filterDeletedEntities(normalized, "payments", Array.isArray(data.payments) ? data.payments : structuredClone(seedData.payments)).map((item) => normalizeTextFields(item));
+  normalized.records = filterDeletedEntities(normalized, "records", normalized.records).map((item) => normalizeTextFields(item));
+  normalized.fiscalInvoices = filterDeletedEntities(normalized, "fiscalInvoices", Array.isArray(data.fiscalInvoices) ? data.fiscalInvoices : structuredClone(seedData.fiscalInvoices)).map((item, index) => normalizeFiscalInvoice(normalizeTextFields(item), index));
   normalized.appointments = normalized.appointments.map((item) => normalizeAppointmentTeacher(item));
   normalized.blocks = normalized.blocks.map((item) => normalizeAppointmentTeacher(item));
-  normalized.contracts = Array.isArray(data.contracts) ? data.contracts : structuredClone(seedData.contracts);
+  normalized.contracts = filterDeletedEntities(normalized, "contracts", Array.isArray(data.contracts) ? data.contracts : structuredClone(seedData.contracts));
   return normalized;
 }
 
@@ -1524,8 +1549,12 @@ function fixPortugueseText(value) {
   return normalized;
 }
 
-function saveState() {
+function saveState(options = {}) {
   localStorage.setItem(storageKey, JSON.stringify(state));
+  if (options.immediate) {
+    persistRemoteStateNow();
+    return;
+  }
   queueRemoteStateSave();
 }
 
@@ -1537,6 +1566,20 @@ function queueRemoteStateSave() {
     const { error } = await window.PhysiofitData.saveState(state);
     if (error) console.warn("Não foi possível sincronizar com o Neon.", error);
   }, 600);
+}
+
+async function persistRemoteStateNow() {
+  if (!remoteStateReady || applyingRemoteState || !window.PhysiofitData?.saveState) return;
+  window.clearTimeout(remoteSaveTimer);
+  const { error } = await window.PhysiofitData.saveState(state);
+  if (error) {
+    console.warn("NÃ£o foi possÃ­vel sincronizar com o Neon.", error);
+    queueRemoteStateSave();
+  }
+}
+
+function saveDeletedState() {
+  saveState({ immediate: true });
 }
 
 async function hydrateStateFromNeon() {
@@ -1848,6 +1891,7 @@ function syncPlanChartAccountToFinancialTitles(planId = "", chartAccountId = "")
 
 function ensureEnrollmentAppointments(enrollment) {
   if (!enrollment?.id) return;
+  rememberDeletedEntities("appointments", state.appointments.filter((item) => item.enrollmentId === enrollment.id).map((item) => item.id));
   state.appointments = state.appointments.filter((item) => item.enrollmentId !== enrollment.id);
   if (enrollment.status === "Cancelada") return;
   const dayFields = [
@@ -2898,8 +2942,9 @@ function convertLead(leadId) {
 }
 
 function deleteLead(leadId) {
+  rememberDeletedEntities("leads", leadId);
   state.leads = state.leads.filter((item) => item.id !== leadId);
-  saveState();
+  saveDeletedState();
   renderCrm();
   toast("Lead excluído.");
 }
@@ -3815,12 +3860,15 @@ function contractStatus(contract) {
 
 function removeContractForecastTitles(contractId, onlyFuture = true) {
   const today = demoToday;
+  const removedIds = [];
   state.accounts = state.accounts.filter((acc) => {
     if (acc.contractId !== contractId) return true;
     if (acc.reconciliationStatus === "manual" || acc.paidDate) return true;
     if (onlyFuture && acc.forecastDate < today) return true;
+    removedIds.push(acc.id);
     return false;
   });
+  rememberDeletedEntities("accounts", removedIds);
 }
 
 function addMonthsToDate(dateStr, months) {
@@ -3918,8 +3966,9 @@ function deleteContract(id) {
   if (hasFuture) msg += "\n\nOs títulos de previsão futuros (não pagos) também serão removidos.";
   if (!confirm(msg)) return;
   removeContractForecastTitles(id, false);
+  rememberDeletedEntities("contracts", id);
   state.contracts = state.contracts.filter((c) => c.id !== id);
-  saveState();
+  saveDeletedState();
   render();
 }
 
@@ -4775,8 +4824,9 @@ function deleteAccount(accountId) {
       movement.updatedAt = new Date().toISOString();
     }
   }
+  rememberDeletedEntities("accounts", accountId);
   state.accounts = state.accounts.filter((account) => account.id !== accountId);
-  saveState();
+  saveDeletedState();
   render();
   toast("Título excluído.");
 }
@@ -4784,9 +4834,10 @@ function deleteAccount(accountId) {
 function deleteChartAccount(chartAccountId) {
   const item = state.chartAccounts.find((account) => account.id === chartAccountId);
   if (!item || !window.confirm(`Excluir a conta ${item.name}?`)) return;
+  rememberDeletedEntities("chartAccounts", chartAccountId);
   state.chartAccounts = state.chartAccounts.filter((account) => account.id !== chartAccountId);
   state.accounts = state.accounts.map((account) => (account.chartAccountId === chartAccountId ? { ...account, chartAccountId: "" } : account));
-  saveState();
+  saveDeletedState();
   render();
   toast("Conta contábil excluída.");
 }
@@ -5076,9 +5127,11 @@ function saveOfxRuleFromDraft(draftId) {
 function clearOfxImport() {
   const batch = currentOfxBatch();
   if (!batch || !window.confirm("Limpar a importação OFX temporária atual?")) return;
+  rememberDeletedEntities("ofxDrafts", state.ofxDrafts.filter((item) => item.importBatchId === batch.id).map((item) => item.id));
+  rememberDeletedEntities("ofxBatches", batch.id);
   state.ofxDrafts = state.ofxDrafts.filter((item) => item.importBatchId !== batch.id);
   state.ofxBatches = state.ofxBatches.filter((item) => item.id !== batch.id);
-  saveState();
+  saveDeletedState();
   render();
   toast("Importação OFX temporária limpa.");
 }
@@ -5086,11 +5139,15 @@ function clearOfxImport() {
 function deleteStudent(studentId) {
   const item = state.students.find((studentItem) => studentItem.id === studentId);
   if (!item || !window.confirm(`Excluir o paciente ${item.name}?`)) return;
+  rememberDeletedEntities("students", studentId);
+  rememberDeletedEntities("appointments", state.appointments.filter((appointment) => appointment.studentId === studentId).map((appointment) => appointment.id));
+  rememberDeletedEntities("payments", state.payments.filter((payment) => payment.studentId === studentId).map((payment) => payment.id));
+  rememberDeletedEntities("records", state.records.filter((record) => record.studentId === studentId).map((record) => record.id));
   state.students = state.students.filter((studentItem) => studentItem.id !== studentId);
   state.appointments = state.appointments.filter((appointment) => appointment.studentId !== studentId);
   state.payments = state.payments.filter((payment) => payment.studentId !== studentId);
   state.records = state.records.filter((record) => record.studentId !== studentId);
-  saveState();
+  saveDeletedState();
   render();
   toast("Paciente excluído.");
 }
@@ -5098,10 +5155,13 @@ function deleteStudent(studentId) {
 function deleteProfessional(professionalId) {
   const item = state.professionals.find((professionalItem) => professionalItem.id === professionalId);
   if (!item || !window.confirm(`Excluir o profissional ${item.name}?`)) return;
+  rememberDeletedEntities("professionals", professionalId);
+  rememberDeletedEntities("appointments", state.appointments.filter((appointment) => appointment.teacherId === professionalId).map((appointment) => appointment.id));
+  rememberDeletedEntities("blocks", (state.blocks ?? []).filter((block) => block.teacherId === professionalId).map((block) => block.id));
   state.professionals = state.professionals.filter((professionalItem) => professionalItem.id !== professionalId);
   state.appointments = state.appointments.filter((appointment) => appointment.teacherId !== professionalId);
   state.blocks = (state.blocks ?? []).filter((block) => block.teacherId !== professionalId);
-  saveState();
+  saveDeletedState();
   render();
   toast("Profissional excluído.");
 }
@@ -5109,9 +5169,10 @@ function deleteProfessional(professionalId) {
 function deleteSupplier(supplierId) {
   const item = state.suppliers.find((supplierItem) => supplierItem.id === supplierId);
   if (!item || !window.confirm(`Excluir o fornecedor ${item.name}?`)) return;
+  rememberDeletedEntities("suppliers", supplierId);
   state.suppliers = state.suppliers.filter((supplierItem) => supplierItem.id !== supplierId);
   state.accounts = state.accounts.map((account) => (account.supplierId === supplierId ?{ ...account, supplierId: "" } : account));
-  saveState();
+  saveDeletedState();
   render();
   toast("Fornecedor excluído.");
 }
@@ -5119,9 +5180,10 @@ function deleteSupplier(supplierId) {
 function deleteModality(modalityId) {
   const item = state.modalities.find((modalityItem) => modalityItem.id === modalityId);
   if (!item || !window.confirm(`Excluir a modalidade ${item.name}?`)) return;
+  rememberDeletedEntities("modalities", modalityId);
   state.modalities = state.modalities.filter((modalityItem) => modalityItem.id !== modalityId);
   state.plans = state.plans.map((plan) => (plan.modalityId === modalityId ?{ ...plan, modalityId: "" } : plan));
-  saveState();
+  saveDeletedState();
   render();
   toast("Modalidade excluída.");
 }
@@ -5129,8 +5191,9 @@ function deleteModality(modalityId) {
 function deletePlan(planId) {
   const item = state.plans.find((planItem) => planItem.id === planId);
   if (!item || !window.confirm(`Excluir o plano ${item.name}?`)) return;
+  rememberDeletedEntities("plans", planId);
   state.plans = state.plans.filter((planItem) => planItem.id !== planId);
-  saveState();
+  saveDeletedState();
   render();
   toast("Plano excluído.");
 }
@@ -5138,9 +5201,11 @@ function deletePlan(planId) {
 function deleteEnrollment(enrollmentId) {
   const item = state.enrollments.find((enrollment) => enrollment.id === enrollmentId);
   if (!item || !window.confirm(`Excluir a matrícula de ${studentName(item.studentId)}?`)) return;
+  rememberDeletedEntities("enrollments", enrollmentId);
+  rememberDeletedEntities("appointments", state.appointments.filter((appointment) => appointment.enrollmentId === enrollmentId).map((appointment) => appointment.id));
   state.enrollments = state.enrollments.filter((enrollment) => enrollment.id !== enrollmentId);
   state.appointments = state.appointments.filter((appointment) => appointment.enrollmentId !== enrollmentId);
-  saveState();
+  saveDeletedState();
   render();
   toast("Matrícula excluída.");
 }
