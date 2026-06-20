@@ -752,7 +752,8 @@ const modalSchemas = {
       { name: "modalityId", label: "Modalidade", type: "modalityId" },
       { name: "planType", label: "Tipo de plano", type: "select", options: ["", "Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "" },
       { name: "planId", label: "Plano", type: "planId" },
-      { name: "professionalId", label: "Profissional", type: "professionalOptional" },
+      { name: "professionalId", label: "Profissional", type: "professional" },
+      { name: "room", label: "Sala", type: "roomOptional", value: "" },
       { name: "startDate", label: "Data da matrícula", type: "date", value: demoToday },
       { name: "endDate", label: "Data final", type: "date", value: "2026-12-31" },
       { name: "dueDay", label: "Dia do vencimento", type: "number", value: 10 },
@@ -763,7 +764,6 @@ const modalSchemas = {
       { name: "monthlyValue", label: "Valor da mensalidade", type: "number", value: 0 },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Dinheiro", "Transferência"], value: "Pix" },
       { name: "autoRenew", label: "Renovação automática", type: "select", options: ["Sim", "Não"], value: "Sim" },
-      { name: "room", label: "Sala", type: "roomOptional", value: "", required: false },
       { name: "freeSchedule", label: "Horário livre", type: "select", options: ["Não", "Sim"], value: "Não" },
       { name: "sessions", label: "Sessões por semana", type: "number", value: 1 },
       { name: "mondayTime", label: "Segunda-feira", type: "time", value: "", required: false },
@@ -6434,6 +6434,19 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
   if (invalidLookup) {
     invalidLookup.reportValidity();
     return;
+  }
+  if (form.dataset.type === "enrollment" && form.elements.freeSchedule?.value !== "Sim") {
+    const dayFields = ["mondayTime", "tuesdayTime", "wednesdayTime", "thursdayTime", "fridayTime"];
+    const hasTime = dayFields.some((name) => form.elements[name]?.value);
+    if (!hasTime) {
+      const firstDay = form.elements.mondayTime;
+      if (firstDay) {
+        firstDay.setCustomValidity("Informe pelo menos um horário de sessão.");
+        firstDay.reportValidity();
+        firstDay.setCustomValidity("");
+      }
+      return;
+    }
   }
   const schema = modalSchemas[form.dataset.type];
   const values = Object.fromEntries(new FormData(form).entries());
