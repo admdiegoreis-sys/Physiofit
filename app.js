@@ -626,7 +626,7 @@ const modalSchemas = {
       { name: "room", label: "Sala", type: "roomOptional", value: "", required: false },
       { name: "type", label: "Modalidade", type: "modality" },
       { name: "sessionKind", label: "Tipo de sessão", type: "select", options: ["Mensalidade", "Experimental", "Avulso"] },
-      { name: "status", label: "Status", type: "select", options: ["Agendada", "Confirmada", "Aguardando", "Compareceu", "Faltou", "Cancelada", "Reposta"] },
+      { name: "status", label: "Status", type: "select", options: ["Agendada", "Confirmada", "Aguardando", "Visita realizada", "Faltou", "Cancelada", "Reposta"] },
       { name: "notes", label: "Observação", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
@@ -2697,7 +2697,7 @@ function renderDashboard() {
   const weekAppointments = state.appointments.filter((item) => weekDays().some((day) => isoDate(day) === item.date));
   const weeklyCapacity = Math.max(1, activeProfessionals().reduce((sum, item) => sum + Number(item.maxPatients || 0), 0) * 5);
   const occupancyRate = Math.min(100, Math.round((weekAppointments.length / weeklyCapacity) * 100));
-  const confirmedRate = todayClasses.length ?Math.round((todayClasses.filter((item) => ["Confirmada", "Concluída", "Compareceu"].includes(item.status)).length / todayClasses.length) * 100) : 0;
+  const confirmedRate = todayClasses.length ?Math.round((todayClasses.filter((item) => ["Confirmada", "Concluída", "Visita realizada"].includes(item.status)).length / todayClasses.length) * 100) : 0;
   const atRisk = state.students.filter((item) => item.status === "Inativo" || item.membership === "Matr. Cancel.").length;
   const financialTitles = state.accounts.filter((item) => item.origin !== "Importação OFX" && item.origin !== "ImportaÃ§Ã£o OFX" && item.status !== "Cancelado");
   const receivableOverdue = financialTitles.filter((item) => item.direction === "Receber" && isAccountOverdue(item)).reduce((sum, item) => sum + accountOpenAmount(item), 0);
@@ -2740,7 +2740,7 @@ function renderDashboard() {
   const monthlyConfirmedTrend = dashboardMonths.map((month) => {
     const monthClasses = state.appointments.filter((item) => monthKey(item.date) === month);
     if (!monthClasses.length) return 0;
-    return Math.round((monthClasses.filter((item) => ["Confirmada", "Concluída", "Compareceu"].includes(item.status)).length / monthClasses.length) * 100);
+    return Math.round((monthClasses.filter((item) => ["Confirmada", "Concluída", "Visita realizada"].includes(item.status)).length / monthClasses.length) * 100);
   });
   setMetricTrend("#activeStudentsTrend", softTrend(activeStudentTotal, dashboardMonths, 0.035), "#0f9692");
   setMetricTrend("#todayClassesTrend", monthlyClassesTrend, "#48b962");
@@ -5767,7 +5767,7 @@ function renderRecords() {
         .join("")
     : `<div class="empty-state">Nenhum registro clínico cadastrado.</div>`;
 
-  const checkins = state.appointments.filter((item) => item.status === "Concluída" || item.status === "Compareceu").sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));
+  const checkins = state.appointments.filter((item) => item.status === "Concluída" || item.status === "Visita realizada").sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));
   const missed = state.appointments.filter((item) => item.status === "Faltou");
   const canceled = state.appointments.filter((item) => item.status === "Cancelada");
   const credits = state.students.reduce((sum, item) => sum + replacementBalance(item.id), 0);
@@ -5800,7 +5800,7 @@ function renderRecords() {
       const studentMissed = studentAppointments.filter((item) => item.status === "Faltou").length;
       const studentCanceled = studentAppointments.filter((item) => item.status === "Cancelada").length;
       const lastPresence = studentAppointments
-        .filter((item) => item.status === "Concluída" || item.status === "Compareceu")
+        .filter((item) => item.status === "Concluída" || item.status === "Visita realizada")
         .sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`))[0]?.date || studentItem.lastPresence || "";
       const creditBalance = replacementBalance(studentItem.id);
       const risk = studentMissed >= 2 || creditBalance >= 3 ? "Alto" : studentMissed || creditBalance ? "Médio" : "Baixo";
@@ -6486,7 +6486,7 @@ document.addEventListener("click", (event) => {
     }
     if (scheduleAction.dataset.action === "confirm" && appointment) appointment.status = "Confirmada";
     if (scheduleAction.dataset.action === "complete" && appointment) {
-      appointment.status = "Compareceu";
+      appointment.status = "Visita realizada";
       const relatedStudent = state.students.find((item) => item.id === appointment.studentId);
       if (relatedStudent) relatedStudent.lastPresence = appointment.date;
       state.leads = state.leads.map((lead) =>
