@@ -473,7 +473,7 @@ let remoteSaveTimer = null;
 let authSession = window.PhysiofitData?.session || null;
 let activePaymentFilter = "all";
 let agendaMode = "week";
-let currentWeekStart = parseLocalDate(demoToday);
+let currentWeekStart = toMonday(parseLocalDate(demoToday));
 let editingStudentId = null;
 let editingProfessionalId = null;
 let editingModalityId = null;
@@ -1689,6 +1689,18 @@ function isoDate(date) {
 
 function dateValue(value) {
   return value ? parseLocalDate(value).getTime() : Number.MAX_SAFE_INTEGER;
+}
+
+function isWeekend(date) {
+  const dow = date.getDay();
+  return dow === 0 || dow === 6;
+}
+
+function toMonday(date) {
+  const dow = date.getDay();
+  if (dow === 0) return addDays(date, 1);  // Dom → próxima Seg
+  if (dow === 6) return addDays(date, 2);  // Sáb → próxima Seg
+  return addDays(date, 1 - dow);           // qualquer dia útil → Seg da semana
 }
 
 function weekDays() {
@@ -3058,9 +3070,7 @@ function saveScheduleVisit() {
   _svLeadId = null;
 
   // Set week BEFORE render so renderSchedule() uses the correct week
-  const apptDate = parseLocalDate(date);
-  const dow = apptDate.getDay();
-  currentWeekStart = addDays(apptDate, dow === 0 ? -6 : 1 - dow);
+  currentWeekStart = toMonday(parseLocalDate(date));
 
   saveState();
   render();
@@ -6471,22 +6481,30 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
       return;
     }
   }
+  if (["appointment", "block"].includes(form.dataset.type)) {
+    const dateVal = form.elements.date?.value;
+    if (dateVal && isWeekend(parseLocalDate(dateVal))) {
+      const dateField = form.elements.date;
+      dateField.setCustomValidity("Não é permitido agendar em finais de semana (sábado ou domingo).");
+      dateField.reportValidity();
+      dateField.setCustomValidity("");
+      return;
+    }
+  }
   const schema = modalSchemas[form.dataset.type];
   const values = Object.fromEntries(new FormData(form).entries());
   form.querySelectorAll("[data-student-search]").forEach((input) => {
     delete values[`${input.dataset.studentTarget}Search`];
   });
+  const savedLeadId = form.dataset.type === "lead" ? editingLeadId : null;
   schema.handler(values);
   saveState();
   closeModal();
-  const savedLeadId = form.dataset.type === "lead" ? editingLeadId : null;
   render();
   if (savedLeadId) {
     const savedLead = state.leads.find((l) => l.id === savedLeadId);
     if (savedLead?.visitDate && savedLead?.linkedAppointmentId) {
-      const apptDate = parseLocalDate(savedLead.visitDate);
-      const dow = apptDate.getDay();
-      currentWeekStart = addDays(apptDate, dow === 0 ? -6 : 1 - dow);
+      currentWeekStart = toMonday(parseLocalDate(savedLead.visitDate));
       switchView("agenda");
       toast("Lead salvo. Exibindo semana do agendamento.");
       return;
@@ -6654,17 +6672,31 @@ document.querySelector("#leadSearchButton")?.addEventListener("click", renderCrm
 document.querySelector("#leadClearFiltersButton")?.addEventListener("click", clearCrmFilters);
 
 document.querySelector("#prevWeek").addEventListener("click", () => {
-  currentWeekStart = addDays(currentWeekStart, agendaMode === "day" ?-1 : -7);
+  if (agendaMode === "day") {
+    let prev = addDays(currentWeekStart, -1);
+    if (prev.getDay() === 0) prev = addDays(prev, -2); // Dom → Sex
+    else if (prev.getDay() === 6) prev = addDays(prev, -1); // Sáb → Sex
+    currentWeekStart = prev;
+  } else {
+    currentWeekStart = toMonday(addDays(currentWeekStart, -7));
+  }
   renderSchedule();
 });
 
 document.querySelector("#nextWeek").addEventListener("click", () => {
-  currentWeekStart = addDays(currentWeekStart, agendaMode === "day" ?1 : 7);
+  if (agendaMode === "day") {
+    let next = addDays(currentWeekStart, 1);
+    if (next.getDay() === 6) next = addDays(next, 2); // Sáb → Seg
+    else if (next.getDay() === 0) next = addDays(next, 1); // Dom → Seg
+    currentWeekStart = next;
+  } else {
+    currentWeekStart = toMonday(addDays(currentWeekStart, 7));
+  }
   renderSchedule();
 });
 
 document.querySelector("#todayButton").addEventListener("click", () => {
-  currentWeekStart = parseLocalDate(demoToday);
+  currentWeekStart = toMonday(parseLocalDate(demoToday));
   renderSchedule();
 });
 
