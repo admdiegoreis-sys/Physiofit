@@ -5841,3 +5841,6 @@ td.row-actions .row-action-button {
 .sv-other { font-size: 0.82rem; color: #475569; padding: 2px 0; }
 .sv-other-more { color: var(--muted); font-style: italic; }
 .sv-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+
+.lose-lead-button { color: #dc2626 !important; font-weight: 700; font-size: 1rem; border: 1px solid #fecaca !important; background: #fff5f5 !important; }
+.lose-lead-button:hover { background: #fee2e2 !important; border-color: #dc2626 !important; }

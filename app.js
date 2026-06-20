@@ -2853,6 +2853,7 @@ function renderCrm() {
                   <button class="row-action-button lead-action-button edit-icon-button" data-edit-lead="${lead.id}" type="button" title="Editar lead" aria-label="Editar lead"><span class="lead-action-icon lead-action-edit" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button edit-icon-button" data-schedule-lead="${lead.id}" type="button" title="Agendar visita" aria-label="Agendar visita"><span class="lead-action-icon lead-action-calendar" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button edit-icon-button" data-convert-lead="${lead.id}" type="button" title="Converter em aluno" aria-label="Converter em aluno"><span class="lead-action-icon lead-action-check" aria-hidden="true"></span></button>
+                  <button class="row-action-button lead-action-button lose-lead-button" data-lose-lead="${lead.id}" type="button" title="Marcar como perdido" aria-label="Marcar como perdido">✗</button>
                   <button class="row-action-button delete-icon-button" data-delete-lead="${lead.id}" type="button" title="Excluir lead" aria-label="Excluir lead">&times;</button>
                 </div>
               </td>
@@ -3039,6 +3040,33 @@ function saveScheduleVisit() {
   currentWeekStart = addDays(apptDate, toMonday);
   navigateTo("schedule");
   toast("Visita agendada! Redirecionando para a agenda.");
+}
+
+let _loseLeadId = null;
+
+function openLoseLeadOverlay(leadId) {
+  const lead = state.leads.find((item) => item.id === leadId);
+  if (!lead) return;
+  _loseLeadId = leadId;
+  document.querySelector("#loseLeadName").textContent = lead.name;
+  document.querySelector("#loseLeadReason").value = lead.lossReason || "";
+  document.querySelector("#loseLeadOverlay").hidden = false;
+  document.querySelector("#loseLeadReason").focus();
+}
+
+function saveLoseLead() {
+  const lead = state.leads.find((item) => item.id === _loseLeadId);
+  if (!lead) return;
+  const reason = document.querySelector("#loseLeadReason").value.trim();
+  if (!reason) { document.querySelector("#loseLeadReason").focus(); return; }
+  lead.status = "Perdido";
+  lead.lossReason = reason;
+  lead.history = `${lead.history || ""}\nMarcado como perdido em ${dateLabel(demoToday)}: ${reason}`.trim();
+  document.querySelector("#loseLeadOverlay").hidden = true;
+  _loseLeadId = null;
+  saveState();
+  renderCrm();
+  toast("Lead marcado como perdido.");
 }
 
 function convertLead(leadId) {
@@ -6253,6 +6281,9 @@ document.addEventListener("click", (event) => {
   const scheduleLeadButton = event.target.closest("[data-schedule-lead]");
   if (scheduleLeadButton) openScheduleVisitOverlay(scheduleLeadButton.dataset.scheduleLead);
 
+  const loseLeadButton = event.target.closest("[data-lose-lead]");
+  if (loseLeadButton) openLoseLeadOverlay(loseLeadButton.dataset.loseLead);
+
   const convertLeadButton = event.target.closest("[data-convert-lead]");
   if (convertLeadButton) convertLead(convertLeadButton.dataset.convertLead);
 
@@ -6775,6 +6806,19 @@ document.querySelector("#passwordOverlayForm")?.addEventListener("submit", async
 document.querySelector("#passwordOverlayCancel")?.addEventListener("click", closePasswordOverlay);
 document.querySelector("#passwordOverlay")?.addEventListener("click", (e) => {
   if (e.target === e.currentTarget) closePasswordOverlay();
+});
+
+// Lose Lead overlay
+document.querySelector("#loseLeadSave")?.addEventListener("click", saveLoseLead);
+document.querySelector("#loseLeadCancel")?.addEventListener("click", () => {
+  document.querySelector("#loseLeadOverlay").hidden = true;
+  _loseLeadId = null;
+});
+document.querySelector("#loseLeadOverlay")?.addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) { document.querySelector("#loseLeadOverlay").hidden = true; _loseLeadId = null; }
+});
+document.querySelector("#loseLeadReason")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveLoseLead(); }
 });
 
 // Schedule Visit overlay
