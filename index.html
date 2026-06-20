@@ -718,10 +718,12 @@
                 <select id="enrollmentPlanTypeFilter">
                   <option value="all">Tipo de plano</option>
                 </select>
-                <select id="enrollmentDateFilter">
-                  <option value="registration">Data de Matrícula</option>
-                  <option value="due">Data de Vencimento</option>
-                </select>
+                <div class="enrollment-date-range">
+                  <span class="enrollment-date-range-label">Data de Matrícula</span>
+                  <input type="date" id="enrollmentDateFrom" title="De" placeholder="De" />
+                  <span class="enrollment-date-range-sep">–</span>
+                  <input type="date" id="enrollmentDateTo" title="Até" placeholder="Até" />
+                </div>
                 <div class="patient-search-row">
                   <input id="enrollmentSearch" type="search" placeholder="Buscar por nome do aluno ou responsável" />
                   <button class="action-button blue" id="enrollmentSearchButton" type="button">Buscar</button>

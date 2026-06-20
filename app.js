@@ -3322,12 +3322,16 @@ function renderEnrollments() {
   const professionalFilter = document.querySelector("#enrollmentProfessionalFilter")?.value ?? "all";
   const roomFilter = document.querySelector("#enrollmentRoomFilter")?.value ?? "all";
   const typeFilter = document.querySelector("#enrollmentPlanTypeFilter")?.value ?? "all";
+  const dateFrom = document.querySelector("#enrollmentDateFrom")?.value ?? "";
+  const dateTo = document.querySelector("#enrollmentDateTo")?.value ?? "";
   const list = state.enrollments
     .filter((item) => statusFilter === "all" || (statusFilter === "activeAndExpired" ?["Ativa", "Vencida"].includes(item.status) : item.status === statusFilter))
     .filter((item) => modalityFilter === "all" || item.modalityId === modalityFilter)
     .filter((item) => professionalFilter === "all" || item.professionalId === professionalFilter)
     .filter((item) => roomFilter === "all" || item.room === roomFilter)
     .filter((item) => typeFilter === "all" || planTypeLabel(item.planType || planById(item.planId)?.type) === planTypeLabel(typeFilter))
+    .filter((item) => !dateFrom || (item.startDate && item.startDate >= dateFrom))
+    .filter((item) => !dateTo || (item.startDate && item.startDate <= dateTo))
     .filter((item) => {
       const student = studentName(item.studentId);
       const plan = planName(item.planId);
@@ -6605,7 +6609,10 @@ function clearEnrollmentFilters() {
   setControlValue("enrollmentRoomFilter", "all");
   setControlValue("enrollmentProfessionalFilter", "all");
   setControlValue("enrollmentPlanTypeFilter", "all");
-  setControlValue("enrollmentDateFilter", "registration");
+  const fromEl = document.querySelector("#enrollmentDateFrom");
+  const toEl = document.querySelector("#enrollmentDateTo");
+  if (fromEl) fromEl.value = "";
+  if (toEl) toEl.value = "";
   renderEnrollments();
 }
 
@@ -6767,10 +6774,12 @@ document.querySelector("#planEditorForm").addEventListener("change", (event) => 
   const form = event.currentTarget;
   if (form.elements.chartAccountId) form.elements.chartAccountId.value = revenueChartAccountForModality(event.target.value)?.id || form.elements.chartAccountId.value;
 });
-["enrollmentSearch", "enrollmentStatusFilter", "enrollmentModalityFilter", "enrollmentRoomFilter", "enrollmentProfessionalFilter", "enrollmentPlanTypeFilter", "enrollmentDateFilter"].forEach((id) => {
+["enrollmentSearch", "enrollmentStatusFilter", "enrollmentModalityFilter", "enrollmentRoomFilter", "enrollmentProfessionalFilter", "enrollmentPlanTypeFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderEnrollments);
   document.querySelector(`#${id}`)?.addEventListener("change", renderEnrollments);
 });
+document.querySelector("#enrollmentDateFrom")?.addEventListener("change", renderEnrollments);
+document.querySelector("#enrollmentDateTo")?.addEventListener("change", renderEnrollments);
 document.querySelector("#enrollmentSearchButton")?.addEventListener("click", renderEnrollments);
 document.querySelector("#enrollmentClearFiltersButton")?.addEventListener("click", clearEnrollmentFilters);
 ["monthlySearch", "monthlyPaidFilter", "monthlyMembershipFilter", "monthlyModalityFilter", "monthlyInvoiceFilter", "monthlyReceiptFilter", "monthlyTeacherFilter", "monthlyExternalFilter", "monthlyPeriodFilter", "monthlyPeriodEndFilter"].forEach((id) => {

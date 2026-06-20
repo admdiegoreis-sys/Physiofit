@@ -1897,11 +1897,46 @@ button {
 }
 
 .enrollment-toolbar {
-  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  grid-template-columns: repeat(5, minmax(140px, 1fr)) auto;
 }
 
 .enrollment-toolbar .patient-search-row {
   grid-column: 1 / -1;
+}
+
+.enrollment-date-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #cfd5de;
+  border-radius: 5px;
+  background: #fff;
+  padding: 0 10px;
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.enrollment-date-range-label {
+  font-size: 0.82rem;
+  color: #535b66;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.enrollment-date-range-sep {
+  color: #9aa3af;
+  font-size: 0.9rem;
+}
+
+.enrollment-date-range input[type="date"] {
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  color: #535b66;
+  padding: 0;
+  width: 130px;
+  outline: none;
+  min-height: unset;
 }
 
 .title-actions {
