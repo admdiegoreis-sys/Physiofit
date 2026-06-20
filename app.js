@@ -3057,14 +3057,13 @@ function saveScheduleVisit() {
   document.querySelector("#scheduleVisitOverlay").hidden = true;
   _svLeadId = null;
 
+  // Set week BEFORE render so renderSchedule() uses the correct week
+  const apptDate = parseLocalDate(date);
+  const dow = apptDate.getDay();
+  currentWeekStart = addDays(apptDate, dow === 0 ? -6 : 1 - dow);
+
   saveState();
   render();
-
-  // Navigate to agenda on the booked date
-  const apptDate = parseLocalDate(date);
-  const dow = apptDate.getDay(); // 0=Sun..6=Sat
-  const toMonday = dow === 0 ? -6 : 1 - dow;
-  currentWeekStart = addDays(apptDate, toMonday);
   switchView("schedule");
   toast("Visita agendada! Redirecionando para a agenda.");
 }
