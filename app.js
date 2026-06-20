@@ -6446,13 +6446,17 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
   }
   if (form.dataset.type === "enrollment" && form.elements.freeSchedule?.value !== "Sim") {
     const dayFields = ["mondayTime", "tuesdayTime", "wednesdayTime", "thursdayTime", "fridayTime"];
-    const hasTime = dayFields.some((name) => form.elements[name]?.value);
-    if (!hasTime) {
-      const firstDay = form.elements.mondayTime;
-      if (firstDay) {
-        firstDay.setCustomValidity("Informe pelo menos um horário de sessão.");
-        firstDay.reportValidity();
-        firstDay.setCustomValidity("");
+    const filledTimes = dayFields.filter((name) => form.elements[name]?.value);
+    const sessions = Number(form.elements.sessions?.value) || 0;
+    if (filledTimes.length !== sessions) {
+      const msg = sessions === 0
+        ? "Informe a quantidade de sessões por semana."
+        : `Sessões por semana é ${sessions}, mas ${filledTimes.length === 0 ? "nenhum horário foi" : `apenas ${filledTimes.length} horário(s) foi(foram)`} preenchido(s). Preencha exatamente ${sessions} dia(s).`;
+      const targetField = form.elements[dayFields.find((n) => !form.elements[n]?.value) || dayFields[0]];
+      if (targetField) {
+        targetField.setCustomValidity(msg);
+        targetField.reportValidity();
+        targetField.setCustomValidity("");
       }
       return;
     }
