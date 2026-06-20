@@ -2879,10 +2879,117 @@ function leadStatusClass(status) {
   return "aguardando";
 }
 
-function scheduleLead(leadId) {
+let _svLeadId = null;
+
+function openScheduleVisitOverlay(leadId) {
   const lead = state.leads.find((item) => item.id === leadId);
   if (!lead) return;
-  const student = state.students.find((item) => normalizedText(item.name) === normalizedText(lead.name));
+  _svLeadId = leadId;
+
+  const overlay = document.querySelector("#scheduleVisitOverlay");
+  if (!overlay) return;
+
+  // Populate lead name
+  document.querySelector("#svLeadName").textContent = lead.name + (lead.interest ? ` · ${lead.interest}` : "");
+
+  // Default date
+  document.querySelector("#svDate").value = lead.nextFollowUpDate || demoToday;
+
+  // Default times
+  document.querySelector("#svTime").value = "09:00";
+  document.querySelector("#svEndTime").value = "10:00";
+
+  // Populate professional select
+  const profSelect = document.querySelector("#svProfessional");
+  profSelect.innerHTML = activeProfessionals().map((p) => `<option value="${p.id}">${p.name}</option>`).join("");
+  const defaultProf = lead.ownerId && activeProfessionals().some((p) => p.id === lead.ownerId) ? lead.ownerId : activeProfessionals()[0]?.id || "";
+  profSelect.value = defaultProf;
+
+  // Hide availability until date is set
+  document.querySelector("#svAvailability").hidden = true;
+
+  overlay.hidden = false;
+  updateSvAvailability();
+}
+
+function updateSvAvailability() {
+  const date = document.querySelector("#svDate")?.value;
+  const timeStart = document.querySelector("#svTime")?.value || "00:00";
+  const timeEnd = document.querySelector("#svEndTime")?.value || "23:59";
+  const profId = document.querySelector("#svProfessional")?.value || "";
+  const room = document.querySelector("#svRoom")?.value || "";
+  const avDiv = document.querySelector("#svAvailability");
+  const listDiv = document.querySelector("#svConflictList");
+  if (!avDiv || !listDiv) return;
+
+  if (!date) { avDiv.hidden = true; return; }
+
+  // All appointments on this date
+  const dayAppts = state.appointments.filter((a) => a.date === date && a.status !== "Cancelada");
+
+  // Separate conflicts from free slots
+  const conflicts = dayAppts.filter((a) => {
+    const sameProf = a.teacherId === profId;
+    const sameRoom = room && a.room === room;
+    const overlaps = a.time < timeEnd && a.endTime > timeStart;
+    return (sameProf || sameRoom) && overlaps;
+  });
+
+  const othersSameDay = dayAppts.filter((a) => {
+    const sameProf = a.teacherId === profId;
+    const sameRoom = room && a.room === room;
+    const overlaps = a.time < timeEnd && a.endTime > timeStart;
+    return !((sameProf || sameRoom) && overlaps);
+  });
+
+  const studentName = (appt) => {
+    const s = state.students.find((st) => st.id === appt.studentId);
+    return s?.name || "Aluno";
+  };
+  const profName = (appt) => professionalName(appt.teacherId) || "—";
+
+  let html = "";
+
+  if (conflicts.length === 0) {
+    html += `<div class="sv-free"><span class="sv-free-icon">✓</span> Horário livre para ${profName({ teacherId: profId })} às ${timeStart}${room ? ` · ${room}` : ""}</div>`;
+  } else {
+    html += conflicts.map((a) => `
+      <div class="sv-conflict">
+        <span class="sv-conflict-icon">⚠</span>
+        <span><strong>${a.time}–${a.endTime}</strong> · ${studentName(a)} com ${profName(a)} · ${a.room}</span>
+      </div>`).join("");
+  }
+
+  if (othersSameDay.length) {
+    html += `<p class="sv-other-title">Outros agendamentos neste dia</p>`;
+    html += othersSameDay.slice(0, 6).map((a) => `
+      <div class="sv-other">
+        ${a.time}–${a.endTime} · ${studentName(a)} · ${profName(a)} · ${a.room}
+      </div>`).join("");
+    if (othersSameDay.length > 6) html += `<div class="sv-other sv-other-more">+${othersSameDay.length - 6} mais</div>`;
+  }
+
+  if (dayAppts.length === 0) {
+    html = `<div class="sv-free"><span class="sv-free-icon">✓</span> Nenhum agendamento neste dia — horário totalmente livre</div>`;
+  }
+
+  listDiv.innerHTML = html;
+  avDiv.hidden = false;
+}
+
+function saveScheduleVisit() {
+  const lead = state.leads.find((item) => item.id === _svLeadId);
+  if (!lead) return;
+
+  const date = document.querySelector("#svDate")?.value;
+  const time = document.querySelector("#svTime")?.value || "09:00";
+  const endTime = document.querySelector("#svEndTime")?.value || "10:00";
+  const profId = document.querySelector("#svProfessional")?.value || activeProfessionals()[0]?.id || "";
+  const room = document.querySelector("#svRoom")?.value || "Sala Reformer";
+
+  if (!date) { toast("Informe a data da visita."); return; }
+
+  let student = state.students.find((item) => normalizedText(item.name) === normalizedText(lead.name) || item.id === lead.linkedStudentId);
   const studentId = student?.id || uid("s");
   if (!student) {
     state.students.push(normalizeStudent({
@@ -2898,27 +3005,40 @@ function scheduleLead(leadId) {
       commercialNotes: lead.notes,
     }, state.students.length));
   }
+
   const appointment = {
     id: uid("a"),
-    date: lead.nextFollowUpDate || demoToday,
-    time: "09:00",
-    endTime: "10:00",
+    date,
+    time,
+    endTime,
     studentId,
-    teacherId: lead.ownerId || activeProfessionals()[0]?.id || "",
-    room: "Sala Reformer",
-    type: lead.interest === "Outro" ? "Pilates" : lead.interest,
+    teacherId: profId,
+    room,
+    type: lead.interest === "Outro" ? "Pilates" : (lead.interest || "Pilates"),
     status: "Aguardando",
     sessionKind: "Experimental",
   };
   state.appointments.push(appointment);
+
   lead.status = "Visita agendada";
-  lead.visitDate = appointment.date;
+  lead.visitDate = date;
   lead.linkedStudentId = studentId;
   lead.linkedAppointmentId = appointment.id;
-  lead.history = `${lead.history || ""}\nExperimental agendada para ${dateLabel(appointment.date)} às ${appointment.time}.`.trim();
+  lead.history = `${lead.history || ""}\nExperimental agendada para ${dateLabel(date)} às ${time}.`.trim();
+
+  document.querySelector("#scheduleVisitOverlay").hidden = true;
+  _svLeadId = null;
+
   saveState();
   render();
-  toast("Visita agendada a partir da Central de Leads.");
+
+  // Navigate to agenda on the booked date
+  const apptDate = parseLocalDate(date);
+  const dow = apptDate.getDay(); // 0=Sun..6=Sat
+  const toMonday = dow === 0 ? -6 : 1 - dow;
+  currentWeekStart = addDays(apptDate, toMonday);
+  navigateTo("schedule");
+  toast("Visita agendada! Redirecionando para a agenda.");
 }
 
 function convertLead(leadId) {
@@ -6131,7 +6251,7 @@ document.addEventListener("click", (event) => {
   if (deleteChartAccountButton) deleteChartAccount(deleteChartAccountButton.dataset.deleteChartAccount);
 
   const scheduleLeadButton = event.target.closest("[data-schedule-lead]");
-  if (scheduleLeadButton) scheduleLead(scheduleLeadButton.dataset.scheduleLead);
+  if (scheduleLeadButton) openScheduleVisitOverlay(scheduleLeadButton.dataset.scheduleLead);
 
   const convertLeadButton = event.target.closest("[data-convert-lead]");
   if (convertLeadButton) convertLead(convertLeadButton.dataset.convertLead);
@@ -6655,6 +6775,23 @@ document.querySelector("#passwordOverlayForm")?.addEventListener("submit", async
 document.querySelector("#passwordOverlayCancel")?.addEventListener("click", closePasswordOverlay);
 document.querySelector("#passwordOverlay")?.addEventListener("click", (e) => {
   if (e.target === e.currentTarget) closePasswordOverlay();
+});
+
+// Schedule Visit overlay
+["svDate", "svTime", "svEndTime", "svProfessional", "svRoom"].forEach((id) => {
+  document.querySelector(`#${id}`)?.addEventListener("change", updateSvAvailability);
+  document.querySelector(`#${id}`)?.addEventListener("input", updateSvAvailability);
+});
+document.querySelector("#svSave")?.addEventListener("click", saveScheduleVisit);
+document.querySelector("#svCancel")?.addEventListener("click", () => {
+  document.querySelector("#scheduleVisitOverlay").hidden = true;
+  _svLeadId = null;
+});
+document.querySelector("#scheduleVisitOverlay")?.addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) {
+    document.querySelector("#scheduleVisitOverlay").hidden = true;
+    _svLeadId = null;
+  }
 });
 
 document.querySelector("#copyPortalButton").addEventListener("click", async () => {

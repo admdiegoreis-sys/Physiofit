@@ -5823,3 +5823,21 @@ td.row-actions .row-action-button {
   align-self: center;
   white-space: nowrap;
 }
+
+/* ── Schedule Visit Overlay ─────────────────────────────── */
+.sv-card { max-width: 520px; }
+.sv-lead-name { font-weight: 600; color: var(--ink); margin: 0 0 14px; font-size: 0.95rem; }
+.sv-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-bottom: 14px; }
+.sv-label { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+.sv-label input, .sv-label select { font-size: 0.9rem; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; width: 100%; box-sizing: border-box; }
+.sv-label:first-child { grid-column: 1 / -1; }
+.sv-availability { background: #f8fafc; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+.sv-avail-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 8px; }
+.sv-free { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #15803d; font-weight: 600; padding: 6px 0; }
+.sv-free-icon { font-size: 1.1rem; }
+.sv-conflict { display: flex; align-items: flex-start; gap: 8px; font-size: 0.88rem; color: #b45309; padding: 4px 0; }
+.sv-conflict-icon { font-size: 1rem; margin-top: 1px; }
+.sv-other-title { font-size: 0.78rem; font-weight: 700; color: var(--muted); margin: 10px 0 4px; text-transform: uppercase; letter-spacing: .04em; }
+.sv-other { font-size: 0.82rem; color: #475569; padding: 2px 0; }
+.sv-other-more { color: var(--muted); font-style: italic; }
+.sv-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }

@@ -1726,6 +1726,50 @@
     </div>
 
     <!-- Password overlay (admin: set password for another user) -->
+    <!-- Schedule Visit overlay -->
+    <div id="scheduleVisitOverlay" class="pw-overlay" hidden>
+      <div class="pw-overlay-card sv-card">
+        <p class="eyebrow">Central de Leads</p>
+        <h3>Agendar Visita Experimental</h3>
+        <p id="svLeadName" class="sv-lead-name"></p>
+        <div class="sv-fields">
+          <label class="sv-label">
+            Data
+            <input type="date" id="svDate" />
+          </label>
+          <label class="sv-label">
+            Início
+            <input type="time" id="svTime" value="09:00" step="900" />
+          </label>
+          <label class="sv-label">
+            Fim
+            <input type="time" id="svEndTime" value="10:00" step="900" />
+          </label>
+          <label class="sv-label">
+            Profissional
+            <select id="svProfessional"></select>
+          </label>
+          <label class="sv-label">
+            Sala
+            <select id="svRoom">
+              <option>Sala Reformer</option>
+              <option>Sala Clínica</option>
+              <option>Sala 3</option>
+              <option>Todas as salas</option>
+            </select>
+          </label>
+        </div>
+        <div id="svAvailability" class="sv-availability" hidden>
+          <p class="sv-avail-title">Disponibilidade nesta data</p>
+          <div id="svConflictList" class="sv-conflict-list"></div>
+        </div>
+        <div class="sv-actions">
+          <button id="svCancel" class="ghost-button" type="button">Cancelar</button>
+          <button id="svSave" class="primary-button" type="button">Salvar e ir à Agenda</button>
+        </div>
+      </div>
+    </div>
+
     <div id="passwordOverlay" class="pw-overlay" hidden>
       <div class="pw-overlay-card">
         <p class="eyebrow">Redefinir senha</p>
