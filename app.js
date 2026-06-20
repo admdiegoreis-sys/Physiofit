@@ -3050,6 +3050,13 @@ function saveScheduleVisit() {
   const room = document.querySelector("#svRoom")?.value || "Sala Reformer";
 
   if (!date) { toast("Informe a data da visita."); return; }
+  if (isWeekend(parseLocalDate(date))) {
+    const dateEl = document.querySelector("#svDate");
+    dateEl.setCustomValidity("Não é permitido agendar visita em finais de semana (sábado ou domingo).");
+    dateEl.reportValidity();
+    dateEl.setCustomValidity("");
+    return;
+  }
 
   let student = state.students.find((item) => normalizedText(item.name) === normalizedText(lead.name) || item.id === lead.linkedStudentId);
   const studentId = student?.id || uid("s");
