@@ -576,8 +576,16 @@ const modalSchemas = {
     handler: (values) => {
       const current = editingLeadId ? state.leads.find((item) => item.id === editingLeadId) : {};
       const normalized = normalizeLead({ ...current, id: editingLeadId || uid("l"), ...values }, state.leads.length);
-      if (editingLeadId) state.leads = state.leads.map((item) => (item.id === editingLeadId ? normalized : item));
-      else state.leads.unshift(normalized);
+      if (editingLeadId) {
+        state.leads = state.leads.map((item) => (item.id === editingLeadId ? normalized : item));
+        if (normalized.linkedAppointmentId && normalized.visitDate) {
+          state.appointments = state.appointments.map((appt) =>
+            appt.id === normalized.linkedAppointmentId ? { ...appt, date: normalized.visitDate } : appt
+          );
+        }
+      } else {
+        state.leads.unshift(normalized);
+      }
     },
   },
   leadVisit: {
