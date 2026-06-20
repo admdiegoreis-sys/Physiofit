@@ -6058,7 +6058,7 @@ function renderField(field) {
     return `
       <label>${field.label}
         <select name="${field.name}" ${required}>
-          <option value="" ${isSelected("")}>Sem modalidade</option>
+          <option value="" ${isSelected("")}>${required ? "" : "Sem modalidade"}</option>
           ${options.map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.name}</option>`).join("")}
         </select>
       </label>
