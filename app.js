@@ -665,14 +665,41 @@ const modalSchemas = {
     title: "Novo aluno",
     submit: "Salvar aluno",
     fields: [
+      { name: "_h1", label: "Identificação", type: "heading" },
       { name: "name", label: "Nome completo", type: "text" },
-      { name: "email", label: "E-mail", type: "email" },
-      { name: "phone", label: "Telefone", type: "tel" },
-      { name: "cpf", label: "CPF", type: "text" },
-      { name: "birthDate", label: "Data de nascimento", type: "date" },
-      { name: "plan", label: "Plano", type: "plan" },
-      { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"] },
-      { name: "membership", label: "Matrícula", type: "select", options: ["Matriculado", "Matrículas", "Matr. Cancel.", "Avulsa"] },
+      { name: "cpf", label: "CPF", type: "text", required: false },
+      { name: "birthDate", label: "Data de nascimento", type: "date", required: false },
+      { name: "gender", label: "Sexo", type: "select", options: ["Feminino", "Masculino"], value: "Feminino", required: false },
+      { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"], value: "Ativo" },
+      { name: "profession", label: "Profissão", type: "text", value: "", required: false },
+      { name: "origin", label: "Origem do cadastro", type: "text", value: "", required: false },
+      { name: "_h2", label: "Contato e endereço", type: "heading" },
+      { name: "email", label: "E-mail", type: "email", required: false },
+      { name: "phone", label: "Celular", type: "tel", required: false },
+      { name: "alternatePhone", label: "Telefone alternativo", type: "tel", value: "", required: false },
+      { name: "zip", label: "CEP", type: "text", value: "", required: false },
+      { name: "address", label: "Endereço", type: "text", value: "", required: false },
+      { name: "addressNumber", label: "Número", type: "text", value: "", required: false },
+      { name: "neighborhood", label: "Bairro", type: "text", value: "", required: false },
+      { name: "city", label: "Cidade", type: "text", value: "", required: false },
+      { name: "stateCode", label: "UF", type: "text", value: "", required: false },
+      { name: "_h3", label: "Matrícula e plano", type: "heading" },
+      { name: "membership", label: "Matrícula", type: "select", options: ["Matriculado", "Matrículas", "Matr. Cancel.", "Avulsa"], required: false },
+      { name: "plan", label: "Plano", type: "plan", required: false },
+      { name: "registrationDate", label: "Data da matrícula", type: "date", value: "", required: false },
+      { name: "commercialNotes", label: "Observações comerciais", type: "textarea", value: "", required: false },
+      { name: "_h4", label: "Saúde / Prontuário", type: "heading" },
+      { name: "clinicalGoal", label: "Objetivo do paciente", type: "textarea", value: "", required: false },
+      { name: "restrictions", label: "Restrições / dores / contraindicações", type: "textarea", value: "", required: false },
+      { name: "medication", label: "Medicamentos / observações de saúde", type: "textarea", value: "", required: false },
+      { name: "height", label: "Altura", type: "text", value: "", required: false },
+      { name: "weight", label: "Peso", type: "text", value: "", required: false },
+      { name: "_h5", label: "Responsáveis e emergência", type: "heading" },
+      { name: "responsible", label: "Responsável financeiro", type: "text", value: "", required: false },
+      { name: "responsiblePhone", label: "Contato do responsável", type: "tel", value: "", required: false },
+      { name: "emergencyContact", label: "Contato de emergência", type: "text", value: "", required: false },
+      { name: "emergencyPhone", label: "Telefone de emergência", type: "tel", value: "", required: false },
+      { name: "notes", label: "Observações gerais", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
       const newStudent = { id: uid("s"), gender: "F", lastPresence: "-", ...values };
@@ -6184,6 +6211,7 @@ function renderField(field) {
       </label>
     `;
   }
+  if (field.type === "heading") return `<p class="modal-section-heading">${field.label}</p>`;
   if (field.type === "select") {
     return `
       <label>${field.label}
