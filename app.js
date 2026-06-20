@@ -3064,7 +3064,7 @@ function saveScheduleVisit() {
 
   saveState();
   render();
-  switchView("schedule");
+  switchView("agenda");
   toast("Visita agendada! Redirecionando para a agenda.");
 }
 
@@ -6477,7 +6477,7 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
       const apptDate = parseLocalDate(savedLead.visitDate);
       const dow = apptDate.getDay();
       currentWeekStart = addDays(apptDate, dow === 0 ? -6 : 1 - dow);
-      switchView("schedule");
+      switchView("agenda");
       toast("Lead salvo. Exibindo semana do agendamento.");
       return;
     }
