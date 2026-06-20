@@ -2048,7 +2048,7 @@ function professional(id) {
 
 function professionalName(id) {
   if (id === "all") return "Todos";
-  return professional(id)?.name ?? "Profissional removido";
+  return professional(id)?.name ?? "Profissional não informado";
 }
 
 function activeProfessionals() {
