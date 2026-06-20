@@ -6310,10 +6310,20 @@ document.addEventListener("click", (event) => {
   if (scheduleLeadButton) openScheduleVisitOverlay(scheduleLeadButton.dataset.scheduleLead);
 
   const loseLeadButton = event.target.closest("[data-lose-lead]");
-  if (loseLeadButton) openLoseLeadOverlay(loseLeadButton.dataset.loseLead);
+  if (loseLeadButton) {
+    const lLead = state.leads.find((l) => l.id === loseLeadButton.dataset.loseLead);
+    if (lLead?.status === "Perdido") { toast("Este lead já está marcado como perdido."); }
+    else if (lLead?.status === "Matriculado") { toast("Lead já matriculado — não é possível marcá-lo como perdido."); }
+    else openLoseLeadOverlay(loseLeadButton.dataset.loseLead);
+  }
 
   const convertLeadButton = event.target.closest("[data-convert-lead]");
-  if (convertLeadButton) convertLead(convertLeadButton.dataset.convertLead);
+  if (convertLeadButton) {
+    const cLead = state.leads.find((l) => l.id === convertLeadButton.dataset.convertLead);
+    if (cLead?.status === "Matriculado") { toast("Este lead já está matriculado."); }
+    else if (cLead?.status === "Perdido") { toast("Lead marcado como perdido — edite o status antes de matricular."); }
+    else convertLead(convertLeadButton.dataset.convertLead);
+  }
 
   const deleteLeadButton = event.target.closest("[data-delete-lead]");
   if (deleteLeadButton) deleteLead(deleteLeadButton.dataset.deleteLead);
