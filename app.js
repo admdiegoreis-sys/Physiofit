@@ -484,6 +484,7 @@ let editingEnrollmentId = null;
 let editingAppointmentId = null;
 let editingLeadId = null;
 let _pendingEnrollLeadId = null;
+let _pendingStudentLeadId = null;
 let editingAccountId = null;
 let settlingAccountId = null;
 let editingContractId = null;
@@ -673,7 +674,16 @@ const modalSchemas = {
       { name: "status", label: "Status", type: "select", options: ["Ativo", "Inativo"] },
       { name: "membership", label: "Matrícula", type: "select", options: ["Matriculado", "Matrículas", "Matr. Cancel.", "Avulsa"] },
     ],
-    handler: (values) => state.students.push({ id: uid("s"), gender: "F", lastPresence: "-", ...values }),
+    handler: (values) => {
+      const newStudent = { id: uid("s"), gender: "F", lastPresence: "-", ...values };
+      state.students.push(newStudent);
+      if (_pendingStudentLeadId) {
+        state.leads = state.leads.map((lead) =>
+          lead.id === _pendingStudentLeadId ? { ...lead, linkedStudentId: newStudent.id } : lead
+        );
+        _pendingStudentLeadId = null;
+      }
+    },
   },
   supplier: {
     title: "Novo fornecedor",
@@ -2891,7 +2901,8 @@ function renderCrm() {
                 <div class="row-actions">
                   <button class="row-action-button lead-action-button edit-icon-button" data-edit-lead="${lead.id}" type="button" title="Editar lead" aria-label="Editar lead"><span class="lead-action-icon lead-action-edit" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button edit-icon-button" data-schedule-lead="${lead.id}" type="button" title="Agendar visita" aria-label="Agendar visita"><span class="lead-action-icon lead-action-calendar" aria-hidden="true"></span></button>
-                  <button class="row-action-button lead-action-button edit-icon-button" data-convert-lead="${lead.id}" type="button" title="Converter em aluno" aria-label="Converter em aluno"><span class="lead-action-icon lead-action-check" aria-hidden="true"></span></button>
+                  <button class="row-action-button lead-action-button lead-register-student-btn" data-register-student-lead="${lead.id}" type="button" title="Cadastrar aluno" aria-label="Cadastrar aluno"><span class="lead-action-icon lead-action-person" aria-hidden="true"></span></button>
+                  <button class="row-action-button lead-action-button lead-enroll-btn" data-convert-lead="${lead.id}" type="button" title="Realizar matrícula" aria-label="Realizar matrícula"><span class="lead-action-icon lead-action-contract" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button lead-lose-btn" data-lose-lead="${lead.id}" type="button" title="Marcar como perdido" aria-label="Marcar como perdido"><span class="lead-action-icon lead-action-x" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button lead-del-btn" data-delete-lead="${lead.id}" type="button" title="Excluir lead" aria-label="Excluir lead"><span class="lead-action-icon lead-action-trash" aria-hidden="true"></span></button>
                 </div>
@@ -3105,26 +3116,28 @@ function saveLoseLead() {
   toast("Lead marcado como perdido.");
 }
 
+function registerStudentFromLead(leadId) {
+  const lead = state.leads.find((l) => l.id === leadId);
+  if (!lead) return;
+  if (lead.linkedStudentId && state.students.find((s) => s.id === lead.linkedStudentId)) {
+    toast("Aluno já cadastrado para este lead.");
+    return;
+  }
+  _pendingStudentLeadId = leadId;
+  switchView("students");
+  editingStudentId = null;
+  openModal("student", { name: lead.name, email: lead.email || "", phone: lead.phone || "" });
+  document.querySelector("#modalTitle").textContent = "Cadastrar aluno";
+}
+
 function convertLead(leadId) {
   const lead = state.leads.find((item) => item.id === leadId);
   if (!lead) return;
-  let student = state.students.find((item) => item.id === lead.linkedStudentId || normalizedText(item.name) === normalizedText(lead.name));
+  const student = state.students.find((s) => s.id === lead.linkedStudentId);
   if (!student) {
-    student = normalizeStudent({
-      id: uid("s"),
-      name: lead.name,
-      email: lead.email,
-      phone: lead.phone,
-      plan: lead.interest,
-      status: "Ativo",
-      membership: "Ativo",
-      origin: lead.origin,
-      registrationDate: demoToday,
-      commercialNotes: lead.notes,
-    }, state.students.length);
-    state.students.push(student);
+    toast("Cadastre o aluno primeiro antes de realizar a matrícula.");
+    return;
   }
-  lead.linkedStudentId = student.id;
   saveState();
   render();
   _pendingEnrollLeadId = leadId;
@@ -6178,6 +6191,7 @@ function closeModal() {
   editingAccountId = null;
   settlingAccountId = null;
   _pendingEnrollLeadId = null;
+  _pendingStudentLeadId = null;
   document.querySelector("#modalBackdrop").hidden = true;
 }
 
@@ -6322,6 +6336,9 @@ document.addEventListener("click", (event) => {
 
   const scheduleLeadButton = event.target.closest("[data-schedule-lead]");
   if (scheduleLeadButton) openScheduleVisitOverlay(scheduleLeadButton.dataset.scheduleLead);
+
+  const registerStudentLeadButton = event.target.closest("[data-register-student-lead]");
+  if (registerStudentLeadButton) registerStudentFromLead(registerStudentLeadButton.dataset.registerStudentLead);
 
   const loseLeadButton = event.target.closest("[data-lose-lead]");
   if (loseLeadButton) {

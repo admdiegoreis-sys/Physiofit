@@ -5907,6 +5907,54 @@ td.row-actions .row-action-button {
 .lead-action-x::before { transform: translate(-50%, -50%) rotate(45deg); }
 .lead-action-x::after  { transform: translate(-50%, -50%) rotate(-45deg); }
 
+/* Lead action: Cadastrar aluno (pessoa) */
+.crm-table-wrap .lead-register-student-btn { background: #3b82a0; }
+.crm-table-wrap .lead-action-person {
+  display: block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  margin: 3px auto 0;
+  position: relative;
+}
+.crm-table-wrap .lead-action-person::after {
+  content: "";
+  position: absolute;
+  top: 11px; left: 50%;
+  transform: translateX(-50%);
+  width: 16px; height: 8px;
+  border-radius: 8px 8px 0 0;
+  background: #fff;
+}
+
+/* Lead action: Realizar matrícula (contrato) */
+.crm-table-wrap .lead-enroll-btn { background: #2d7a4f; }
+.crm-table-wrap .lead-action-contract {
+  display: block;
+  width: 12px; height: 15px;
+  border: 2.5px solid #fff;
+  border-radius: 2px;
+  margin: 4px auto 0;
+  position: relative;
+}
+.crm-table-wrap .lead-action-contract::before {
+  content: "";
+  position: absolute;
+  top: 3px; left: 1px; right: 1px;
+  height: 2px;
+  background: #fff;
+  box-shadow: 0 3px 0 #fff;
+}
+.crm-table-wrap .lead-action-contract::after {
+  content: "";
+  position: absolute;
+  top: -5px; right: -5px;
+  width: 6px; height: 6px;
+  background: #2d7a4f;
+  border-top: 2.5px solid #fff;
+  border-left: 2.5px solid #fff;
+}
+
 /* Lead action: Lixeira (excluir) */
 .crm-table-wrap .lead-del-btn { background: #7a5c6e; }
 .crm-table-wrap .lead-action-trash {
