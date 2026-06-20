@@ -6466,6 +6466,11 @@ document.addEventListener("click", (event) => {
       appointment.status = "Compareceu";
       const relatedStudent = state.students.find((item) => item.id === appointment.studentId);
       if (relatedStudent) relatedStudent.lastPresence = appointment.date;
+      state.leads = state.leads.map((lead) =>
+        lead.linkedAppointmentId === appointment.id && !["Matriculado", "Perdido"].includes(lead.status)
+          ? { ...lead, status: "Visita realizada" }
+          : lead
+      );
     }
     if (scheduleAction.dataset.action === "missed" && appointment) {
       appointment.status = "Faltou";
