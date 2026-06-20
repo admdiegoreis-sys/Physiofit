@@ -633,6 +633,11 @@ const modalSchemas = {
           if (item.id !== editingAppointmentId) return item;
           return { ...item, ...values, notes: appendNote(values.notes || item.notes, "Remarcação") };
         });
+        if (values.date) {
+          state.leads = state.leads.map((lead) =>
+            lead.linkedAppointmentId === editingAppointmentId ? { ...lead, visitDate: values.date } : lead
+          );
+        }
       } else {
         state.appointments.push({ id: uid("a"), ...values });
       }
