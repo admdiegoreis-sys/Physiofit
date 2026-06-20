@@ -2830,17 +2830,28 @@ function renderDashboard() {
     </div>
   `;
 
-  const funnelRows = [
-    ["Leads", state.leads.length],
-    ["Avaliações agendadas", state.leads.filter((item) => ["Visita agendada", "Visita realizada"].includes(item.status)).length],
-    ["Primeira aula", state.leads.filter((item) => ["Visita realizada", "Proposta enviada", "Matriculado"].includes(item.status)).length],
-    ["Conversão", state.leads.filter((item) => item.status === "Matriculado").length],
-    ["Renovação", activeEnrollments().length],
-  ];
-  const maxFunnel = Math.max(1, ...funnelRows.map((item) => item[1]));
-  document.querySelector("#dashboardFunnel").innerHTML = funnelRows
-    .map(([label, value], index) => `<article style="--funnel-width:${Math.max(24, (value / maxFunnel) * 100)}%;"><span></span><strong>${label}</strong><b>${value}</b>${index ? `<small>${Math.round((value / maxFunnel) * 100)}%</small>` : ""}</article>`)
+  const totalLeads = Math.max(1, state.leads.length);
+  const funnelPipeline = leadStatuses.filter((s) => s !== "Perdido");
+  const funnelRows = funnelPipeline.map((status) => [status, state.leads.filter((l) => l.status === status).length]);
+  const lostCount = state.leads.filter((l) => l.status === "Perdido").length;
+  const maxFunnel = Math.max(1, ...funnelRows.map((r) => r[1]));
+  const funnelHtml = funnelRows
+    .map(([label, value], index) => {
+      const width = Math.max(12, Math.round((value / maxFunnel) * 100));
+      const pct = Math.round((value / totalLeads) * 100);
+      const opacity = 1 - (index * 0.08);
+      const isConvert = label === "Matriculado";
+      return `<article style="--funnel-width:${width}%; --funnel-opacity:${opacity};" ${isConvert ? 'data-funnel-success="1"' : ""}>
+        <span></span><strong>${label}</strong><b>${value}</b><small>${pct}%</small>
+      </article>`;
+    })
     .join("");
+  const lostHtml = lostCount
+    ? `<article data-funnel-lost="1" style="--funnel-width:${Math.round((lostCount / maxFunnel) * 100)}%; --funnel-opacity:0.7;">
+        <span></span><strong>Perdidos</strong><b>${lostCount}</b><small>${Math.round((lostCount / totalLeads) * 100)}%</small>
+      </article>`
+    : "";
+  document.querySelector("#dashboardFunnel").innerHTML = funnelHtml + lostHtml;
 
   const upcomingAccounts = financialTitles
     .filter((item) => item.direction === "Receber" && accountOpenAmount(item) > 0)
