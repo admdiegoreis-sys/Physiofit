@@ -345,13 +345,6 @@
                 <option>Aguardando</option>
                 <option>Concluída</option>
               </select>
-              <select id="roomFilter">
-                <option value="all">Salas</option>
-                <option>Sala Reformer</option>
-                <option>Sala Cadillac</option>
-                <option>Sala Clínica</option>
-                <option>Sala Solo</option>
-              </select>
               <select id="teacherFilter">
                 <option value="all">Profissional</option>
                 <option>Marina</option>
@@ -361,7 +354,6 @@
               <select id="groupFilter">
                 <option>Agrupado por dia/semana/mês</option>
                 <option>Por profissional</option>
-                <option>Por sala</option>
               </select>
               <div class="agenda-search-row">
                 <input id="agendaSearch" type="search" placeholder="Buscar por nome ou e-mail do aluno" />
@@ -737,7 +729,7 @@
                       <th>Ações</th>
                       <th>Paciente</th>
                       <th>Profissional</th>
-                      <th>Modalidade<br />Sala</th>
+                      <th>Modalidade</th>
                       <th>Data<br />Matrícula</th>
                       <th>Dia<br />Venc.</th>
                       <th>Valor<br />Mensalidade</th>
@@ -1758,15 +1750,6 @@
           <label class="sv-label">
             Profissional
             <select id="svProfessional"></select>
-          </label>
-          <label class="sv-label">
-            Sala
-            <select id="svRoom">
-              <option>Sala Reformer</option>
-              <option>Sala Clínica</option>
-              <option>Sala 3</option>
-              <option>Todas as salas</option>
-            </select>
           </label>
         </div>
         <div id="svAvailability" class="sv-availability" hidden>

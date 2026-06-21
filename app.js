@@ -623,7 +623,6 @@ const modalSchemas = {
       { name: "endTime", label: "Horário final", type: "time", value: "10:00" },
       { name: "studentId", label: "Aluno/Paciente", type: "student" },
       { name: "teacherId", label: "Profissional", type: "professional" },
-      { name: "room", label: "Sala", type: "roomOptional", value: "", required: false },
       { name: "type", label: "Modalidade", type: "modality" },
       { name: "sessionKind", label: "Tipo de sessão", type: "select", options: ["Mensalidade", "Experimental", "Avulso"] },
       { name: "status", label: "Status", type: "select", options: ["Agendada", "Confirmada", "Aguardando", "Visita realizada", "Faltou", "Cancelada", "Reposta"] },
@@ -661,7 +660,6 @@ const modalSchemas = {
       { name: "endTime", label: "Fim", type: "time", value: "15:00" },
       { name: "title", label: "Descrição", type: "text", value: "Horário Bloqueado" },
       { name: "teacherId", label: "Profissional", type: "professionalWithAll" },
-      { name: "room", label: "Sala", type: "select", options: ["Todas", "Sala Reformer", "Sala Cadillac", "Sala Clínica", "Sala Solo"] },
     ],
     handler: (values) => {
       if (!Array.isArray(state.blocks)) state.blocks = [];
@@ -695,7 +693,6 @@ const modalSchemas = {
       { name: "planType", label: "Tipo de plano", type: "select", options: ["", "Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "", required: false, enroll: true },
       { name: "planId", label: "Plano", type: "planId", required: false, enroll: true },
       { name: "professionalId", label: "Profissional", type: "professionalOptional", required: false, enroll: true },
-      { name: "room", label: "Sala", type: "roomOptional", value: "", required: false, enroll: true },
       { name: "startDate", label: "Data de início", type: "date", value: demoToday, required: false, enroll: true },
       { name: "firstPaymentDate", label: "Data do 1º pagamento", type: "date", value: demoToday, required: false, enroll: true },
       { name: "sessions", label: "Sessões por semana", type: "number", value: "", required: false, enroll: true },
@@ -720,7 +717,7 @@ const modalSchemas = {
       { name: "notes", label: "Observações gerais", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
-      const enrollFields = ["modalityId","planType","planId","professionalId","room","startDate","sessions","mondayTime","tuesdayTime","wednesdayTime","thursdayTime","fridayTime","monthlyValue","paymentMethod","firstPaymentDate","dueDay","registrationFee","paymentMethod","contractTemplate","contractStatus","freeSchedule","autoRenew","dueNotice","sessionReminder","financialNotes"];
+      const enrollFields = ["modalityId","planType","planId","professionalId","startDate","sessions","mondayTime","tuesdayTime","wednesdayTime","thursdayTime","fridayTime","monthlyValue","paymentMethod","firstPaymentDate","dueDay","registrationFee","paymentMethod","contractTemplate","contractStatus","freeSchedule","autoRenew","dueNotice","sessionReminder","financialNotes"];
       const enrollValues = Object.fromEntries(enrollFields.map(k => [k, values[k]]));
       enrollFields.forEach(k => delete values[k]);
       const hasEnroll = !!(enrollValues.modalityId && enrollValues.planId);
@@ -839,7 +836,6 @@ const modalSchemas = {
       { name: "planType", label: "Tipo de plano", type: "select", options: ["", "Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "" },
       { name: "planId", label: "Plano", type: "planId" },
       { name: "professionalId", label: "Profissional", type: "professional" },
-      { name: "room", label: "Sala", type: "roomOptional", value: "" },
       { name: "startDate", label: "Data da matrícula", type: "date", value: demoToday },
       { name: "endDate", label: "Data final", type: "date", value: "2026-12-31" },
       { name: "dueDay", label: "Dia do vencimento", type: "number", value: 10 },
@@ -2551,7 +2547,7 @@ function filteredAppointments() {
   const modalityTerm = normalizedText(modality);
   const session = selectedValue("sessionFilter");
   const status = selectedValue("statusFilter");
-  const room = selectedValue("roomFilter");
+  const room = "all";
   const teacher = selectedValue("teacherFilter");
 
   return state.appointments.filter((item) => {
@@ -2562,8 +2558,7 @@ function filteredAppointments() {
       (modality === "all" || item.type === modality || normalizedText(item.type).includes(modalityTerm)) &&
       (session === "all" || item.sessionKind === session) &&
       (status === "all" || item.status === status) &&
-      (room === "all" || item.room === room) &&
-      (teacher === "all" || item.teacherId === teacher)
+        (teacher === "all" || item.teacherId === teacher)
     );
   });
 }
@@ -2673,13 +2668,6 @@ function renderEnrollmentOptions() {
     const selected = professionalFilter.value || "all";
     professionalFilter.innerHTML = `<option value="all">Profissional</option>${activeProfessionals().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
     professionalFilter.value = selected === "all" || activeProfessionals().some((item) => item.id === selected) ?selected : "all";
-  }
-  const roomFilter = document.querySelector("#enrollmentRoomFilter");
-  if (roomFilter) {
-    const rooms = [...new Set(state.enrollments.map((item) => item.room).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
-    const selected = roomFilter.value || "all";
-    roomFilter.innerHTML = `<option value="all">Sala</option>${rooms.map((room) => `<option value="${room}">${room}</option>`).join("")}`;
-    roomFilter.value = selected === "all" || rooms.includes(selected) ?selected : "all";
   }
   const typeFilter = document.querySelector("#enrollmentPlanTypeFilter");
   if (typeFilter) {
@@ -3062,7 +3050,6 @@ function updateSvAvailability() {
   const timeStart = document.querySelector("#svTime")?.value || "00:00";
   const timeEnd = document.querySelector("#svEndTime")?.value || "23:59";
   const profId = document.querySelector("#svProfessional")?.value || "";
-  const room = document.querySelector("#svRoom")?.value || "";
   const avDiv = document.querySelector("#svAvailability");
   const listDiv = document.querySelector("#svConflictList");
   if (!avDiv || !listDiv) return;
@@ -3075,16 +3062,14 @@ function updateSvAvailability() {
   // Separate conflicts from free slots
   const conflicts = dayAppts.filter((a) => {
     const sameProf = a.teacherId === profId;
-    const sameRoom = room && a.room === room;
     const overlaps = a.time < timeEnd && a.endTime > timeStart;
-    return (sameProf || sameRoom) && overlaps;
+    return sameProf && overlaps;
   });
 
   const othersSameDay = dayAppts.filter((a) => {
     const sameProf = a.teacherId === profId;
-    const sameRoom = room && a.room === room;
     const overlaps = a.time < timeEnd && a.endTime > timeStart;
-    return !((sameProf || sameRoom) && overlaps);
+    return !(sameProf && overlaps);
   });
 
   const studentName = (appt) => {
@@ -3096,12 +3081,12 @@ function updateSvAvailability() {
   let html = "";
 
   if (conflicts.length === 0) {
-    html += `<div class="sv-free"><span class="sv-free-icon">✓</span> Horário livre para ${profName({ teacherId: profId })} às ${timeStart}${room ? ` · ${room}` : ""}</div>`;
+    html += `<div class="sv-free"><span class="sv-free-icon">✓</span> Horário livre para ${profName({ teacherId: profId })} às ${timeStart}</div>`;
   } else {
     html += conflicts.map((a) => `
       <div class="sv-conflict">
         <span class="sv-conflict-icon">⚠</span>
-        <span><strong>${a.time}–${a.endTime}</strong> · ${studentName(a)} com ${profName(a)} · ${a.room}</span>
+        <span><strong>${a.time}–${a.endTime}</strong> · ${studentName(a)} com ${profName(a)}</span>
       </div>`).join("");
   }
 
@@ -3109,7 +3094,7 @@ function updateSvAvailability() {
     html += `<p class="sv-other-title">Outros agendamentos neste dia</p>`;
     html += othersSameDay.slice(0, 6).map((a) => `
       <div class="sv-other">
-        ${a.time}–${a.endTime} · ${studentName(a)} · ${profName(a)} · ${a.room}
+        ${a.time}–${a.endTime} · ${studentName(a)} · ${profName(a)}
       </div>`).join("");
     if (othersSameDay.length > 6) html += `<div class="sv-other sv-other-more">+${othersSameDay.length - 6} mais</div>`;
   }
@@ -3130,8 +3115,6 @@ function saveScheduleVisit() {
   const time = document.querySelector("#svTime")?.value || "09:00";
   const endTime = document.querySelector("#svEndTime")?.value || "10:00";
   const profId = document.querySelector("#svProfessional")?.value || activeProfessionals()[0]?.id || "";
-  const room = document.querySelector("#svRoom")?.value || "Sala Reformer";
-
   if (!date) { toast("Informe a data da visita."); return; }
   if (isWeekend(parseLocalDate(date))) {
     const dateEl = document.querySelector("#svDate");
@@ -3151,7 +3134,6 @@ function saveScheduleVisit() {
     studentId,
     leadId: lead.id,
     teacherId: profId,
-    room,
     type: lead.interest === "Outro" ? "Pilates" : (lead.interest || "Pilates"),
     status: "Aguardando",
     sessionKind: "Experimental",
@@ -3356,7 +3338,6 @@ function renderAgendaList() {
             <th>Aluno/Paciente</th>
             <th>Modalidade</th>
             <th>Profissional</th>
-            <th>Sala</th>
             <th>Status</th>
             <th>Ações</th>
           </tr>
@@ -3371,7 +3352,6 @@ function renderAgendaList() {
                   <td>${studentName(item.studentId)}</td>
                   <td>${item.type}</td>
                   <td>${professionalName(item.teacherId)}</td>
-                  <td>${item.room}</td>
                   <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
                   <td>
                     <button class="mini-button" data-action="reschedule" data-id="${item.id}" type="button">Editar horário</button>
@@ -3446,7 +3426,7 @@ function renderEnrollments() {
   const statusFilter = document.querySelector("#enrollmentStatusFilter")?.value ?? "activeAndExpired";
   const modalityFilter = document.querySelector("#enrollmentModalityFilter")?.value ?? "all";
   const professionalFilter = document.querySelector("#enrollmentProfessionalFilter")?.value ?? "all";
-  const roomFilter = document.querySelector("#enrollmentRoomFilter")?.value ?? "all";
+  const roomFilter = "all";
   const typeFilter = document.querySelector("#enrollmentPlanTypeFilter")?.value ?? "all";
   const dateFrom = document.querySelector("#enrollmentDateFrom")?.value ?? "";
   const dateTo = document.querySelector("#enrollmentDateTo")?.value ?? "";
@@ -3483,7 +3463,7 @@ function renderEnrollments() {
               </td>
               <td><div class="patient-name"><strong>${displayName(studentName(item.studentId))}</strong></div></td>
               <td>${professionalName(item.professionalId)}</td>
-              <td><strong>${modalityName(item.modalityId)}</strong><br><small>${item.room || "-"}</small></td>
+              <td><strong>${modalityName(item.modalityId)}</strong></td>
               <td>${dateLabel(item.startDate)}</td>
               <td>${item.dueDay || "-"}</td>
               <td><strong>${currency(Number(item.monthlyValue || 0))}</strong></td>
@@ -6743,7 +6723,6 @@ function clearScheduleFilters() {
   setControlValue("modalityFilter", "all");
   setControlValue("sessionFilter", "all");
   setControlValue("statusFilter", "all");
-  setControlValue("roomFilter", "all");
   setControlValue("teacherFilter", "all");
   renderSchedule();
 }
@@ -6853,7 +6832,7 @@ function clearChartAccountFilters() {
   renderChartAccounts();
 }
 
-["agendaSearch", "globalStudentSearch", "modalityFilter", "sessionFilter", "statusFilter", "roomFilter", "teacherFilter"].forEach((id) => {
+["agendaSearch", "globalStudentSearch", "modalityFilter", "sessionFilter", "statusFilter", "teacherFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderSchedule);
   document.querySelector(`#${id}`)?.addEventListener("change", renderSchedule);
 });
@@ -7127,7 +7106,7 @@ document.querySelector("#loseLeadReason")?.addEventListener("keydown", (e) => {
 });
 
 // Schedule Visit overlay
-["svDate", "svTime", "svEndTime", "svProfessional", "svRoom"].forEach((id) => {
+["svDate", "svTime", "svEndTime", "svProfessional"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("change", updateSvAvailability);
   document.querySelector(`#${id}`)?.addEventListener("input", updateSvAvailability);
 });
