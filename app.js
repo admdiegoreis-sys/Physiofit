@@ -6663,6 +6663,17 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
         return;
       }
     }
+    if (_pendingStudentLeadId && (!form.elements.modalityId?.value || !form.elements.planId?.value)) {
+      const planField = form.elements.planId || form.elements.modalityId;
+      if (planField) {
+        planField.setCustomValidity("Cadastre uma matrícula para salvar o novo aluno/cliente.");
+        planField.reportValidity();
+        planField.setCustomValidity("");
+      } else {
+        toast("Cadastre uma matrícula para salvar o novo aluno/cliente.");
+      }
+      return;
+    }
   }
   const schema = modalSchemas[form.dataset.type];
   const values = Object.fromEntries(new FormData(form).entries());
