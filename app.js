@@ -3310,8 +3310,11 @@ function updateLeadAfterVisit(appointment) {
 }
 
 function appointmentPersonName(item) {
+  if (item.leadId) {
+    const lead = state.leads.find(l => l.id === item.leadId);
+    if (lead) return lead.name;
+  }
   if (item.studentId) return studentName(item.studentId);
-  if (item.leadId) return state.leads.find(l => l.id === item.leadId)?.name || "Lead";
   return "Sem aluno";
 }
 
