@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -59,7 +59,7 @@
                 <button class="top-menu-option" data-view="plans" type="button">Planos</button>
                 <button class="top-menu-option" data-view="suppliers" type="button">Fornecedores</button>
                 <button class="top-menu-option" data-view="professionals" type="button">Profissionais</button>
-                <button class="top-menu-option" data-view="students" type="button">Alunos/Pacientes</button>
+                <button class="top-menu-option" data-view="students" type="button">Clientes</button>
                 <button class="top-menu-option" data-view="enrollments" type="button">Matrículas</button>
               </div>
             </div>
@@ -107,9 +107,9 @@
           <div class="topbar-tools">
             <label class="global-search">
               <span aria-hidden="true">⌕</span>
-              <input id="globalSearch" type="search" placeholder="Buscar alunos, agenda, financeiro..." />
+              <input id="globalSearch" type="search" placeholder="Buscar clientes, agenda, financeiro..." />
             </label>
-            <button class="quick-action primary-button" data-view-target="students" type="button"><span aria-hidden="true">+</span>Novo aluno</button>
+            <button class="quick-action primary-button" data-view-target="students" type="button"><span aria-hidden="true">+</span>Novo cliente</button>
             <button class="quick-action ghost-button" data-view-target="records" type="button"><span aria-hidden="true">+</span>Nova avaliação</button>
             <button class="notification-button" type="button" aria-label="Notificações">●<span>2</span></button>
           </div>
@@ -128,7 +128,7 @@
             </div>
             <div class="executive-actions">
               <button class="primary-button" data-view-target="agenda" type="button">Abrir agenda</button>
-              <button class="ghost-button" data-view-target="students" type="button">Ver alunos</button>
+              <button class="ghost-button" data-view-target="students" type="button">Ver clientes</button>
             </div>
           </div>
 
@@ -136,7 +136,7 @@
             <article class="metric metric-students">
               <span class="metric-icon" aria-hidden="true"></span>
               <strong id="activeStudentsMetric">0</strong>
-              <small>Alunos ativos</small>
+              <small>Clientes ativos</small>
               <span class="metric-sparkline" id="activeStudentsTrend" aria-hidden="true"></span>
             </article>
             <article class="metric metric-schedule">
@@ -356,7 +356,7 @@
                 <option>Por profissional</option>
               </select>
               <div class="agenda-search-row">
-                <input id="agendaSearch" type="search" placeholder="Buscar por nome ou e-mail do aluno" />
+                <input id="agendaSearch" type="search" placeholder="Buscar por nome ou e-mail do cliente" />
                 <button class="action-button blue" id="agendaSearchButton" type="button">Buscar</button>
                 <button class="action-button clear-filter-button" id="agendaClearFiltersButton" type="button">Limpar filtros</button>
               </div>
@@ -387,10 +387,10 @@
             <div class="module-titlebar">
               <div>
                 <p class="eyebrow">Cadastros</p>
-                <h2>Pacientes</h2>
+                <h2>Clientes</h2>
               </div>
               <div class="module-actions">
-                <button class="primary-button success-button" id="newPatientButton" type="button">Novo Paciente</button>
+                <button class="primary-button success-button" id="newPatientButton" type="button">Novo Cliente</button>
                 <button class="ghost-button" type="button">Exportar</button>
               </div>
             </div>
@@ -412,7 +412,7 @@
                   <thead>
                     <tr>
                       <th></th>
-                      <th>Paciente</th>
+                      <th>Cliente</th>
                       <th>Status</th>
                       <th>E-mail / Celular</th>
                       <th>CPF</th>
@@ -431,7 +431,7 @@
             <div class="module-titlebar">
               <div>
                 <p class="eyebrow">Cadastro</p>
-                <h2 id="patientEditorTitle">Paciente</h2>
+                <h2 id="patientEditorTitle">Cliente</h2>
               </div>
               <div class="module-actions">
                 <button class="ghost-button" id="backToPatientsButton" type="button">Voltar</button>
@@ -439,7 +439,7 @@
               </div>
             </div>
             <div class="module-body">
-              <div class="patient-editor-tabs" role="tablist" aria-label="Abas do cadastro do paciente">
+              <div class="patient-editor-tabs" role="tablist" aria-label="Abas do cadastro do cliente">
                 <button class="patient-tab active" data-patient-tab="personal" type="button">Dados Pessoais</button>
                 <button class="patient-tab" data-patient-tab="clinical" type="button">Saúde / Prontuário</button>
                 <button class="patient-tab" data-patient-tab="registration" type="button">Matrícula</button>
@@ -546,7 +546,7 @@
                     <h3>Saúde / prontuário</h3>
                   </div>
                   <div class="editor-grid">
-                    <label class="wide">Objetivo do paciente<textarea name="clinicalGoal" rows="3"></textarea></label>
+                    <label class="wide">Objetivo do cliente<textarea name="clinicalGoal" rows="3"></textarea></label>
                     <label class="wide">Restrições / dores / contraindicações<textarea name="restrictions" rows="3"></textarea></label>
                     <label class="wide">Medicamentos / observações de saúde<textarea name="medication" rows="3"></textarea></label>
                     <label>Altura<input name="height" placeholder="Ex.: 1,70" /></label>
@@ -601,7 +601,7 @@
                       <th>Nome</th>
                       <th>E-mail</th>
                       <th>Celular</th>
-                      <th>Máx. Pacientes</th>
+                      <th>Máx. Clientes</th>
                       <th>Cor</th>
                       <th>Status</th>
                     </tr>
@@ -648,7 +648,7 @@
                     <label>Celular<input name="phone" /></label>
                     <label>CREFITO / Documento<input name="document" /></label>
                     <label>Função<input name="role" /></label>
-                    <label>Máx. pacientes<input name="maxPatients" type="number" min="1" max="30" /></label>
+                    <label>Máx. clientes<input name="maxPatients" type="number" min="1" max="30" /></label>
                     <label>Status
                       <select name="status">
                         <option>Ativo</option>
@@ -717,7 +717,7 @@
                   <input type="date" id="enrollmentDateTo" title="Até" placeholder="Até" />
                 </div>
                 <div class="patient-search-row">
-                  <input id="enrollmentSearch" type="search" placeholder="Buscar por nome do aluno ou responsável" />
+                  <input id="enrollmentSearch" type="search" placeholder="Buscar por nome do cliente ou responsável" />
                   <button class="action-button blue" id="enrollmentSearchButton" type="button">Buscar</button>
 <button class="action-button clear-filter-button" id="enrollmentClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
@@ -727,7 +727,7 @@
                   <thead>
                     <tr>
                       <th>Ações</th>
-                      <th>Paciente</th>
+                      <th>Cliente</th>
                       <th>Profissional</th>
                       <th>Modalidade</th>
                       <th>Data<br />Matrícula</th>
@@ -817,7 +817,7 @@
                       <th></th>
                       <th>Modalidade / Serviço</th>
                       <th>Cor</th>
-                      <th>Máx. pacientes</th>
+                      <th>Máx. clientes</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -847,7 +847,7 @@
                 </div>
                 <div class="editor-grid">
                   <label class="wide">Nome da modalidade / serviço<input name="name" required /></label>
-                  <label>Máx. pacientes<input name="maxPatients" type="number" min="1" max="30" /></label>
+                  <label>Máx. clientes<input name="maxPatients" type="number" min="1" max="30" /></label>
                   <label>Status
                     <select name="status">
                       <option>Ativo</option>
@@ -1019,7 +1019,7 @@
                   <option>Manual</option>
                 </select>
                 <div class="patient-search-row monthly-search-row">
-                  <input id="monthlySearch" type="search" placeholder="Buscar pelo nome Aluno/Paciente" />
+                  <input id="monthlySearch" type="search" placeholder="Buscar pelo nome do cliente" />
                   <button class="action-button blue" id="monthlySearchButton" type="button">Buscar</button>
                   <button class="action-button clear-filter-button" id="monthlyClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
@@ -1030,7 +1030,7 @@
                   <thead>
                     <tr>
                       <th></th>
-                      <th>Aluno</th>
+                      <th>Cliente</th>
                       <th>Pagamento</th>
                       <th>Status</th>
                       <th>Matrícula</th>
@@ -1073,7 +1073,7 @@
                   <option value="all">Modalidades</option>
                 </select>
                 <div class="patient-search-row fiscal-search-row">
-                  <input id="fiscalSearch" type="search" placeholder="Buscar por aluno, CPF, serviço ou nota" />
+                  <input id="fiscalSearch" type="search" placeholder="Buscar por cliente, CPF, serviço ou nota" />
                   <button class="action-button blue" id="fiscalSearchButton" type="button">Buscar</button>
                   <button class="action-button clear-filter-button" id="fiscalClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
@@ -1276,7 +1276,7 @@
                   <option value="all">Fornecedores</option>
                 </select>
                 <div class="patient-search-row accounts-search-row">
-                  <input id="receivableAccountSearch" type="search" placeholder="Buscar por aluno, fornecedor ou descrição" />
+                  <input id="receivableAccountSearch" type="search" placeholder="Buscar por cliente, fornecedor ou descrição" />
                   <button class="action-button blue" id="receivableAccountSearchButton" type="button">Buscar</button>
                   <button class="action-button clear-filter-button" id="receivableAccountClearFiltersButton" type="button">Limpar filtros</button>
                 </div>
@@ -1293,7 +1293,7 @@
                       <th>Valor</th>
                       <th>Descrição</th>
                       <th>Conciliação</th>
-                      <th>Aluno/Fornecedor</th>
+                      <th>Cliente/Fornecedor</th>
                       <th>Plano de contas</th>
                       <th>Ações</th>
                     </tr>
@@ -1591,7 +1591,7 @@
                   <table>
                     <thead>
                       <tr>
-                        <th>Aluno/Paciente</th>
+                        <th>Cliente</th>
                         <th>Créditos</th>
                         <th>Faltas</th>
                         <th>Cancelamentos</th>
@@ -1652,7 +1652,7 @@
                   <div class="panel-heading">
                     <div>
                       <p class="eyebrow">Portal</p>
-                      <h2>Link para alunos</h2>
+                      <h2>Link para clientes</h2>
                     </div>
                   </div>
                   <div class="portal-preview">
@@ -1804,3 +1804,4 @@
     <script src="app.js"></script>
   </body>
 </html>
+

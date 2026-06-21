@@ -1,4 +1,4 @@
-const storageKey = "studioflow-pilates-v2";
+﻿const storageKey = "studioflow-pilates-v2";
 const demoToday = new Date().toISOString().slice(0, 10);
 
 const seedStudents = [
@@ -496,7 +496,7 @@ const viewTitles = {
   crm: "CRM",
   agenda: "Agenda",
   students: "Cadastros",
-  patientEditor: "Cadastro de paciente",
+  patientEditor: "Cadastro de cliente",
   enrollments: "Matrículas",
   professionals: "Profissionais",
   professionalEditor: "Cadastro de profissional",
@@ -621,7 +621,7 @@ const modalSchemas = {
       { name: "date", label: "Data", type: "date", value: demoToday },
       { name: "time", label: "Horário inicial", type: "time", value: "09:00" },
       { name: "endTime", label: "Horário final", type: "time", value: "10:00" },
-      { name: "studentId", label: "Aluno/Paciente", type: "student" },
+      { name: "studentId", label: "Cliente", type: "student" },
       { name: "teacherId", label: "Profissional", type: "professional" },
       { name: "type", label: "Modalidade", type: "modality" },
       { name: "sessionKind", label: "Tipo de sessão", type: "select", options: ["Mensalidade", "Experimental", "Avulso"] },
@@ -667,8 +667,8 @@ const modalSchemas = {
     },
   },
   student: {
-    title: "Novo aluno",
-    submit: "Salvar aluno",
+    title: "Novo cliente",
+    submit: "Salvar cliente",
     fields: [
       { name: "_h1", label: "Identificação", type: "heading" },
       { name: "name", label: "Nome completo", type: "text" },
@@ -704,7 +704,7 @@ const modalSchemas = {
       { name: "monthlyValue", label: "Valor da mensalidade", type: "number", value: "", required: false, enroll: true },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["", "Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Dinheiro", "Transferência"], value: "", required: false, enroll: true },
       { name: "_h4", label: "Saúde / Prontuário", type: "heading" },
-      { name: "clinicalGoal", label: "Objetivo do paciente", type: "textarea", value: "", required: false },
+      { name: "clinicalGoal", label: "Objetivo do cliente", type: "textarea", value: "", required: false },
       { name: "restrictions", label: "Restrições / dores / contraindicações", type: "textarea", value: "", required: false },
       { name: "medication", label: "Medicamentos / observações de saúde", type: "textarea", value: "", required: false },
       { name: "height", label: "Altura", type: "text", value: "", required: false },
@@ -831,7 +831,7 @@ const modalSchemas = {
     title: "Matrícula",
     submit: "Salvar matrícula",
     fields: [
-      { name: "studentId", label: "Aluno/Paciente", type: "student" },
+      { name: "studentId", label: "Cliente", type: "student" },
       { name: "modalityId", label: "Modalidade", type: "modalityId" },
       { name: "planType", label: "Tipo de plano", type: "select", options: ["", "Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "" },
       { name: "planId", label: "Plano", type: "planId" },
@@ -902,7 +902,7 @@ const modalSchemas = {
     title: "Nova cobrança",
     submit: "Salvar cobrança",
     fields: [
-      { name: "studentId", label: "Aluno", type: "student" },
+      { name: "studentId", label: "Cliente", type: "student" },
       { name: "description", label: "Descrição", type: "text", value: "Mensalidade" },
       { name: "dueDate", label: "Vencimento", type: "date", value: demoToday },
       { name: "amount", label: "Valor", type: "number", value: 300 },
@@ -958,7 +958,7 @@ const modalSchemas = {
       { name: "forecastDate", label: "Previsão", type: "date", value: demoToday },
       { name: "amount", label: "Valor", type: "number", value: 0 },
       { name: "description", label: "Descrição", type: "text", value: "Nova conta" },
-      { name: "person", label: "Paciente/Fornecedor", type: "text", value: "" },
+      { name: "person", label: "Cliente/Fornecedor", type: "text", value: "" },
       { name: "document", label: "CPF/CNPJ", type: "text", value: "" },
       { name: "chartAccountId", label: "Plano de contas", type: "chartAccount" },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Transferência", "Dinheiro"], value: "Pix" },
@@ -1052,7 +1052,7 @@ const modalSchemas = {
     title: "Novo registro clínico",
     submit: "Salvar registro",
     fields: [
-      { name: "studentId", label: "Aluno", type: "student" },
+      { name: "studentId", label: "Cliente", type: "student" },
       { name: "date", label: "Data", type: "date", value: demoToday },
       { name: "title", label: "Título", type: "text", value: "Evolução" },
       { name: "note", label: "Observações", type: "textarea" },
@@ -1967,7 +1967,7 @@ function ensureEnrollmentFinancialTitles(enrollment) {
       originalAmount: amount,
       paidAmount: 0,
       openAmount: amount,
-      description: `Mensalidade: ${displayName(relatedStudent?.name || "Aluno")}`,
+      description: `Mensalidade: ${displayName(relatedStudent?.name || "Cliente")}`,
       person: relatedStudent?.name || "",
       document: relatedStudent?.cpf || "",
       modalityId: enrollment.modalityId,
@@ -1993,7 +1993,7 @@ function ensureEnrollmentFinancialTitles(enrollment) {
       originalAmount: registrationFee,
       paidAmount: 0,
       openAmount: registrationFee,
-      description: `Taxa de matrícula: ${displayName(relatedStudent?.name || "Aluno")}`,
+      description: `Taxa de matrícula: ${displayName(relatedStudent?.name || "Cliente")}`,
       person: relatedStudent?.name || "",
       document: relatedStudent?.cpf || "",
       modalityId: enrollment.modalityId,
@@ -2089,7 +2089,7 @@ function student(id) {
 }
 
 function studentName(id) {
-  return student(id)?.name ?? "Aluno removido";
+  return student(id)?.name ?? "Cliente removido";
 }
 
 function studentActivePlan(studentId) {
@@ -2984,7 +2984,7 @@ function renderCrm() {
                 <div class="row-actions">
                   <button class="row-action-button lead-action-button edit-icon-button" data-edit-lead="${lead.id}" type="button" title="Editar lead" aria-label="Editar lead"><span class="lead-action-icon lead-action-edit" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button edit-icon-button" data-schedule-lead="${lead.id}" type="button" title="Agendar visita" aria-label="Agendar visita"><span class="lead-action-icon lead-action-calendar" aria-hidden="true"></span></button>
-                  <button class="row-action-button lead-action-button lead-register-student-btn" data-register-student-lead="${lead.id}" type="button" title="Cadastrar aluno" aria-label="Cadastrar aluno"><span class="lead-action-icon lead-action-person" aria-hidden="true"></span></button>
+                  <button class="row-action-button lead-action-button lead-register-student-btn" data-register-student-lead="${lead.id}" type="button" title="Cadastrar cliente" aria-label="Cadastrar cliente"><span class="lead-action-icon lead-action-person" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button lead-lose-btn" data-lose-lead="${lead.id}" type="button" title="Marcar como perdido" aria-label="Marcar como perdido"><span class="lead-action-icon lead-action-x" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button lead-del-btn" data-delete-lead="${lead.id}" type="button" title="Excluir lead" aria-label="Excluir lead"><span class="lead-action-icon lead-action-trash" aria-hidden="true"></span></button>
                 </div>
@@ -3074,7 +3074,7 @@ function updateSvAvailability() {
 
   const studentName = (appt) => {
     const s = state.students.find((st) => st.id === appt.studentId);
-    return s?.name || "Aluno";
+    return s?.name || "Cliente";
   };
   const profName = (appt) => professionalName(appt.teacherId) || "—";
 
@@ -3189,14 +3189,14 @@ function registerStudentFromLead(leadId) {
   const lead = state.leads.find((l) => l.id === leadId);
   if (!lead) return;
   if (lead.linkedStudentId && state.students.find((s) => s.id === lead.linkedStudentId)) {
-    toast("Aluno já cadastrado para este lead.");
+    toast("Cliente já cadastrado para este lead.");
     return;
   }
   _pendingStudentLeadId = leadId;
   switchView("students");
   editingStudentId = null;
   openModal("student", { name: lead.name, email: lead.email || "", phone: lead.phone || "" });
-  document.querySelector("#modalTitle").textContent = "Cadastrar aluno";
+  document.querySelector("#modalTitle").textContent = "Cadastrar cliente";
 }
 
 function convertLead(leadId) {
@@ -3204,7 +3204,7 @@ function convertLead(leadId) {
   if (!lead) return;
   const student = state.students.find((s) => s.id === lead.linkedStudentId);
   if (!student) {
-    toast("Cadastre o aluno primeiro antes de realizar a matrícula.");
+    toast("Cadastre o cliente primeiro antes de realizar a matrícula.");
     return;
   }
   saveState();
@@ -3298,7 +3298,7 @@ function appointmentPersonName(item) {
     if (lead) return lead.name;
   }
   if (item.studentId) return studentName(item.studentId);
-  return "Sem aluno";
+  return "Sem cliente";
 }
 
 function renderCalendarEvent(item) {
@@ -3335,7 +3335,7 @@ function renderAgendaList() {
           <tr>
             <th>Data</th>
             <th>Horário</th>
-            <th>Aluno/Paciente</th>
+            <th>Cliente</th>
             <th>Modalidade</th>
             <th>Profissional</th>
             <th>Status</th>
@@ -3403,8 +3403,8 @@ function renderStudents() {
             <tr>
               <td>
                 <div class="row-actions">
-                  <button class="row-action-button edit-icon-button" data-edit-student="${item.id}" type="button" title="Editar paciente" aria-label="Editar paciente">✎</button>
-                  <button class="row-action-button delete-icon-button" data-delete-student="${item.id}" type="button" title="Excluir paciente" aria-label="Excluir paciente">×</button>
+                  <button class="row-action-button edit-icon-button" data-edit-student="${item.id}" type="button" title="Editar cliente" aria-label="Editar cliente">✎</button>
+                  <button class="row-action-button delete-icon-button" data-delete-student="${item.id}" type="button" title="Excluir cliente" aria-label="Excluir cliente">×</button>
                 </div>
               </td>
               <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${studentActivePlan(item.id)}</span></div></td>
@@ -3416,7 +3416,7 @@ function renderStudents() {
           `,
         )
         .join("")
-    : `<tr><td colspan="6"><div class="empty-state">Nenhum paciente encontrado.</div></td></tr>`;
+    : `<tr><td colspan="6"><div class="empty-state">Nenhum cliente encontrado.</div></td></tr>`;
 }
 
 function renderEnrollments() {
@@ -3748,7 +3748,7 @@ function monthlyRows() {
       return {
         id: `m${enrollment.id}`,
         studentId: enrollment.studentId,
-        patient: studentItem.name ?? "Aluno removido",
+        patient: studentItem.name ?? "Cliente removido",
         dueDate: `2026-05-${dueDay}`,
         status,
         method,
@@ -3965,7 +3965,7 @@ function issueFiscalInvoice(monthlyId, options = {}) {
   if (options.silent) return invoice;
   saveState();
   render();
-  toast(invoice.status === "Autorizada" ? "NFS-e autorizada." : "NFS-e rejeitada: revise os dados do aluno.");
+  toast(invoice.status === "Autorizada" ? "NFS-e autorizada." : "NFS-e rejeitada: revise os dados do cliente.");
   return invoice;
 }
 
@@ -5446,7 +5446,7 @@ function clearOfxImport() {
 
 function deleteStudent(studentId) {
   const item = state.students.find((studentItem) => studentItem.id === studentId);
-  if (!item || !window.confirm(`Excluir o paciente ${item.name}?`)) return;
+  if (!item || !window.confirm(`Excluir o cliente ${item.name}?`)) return;
   rememberDeletedEntities("students", studentId);
   rememberDeletedEntities("appointments", state.appointments.filter((appointment) => appointment.studentId === studentId).map((appointment) => appointment.id));
   rememberDeletedEntities("payments", state.payments.filter((payment) => payment.studentId === studentId).map((payment) => payment.id));
@@ -5457,7 +5457,7 @@ function deleteStudent(studentId) {
   state.records = state.records.filter((record) => record.studentId !== studentId);
   saveDeletedState();
   render();
-  toast("Paciente excluído.");
+  toast("Cliente excluído.");
 }
 
 function deleteProfessional(professionalId) {
@@ -5590,7 +5590,7 @@ function renderLinkedEnrollments(professionalId) {
     .map((appointment, index) => {
       const patient = student(appointment.studentId);
       return {
-        name: patient?.name ?? "Paciente removido",
+        name: patient?.name ?? "Cliente removido",
         date: appointment.date,
         amount: 190 + ((index % 5) * 75),
         payment: index % 3 === 0 ?"Trimestralidade" : "Mensalidade",
@@ -5697,7 +5697,7 @@ function renderPatientEnrollmentHistory(studentId = "") {
   const table = document.querySelector("#patientEnrollmentHistoryTable");
   if (!table) return;
   if (!studentId) {
-    table.innerHTML = `<tr><td colspan="8"><div class="empty-state">Histórico disponível após salvar o paciente.</div></td></tr>`;
+    table.innerHTML = `<tr><td colspan="8"><div class="empty-state">Histórico disponível após salvar o cliente.</div></td></tr>`;
     return;
   }
   const enrollments = state.enrollments
@@ -5724,7 +5724,7 @@ function renderPatientEnrollmentHistory(studentId = "") {
           `;
         })
         .join("")
-    : `<tr><td colspan="8"><div class="empty-state">Nenhuma matrícula vinculada ao paciente.</div></td></tr>`;
+    : `<tr><td colspan="8"><div class="empty-state">Nenhuma matrícula vinculada ao cliente.</div></td></tr>`;
 }
 
 function savePatientEditor() {
@@ -5749,7 +5749,7 @@ function savePatientEditor() {
   saveState();
   renderStudents();
   switchView("students");
-  toast("Cadastro do paciente salvo.");
+  toast("Cadastro do cliente salvo.");
 }
 
 function renderPatientLeadOptions(selectedValue = "") {
@@ -6063,7 +6063,7 @@ function openModal(type, values = {}) {
     const enrollFields = fields.filter((f) => f.enroll && f.name !== "_henroll");
     form.innerHTML = `
       <div class="modal-tabs">
-        <button type="button" class="modal-tab active" data-modal-tab="data">Dados do aluno</button>
+        <button type="button" class="modal-tab active" data-modal-tab="data">Dados do cliente</button>
         <button type="button" class="modal-tab" data-modal-tab="enroll">Matrícula</button>
       </div>
       <div class="modal-tab-panel active" data-modal-tab-panel="data">${dataFields.map(renderField).join("")}</div>
@@ -6143,7 +6143,7 @@ function syncStudentLookup(input, allowPartial = false) {
   const hidden = form?.elements[input.dataset.studentTarget];
   const studentMatch = allowPartial ? findStudentByLookup(input.value) : state.students.find((item) => normalizedText(item.name) === normalizedText(input.value));
   if (hidden) hidden.value = studentMatch?.id || "";
-  input.setCustomValidity(studentMatch ? "" : "Selecione um paciente cadastrado.");
+  input.setCustomValidity(studentMatch ? "" : "Selecione um cliente cadastrado.");
   return Boolean(studentMatch);
 }
 
@@ -6582,7 +6582,7 @@ document.addEventListener("click", (event) => {
     }
     if (scheduleAction.dataset.action === "replacement" && appointment) {
       if (replacementBalance(appointment.studentId) <= 0 && !appointment.replacementUsed) {
-        toast("Aluno sem crédito de reposição disponível.");
+        toast("Cliente sem crédito de reposição disponível.");
         return;
       }
       appointment.status = "Reposta";
@@ -6641,7 +6641,7 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
       const duplicate = state.students.find((s) => s.cpf && s.cpf.replace(/\D/g, "") === cpfVal);
       if (duplicate) {
         const cpfField = form.elements.cpf;
-        cpfField.setCustomValidity(`CPF já cadastrado para o aluno "${duplicate.name}".`);
+        cpfField.setCustomValidity(`CPF já cadastrado para o cliente "${duplicate.name}".`);
         cpfField.reportValidity();
         cpfField.setCustomValidity("");
         return;
@@ -6650,11 +6650,11 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
     if (_pendingStudentLeadId && (!form.elements.modalityId?.value || !form.elements.planId?.value)) {
       const planField = form.elements.planId || form.elements.modalityId;
       if (planField) {
-        planField.setCustomValidity("Cadastre uma matrícula para salvar o novo aluno/cliente.");
+        planField.setCustomValidity("Cadastre uma matrícula para salvar o novo cliente.");
         planField.reportValidity();
         planField.setCustomValidity("");
       } else {
-        toast("Cadastre uma matrícula para salvar o novo aluno/cliente.");
+        toast("Cadastre uma matrícula para salvar o novo cliente.");
       }
       return;
     }
@@ -7154,3 +7154,5 @@ render();
 })();
 
 hydrateStateFromNeon();
+
+
