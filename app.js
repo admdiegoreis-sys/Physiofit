@@ -748,7 +748,7 @@ const modalSchemas = {
           planType: planTypeLabel(enrollValues.planType || plan?.type),
           leadId: leadId || "",
           status: "Ativa",
-          dueDay: 10,
+          dueDay: Number((enrollValues.firstPaymentDate || enrollValues.startDate || demoToday).split("-")[2]) || 10,
         }, state.enrollments.length);
         state.enrollments.push(normalized);
         if (leadId) {
