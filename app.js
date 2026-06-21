@@ -866,6 +866,9 @@ const modalSchemas = {
     handler: (values) => {
       const plan = state.plans.find((item) => item.id === values.planId);
       const enrollmentId = editingEnrollmentId || uid("e");
+      const previousStatus = editingEnrollmentId
+        ? state.enrollments.find((e) => e.id === editingEnrollmentId)?.status
+        : null;
       const normalized = normalizeEnrollment({
         id: enrollmentId,
         ...values,
@@ -898,6 +901,11 @@ const modalSchemas = {
       }
       ensureEnrollmentFinancialTitles(normalized);
       ensureEnrollmentAppointments(normalized);
+      if (normalized.status === "Cancelada" && previousStatus && previousStatus !== "Cancelada") {
+        cancelEnrollmentFutureItems(normalized);
+      } else {
+        ensureAutoRenewalTitles(normalized);
+      }
     },
   },
   payment: {
@@ -1078,14 +1086,19 @@ function chartAccountFields() {
 }
 
 function loadState() {
+  const withProjections = (data) => {
+    state = normalizeState(data);
+    refreshAutoRenewalProjections();
+    return state;
+  };
   const saved = localStorage.getItem(storageKey);
-  if (!saved) return normalizeState(structuredClone(seedData));
+  if (!saved) return withProjections(structuredClone(seedData));
   try {
     const parsed = JSON.parse(saved);
-    if (parsed.dataVersion !== seedData.dataVersion) return normalizeState(structuredClone(seedData));
-    return normalizeState(parsed);
+    if (parsed.dataVersion !== seedData.dataVersion) return withProjections(structuredClone(seedData));
+    return withProjections(parsed);
   } catch {
-    return normalizeState(structuredClone(seedData));
+    return withProjections(structuredClone(seedData));
   }
 }
 
@@ -1728,6 +1741,7 @@ async function hydrateStateFromNeon() {
     if (data.data.dataVersion !== seedData.dataVersion) {
       applyingRemoteState = true;
       state = normalizeState(structuredClone(seedData));
+      refreshAutoRenewalProjections();
       ensureContractForecasts();
       localStorage.setItem(storageKey, JSON.stringify(state));
       applyingRemoteState = false;
@@ -1740,6 +1754,7 @@ async function hydrateStateFromNeon() {
     }
     applyingRemoteState = true;
     state = normalizeState(data.data);
+    refreshAutoRenewalProjections();
     ensureContractForecasts();
     localStorage.setItem(storageKey, JSON.stringify(state));
     applyingRemoteState = false;
@@ -2031,6 +2046,121 @@ function ensureEnrollmentFinancialTitles(enrollment) {
   enrollment.financialTitlesGenerated = titles.length > 0;
 }
 
+function autoRenewalProjectedEnd() {
+  return addMonthsToIsoDate(demoToday, 3);
+}
+
+function ensureAutoRenewalTitles(enrollment) {
+  if (!enrollment?.id || enrollment.autoRenew !== "Sim" || enrollment.status === "Cancelada") return;
+  const planType = planTypeLabel(enrollment.planType || state.plans.find((p) => p.id === enrollment.planId)?.type);
+  if (planType !== "Mensal") return;
+  const projEnd = autoRenewalProjectedEnd();
+  const existing = state.accounts.filter((a) => a.enrollmentId === enrollment.id && !a.description?.startsWith("Taxa"));
+  if (!existing.length) return;
+  const lastDate = existing.map((a) => a.forecastDate || "").sort().pop();
+  if (!lastDate || lastDate >= projEnd) return;
+  const relatedStudent = student(enrollment.studentId);
+  const plan = state.plans.find((p) => p.id === enrollment.planId);
+  const chartAccount = state.chartAccounts.find((c) => c.id === plan?.chartAccountId) || revenueChartAccountForModality(enrollment.modalityId);
+  const discount = Number(enrollment.discount || 0);
+  const baseAmount = Number(enrollment.monthlyValue || plan?.value || 0);
+  const amount = Math.max(0, baseAmount - discount);
+  if (!baseAmount) return;
+  let cursor = addMonthsToIsoDate(lastDate, 1);
+  while (cursor <= projEnd) {
+    const alreadyExists = existing.some((a) => a.forecastDate === cursor) || state.accounts.some((a) => a.enrollmentId === enrollment.id && a.forecastDate === cursor);
+    if (!alreadyExists) {
+      state.accounts.push(normalizeAccount({
+        id: uid("cp"),
+        direction: "Receber",
+        status: "Aberto",
+        competenceDate: cursor,
+        forecastDate: cursor,
+        dueDate: cursor,
+        paidDate: "",
+        amount,
+        originalAmount: baseAmount,
+        paidAmount: 0,
+        openAmount: amount,
+        description: `Mensalidade: ${displayName(relatedStudent?.name || "Cliente")}`,
+        person: relatedStudent?.name || "",
+        document: relatedStudent?.cpf || "",
+        modalityId: enrollment.modalityId,
+        teacherId: enrollment.professionalId,
+        chartAccountId: chartAccount?.id || "",
+        paymentMethod: enrollment.paymentMethod || "Pix",
+        origin: "Matrícula",
+        enrollmentId: enrollment.id,
+        reconciliationStatus: "unreconciled",
+        projected: true,
+      }, state.accounts.length));
+    }
+    cursor = addMonthsToIsoDate(cursor, 1);
+  }
+}
+
+function addMissingAutoRenewalAppointments(enrollment) {
+  if (!enrollment?.id || enrollment.autoRenew !== "Sim" || enrollment.status === "Cancelada") return;
+  const _pt = planTypeLabel(enrollment.planType || state.plans.find((p) => p.id === enrollment.planId)?.type);
+  if (_pt === "Avulsa" || _pt === "Pacote") return;
+  const dayFields = [
+    ["mondayTime", 1], ["tuesdayTime", 2], ["wednesdayTime", 3],
+    ["thursdayTime", 4], ["fridayTime", 5],
+  ];
+  const selectedDays = dayFields.filter(([field]) => enrollment[field]);
+  if (!selectedDays.length || !enrollment.startDate) return;
+  const projEnd = autoRenewalProjectedEnd();
+  const existingDates = new Set(
+    state.appointments.filter((a) => a.enrollmentId === enrollment.id).map((a) => a.date),
+  );
+  const latestExisting = [...existingDates].sort().pop();
+  const startFrom = latestExisting ? addDays(parseLocalDate(latestExisting), 1) : parseLocalDate(enrollment.startDate);
+  const endLimit = parseLocalDate(projEnd).getTime();
+  const newAppts = [];
+  let cursor = startFrom;
+  while (cursor.getTime() <= endLimit) {
+    selectedDays.forEach(([field, weekDay]) => {
+      if (cursor.getDay() !== weekDay) return;
+      const dateStr = isoDate(cursor);
+      if (existingDates.has(dateStr)) return;
+      newAppts.push({
+        id: uid("a"),
+        enrollmentId: enrollment.id,
+        date: dateStr,
+        time: enrollment[field],
+        endTime: addOneHour(enrollment[field]),
+        studentId: enrollment.studentId,
+        teacherId: enrollment.professionalId,
+        room: enrollment.room || "",
+        type: modalityName(enrollment.modalityId) || "Pilates",
+        status: "Agendada",
+        sessionKind: planTypeLabel(enrollment.planType),
+      });
+    });
+    cursor = addDays(cursor, 1);
+  }
+  state.appointments.push(...newAppts);
+}
+
+function cancelEnrollmentFutureItems(enrollment) {
+  const futureAccountIds = state.accounts
+    .filter((a) => a.enrollmentId === enrollment.id && !a.paidDate && (a.forecastDate || a.dueDate) > demoToday)
+    .map((a) => a.id);
+  if (futureAccountIds.length) {
+    rememberDeletedEntities("accounts", futureAccountIds);
+    state.accounts = state.accounts.filter((a) => !futureAccountIds.includes(a.id));
+  }
+}
+
+function refreshAutoRenewalProjections() {
+  state.enrollments
+    .filter((e) => e.autoRenew === "Sim" && e.status !== "Cancelada")
+    .forEach((enrollment) => {
+      ensureAutoRenewalTitles(enrollment);
+      addMissingAutoRenewalAppointments(enrollment);
+    });
+}
+
 function syncPlanChartAccountToFinancialTitles(planId = "", chartAccountId = "") {
   if (!planId || !chartAccountId) return;
   const enrollmentIds = new Set(state.enrollments.filter((item) => item.planId === planId).map((item) => item.id));
@@ -2057,7 +2187,10 @@ function ensureEnrollmentAppointments(enrollment) {
   ];
   const selectedDays = dayFields.filter(([field]) => enrollment[field]);
   if (!selectedDays.length || !enrollment.startDate || !enrollment.endDate) return;
-  const endLimit = parseLocalDate(enrollment.endDate).getTime();
+  const effectiveEnd = enrollment.autoRenew === "Sim"
+    ? (autoRenewalProjectedEnd() > enrollment.endDate ? autoRenewalProjectedEnd() : enrollment.endDate)
+    : enrollment.endDate;
+  const endLimit = parseLocalDate(effectiveEnd).getTime();
   const appointments = [];
   let cursor = parseLocalDate(enrollment.startDate);
   while (cursor.getTime() <= endLimit) {
@@ -7179,6 +7312,7 @@ document.querySelector("#copyPortalButton").addEventListener("click", async () =
 
 document.querySelector("#seedButton")?.addEventListener("click", () => {
   state = normalizeState(structuredClone(seedData));
+  refreshAutoRenewalProjections();
   ensureContractForecasts();
   saveState();
   render();
