@@ -3375,6 +3375,48 @@ td.row-actions .row-action-button:last-child {
   padding-bottom: 6px;
   margin: 6px 0 -2px;
 }
+.modal-section-heading--enroll {
+  color: #1a7a4a;
+  border-bottom-color: #6fcfa0;
+  background: #edfbf3;
+  padding: 6px 10px;
+  border-radius: 6px 6px 0 0;
+  margin-bottom: 0;
+}
+.enroll-field {
+  background: #f0fdf6;
+  border: 1px solid #b3e8cc;
+  border-radius: 6px;
+  padding: 6px 10px 4px;
+}
+.modal-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 4px;
+}
+.modal-tab {
+  padding: 8px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  transition: color .15s, border-color .15s;
+}
+.modal-tab.active {
+  color: var(--accent, #3b7fd4);
+  border-bottom-color: var(--accent, #3b7fd4);
+}
+.modal-tab-panel {
+  display: none;
+}
+.modal-tab-panel.active {
+  display: contents;
+}
 
 .form-grid label,
 .modal-body label {

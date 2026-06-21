@@ -631,14 +631,21 @@ const modalSchemas = {
     ],
     handler: (values) => {
       if (editingAppointmentId) {
+        let savedAppointment = null;
         state.appointments = state.appointments.map((item) => {
           if (item.id !== editingAppointmentId) return item;
-          return { ...item, ...values, notes: appendNote(values.notes || item.notes, "Remarcação") };
+          savedAppointment = { ...item, ...values, notes: appendNote(values.notes || item.notes, "Remarcação") };
+          return savedAppointment;
         });
         if (values.date) {
           state.leads = state.leads.map((lead) =>
-            lead.linkedAppointmentId === editingAppointmentId ? { ...lead, visitDate: values.date } : lead
+            (lead.linkedAppointmentId === editingAppointmentId || savedAppointment?.leadId === lead.id)
+              ? { ...lead, visitDate: values.date }
+              : lead
           );
+        }
+        if (values.status === "Visita realizada" && savedAppointment) {
+          updateLeadAfterVisit(savedAppointment);
         }
       } else {
         state.appointments.push({ id: uid("a"), ...values });
@@ -683,6 +690,21 @@ const modalSchemas = {
       { name: "neighborhood", label: "Bairro", type: "text", value: "", required: false },
       { name: "city", label: "Cidade", type: "text", value: "", required: false },
       { name: "stateCode", label: "UF", type: "text", value: "", required: false },
+      { name: "_henroll", label: "Matrícula (opcional)", type: "heading", enroll: true },
+      { name: "modalityId", label: "Modalidade", type: "modalityId", required: false, enroll: true },
+      { name: "planType", label: "Tipo de plano", type: "select", options: ["", "Avulsa", "Pacote", "Mensal", "Trimestral", "Semestral"], value: "", required: false, enroll: true },
+      { name: "planId", label: "Plano", type: "planId", required: false, enroll: true },
+      { name: "professionalId", label: "Profissional", type: "professionalOptional", required: false, enroll: true },
+      { name: "room", label: "Sala", type: "roomOptional", value: "", required: false, enroll: true },
+      { name: "startDate", label: "Data de início", type: "date", value: demoToday, required: false, enroll: true },
+      { name: "sessions", label: "Sessões por semana", type: "number", value: "", required: false, enroll: true },
+      { name: "mondayTime", label: "Segunda-feira", type: "time", value: "", required: false, enroll: true },
+      { name: "tuesdayTime", label: "Terça-feira", type: "time", value: "", required: false, enroll: true },
+      { name: "wednesdayTime", label: "Quarta-feira", type: "time", value: "", required: false, enroll: true },
+      { name: "thursdayTime", label: "Quinta-feira", type: "time", value: "", required: false, enroll: true },
+      { name: "fridayTime", label: "Sexta-feira", type: "time", value: "", required: false, enroll: true },
+      { name: "monthlyValue", label: "Valor da mensalidade", type: "number", value: "", required: false, enroll: true },
+      { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["", "Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Dinheiro", "Transferência"], value: "", required: false, enroll: true },
       { name: "_h4", label: "Saúde / Prontuário", type: "heading" },
       { name: "clinicalGoal", label: "Objetivo do paciente", type: "textarea", value: "", required: false },
       { name: "restrictions", label: "Restrições / dores / contraindicações", type: "textarea", value: "", required: false },
@@ -697,13 +719,43 @@ const modalSchemas = {
       { name: "notes", label: "Observações gerais", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
+      const enrollFields = ["modalityId","planType","planId","professionalId","room","startDate","sessions","mondayTime","tuesdayTime","wednesdayTime","thursdayTime","fridayTime","monthlyValue","paymentMethod"];
+      const enrollValues = Object.fromEntries(enrollFields.map(k => [k, values[k]]));
+      enrollFields.forEach(k => delete values[k]);
       const newStudent = { id: uid("s"), gender: "F", lastPresence: "-", ...values };
       state.students.push(newStudent);
-      if (_pendingStudentLeadId) {
+      const leadId = _pendingStudentLeadId;
+      if (leadId) {
         state.leads = state.leads.map((lead) =>
-          lead.id === _pendingStudentLeadId ? { ...lead, linkedStudentId: newStudent.id } : lead
+          lead.id === leadId ? { ...lead, linkedStudentId: newStudent.id } : lead
         );
         _pendingStudentLeadId = null;
+      }
+      if (enrollValues.modalityId && enrollValues.planId) {
+        const plan = state.plans.find(p => p.id === enrollValues.planId);
+        const enrollmentId = uid("e");
+        const normalized = normalizeEnrollment({
+          id: enrollmentId,
+          studentId: newStudent.id,
+          ...enrollValues,
+          monthlyValue: Number(enrollValues.monthlyValue || plan?.value || 0),
+          sessions: Number(enrollValues.sessions || weeklySessionsFromPlan(plan) || 0),
+          startDate: enrollValues.startDate || demoToday,
+          endDate: calculatedEnrollmentEndDate(enrollValues.startDate || demoToday, enrollValues.planType || plan?.type),
+          firstPaymentDate: enrollValues.startDate || demoToday,
+          planType: planTypeLabel(enrollValues.planType || plan?.type),
+          leadId: leadId || "",
+          status: "Ativa",
+          dueDay: 10,
+        }, state.enrollments.length);
+        state.enrollments.push(normalized);
+        if (leadId) {
+          state.leads = state.leads.map(lead =>
+            lead.id === leadId ? { ...lead, status: "Matriculado", linkedEnrollmentId: enrollmentId, history: `${lead.history || ""}\nMatriculado em ${dateLabel(demoToday)}.`.trim() } : lead
+          );
+        }
+        ensureEnrollmentFinancialTitles(normalized);
+        ensureEnrollmentAppointments(normalized);
       }
     },
   },
@@ -3080,22 +3132,7 @@ function saveScheduleVisit() {
     return;
   }
 
-  let student = state.students.find((item) => normalizedText(item.name) === normalizedText(lead.name) || item.id === lead.linkedStudentId);
-  const studentId = student?.id || uid("s");
-  if (!student) {
-    state.students.push(normalizeStudent({
-      id: studentId,
-      name: lead.name,
-      email: lead.email,
-      phone: lead.phone,
-      plan: "Experimental",
-      status: "Ativo",
-      membership: "Avulsa",
-      origin: lead.origin,
-      registrationDate: demoToday,
-      commercialNotes: lead.notes,
-    }, state.students.length));
-  }
+  const studentId = lead.linkedStudentId || "";
 
   const appointment = {
     id: uid("a"),
@@ -3103,6 +3140,7 @@ function saveScheduleVisit() {
     time,
     endTime,
     studentId,
+    leadId: lead.id,
     teacherId: profId,
     room,
     type: lead.interest === "Outro" ? "Pilates" : (lead.interest || "Pilates"),
@@ -3113,7 +3151,7 @@ function saveScheduleVisit() {
 
   lead.status = "Visita agendada";
   lead.visitDate = date;
-  lead.linkedStudentId = studentId;
+  if (studentId) lead.linkedStudentId = studentId;
   lead.linkedAppointmentId = appointment.id;
   lead.history = `${lead.history || ""}\nExperimental agendada para ${dateLabel(date)} às ${time}.`.trim();
 
@@ -3247,13 +3285,36 @@ function renderCalendarGrid(days) {
   `;
 }
 
+function updateLeadAfterVisit(appointment) {
+  if (!appointment?.id) return;
+  let updated = 0;
+  state.leads = state.leads.map((lead) => {
+    const byAppointmentId = lead.linkedAppointmentId && lead.linkedAppointmentId === appointment.id;
+    const byLeadId = appointment.leadId && appointment.leadId === lead.id;
+    const byStudent = appointment.studentId && appointment.studentId === lead.linkedStudentId;
+    console.log("[updateLeadAfterVisit]", { leadId: lead.id, leadName: lead.name, leadStatus: lead.status, linkedAppointmentId: lead.linkedAppointmentId, appointmentId: appointment.id, appointmentLeadId: appointment.leadId, appointmentStudentId: appointment.studentId, linkedStudentId: lead.linkedStudentId, byAppointmentId, byLeadId, byStudent });
+    if (!byAppointmentId && !byLeadId && !byStudent) return lead;
+    if (["Matriculado", "Perdido"].includes(lead.status)) return lead;
+    updated++;
+    return { ...lead, status: "Visita realizada" };
+  });
+  console.log("[updateLeadAfterVisit] leads atualizados:", updated);
+}
+
+function appointmentPersonName(item) {
+  if (item.studentId) return studentName(item.studentId);
+  if (item.leadId) return state.leads.find(l => l.id === item.leadId)?.name || "Lead";
+  return "Sem aluno";
+}
+
 function renderCalendarEvent(item) {
   const relatedStudent = student(item.studentId);
   const relatedProfessional = professional(item.teacherId);
+  const personName = appointmentPersonName(item);
   return `
-    <article class="calendar-event ${statusClass(item.status)}" style="${relatedProfessional?.color ?`background:${relatedProfessional.color}` : ""}" data-action="reschedule" data-id="${item.id}" title="Editar/remarcar ${item.type} - ${studentName(item.studentId)}">
+    <article class="calendar-event ${statusClass(item.status)}" style="${relatedProfessional?.color ?`background:${relatedProfessional.color}` : ""}" data-action="reschedule" data-id="${item.id}" title="Editar/remarcar ${item.type} - ${personName}">
       <span>${item.time} - ${item.endTime}</span>
-      <strong>${studentName(item.studentId).toUpperCase()}</strong>
+      <strong>${personName.toUpperCase()}</strong>
       <small>${professionalName(item.teacherId)} · ${relatedStudent?.plan ?? item.sessionKind}</small>
       <button class="cal-event-delete" data-action="delete-appointment" data-id="${item.id}" type="button" title="Excluir agendamento" aria-label="Excluir agendamento">×</button>
     </article>
@@ -6005,8 +6066,30 @@ function openModal(type, values = {}) {
   document.querySelector("#modalTitle").textContent = schema.title;
   form.dataset.type = type;
   const fields = schema.fields.map((field) => ({ ...field, value: values[field.name] ?? field.value }));
-  form.innerHTML = [...fields.map(renderField), `<button class="primary-button" type="submit">${schema.submit}</button>`].join("");
-  if (type === "enrollment") {
+  if (type === "student") {
+    const dataFields = fields.filter((f) => !f.enroll && f.name !== "_henroll");
+    const enrollFields = fields.filter((f) => f.enroll && f.name !== "_henroll");
+    form.innerHTML = `
+      <div class="modal-tabs">
+        <button type="button" class="modal-tab active" data-modal-tab="data">Dados do aluno</button>
+        <button type="button" class="modal-tab" data-modal-tab="enroll">Matrícula</button>
+      </div>
+      <div class="modal-tab-panel active" data-modal-tab-panel="data">${dataFields.map(renderField).join("")}</div>
+      <div class="modal-tab-panel" data-modal-tab-panel="enroll">${enrollFields.map(renderField).join("")}</div>
+      <button class="primary-button" type="submit">${schema.submit}</button>
+    `;
+    form.querySelectorAll(".modal-tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        form.querySelectorAll(".modal-tab").forEach((b) => b.classList.remove("active"));
+        form.querySelectorAll(".modal-tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        form.querySelector(`[data-modal-tab-panel="${btn.dataset.modalTab}"]`)?.classList.add("active");
+      });
+    });
+  } else {
+    form.innerHTML = [...fields.map(renderField), `<button class="primary-button" type="submit">${schema.submit}</button>`].join("");
+  }
+  if (type === "enrollment" || type === "student") {
     updateEnrollmentPlanOptions(form);
     applyEnrollmentPlanDefaults(form, false);
   }
@@ -6021,7 +6104,7 @@ function plansForModality(modalityId = "") {
 }
 
 function updateEnrollmentPlanOptions(form) {
-  if (!form || form.dataset.type !== "enrollment") return;
+  if (!form || (form.dataset.type !== "enrollment" && form.dataset.type !== "student")) return;
   const planSelect = form.elements.planId;
   if (!planSelect) return;
   const modalityId = form.elements.modalityId?.value || "";
@@ -6029,14 +6112,16 @@ function updateEnrollmentPlanOptions(form) {
   const selected = planSelect.value;
   let plans = plansForModality(modalityId);
   if (planType) plans = plans.filter((item) => planTypeLabel(item.type) === planTypeLabel(planType));
+  const isOptionalPlan = planSelect.closest("form")?.dataset.type === "student";
+  const emptyOpt = isOptionalPlan ? `<option value="">Sem plano</option>` : "";
   planSelect.innerHTML = plans.length
-    ? plans.map((item) => `<option value="${item.id}">${escapeHtml(displayName(item.name))}</option>`).join("")
+    ? emptyOpt + plans.map((item) => `<option value="${item.id}">${escapeHtml(displayName(item.name))}</option>`).join("")
     : `<option value="">Nenhum plano para este tipo</option>`;
-  planSelect.value = plans.some((item) => item.id === selected) ? selected : plans[0]?.id || "";
+  planSelect.value = plans.some((item) => item.id === selected) ? selected : (isOptionalPlan ? "" : plans[0]?.id || "");
 }
 
 function applyEnrollmentPlanDefaults(form, overwrite = true) {
-  if (!form || form.dataset.type !== "enrollment") return;
+  if (!form || (form.dataset.type !== "enrollment" && form.dataset.type !== "student")) return;
   const plan = state.plans.find((item) => item.id === form.elements.planId?.value);
   if (!plan) return;
   const setIfNeeded = (name, value) => {
@@ -6073,6 +6158,7 @@ function syncStudentLookup(input, allowPartial = false) {
 function renderField(field) {
   const required = field.required === false ? "" : "required";
   const isSelected = (value) => String(value ?? "") === String(field.value ?? "") ? "selected" : "";
+  const ec = field.enroll ? ' class="enroll-field"' : "";
 
   if (field.type === "student") {
     const selectedStudent = state.students.find((item) => item.id === field.value) || state.students[0] || {};
@@ -6102,7 +6188,7 @@ function renderField(field) {
   }
   if (field.type === "professionalOptional") {
     return `
-      <label>${field.label}
+      <label${ec}>${field.label}
         <select name="${field.name}" ${required}>
           <option value="" ${isSelected("")}>Sem profissional</option>
           ${activeProfessionals().map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.name}</option>`).join("")}
@@ -6113,7 +6199,7 @@ function renderField(field) {
   if (field.type === "modality") {
     const options = activeModalities();
     return `
-      <label>${field.label}
+      <label${ec}>${field.label}
         <select name="${field.name}" ${required}>
           ${options.map((item) => `<option value="${item.name}" ${isSelected(item.name)}>${item.name}</option>`).join("")}
         </select>
@@ -6123,7 +6209,7 @@ function renderField(field) {
   if (field.type === "modalityId") {
     const options = activeModalities();
     return `
-      <label>${field.label}
+      <label${ec}>${field.label}
         <select name="${field.name}" ${required}>
           <option value="" ${isSelected("")}>${required ? "" : "Sem modalidade"}</option>
           ${options.map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${item.name}</option>`).join("")}
@@ -6181,9 +6267,11 @@ function renderField(field) {
     `;
   }
   if (field.type === "planId") {
+    const emptyPlanOpt = field.required === false ? `<option value="" ${isSelected("")}>Sem plano</option>` : "";
     return `
-      <label>${field.label}
+      <label${ec}>${field.label}
         <select name="${field.name}" ${required}>
+          ${emptyPlanOpt}
           ${activePlans().map((item) => `<option value="${item.id}" ${isSelected(item.id)}>${escapeHtml(displayName(item.name))}</option>`).join("")}
         </select>
       </label>
@@ -6199,26 +6287,27 @@ function renderField(field) {
       { value: "Sala Funcional", label: "Sala Funcional" },
     ];
     return `
-      <label>${field.label}
+      <label${ec}>${field.label}
         <select name="${field.name}" ${required}>
           ${options.map((option) => `<option value="${option.value}" ${isSelected(option.value)}>${option.label}</option>`).join("")}
         </select>
       </label>
     `;
   }
-  if (field.type === "heading") return `<p class="modal-section-heading">${field.label}</p>`;
+  if (field.type === "heading") return `<p class="modal-section-heading${field.enroll ? " modal-section-heading--enroll" : ""}">${field.label}</p>`;
   if (field.type === "select") {
     return `
-      <label>${field.label}
+      <label${ec}>${field.label}
         <select name="${field.name}" ${required}>
           ${field.options.map((option) => `<option ${isSelected(option)}>${option}</option>`).join("")}
         </select>
       </label>
     `;
   }
-  if (field.type === "textarea") return `<label>${field.label}<textarea name="${field.name}" rows="4" ${required}>${field.value ?? ""}</textarea></label>`;
+  const enrollClass = field.enroll ? ' class="enroll-field"' : "";
+  if (field.type === "textarea") return `<label${enrollClass}>${field.label}<textarea name="${field.name}" rows="4" ${required}>${field.value ?? ""}</textarea></label>`;
   const extraAttrs = field.type === "number" ? ' step="any"' : "";
-  return `<label>${field.label}<input name="${field.name}" type="${field.type}" value="${field.value ?? ""}"${extraAttrs} ${required} /></label>`;
+  return `<label${enrollClass}>${field.label}<input name="${field.name}" type="${field.type}" value="${field.value ?? ""}"${extraAttrs} ${required} /></label>`;
 }
 
 function closeModal() {
@@ -6489,11 +6578,7 @@ document.addEventListener("click", (event) => {
       appointment.status = "Visita realizada";
       const relatedStudent = state.students.find((item) => item.id === appointment.studentId);
       if (relatedStudent) relatedStudent.lastPresence = appointment.date;
-      state.leads = state.leads.map((lead) =>
-        lead.linkedAppointmentId === appointment.id && !["Matriculado", "Perdido"].includes(lead.status)
-          ? { ...lead, status: "Visita realizada" }
-          : lead
-      );
+      updateLeadAfterVisit(appointment);
     }
     if (scheduleAction.dataset.action === "missed" && appointment) {
       appointment.status = "Faltou";
@@ -6600,12 +6685,16 @@ document.querySelector("#modalForm").addEventListener("input", (event) => {
 
 document.querySelector("#modalForm").addEventListener("change", (event) => {
   const form = event.currentTarget;
-  if (form.dataset.type === "enrollment" && ["modalityId", "planType"].includes(event.target.name)) {
+  if (["appointment", "block"].includes(form.dataset.type) && event.target.name === "time" && form.elements.endTime) {
+    form.elements.endTime.value = addOneHour(event.target.value);
+    return;
+  }
+  if (["enrollment", "student"].includes(form.dataset.type) && ["modalityId", "planType"].includes(event.target.name)) {
     updateEnrollmentPlanOptions(form);
     applyEnrollmentPlanDefaults(form, true);
     return;
   }
-  if (form.dataset.type === "enrollment" && ["planId", "startDate"].includes(event.target.name)) {
+  if (["enrollment", "student"].includes(form.dataset.type) && ["planId", "startDate"].includes(event.target.name)) {
     applyEnrollmentPlanDefaults(form, true);
     return;
   }
