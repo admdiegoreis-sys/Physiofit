@@ -3491,6 +3491,8 @@ function renderEnrollments() {
               <td>${dateLabel(item.startDate)}</td>
               <td>${item.dueDay || "-"}</td>
               <td><strong>${currency(Number(item.monthlyValue || 0))}</strong></td>
+              <td>${Number(item.discount || 0) > 0 ? `<span style="color:var(--danger,#e53)">${currency(Number(item.discount))}</span>` : "-"}</td>
+              <td><strong>${currency(Math.max(0, Number(item.monthlyValue || 0) - Number(item.discount || 0)))}</strong></td>
               <td><div class="patient-name"><strong>${displayName(planName(item.planId))}</strong><span>${planTypeLabel(item.planType || planById(item.planId)?.type)}</span></div></td>
               <td><div class="patient-name"><strong>${paymentSummary.label}</strong><span>${item.paymentMethod || "-"}</span></div></td>
               <td>${item.sessions || "-"}</td>
@@ -3767,7 +3769,9 @@ function monthlyRows() {
       const dueDay = String(Math.min(28, Number(enrollment.dueDay || 2 + ((index * 3) % 24)))).padStart(2, "0");
       const paid = status === "Pago";
       const courtesy = status === "Cortesia";
+      const discount = Number(enrollment.discount || 0);
       const amount = Number(payment?.amount ?? enrollment.monthlyValue ?? plan?.value ?? 0);
+      const netAmount = Math.max(0, amount - discount);
       const method = paid ? enrollment.paymentMethod || paymentMethods[index % 3] : courtesy ? "Cortesia" : status;
       return {
         id: `m${enrollment.id}`,
@@ -3782,7 +3786,9 @@ function monthlyRows() {
         paymentDate: paid || courtesy ? `2026-05-${String(Math.max(1, Number(dueDay) - (index % 4))).padStart(2, "0")}` : "",
         invoiceCode: paid || courtesy ? `[001.${320 + index}]` : "",
         amount,
-        received: paid ? amount : 0,
+        discount,
+        netAmount,
+        received: paid ? netAmount : 0,
         external: index % 4 === 0 ? "Asaas" : "Manual",
         active: enrollment.status,
       };
@@ -3856,12 +3862,14 @@ function renderMonthlyPayments() {
               <td><span class="membership-badge">Ativo<br><small>${dateLabel(item.membershipDate)}</small><br><small>Mensalidade</small></span></td>
               <td>${item.paymentDate ?`${dateLabel(item.paymentDate)}<br><small>${invoiceByMonthlyId(item.id)?.number || item.invoiceCode || "Sem NFS-e"}</small>` : "-"}</td>
               <td><strong>${currency(item.amount)}</strong><br><small>${item.method}</small></td>
+              <td>${item.discount > 0 ? `<span style="color:var(--danger,#e53)">${currency(item.discount)}</span>` : "-"}</td>
+              <td><strong>${currency(item.netAmount ?? item.amount)}</strong></td>
               <td><strong>${currency(item.received)}</strong></td>
             </tr>
           `,
         )
         .join("")
-    : `<tr><td colspan="8"><div class="empty-state">Nenhuma mensalidade encontrada.</div></td></tr>`;
+    : `<tr><td colspan="10"><div class="empty-state">Nenhuma mensalidade encontrada.</div></td></tr>`;
 }
 
 function invoiceByMonthlyId(monthlyId) {
@@ -4149,6 +4157,8 @@ function renderAccountTable(config) {
               <td>${dateLabel(item.competenceDate)}</td>
               <td>${dateLabel(item.forecastDate)}</td>
               <td>${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
+              <td><strong class="${item.direction === "Receber" ? "amount-in" : "amount-out"}">${item.direction === "Receber" ? "" : "-"}${currency(item.originalAmount ?? item.amount)}</strong></td>
+              <td>${(item.originalAmount ?? item.amount) > item.amount ? `<span style="color:var(--danger,#e53)">${currency((item.originalAmount ?? item.amount) - item.amount)}</span>` : "-"}</td>
               <td><strong class="${item.direction === "Receber" ? "amount-in" : "amount-out"}">${item.direction === "Receber" ? "" : "-"}${currency(item.amount)}</strong></td>
               <td><strong>${item.description}</strong><br><small>${item.bankLaunch ?? item.paymentMethod ?? ""}</small></td>
               <td><span class="source-pill ${sourceClass}">${sourceLabel}</span></td>
@@ -4166,7 +4176,7 @@ function renderAccountTable(config) {
           `;
         })
         .join("")
-    : `<tr><td colspan="10"><div class="empty-state">${config.emptyMessage}</div></td></tr>`;
+    : `<tr><td colspan="12"><div class="empty-state">${config.emptyMessage}</div></td></tr>`;
 }
 
 // ─── Contracts ───────────────────────────────────────────────────────────────
