@@ -6176,10 +6176,11 @@ function renderField(field) {
   const ec = field.enroll ? ' class="enroll-field"' : "";
 
   if (field.type === "student") {
-    const selectedStudent = state.students.find((item) => item.id === field.value);
+    const selectedStudent = state.students.find((item) => item.id === field.value)
+      || (field.value ? (seedData?.students ?? []).find((item) => item.id === field.value) : null);
     const existingId = selectedStudent?.id || field.value || "";
     const isLeadMode = !existingId && Boolean(field._leadDisplayName);
-    const existingName = selectedStudent?.name || (isLeadMode ? field._leadDisplayName : "");
+    const existingName = selectedStudent?.name || field._leadDisplayName || "";
     const leadAttr = isLeadMode ? ' data-lead-mode="true"' : "";
     const listId = `studentList-${field.name}`;
     return `
