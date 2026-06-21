@@ -2094,6 +2094,14 @@ function studentName(id) {
   return student(id)?.name ?? "Aluno removido";
 }
 
+function studentActivePlan(studentId) {
+  const enrollments = state.enrollments.filter((e) => e.studentId === studentId);
+  const active = enrollments.find((e) => e.status === "Ativa") ?? enrollments.sort((a, b) => (b.startDate ?? "").localeCompare(a.startDate ?? ""))[0];
+  if (!active) return "-";
+  const plan = state.plans.find((p) => p.id === active.planId);
+  return [modalityName(active.modalityId), plan?.name].filter(Boolean).join(" · ") || "-";
+}
+
 function professional(id) {
   return state.professionals.find((item) => item.id === id);
 }
@@ -3415,7 +3423,7 @@ function renderStudents() {
                   <button class="row-action-button delete-icon-button" data-delete-student="${item.id}" type="button" title="Excluir paciente" aria-label="Excluir paciente">×</button>
                 </div>
               </td>
-              <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.plan}</span></div></td>
+              <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${studentActivePlan(item.id)}</span></div></td>
               <td><span class="status-pill ${statusClass(item.membership)}">${item.membership}</span></td>
               <td><div class="patient-contact"><span>${item.email || "-"}</span><a href="tel:${item.phone}">${item.phone}</a></div></td>
               <td>${maskedCpf(item.cpf)}</td>
