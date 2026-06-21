@@ -719,7 +719,7 @@ const modalSchemas = {
       { name: "notes", label: "Observações gerais", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
-      const enrollFields = ["modalityId","planType","planId","professionalId","room","startDate","sessions","mondayTime","tuesdayTime","wednesdayTime","thursdayTime","fridayTime","monthlyValue","paymentMethod"];
+      const enrollFields = ["modalityId","planType","planId","professionalId","room","startDate","sessions","mondayTime","tuesdayTime","wednesdayTime","thursdayTime","fridayTime","monthlyValue","paymentMethod","firstPaymentDate","dueDay","registrationFee","paymentMethod","contractTemplate","contractStatus","freeSchedule","autoRenew","dueNotice","sessionReminder","financialNotes"];
       const enrollValues = Object.fromEntries(enrollFields.map(k => [k, values[k]]));
       enrollFields.forEach(k => delete values[k]);
       const newStudent = { id: uid("s"), gender: "F", lastPresence: "-", ...values };
@@ -742,7 +742,7 @@ const modalSchemas = {
           sessions: Number(enrollValues.sessions || weeklySessionsFromPlan(plan) || 0),
           startDate: enrollValues.startDate || demoToday,
           endDate: calculatedEnrollmentEndDate(enrollValues.startDate || demoToday, enrollValues.planType || plan?.type),
-          firstPaymentDate: enrollValues.startDate || demoToday,
+          firstPaymentDate: enrollValues.firstPaymentDate || enrollValues.startDate || demoToday,
           planType: planTypeLabel(enrollValues.planType || plan?.type),
           leadId: leadId || "",
           status: "Ativa",
