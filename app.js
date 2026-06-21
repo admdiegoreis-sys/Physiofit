@@ -501,7 +501,7 @@ const viewTitles = {
   professionals: "Profissionais",
   professionalEditor: "Cadastro de profissional",
   suppliers: "Fornecedores",
-  modalities: "Modalidades / Serviços",
+  modalities: "Modalidades",
   modalityEditor: "Cadastro de modalidade",
   plans: "Planos",
   planEditor: "Cadastro de plano",
@@ -7154,5 +7154,6 @@ render();
 })();
 
 hydrateStateFromNeon();
+
 
 
