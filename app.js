@@ -5084,7 +5084,12 @@ function openEnrollmentModal(enrollmentId = null) {
 function openAppointmentModal(appointmentId = null) {
   editingAppointmentId = appointmentId;
   const item = appointmentId ? state.appointments.find((appointment) => appointment.id === appointmentId) : null;
-  openModal("appointment", item ?? {});
+  let values = item ?? {};
+  if (item && !item.studentId && item.leadId) {
+    const lead = state.leads.find((l) => l.id === item.leadId);
+    if (lead) values = { ...item, _leadDisplayName: lead.name };
+  }
+  openModal("appointment", values);
   document.querySelector("#modalTitle").textContent = appointmentId ? "Remarcar sessão" : "Agendar sessão";
 }
 
@@ -6073,7 +6078,7 @@ function openModal(type, values = {}) {
   const form = document.querySelector("#modalForm");
   document.querySelector("#modalTitle").textContent = schema.title;
   form.dataset.type = type;
-  const fields = schema.fields.map((field) => ({ ...field, value: values[field.name] ?? field.value }));
+  const fields = schema.fields.map((field) => ({ ...field, value: values[field.name] ?? field.value, _leadDisplayName: field.name === "studentId" ? (values._leadDisplayName || "") : "" }));
   if (type === "student") {
     const dataFields = fields.filter((f) => !f.enroll && f.name !== "_henroll");
     const enrollFields = fields.filter((f) => f.enroll && f.name !== "_henroll");
@@ -6155,6 +6160,7 @@ function findStudentByLookup(value = "") {
 }
 
 function syncStudentLookup(input, allowPartial = false) {
+  if (input.dataset.leadMode) { input.setCustomValidity(""); return true; }
   const form = input.closest("form");
   const hidden = form?.elements[input.dataset.studentTarget];
   const studentMatch = allowPartial ? findStudentByLookup(input.value) : state.students.find((item) => normalizedText(item.name) === normalizedText(input.value));
@@ -6172,11 +6178,13 @@ function renderField(field) {
   if (field.type === "student") {
     const selectedStudent = state.students.find((item) => item.id === field.value);
     const existingId = selectedStudent?.id || field.value || "";
-    const existingName = selectedStudent?.name || "";
+    const isLeadMode = !existingId && Boolean(field._leadDisplayName);
+    const existingName = selectedStudent?.name || (isLeadMode ? field._leadDisplayName : "");
+    const leadAttr = isLeadMode ? ' data-lead-mode="true"' : "";
     const listId = `studentList-${field.name}`;
     return `
       <label class="student-lookup-field">${field.label}
-        <input type="search" name="${field.name}Search" list="${listId}" value="${escapeHtml(existingName)}" data-student-search data-student-target="${field.name}" placeholder="Digite parte do nome do paciente" autocomplete="off" ${required} />
+        <input type="search" name="${field.name}Search" list="${listId}" value="${escapeHtml(existingName)}" data-student-search data-student-target="${field.name}" placeholder="Digite parte do nome do paciente" autocomplete="off" ${required}${leadAttr} />
         <input type="hidden" name="${field.name}" value="${escapeHtml(existingId)}" />
         <datalist id="${listId}">
           ${state.students.map((item) => `<option value="${escapeHtml(item.name)}" label="${escapeHtml([item.cpf, item.phone].filter(Boolean).join(" · "))}"></option>`).join("")}
