@@ -494,34 +494,6 @@
                 </section>
 
                 <section class="patient-tab-panel" data-patient-panel="registration">
-                  <div class="form-section-heading">
-                    <h3>Matrícula e plano</h3>
-                  </div>
-                  <div class="editor-grid">
-                    <label>Matrícula
-                      <select name="membership">
-                        <option>Matriculado</option>
-                        <option>Matrículas</option>
-                        <option>Matr. Cancel.</option>
-                        <option>Avulsa</option>
-                      </select>
-                    </label>
-                    <label>Plano
-                      <select name="plan" data-plan-select>
-                        <option>Mensal 2x semana</option>
-                        <option>Mensal livre</option>
-                        <option>Fisioterapia</option>
-                        <option>Experimental</option>
-                        <option>Aula avulsa</option>
-                      </select>
-                    </label>
-                    <label>Data da matrícula<input name="registrationDate" type="date" /></label>
-                    <label>Última presença<input name="lastPresence" type="date" /></label>
-                    <label class="wide">Observações comerciais<textarea name="commercialNotes" rows="4"></textarea></label>
-                  </div>
-                  <div class="form-section-heading enrollment-history-heading">
-                    <h3>Matrículas e renovações</h3>
-                  </div>
                   <div class="table-wrap patient-enrollment-history-wrap">
                     <table>
                       <thead>
@@ -532,6 +504,8 @@
                           <th>Início</th>
                           <th>Fim</th>
                           <th>Valor</th>
+                          <th>Desconto</th>
+                          <th>Valor Líquido</th>
                           <th>Financeiro</th>
                           <th>Status</th>
                         </tr>
@@ -1807,7 +1781,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=7"></script>
   </body>
 </html>
 

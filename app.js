@@ -5869,7 +5869,7 @@ function renderPatientEnrollmentHistory(studentId = "") {
   const table = document.querySelector("#patientEnrollmentHistoryTable");
   if (!table) return;
   if (!studentId) {
-    table.innerHTML = `<tr><td colspan="8"><div class="empty-state">Histórico disponível após salvar o cliente.</div></td></tr>`;
+    table.innerHTML = `<tr><td colspan="10"><div class="empty-state">Histórico disponível após salvar o cliente.</div></td></tr>`;
     return;
   }
   const enrollments = state.enrollments
@@ -5890,13 +5890,15 @@ function renderPatientEnrollmentHistory(studentId = "") {
               <td>${dateLabel(item.startDate)}</td>
               <td>${dateLabel(item.endDate)}</td>
               <td><strong>${currency(Number(item.monthlyValue || 0))}</strong></td>
+              <td>${Number(item.discount || 0) > 0 ? `<span style="color:var(--danger,#e53)">${currency(Number(item.discount))}</span>` : "-"}</td>
+              <td><strong>${currency(Math.max(0, Number(item.monthlyValue || 0) - Number(item.discount || 0)))}</strong></td>
               <td><span class="status-pill ${financialClass}">${financialLabel}</span></td>
               <td><span class="status-pill ${statusClass(item.status)}">${item.status || "-"}</span></td>
             </tr>
           `;
         })
         .join("")
-    : `<tr><td colspan="8"><div class="empty-state">Nenhuma matrícula vinculada ao cliente.</div></td></tr>`;
+    : `<tr><td colspan="10"><div class="empty-state">Nenhuma matrícula vinculada ao cliente.</div></td></tr>`;
 }
 
 function savePatientEditor() {
