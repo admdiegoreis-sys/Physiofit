@@ -1943,7 +1943,11 @@ function activeRevenueChartAccounts() {
 
 function addMonthsToIsoDate(value, months) {
   const date = parseLocalDate(value);
+  const day = date.getDate();
+  date.setDate(1);
   date.setMonth(date.getMonth() + months);
+  const maxDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  date.setDate(Math.min(day, maxDay));
   return isoDate(date);
 }
 
@@ -2034,6 +2038,8 @@ function ensureEnrollmentAppointments(enrollment) {
   rememberDeletedEntities("appointments", state.appointments.filter((item) => item.enrollmentId === enrollment.id).map((item) => item.id));
   state.appointments = state.appointments.filter((item) => item.enrollmentId !== enrollment.id);
   if (enrollment.status === "Cancelada") return;
+  const _pt = planTypeLabel(enrollment.planType || state.plans.find((p) => p.id === enrollment.planId)?.type);
+  if (_pt === "Avulsa" || _pt === "Pacote") return;
   const dayFields = [
     ["mondayTime", 1],
     ["tuesdayTime", 2],
