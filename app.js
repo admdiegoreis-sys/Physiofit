@@ -1140,7 +1140,12 @@ function normalizeState(data) {
   const mergedPlans = allRawPlans.length
     ? [...savedPlans, ...filterDeletedEntities(normalized, "plans", seedData.plans).filter((item) => !allSavedPlanNames.has(normalizedText(item.name)))]
     : filterDeletedEntities(normalized, "plans", structuredClone(seedData.plans));
-  normalized.plans = mergedPlans.map((item, index) => normalizePlan(normalizeTextFields(item), index));
+  const seenPlanIds = new Set();
+  normalized.plans = mergedPlans
+    .map((item, index) => normalizePlan(normalizeTextFields(item), index))
+    .reverse()
+    .filter((p) => { if (seenPlanIds.has(p.id)) return false; seenPlanIds.add(p.id); return true; })
+    .reverse();
   const allRawEnrollments = Array.isArray(data.enrollments) ? data.enrollments : [];
   const savedEnrollments = filterDeletedEntities(normalized, "enrollments", allRawEnrollments);
   const allSavedEnrollmentKeys = new Set(allRawEnrollments.map((item) => normalizedText(`${item.studentId ?? ""}-${item.planId ?? ""}-${item.startDate ?? ""}`)));
@@ -1953,11 +1958,13 @@ function ensureEnrollmentFinancialTitles(enrollment) {
   const planType = planTypeLabel(enrollment.planType || plan?.type);
   const installments = planType === "Trimestral" ? 3 : planType === "Semestral" ? 6 : 1;
   const firstDate = enrollment.firstPaymentDate || enrollment.startDate || demoToday;
+  const titlePrefix = planType === "Avulsa" ? "Sessão Avulsa" : planType === "Pacote" ? "Pacote de Sessões" : installments > 1 ? "Parcela" : "Mensalidade";
   const titles = [];
   for (let index = 0; index < installments; index += 1) {
     const dueDate = addMonthsToIsoDate(firstDate, index);
     const amount = Number(enrollment.monthlyValue || plan?.value || 0);
     if (!amount) continue;
+    const installmentLabel = installments > 1 ? ` ${index + 1}/${installments}` : "";
     titles.push(normalizeAccount({
       id: uid("cp"),
       direction: "Receber",
@@ -1970,7 +1977,7 @@ function ensureEnrollmentFinancialTitles(enrollment) {
       originalAmount: amount,
       paidAmount: 0,
       openAmount: amount,
-      description: `Mensalidade: ${displayName(relatedStudent?.name || "Cliente")}`,
+      description: `${titlePrefix}${installmentLabel}: ${displayName(relatedStudent?.name || "Cliente")}`,
       person: relatedStudent?.name || "",
       document: relatedStudent?.cpf || "",
       modalityId: enrollment.modalityId,
@@ -7157,6 +7164,7 @@ render();
 })();
 
 hydrateStateFromNeon();
+
 
 
 
