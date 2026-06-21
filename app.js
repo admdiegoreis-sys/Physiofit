@@ -1973,7 +1973,7 @@ function ensureEnrollmentFinancialTitles(enrollment) {
       id: uid("cp"),
       direction: "Receber",
       status: "Aberto",
-      competenceDate: addMonthsToIsoDate(enrollment.startDate || firstDate, index),
+      competenceDate: dueDate,
       forecastDate: dueDate,
       dueDate,
       paidDate: "",
