@@ -722,7 +722,8 @@ const modalSchemas = {
       const enrollFields = ["modalityId","planType","planId","professionalId","room","startDate","sessions","mondayTime","tuesdayTime","wednesdayTime","thursdayTime","fridayTime","monthlyValue","paymentMethod","firstPaymentDate","dueDay","registrationFee","paymentMethod","contractTemplate","contractStatus","freeSchedule","autoRenew","dueNotice","sessionReminder","financialNotes"];
       const enrollValues = Object.fromEntries(enrollFields.map(k => [k, values[k]]));
       enrollFields.forEach(k => delete values[k]);
-      const newStudent = { id: uid("s"), gender: "F", lastPresence: "-", ...values };
+      const hasEnroll = !!(enrollValues.modalityId && enrollValues.planId);
+      const newStudent = { id: uid("s"), gender: "F", lastPresence: "-", membership: hasEnroll ? "Matriculado" : "Avulsa", ...values };
       state.students.push(newStudent);
       const leadId = _pendingStudentLeadId;
       if (leadId) {
