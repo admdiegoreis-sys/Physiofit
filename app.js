@@ -844,6 +844,8 @@ const modalSchemas = {
       { name: "dueNotice", label: "Aviso de vencimento", type: "select", options: ["Sim", "Não"], value: "Sim" },
       { name: "sessionReminder", label: "Lembrete de sessão", type: "select", options: ["Sim", "Não"], value: "Sim" },
       { name: "monthlyValue", label: "Valor da mensalidade", type: "number", value: 0 },
+      { name: "discount", label: "Desconto (R$)", type: "number", value: 0, required: false },
+      { name: "discountNotes", label: "Motivo do desconto", type: "textarea", value: "", required: false },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Dinheiro", "Transferência"], value: "Pix" },
       { name: "autoRenew", label: "Renovação automática", type: "select", options: ["Sim", "Não"], value: "Sim" },
       { name: "freeSchedule", label: "Horário livre", type: "select", options: ["Não", "Sim"], value: "Não" },
@@ -1391,6 +1393,8 @@ function normalizeEnrollment(item, index) {
     wednesdayTime: defaults.wednesdayTime || "",
     thursdayTime: defaults.thursdayTime || "",
     fridayTime: defaults.fridayTime || "",
+    discount: Number(defaults.discount || 0),
+    discountNotes: defaults.discountNotes || "",
     financialNotes: defaults.financialNotes || "",
     contractTemplate: defaults.contractTemplate || "Contrato de matrícula",
     lockStartDate: defaults.lockStartDate || "",
@@ -1405,6 +1409,8 @@ function normalizeEnrollment(item, index) {
     monthlyValue: Number(item.monthlyValue ?? defaults.monthlyValue ?? plan?.value ?? 0),
     dueDay: Number(item.dueDay ?? defaults.dueDay ?? 0),
     registrationFee: Number(item.registrationFee ?? defaults.registrationFee ?? 0),
+    discount: Number(item.discount ?? defaults.discount ?? 0),
+    discountNotes: item.discountNotes ?? defaults.discountNotes ?? "",
     sessions: Number(item.sessions ?? defaults.sessions ?? plan?.sessions ?? 0),
     paymentStatus: item.paymentStatus ?? defaults.paymentStatus ?? "Pendente",
     lastPaymentDate: item.lastPaymentDate ?? defaults.lastPaymentDate ?? "",
@@ -1964,10 +1970,12 @@ function ensureEnrollmentFinancialTitles(enrollment) {
   const firstDate = enrollment.firstPaymentDate || enrollment.startDate || demoToday;
   const titlePrefix = planType === "Avulsa" ? "Sessão Avulsa" : planType === "Pacote" ? "Pacote de Sessões" : installments > 1 ? "Parcela" : "Mensalidade";
   const titles = [];
+  const discount = Number(enrollment.discount || 0);
   for (let index = 0; index < installments; index += 1) {
     const dueDate = addMonthsToIsoDate(firstDate, index);
-    const amount = Number(enrollment.monthlyValue || plan?.value || 0);
-    if (!amount) continue;
+    const baseAmount = Number(enrollment.monthlyValue || plan?.value || 0);
+    const amount = Math.max(0, baseAmount - discount);
+    if (!baseAmount) continue;
     const installmentLabel = installments > 1 ? ` ${index + 1}/${installments}` : "";
     titles.push(normalizeAccount({
       id: uid("cp"),
@@ -1978,7 +1986,7 @@ function ensureEnrollmentFinancialTitles(enrollment) {
       dueDate,
       paidDate: "",
       amount,
-      originalAmount: amount,
+      originalAmount: baseAmount,
       paidAmount: 0,
       openAmount: amount,
       description: `${titlePrefix}${installmentLabel}: ${displayName(relatedStudent?.name || "Cliente")}`,
