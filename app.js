@@ -7132,6 +7132,10 @@ document.querySelector("#loseLeadReason")?.addEventListener("keydown", (e) => {
   document.querySelector(`#${id}`)?.addEventListener("change", updateSvAvailability);
   document.querySelector(`#${id}`)?.addEventListener("input", updateSvAvailability);
 });
+document.querySelector("#svTime")?.addEventListener("change", (e) => {
+  const endEl = document.querySelector("#svEndTime");
+  if (endEl) endEl.value = addOneHour(e.target.value);
+});
 document.querySelector("#svSave")?.addEventListener("click", saveScheduleVisit);
 document.querySelector("#svCancel")?.addEventListener("click", () => {
   document.querySelector("#scheduleVisitOverlay").hidden = true;
