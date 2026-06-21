@@ -697,6 +697,7 @@ const modalSchemas = {
       { name: "professionalId", label: "Profissional", type: "professionalOptional", required: false, enroll: true },
       { name: "room", label: "Sala", type: "roomOptional", value: "", required: false, enroll: true },
       { name: "startDate", label: "Data de início", type: "date", value: demoToday, required: false, enroll: true },
+      { name: "firstPaymentDate", label: "Data do 1º pagamento", type: "date", value: demoToday, required: false, enroll: true },
       { name: "sessions", label: "Sessões por semana", type: "number", value: "", required: false, enroll: true },
       { name: "mondayTime", label: "Segunda-feira", type: "time", value: "", required: false, enroll: true },
       { name: "tuesdayTime", label: "Terça-feira", type: "time", value: "", required: false, enroll: true },
