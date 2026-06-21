@@ -6145,7 +6145,7 @@ function applyEnrollmentPlanDefaults(form, overwrite = true) {
   setIfNeeded("planType", planTypeLabel(plan.type));
   setIfNeeded("monthlyValue", Number(plan.value || 0).toFixed(2));
   setIfNeeded("sessions", weeklySessionsFromPlan(plan));
-  setIfNeeded("firstPaymentDate", form.elements.startDate?.value || demoToday);
+  if (!form.elements.firstPaymentDate?.value) setIfNeeded("firstPaymentDate", form.elements.startDate?.value || demoToday);
   if (form.elements.startDate?.value) setIfNeeded("endDate", calculatedEnrollmentEndDate(form.elements.startDate.value, form.elements.planType?.value || plan.type));
 }
 
