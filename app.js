@@ -6158,9 +6158,10 @@ function syncStudentLookup(input, allowPartial = false) {
   const form = input.closest("form");
   const hidden = form?.elements[input.dataset.studentTarget];
   const studentMatch = allowPartial ? findStudentByLookup(input.value) : state.students.find((item) => normalizedText(item.name) === normalizedText(input.value));
-  if (hidden) hidden.value = studentMatch?.id || "";
-  input.setCustomValidity(studentMatch ? "" : "Selecione um cliente cadastrado.");
-  return Boolean(studentMatch);
+  if (hidden) hidden.value = studentMatch?.id || hidden.value || "";
+  const isValid = Boolean(studentMatch) || Boolean(hidden?.value);
+  input.setCustomValidity(isValid ? "" : "Selecione um cliente cadastrado.");
+  return isValid;
 }
 
 function renderField(field) {
@@ -6169,12 +6170,14 @@ function renderField(field) {
   const ec = field.enroll ? ' class="enroll-field"' : "";
 
   if (field.type === "student") {
-    const selectedStudent = state.students.find((item) => item.id === field.value) || state.students[0] || {};
+    const selectedStudent = state.students.find((item) => item.id === field.value);
+    const existingId = selectedStudent?.id || field.value || "";
+    const existingName = selectedStudent?.name || "";
     const listId = `studentList-${field.name}`;
     return `
       <label class="student-lookup-field">${field.label}
-        <input type="search" name="${field.name}Search" list="${listId}" value="${escapeHtml(selectedStudent.name || "")}" data-student-search data-student-target="${field.name}" placeholder="Digite parte do nome do paciente" autocomplete="off" ${required} />
-        <input type="hidden" name="${field.name}" value="${escapeHtml(selectedStudent.id || "")}" />
+        <input type="search" name="${field.name}Search" list="${listId}" value="${escapeHtml(existingName)}" data-student-search data-student-target="${field.name}" placeholder="Digite parte do nome do paciente" autocomplete="off" ${required} />
+        <input type="hidden" name="${field.name}" value="${escapeHtml(existingId)}" />
         <datalist id="${listId}">
           ${state.students.map((item) => `<option value="${escapeHtml(item.name)}" label="${escapeHtml([item.cpf, item.phone].filter(Boolean).join(" · "))}"></option>`).join("")}
         </datalist>
