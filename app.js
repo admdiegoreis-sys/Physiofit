@@ -1999,7 +1999,7 @@ function ensureEnrollmentFinancialTitles(enrollment) {
       id: uid("cp"),
       direction: "Receber",
       status: "Aberto",
-      competenceDate: enrollment.startDate || firstDate,
+      competenceDate: firstDate,
       forecastDate: firstDate,
       dueDate: firstDate,
       paidDate: "",
