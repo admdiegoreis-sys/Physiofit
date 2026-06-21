@@ -1119,10 +1119,11 @@ function normalizeState(data) {
   normalized.students = filterDeletedEntities(normalized, "students", normalized.students).map((item, index) => normalizeStudent(normalizeTextFields(item), index));
   normalized.leads = filterDeletedEntities(normalized, "leads", Array.isArray(data.leads) ? data.leads : structuredClone(seedData.leads)).map((item, index) => normalizeLead(normalizeTextFields(item), index));
   normalized.professionals = filterDeletedEntities(normalized, "professionals", Array.isArray(data.professionals) ? data.professionals : structuredClone(seedData.professionals)).map((item, index) => normalizeProfessional(normalizeTextFields(item), index));
-  const savedSuppliers = filterDeletedEntities(normalized, "suppliers", Array.isArray(data.suppliers) ? data.suppliers : []);
-  const savedSupplierKeys = new Set(savedSuppliers.map((item) => normalizedText(`${item.name ?? ""}-${item.document ?? ""}`)));
-  const mergedSuppliers = savedSuppliers.length
-    ? [...savedSuppliers, ...filterDeletedEntities(normalized, "suppliers", seedData.suppliers).filter((item) => !savedSupplierKeys.has(normalizedText(`${item.name}-${item.document}`)))]
+  const allRawSuppliers = Array.isArray(data.suppliers) ? data.suppliers : [];
+  const savedSuppliers = filterDeletedEntities(normalized, "suppliers", allRawSuppliers);
+  const allSavedSupplierKeys = new Set(allRawSuppliers.map((item) => normalizedText(`${item.name ?? ""}-${item.document ?? ""}`)));
+  const mergedSuppliers = allRawSuppliers.length
+    ? [...savedSuppliers, ...filterDeletedEntities(normalized, "suppliers", seedData.suppliers).filter((item) => !allSavedSupplierKeys.has(normalizedText(`${item.name}-${item.document}`)))]
     : filterDeletedEntities(normalized, "suppliers", structuredClone(seedData.suppliers));
   const allNormalizedSuppliers = mergedSuppliers.map((item, index) => normalizeSupplier(normalizeTextFields(item), index));
   const seenSupplierKeys = new Set();
@@ -1133,16 +1134,18 @@ function normalizeState(data) {
     return true;
   });
   normalized.modalities = filterDeletedEntities(normalized, "modalities", Array.isArray(data.modalities) ? data.modalities : structuredClone(seedData.modalities)).map((item, index) => normalizeModality(normalizeTextFields(item), index));
-  const savedPlans = filterDeletedEntities(normalized, "plans", Array.isArray(data.plans) ? data.plans : []);
-  const savedPlanNames = new Set(savedPlans.map((item) => normalizedText(item.name ?? "")));
-  const mergedPlans = savedPlans.length
-    ? [...savedPlans, ...filterDeletedEntities(normalized, "plans", seedData.plans).filter((item) => !savedPlanNames.has(normalizedText(item.name)))]
+  const allRawPlans = Array.isArray(data.plans) ? data.plans : [];
+  const savedPlans = filterDeletedEntities(normalized, "plans", allRawPlans);
+  const allSavedPlanNames = new Set(allRawPlans.map((item) => normalizedText(item.name ?? "")));
+  const mergedPlans = allRawPlans.length
+    ? [...savedPlans, ...filterDeletedEntities(normalized, "plans", seedData.plans).filter((item) => !allSavedPlanNames.has(normalizedText(item.name)))]
     : filterDeletedEntities(normalized, "plans", structuredClone(seedData.plans));
   normalized.plans = mergedPlans.map((item, index) => normalizePlan(normalizeTextFields(item), index));
-  const savedEnrollments = filterDeletedEntities(normalized, "enrollments", Array.isArray(data.enrollments) ? data.enrollments : []);
-  const savedEnrollmentKeys = new Set(savedEnrollments.map((item) => normalizedText(`${item.studentId ?? ""}-${item.planId ?? ""}-${item.startDate ?? ""}`)));
-  const mergedEnrollments = savedEnrollments.length
-    ? [...savedEnrollments, ...filterDeletedEntities(normalized, "enrollments", seedData.enrollments).filter((item) => !savedEnrollmentKeys.has(normalizedText(`${item.studentId}-${item.planId}-${item.startDate}`)))]
+  const allRawEnrollments = Array.isArray(data.enrollments) ? data.enrollments : [];
+  const savedEnrollments = filterDeletedEntities(normalized, "enrollments", allRawEnrollments);
+  const allSavedEnrollmentKeys = new Set(allRawEnrollments.map((item) => normalizedText(`${item.studentId ?? ""}-${item.planId ?? ""}-${item.startDate ?? ""}`)));
+  const mergedEnrollments = allRawEnrollments.length
+    ? [...savedEnrollments, ...filterDeletedEntities(normalized, "enrollments", seedData.enrollments).filter((item) => !allSavedEnrollmentKeys.has(normalizedText(`${item.studentId}-${item.planId}-${item.startDate}`)))]
     : filterDeletedEntities(normalized, "enrollments", structuredClone(seedData.enrollments));
   normalized.enrollments = mergedEnrollments.map((item, index) => normalizeEnrollment(normalizeTextFields(item), index));
   const savedChartAccounts = filterDeletedEntities(normalized, "chartAccounts", Array.isArray(data.chartAccounts) ? data.chartAccounts : []);
@@ -7154,6 +7157,7 @@ render();
 })();
 
 hydrateStateFromNeon();
+
 
 
 
