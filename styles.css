@@ -1897,11 +1897,16 @@ button {
 }
 
 .enrollment-toolbar {
-  grid-template-columns: repeat(5, minmax(140px, 1fr)) auto;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+}
+
+.enrollment-toolbar .enrollment-date-range {
+  grid-column: span 2;
 }
 
 .enrollment-toolbar .patient-search-row {
-  grid-column: 1 / -1;
+  grid-column: span 3;
+  grid-template-columns: minmax(0, 1fr) auto auto;
 }
 
 .enrollment-date-range {
@@ -3552,7 +3557,16 @@ td.row-actions .row-action-button:last-child {
   }
 
   .enrollment-toolbar {
-    grid-template-columns: repeat(3, minmax(160px, 1fr));
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+  }
+
+  .enrollment-toolbar .enrollment-date-range {
+    grid-column: span 2;
+  }
+
+  .enrollment-toolbar .patient-search-row {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
   .accounts-toolbar {
