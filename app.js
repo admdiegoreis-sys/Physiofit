@@ -3542,6 +3542,160 @@ function renderMonthAgenda() {
   }).join("");
 }
 
+function importStudentsAndEnrollmentsFromXlsx(file) {
+  if (!window.XLSX) { toast("Biblioteca XLSX não carregada."); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const wb = window.XLSX.read(e.target.result, { type: "array", cellDates: true });
+      const toRows = (name) => {
+        const ws = wb.Sheets[name];
+        return ws ? window.XLSX.utils.sheet_to_json(ws, { defval: "" }) : [];
+      };
+      const clientRows = toRows("Import_Clientes");
+      const matriculaRows = toRows("Import_Matricula");
+      if (!clientRows.length && !matriculaRows.length) {
+        toast("Abas 'Import_Clientes' e 'Import_Matricula' não encontradas.");
+        return;
+      }
+
+      const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim().replace(/\s+/g, " ");
+      const parseIso = (v) => {
+        if (!v || norm(v) === "nat") return "";
+        const d = v instanceof Date ? v : new Date(v);
+        return isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+      };
+
+      const modalityByNorm = new Map(state.modalities.map((m) => [norm(m.name), m.id]));
+      const planByNorm = new Map(state.plans.map((p) => [norm(p.name), p.id]));
+      const profByNorm = new Map(state.professionals.map((p) => [norm(p.name), p.id]));
+      const existingByCpf = new Map(state.students.filter((s) => s.cpf).map((s) => [String(s.cpf).replace(/\D/g, ""), s.id]));
+      const existingByName = new Map(state.students.map((s) => [norm(s.name), s.id]));
+      const importedIdByName = new Map();
+
+      let studentsAdded = 0, studentsSkipped = 0;
+
+      for (const row of clientRows) {
+        const name = String(row.NOME || "").trim();
+        if (!name) continue;
+        const normName = norm(name);
+        const cleanCpf = String(row.CPF || "").replace(/\D/g, "");
+        if ((cleanCpf && existingByCpf.has(cleanCpf)) || existingByName.has(normName)) {
+          importedIdByName.set(normName, existingByCpf.get(cleanCpf) || existingByName.get(normName));
+          studentsSkipped++;
+          continue;
+        }
+        const cidadeUf = String(row.CIDADE_UF || "");
+        const slash = cidadeUf.lastIndexOf("/");
+        const city = slash > 0 ? cidadeUf.slice(0, slash).trim() : cidadeUf.trim();
+        const stateCode = slash > 0 ? cidadeUf.slice(slash + 1).trim() : "";
+        const birthDate = parseIso(row.DATA_NASCIMENTO);
+        const gender = norm(row.SEXO).includes("masc") ? "Masculino" : "Feminino";
+        const newStudent = normalizeStudent({
+          id: uid("s"),
+          name,
+          email: String(row.EMAIL || ""),
+          phone: String(row.CELULAR || ""),
+          cpf: String(row.CPF || ""),
+          birthDate,
+          gender,
+          zip: String(row.CEP || ""),
+          address: String(row.ENDERECO || ""),
+          addressNumber: String(row.END_NUM || ""),
+          neighborhood: String(row.BAIRRO || ""),
+          city,
+          stateCode,
+          profession: String(row.PROFISSAO || ""),
+          notes: [String(row.OBS || ""), String(row.PATOLOGIA || "")].filter(Boolean).join(" | "),
+          status: "Ativo",
+          membership: "Matriculado",
+          registrationDate: demoToday,
+        }, state.students.length);
+        state.students.push(newStudent);
+        importedIdByName.set(normName, newStudent.id);
+        if (cleanCpf) existingByCpf.set(cleanCpf, newStudent.id);
+        existingByName.set(normName, newStudent.id);
+        studentsAdded++;
+      }
+
+      let enrollmentsAdded = 0, enrollmentsSkipped = 0, enrollmentsMissingPlan = 0;
+
+      for (const row of matriculaRows) {
+        const normName = norm(String(row.NOME || ""));
+        const studentId = importedIdByName.get(normName) || existingByName.get(normName);
+        if (!studentId) { enrollmentsSkipped++; continue; }
+
+        const modalityId = modalityByNorm.get(norm(row.MODALIDADE)) || "";
+        const planNorm = norm(row.PLANO_MATRICULA);
+        let planId = planByNorm.get(planNorm) || "";
+        if (!planId) {
+          for (const [pn, pid] of planByNorm) {
+            if (planNorm.length > 4 && pn.includes(planNorm)) { planId = pid; break; }
+          }
+        }
+        if (!planId) enrollmentsMissingPlan++;
+
+        const professionalId = profByNorm.get(norm(row.NOME_PROF)) || "";
+        const startDate = parseIso(row.DATA_MATRICULA) || demoToday;
+        const dueDay = Number(row.DIA_VENCIMENTO) || Number(startDate.split("-")[2]) || 10;
+        const firstPaymentDate = `${startDate.slice(0, 8)}${String(dueDay).padStart(2, "0")}`;
+        const rawPlanType = String(row.FORMA_MENSALIDADE || "Mensalidade");
+        const endDate = parseIso(row.DATA_VENCIMENTO) || calculatedEnrollmentEndDate(startDate, rawPlanType);
+        const autoRenew = Number(row.RENOVA_AUTO) === 1 ? "Sim" : "Não";
+        const normStatus = norm(row.STATUS_STR);
+        const status = (normStatus === "inativo" || normStatus === "cancelado" || normStatus === "cancelada") ? "Cancelada" : "Ativa";
+
+        const dupKey = `${studentId}-${planId}-${startDate}`;
+        if (state.enrollments.some((en) => `${en.studentId}-${en.planId}-${en.startDate}` === dupKey)) {
+          enrollmentsSkipped++;
+          continue;
+        }
+
+        const plan = planId ? state.plans.find((p) => p.id === planId) : null;
+        const enrollment = normalizeEnrollment({
+          id: uid("e"),
+          studentId,
+          planId: planId || "",
+          modalityId: modalityId || plan?.modalityId || "",
+          professionalId,
+          startDate,
+          endDate,
+          monthlyValue: Number(row.VALOR_MES) || Number(plan?.value) || 0,
+          planType: rawPlanType,
+          dueDay,
+          firstPaymentDate,
+          autoRenew,
+          status,
+          freeSchedule: "Não",
+          financialTitlesGenerated: true,
+          sessions: Number(plan?.sessions) || 0,
+          paymentMethod: "Pix",
+        }, state.enrollments.length);
+
+        state.enrollments.push(enrollment);
+        enrollmentsAdded++;
+      }
+
+      saveState();
+      refreshAutoRenewalProjections();
+      renderStudents();
+
+      const parts = [
+        `${studentsAdded} cliente(s) importado(s)`,
+        `${enrollmentsAdded} matrícula(s) importada(s)`,
+      ];
+      if (studentsSkipped) parts.push(`${studentsSkipped} cliente(s) já existiam`);
+      if (enrollmentsSkipped) parts.push(`${enrollmentsSkipped} matrícula(s) duplicada(s)`);
+      if (enrollmentsMissingPlan) parts.push(`${enrollmentsMissingPlan} matrícula(s) sem plano correspondente`);
+      toast(parts.join(" · "));
+    } catch (err) {
+      console.error("importStudentsAndEnrollmentsFromXlsx:", err);
+      toast("Erro ao processar o arquivo: " + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
 function renderStudents() {
   const term = normalizedText(document.querySelector("#studentSearch")?.value.trim() ?? "");
   const statusFilter = document.querySelector("#studentStatusFilter")?.value ?? "all";
@@ -7191,6 +7345,11 @@ document.querySelector("#studentSearchButton").addEventListener("click", renderS
 document.querySelector("#studentClearFiltersButton")?.addEventListener("click", clearStudentFilters);
 document.querySelector("#studentStatusFilter")?.addEventListener("change", renderStudents);
 document.querySelector("#newPatientButton").addEventListener("click", () => openPatientEditor());
+document.querySelector("#importStudentsButton")?.addEventListener("click", () => document.querySelector("#importStudentsFile").click());
+document.querySelector("#importStudentsFile")?.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) { importStudentsAndEnrollmentsFromXlsx(file); e.target.value = ""; }
+});
 document.querySelector("#backToPatientsButton").addEventListener("click", () => switchView("students"));
 document.querySelector("#patientEditorForm").addEventListener("submit", (event) => {
   event.preventDefault();
