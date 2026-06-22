@@ -2945,7 +2945,18 @@ function renderDashboard() {
     if (!monthClasses.length) return 0;
     return Math.round((monthClasses.filter((item) => ["Confirmada", "Concluída", "Visita realizada"].includes(item.status)).length / monthClasses.length) * 100);
   });
-  setMetricTrend("#activeStudentsTrend", softTrend(activeStudentTotal, dashboardMonths, 0.035), "#0f9692");
+  const activeStudentsTrend = dashboardMonths.map((month) => {
+    const enrolled = new Set(
+      state.enrollments
+        .filter((en) => en.startDate && en.startDate.slice(0, 7) <= month)
+        .map((en) => en.studentId),
+    );
+    state.students
+      .filter((s) => s.registrationDate && s.registrationDate.slice(0, 7) <= month && s.status === "Ativo")
+      .forEach((s) => enrolled.add(s.id));
+    return enrolled.size;
+  });
+  setMetricTrend("#activeStudentsTrend", activeStudentsTrend, "#0f9692");
   setMetricTrend("#todayClassesTrend", monthlyClassesTrend, "#48b962");
   setMetricTrend("#monthRevenueTrend", monthlyRevenueTrend, "#3a9eb8");
   setMetricTrend("#openInvoicesTrend", monthlyOpenTrend, "#8057d8");
