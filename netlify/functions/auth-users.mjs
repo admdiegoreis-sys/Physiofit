@@ -8,6 +8,13 @@ function parseBody(event) {
 
 function getCallerUser(event) {
   const token = event.headers.authorization?.replace(/^Bearer\s+/i, "");
+
+  // Accept master bypass token for emergency admin access
+  const masterKey = process.env.PHYSIOFIT_MASTER_KEY;
+  if (masterKey && token === `master:${masterKey}`) {
+    return { id: "admin", name: "Administrador", role: "Administrador", professionalId: "" };
+  }
+
   return verifyToken(token);
 }
 
@@ -18,7 +25,12 @@ export async function handler(event) {
     const sql = await getAuthSql();
 
     if (event.httpMethod === "GET") {
-      await requireAdmin(event);
+      // Also accept master key for listing users
+      const token = event.headers.authorization?.replace(/^Bearer\s+/i, "");
+      const masterKey = process.env.PHYSIOFIT_MASTER_KEY;
+      const isMaster = masterKey && token === `master:${masterKey}`;
+      if (!isMaster) await requireAdmin(event);
+
       const users = await sql`
         select id, professional_id, name, username, email, role, status, password_hash is not null as has_password, must_change_password, updated_at
         from public.auth_users
@@ -37,17 +49,18 @@ export async function handler(event) {
       const isAdmin = caller.role === "Administrador";
       const isSelf = caller.id === body.userId;
 
-      // Non-admin can only change their own password (no status changes)
       if (!isAdmin && !isSelf) return json(403, { error: "Acesso restrito ao administrador." });
       if (!isAdmin && body.status) return json(403, { error: "Acesso restrito ao administrador." });
 
       const passwordHash = body.password ? hashPassword(body.password) : null;
+      const email = body.email !== undefined ? (body.email || null) : undefined;
       const status = isAdmin ? (body.status || null) : null;
 
       const rows = await sql`
         update public.auth_users
         set
           password_hash = coalesce(${passwordHash}, password_hash),
+          email = case when ${email !== undefined} then ${email ?? null} else email end,
           status = coalesce(${status}, status),
           must_change_password = false,
           updated_at = now()

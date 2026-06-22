@@ -17,9 +17,9 @@ export async function handler(event) {
     // Master bypass: works even if DB is unavailable — set PHYSIOFIT_MASTER_KEY in Netlify env vars
     const masterKey = process.env.PHYSIOFIT_MASTER_KEY;
     if (masterKey && password === masterKey && (username === "admin" || username === "master")) {
-      const masterToken = createToken({ id: "admin", name: "Administrador", role: "Administrador", professional_id: "" });
+      // Use the master key itself as a recognizable token (not a JWT) so all endpoints can verify it
       return json(200, {
-        token: masterToken,
+        token: `master:${masterKey}`,
         user: { id: "admin", name: "Administrador", username: "admin", email: "", role: "Administrador", professionalId: "", mustChangePassword: false },
       });
     }
