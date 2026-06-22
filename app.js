@@ -5445,7 +5445,13 @@ function openChartAccountModal(chartAccountId = null) {
 function openEnrollmentModal(enrollmentId = null) {
   editingEnrollmentId = enrollmentId;
   const item = enrollmentId ? state.enrollments.find((enrollment) => enrollment.id === enrollmentId) : null;
-  openModal("enrollment", item ?? {});
+  let modalValues = item ?? {};
+  if (item?.planId) {
+    const plan = state.plans.find((p) => p.id === item.planId);
+    const weeklyFreq = plan ? weeklySessionsFromPlan(plan) : 0;
+    if (weeklyFreq > 0) modalValues = { ...item, sessions: weeklyFreq };
+  }
+  openModal("enrollment", modalValues);
   document.querySelector("#modalTitle").textContent = enrollmentId ? "Editar matrícula" : "Nova matrícula";
 }
 
