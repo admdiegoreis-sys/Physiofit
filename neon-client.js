@@ -43,6 +43,18 @@
       this.setSession(data);
       return data;
     },
+    async forgotPassword(email) {
+      return request("/auth-forgot", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+    },
+    async resetPassword(token, password) {
+      return request("/auth-reset", {
+        method: "POST",
+        body: JSON.stringify({ token, password }),
+      });
+    },
     async listUsers() {
       return request("/auth-users", { headers: this.authHeaders() });
     },

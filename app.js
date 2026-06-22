@@ -6112,6 +6112,82 @@ async function handleLogin(event) {
   }
 }
 
+function showLoginPanel(panel) {
+  document.querySelectorAll("[data-login-panel]").forEach((el) => {
+    el.hidden = el.id !== `${panel}Form` && el.id !== `${panel}Form`.replace("Form", "Form");
+  });
+  // map panel name to form id
+  const map = { login: "loginForm", forgot: "forgotForm", reset: "resetForm" };
+  document.querySelectorAll("[data-login-panel]").forEach((el) => { el.hidden = true; });
+  const target = document.querySelector(`#${map[panel] || "loginForm"}`);
+  if (target) target.hidden = false;
+  // clear feedbacks
+  document.querySelectorAll(".login-feedback").forEach((el) => { el.textContent = ""; el.className = "login-feedback"; });
+}
+
+async function handleForgotPassword(event) {
+  event.preventDefault();
+  const feedback = document.querySelector("#forgotFeedback");
+  const btn = document.querySelector("#forgotSubmitBtn");
+  const email = document.querySelector("#forgotEmail").value.trim();
+  feedback.textContent = "";
+  feedback.className = "login-feedback";
+  btn.disabled = true;
+  btn.textContent = "Enviando...";
+  try {
+    const result = await window.PhysiofitData.forgotPassword(email);
+    feedback.textContent = result.message || "Verifique seu e-mail.";
+    feedback.className = "login-feedback success";
+    document.querySelector("#forgotEmail").value = "";
+  } catch (error) {
+    feedback.textContent = error.message || "Não foi possível enviar. Tente novamente.";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Enviar link de redefinição";
+  }
+}
+
+async function handleResetPassword(event) {
+  event.preventDefault();
+  const feedback = document.querySelector("#resetFeedback");
+  const btn = document.querySelector("#resetSubmitBtn");
+  const password = document.querySelector("#resetPassword").value;
+  const confirm = document.querySelector("#resetPasswordConfirm").value;
+  feedback.textContent = "";
+  feedback.className = "login-feedback";
+  if (password !== confirm) {
+    feedback.textContent = "As senhas não coincidem.";
+    return;
+  }
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+  if (!token) { feedback.textContent = "Link inválido. Solicite um novo."; return; }
+  btn.disabled = true;
+  btn.textContent = "Salvando...";
+  try {
+    const result = await window.PhysiofitData.resetPassword(token, password);
+    feedback.textContent = result.message || "Senha redefinida com sucesso!";
+    feedback.className = "login-feedback success";
+    document.querySelector("#resetPassword").value = "";
+    document.querySelector("#resetPasswordConfirm").value = "";
+    // Clear token from URL and go to login after 2s
+    history.replaceState({}, "", window.location.pathname);
+    setTimeout(() => showLoginPanel("login"), 2500);
+  } catch (error) {
+    feedback.textContent = error.message || "Não foi possível redefinir. Tente novamente.";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Salvar nova senha";
+  }
+}
+
+function checkResetTokenInUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("action") === "reset" && params.get("token")) {
+    showLoginPanel("reset");
+  }
+}
+
 function logout() {
   authSession = null;
   window.PhysiofitData?.setSession(null);
@@ -7225,8 +7301,17 @@ document.querySelector("#settingsForm").addEventListener("submit", (event) => {
   toast("Configurações salvas.");
 });
 document.querySelector("#loginForm")?.addEventListener("submit", handleLogin);
+document.querySelector("#forgotForm")?.addEventListener("submit", handleForgotPassword);
+document.querySelector("#resetForm")?.addEventListener("submit", handleResetPassword);
+document.querySelector("#showForgotBtn")?.addEventListener("click", () => showLoginPanel("forgot"));
+document.querySelector("#showLoginBtn")?.addEventListener("click", () => showLoginPanel("login"));
+document.querySelector("#showLoginFromResetBtn")?.addEventListener("click", () => {
+  history.replaceState({}, "", window.location.pathname);
+  showLoginPanel("login");
+});
 document.querySelector("#logoutButton")?.addEventListener("click", logout);
 document.querySelector("#refreshUsersButton")?.addEventListener("click", renderAccessUsers);
+checkResetTokenInUrl();
 
 // Change own password
 document.querySelector("#changePasswordForm")?.addEventListener("submit", async (event) => {

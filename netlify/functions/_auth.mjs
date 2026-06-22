@@ -20,6 +20,16 @@ export async function ensureAuthTables(sql) {
     )
   `;
 
+  await sql`
+    create table if not exists public.password_reset_tokens (
+      token text primary key,
+      user_id text not null references public.auth_users(id) on delete cascade,
+      expires_at timestamptz not null,
+      used boolean not null default false,
+      created_at timestamptz not null default now()
+    )
+  `;
+
   const passwordHash = hashPassword("Admin@123");
   await sql`
     insert into public.auth_users (id, name, username, email, role, status, password_hash, must_change_password)

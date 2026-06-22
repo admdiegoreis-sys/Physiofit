@@ -139,8 +139,29 @@ button {
 
 .login-feedback {
   min-height: 20px;
-  color: #b42318;
   font-weight: 700;
+  color: #b42318;
+}
+
+.login-feedback.success {
+  color: #166534;
+}
+
+.login-link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #3d7d8f;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.login-link-button:hover {
+  color: #2c6070;
 }
 
 .professional-session [data-admin-only] {

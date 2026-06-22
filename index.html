@@ -8,16 +8,45 @@
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
-      <form class="login-card" id="loginForm">
+
+      <!-- Painel 1: Login -->
+      <form class="login-card" id="loginForm" data-login-panel="login">
         <img src="assets/physiofit-logo-white.jpeg" alt="Physiofit Studio" />
         <h1>Acesso ao sistema</h1>
-        <p>Entre com seu usuário e senha para continuar.</p>
-        <label>Usuário ou e-mail<input id="loginUsername" autocomplete="username" required /></label>
-        <label>Senha<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
+        <p>Entre com seu e-mail e senha para continuar.</p>
+        <label>E-mail ou usuário<input id="loginUsername" type="text" autocomplete="username" required /></label>
+        <label>
+          Senha
+          <input id="loginPassword" type="password" autocomplete="current-password" required />
+        </label>
         <button class="primary-button success-button" type="submit">Entrar</button>
         <span id="loginFeedback" class="login-feedback" role="alert"></span>
-        <small>Use as credenciais fornecidas pelo administrador do estúdio.</small>
+        <button class="login-link-button" type="button" id="showForgotBtn">Esqueci minha senha</button>
       </form>
+
+      <!-- Painel 2: Esqueci minha senha -->
+      <form class="login-card" id="forgotForm" data-login-panel="forgot" hidden>
+        <img src="assets/physiofit-logo-white.jpeg" alt="Physiofit Studio" />
+        <h1>Recuperar acesso</h1>
+        <p>Informe seu e-mail cadastrado e enviaremos um link para redefinir sua senha.</p>
+        <label>E-mail<input id="forgotEmail" type="email" autocomplete="email" required placeholder="seu@email.com.br" /></label>
+        <button class="primary-button success-button" type="submit" id="forgotSubmitBtn">Enviar link de redefinição</button>
+        <span id="forgotFeedback" class="login-feedback" role="alert"></span>
+        <button class="login-link-button" type="button" id="showLoginBtn">Voltar para o login</button>
+      </form>
+
+      <!-- Painel 3: Redefinir senha (via link do e-mail) -->
+      <form class="login-card" id="resetForm" data-login-panel="reset" hidden>
+        <img src="assets/physiofit-logo-white.jpeg" alt="Physiofit Studio" />
+        <h1>Nova senha</h1>
+        <p>Crie uma nova senha para sua conta.</p>
+        <label>Nova senha<input id="resetPassword" type="password" autocomplete="new-password" required minlength="6" placeholder="Mínimo 6 caracteres" /></label>
+        <label>Confirmar nova senha<input id="resetPasswordConfirm" type="password" autocomplete="new-password" required minlength="6" /></label>
+        <button class="primary-button success-button" type="submit" id="resetSubmitBtn">Salvar nova senha</button>
+        <span id="resetFeedback" class="login-feedback" role="alert"></span>
+        <button class="login-link-button" type="button" id="showLoginFromResetBtn">Voltar para o login</button>
+      </form>
+
     </section>
     <div class="app-shell">
       <main class="workspace">
@@ -1781,7 +1810,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=8"></script>
   </body>
 </html>
 
