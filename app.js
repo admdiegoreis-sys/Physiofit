@@ -3744,7 +3744,7 @@ function renderEnrollments() {
   const statusFilter = document.querySelector("#enrollmentStatusFilter")?.value ?? "activeAndExpired";
   const modalityFilter = document.querySelector("#enrollmentModalityFilter")?.value ?? "all";
   const professionalFilter = document.querySelector("#enrollmentProfessionalFilter")?.value ?? "all";
-  const roomFilter = "all";
+  const scheduleFilter = document.querySelector("#enrollmentScheduleFilter")?.value ?? "all";
   const typeFilter = document.querySelector("#enrollmentPlanTypeFilter")?.value ?? "all";
   const dateFrom = document.querySelector("#enrollmentDateFrom")?.value ?? "";
   const dateTo = document.querySelector("#enrollmentDateTo")?.value ?? "";
@@ -3752,7 +3752,11 @@ function renderEnrollments() {
     .filter((item) => statusFilter === "all" || (statusFilter === "activeAndExpired" ?["Ativa", "Vencida"].includes(item.status) : item.status === statusFilter))
     .filter((item) => modalityFilter === "all" || item.modalityId === modalityFilter)
     .filter((item) => professionalFilter === "all" || item.professionalId === professionalFilter)
-    .filter((item) => roomFilter === "all" || item.room === roomFilter)
+    .filter((item) => {
+      if (scheduleFilter === "all") return true;
+      const hasSchedule = ["mondayTime","tuesdayTime","wednesdayTime","thursdayTime","fridayTime"].some((f) => item[f]);
+      return scheduleFilter === "filled" ? hasSchedule : !hasSchedule;
+    })
     .filter((item) => typeFilter === "all" || planTypeLabel(item.planType || planById(item.planId)?.type) === planTypeLabel(typeFilter))
     .filter((item) => !dateFrom || (item.startDate && item.startDate >= dateFrom))
     .filter((item) => !dateTo || (item.startDate && item.startDate <= dateTo))
@@ -7243,7 +7247,7 @@ function clearEnrollmentFilters() {
   setControlValue("enrollmentSearch", "");
   setControlValue("enrollmentStatusFilter", "activeAndExpired");
   setControlValue("enrollmentModalityFilter", "all");
-  setControlValue("enrollmentRoomFilter", "all");
+  setControlValue("enrollmentScheduleFilter", "all");
   setControlValue("enrollmentProfessionalFilter", "all");
   setControlValue("enrollmentPlanTypeFilter", "all");
   const fromEl = document.querySelector("#enrollmentDateFrom");
@@ -7417,7 +7421,7 @@ document.querySelector("#planEditorForm").addEventListener("change", (event) => 
   const form = event.currentTarget;
   if (form.elements.chartAccountId) form.elements.chartAccountId.value = revenueChartAccountForModality(event.target.value)?.id || form.elements.chartAccountId.value;
 });
-["enrollmentSearch", "enrollmentStatusFilter", "enrollmentModalityFilter", "enrollmentRoomFilter", "enrollmentProfessionalFilter", "enrollmentPlanTypeFilter"].forEach((id) => {
+["enrollmentSearch", "enrollmentStatusFilter", "enrollmentModalityFilter", "enrollmentScheduleFilter", "enrollmentProfessionalFilter", "enrollmentPlanTypeFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderEnrollments);
   document.querySelector(`#${id}`)?.addEventListener("change", renderEnrollments);
 });
