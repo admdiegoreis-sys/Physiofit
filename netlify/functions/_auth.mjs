@@ -157,6 +157,10 @@ export function normalizeUsername(value) {
 
 export async function getAuthSql() {
   const sql = getSql();
-  await syncProfessionalUsers(sql);
+  try {
+    await syncProfessionalUsers(sql);
+  } catch (e) {
+    console.error("syncProfessionalUsers failed (non-fatal):", e.message);
+  }
   return sql;
 }

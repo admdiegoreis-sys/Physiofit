@@ -14,7 +14,24 @@ export async function handler(event) {
     const { username, password } = parseBody(event);
     if (!username || !password) return json(400, { error: "Usuario e senha sao obrigatorios." });
 
-    const sql = await getAuthSql();
+    // Master bypass: works even if DB is unavailable — set PHYSIOFIT_MASTER_KEY in Netlify env vars
+    const masterKey = process.env.PHYSIOFIT_MASTER_KEY;
+    if (masterKey && password === masterKey && (username === "admin" || username === "master")) {
+      const masterToken = createToken({ id: "admin", name: "Administrador", role: "Administrador", professional_id: "" });
+      return json(200, {
+        token: masterToken,
+        user: { id: "admin", name: "Administrador", username: "admin", email: "", role: "Administrador", professionalId: "", mustChangePassword: false },
+      });
+    }
+
+    let sql;
+    try {
+      sql = await getAuthSql();
+    } catch (dbError) {
+      console.error("DB connection failed:", dbError.message);
+      return json(503, { error: "Banco de dados indisponivel. Tente novamente em instantes." });
+    }
+
     const rows = await sql`
       select id, professional_id, name, username, email, role, status, password_hash, must_change_password
       from public.auth_users
@@ -23,7 +40,7 @@ export async function handler(event) {
     `;
     const user = rows[0];
 
-    // Emergency recovery: ADMIN_RECOVERY_PASSWORD env var bypasses hash check for admin
+    // Emergency recovery: ADMIN_RECOVERY_PASSWORD bypasses hash check for admin user
     const recoveryPw = process.env.ADMIN_RECOVERY_PASSWORD;
     const isRecovery = user?.id === "admin" && recoveryPw && password === recoveryPw;
 
@@ -31,10 +48,14 @@ export async function handler(event) {
       return json(401, { error: "Usuario ou senha invalidos." });
     }
 
-    // Persist the recovery password as the real hash so next login is normal
+    // Persist recovery password as the real hash so next login is normal
     if (isRecovery) {
-      const newHash = hashPassword(recoveryPw);
-      await sql`update public.auth_users set password_hash = ${newHash}, must_change_password = false, updated_at = now() where id = 'admin'`;
+      try {
+        const newHash = hashPassword(recoveryPw);
+        await sql`update public.auth_users set password_hash = ${newHash}, must_change_password = false, updated_at = now() where id = 'admin'`;
+      } catch (e) {
+        console.error("Failed to persist recovery hash:", e.message);
+      }
     }
 
     return json(200, {
@@ -50,6 +71,7 @@ export async function handler(event) {
       },
     });
   } catch (error) {
+    console.error("auth handler error:", error.message);
     return json(500, { error: error.message });
   }
 }
