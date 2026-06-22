@@ -3679,7 +3679,7 @@ function importStudentsAndEnrollmentsFromXlsx(file) {
           status,
           freeSchedule: "Não",
           financialTitlesGenerated: true,
-          sessions: Number(plan?.sessions) || 0,
+          sessions: plan ? (weeklySessionsFromPlan(plan) || 0) : 0,
           paymentMethod: "Pix",
         }, state.enrollments.length);
 
@@ -3793,7 +3793,7 @@ function renderEnrollments() {
               <td><strong>${currency(Math.max(0, Number(item.monthlyValue || 0) - Number(item.discount || 0)))}</strong></td>
               <td><div class="patient-name"><strong>${displayName(planName(item.planId))}</strong><span>${planTypeLabel(item.planType || planById(item.planId)?.type)}</span></div></td>
               <td><div class="patient-name"><strong>${paymentSummary.label}</strong><span>${item.paymentMethod || "-"}</span></div></td>
-              <td>${item.sessions || "-"}</td>
+              <td>${(() => { const p = planById(item.planId); return p ? (weeklySessionsFromPlan(p) || item.sessions || "-") : (item.sessions || "-"); })()}x/sem</td>
               <td><div class="enrollment-schedule-pills">${[
                 ["Seg", item.mondayTime],
                 ["Ter", item.tuesdayTime],
