@@ -108,6 +108,10 @@ button {
   box-shadow: 0 22px 60px rgba(20, 32, 50, 0.16);
 }
 
+.login-card[hidden] {
+  display: none !important;
+}
+
 .login-card img {
   width: 260px;
   max-width: 100%;
