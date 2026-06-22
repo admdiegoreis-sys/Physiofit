@@ -467,6 +467,7 @@ function professionalIdByName(name) {
 }
 
 let state = loadState();
+refreshAutoRenewalProjections();
 let remoteStateReady = false;
 let applyingRemoteState = false;
 let remoteSaveTimer = null;
@@ -1086,19 +1087,14 @@ function chartAccountFields() {
 }
 
 function loadState() {
-  const withProjections = (data) => {
-    state = normalizeState(data);
-    refreshAutoRenewalProjections();
-    return state;
-  };
   const saved = localStorage.getItem(storageKey);
-  if (!saved) return withProjections(structuredClone(seedData));
+  if (!saved) return normalizeState(structuredClone(seedData));
   try {
     const parsed = JSON.parse(saved);
-    if (parsed.dataVersion !== seedData.dataVersion) return withProjections(structuredClone(seedData));
-    return withProjections(parsed);
+    if (parsed.dataVersion !== seedData.dataVersion) return normalizeState(structuredClone(seedData));
+    return normalizeState(parsed);
   } catch {
-    return withProjections(structuredClone(seedData));
+    return normalizeState(structuredClone(seedData));
   }
 }
 
