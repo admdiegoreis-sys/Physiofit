@@ -3790,6 +3790,13 @@ function renderEnrollments() {
               <td><div class="patient-name"><strong>${displayName(planName(item.planId))}</strong><span>${planTypeLabel(item.planType || planById(item.planId)?.type)}</span></div></td>
               <td><div class="patient-name"><strong>${paymentSummary.label}</strong><span>${item.paymentMethod || "-"}</span></div></td>
               <td>${item.sessions || "-"}</td>
+              <td><div class="enrollment-schedule-pills">${[
+                ["Seg", item.mondayTime],
+                ["Ter", item.tuesdayTime],
+                ["Qua", item.wednesdayTime],
+                ["Qui", item.thursdayTime],
+                ["Sex", item.fridayTime],
+              ].filter(([, t]) => t).map(([d, t]) => `<span class="schedule-pill">${d} ${t}</span>`).join("")|| "-"}</div></td>
               <td><span class="status-pill ${paymentSummary.label === "Pago" ? paymentSummary.className : financialGenerated ? "ativo" : "pendente"}">${paymentSummary.label === "Pago" ? paymentSummary.label : financialGenerated ? "Gerado" : "Pendente"}</span></td>
               <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
             </tr>
