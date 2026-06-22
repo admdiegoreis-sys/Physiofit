@@ -3831,6 +3831,51 @@ function renderPlans() {
     : `<tr><td colspan="7"><div class="empty-state">Nenhum plano encontrado.</div></td></tr>`;
 }
 
+function exportPlansXls() {
+  const term = normalizedText(document.querySelector("#planSearch")?.value.trim() ?? "");
+  const statusFilter = document.querySelector("#planStatusFilter")?.value ?? "Ativo";
+  const modalityFilter = document.querySelector("#planModalityFilter")?.value ?? "all";
+  const typeFilter = document.querySelector("#planTypeFilter")?.value ?? "all";
+  const sessionsFilter = document.querySelector("#planSessionsFilter")?.value ?? "all";
+  const list = state.plans
+    .filter((item) => statusFilter === "all" || item.status === statusFilter)
+    .filter((item) => modalityFilter === "all" || item.modalityId === modalityFilter)
+    .filter((item) => typeFilter === "all" || planTypeLabel(item.type) === planTypeLabel(typeFilter))
+    .filter((item) => sessionsFilter === "all" || Number(item.sessions || 0) === Number(sessionsFilter))
+    .filter((item) => normalizedText([item.name, modalityName(item.modalityId), chartAccountName(item.chartAccountId), item.type, item.status, item.notes].join(" ")).includes(term))
+    .sort((a, b) => normalizedText(a.name).localeCompare(normalizedText(b.name), "pt-BR", { sensitivity: "base" }));
+
+  const rows = [
+    ["Plano", "Modalidade", "Plano de Contas", "Tipo de Plano", "Sessões", "Valor (R$)", "Status", "Observações"],
+    ...list.map((item) => [
+      item.name || "",
+      modalityName(item.modalityId) || "",
+      chartAccountName(item.chartAccountId) || "",
+      planTypeLabel(item.type) || "",
+      item.sessions ? Number(item.sessions) : "",
+      Number(item.value || 0),
+      item.status || "",
+      item.notes || "",
+    ]),
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths
+  ws["!cols"] = [40, 20, 40, 16, 10, 14, 10, 40].map((w) => ({ wch: w }));
+
+  // Format value column as currency
+  const valueCol = 5;
+  for (let r = 1; r < rows.length; r++) {
+    const cell = ws[XLSX.utils.encode_cell({ r, c: valueCol })];
+    if (cell) cell.z = '"R$" #,##0.00';
+  }
+
+  XLSX.utils.book_append_sheet(wb, ws, "Planos");
+  XLSX.writeFile(wb, `planos_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
 function openPlanEditor(planId = null) {
   editingPlanId = planId;
   const item = planId ?state.plans.find((planItem) => planItem.id === planId) : createEmptyPlan();
@@ -7184,6 +7229,7 @@ document.querySelector("#planModalityFilter")?.addEventListener("change", render
 document.querySelector("#planTypeFilter")?.addEventListener("change", renderPlans);
 document.querySelector("#planSessionsFilter")?.addEventListener("change", renderPlans);
 document.querySelector("#newPlanButton").addEventListener("click", () => openPlanEditor());
+document.querySelector("#exportPlansButton")?.addEventListener("click", exportPlansXls);
 document.querySelector("#backToPlansButton").addEventListener("click", () => switchView("plans"));
 document.querySelector("#planEditorForm").addEventListener("submit", (event) => {
   event.preventDefault();
