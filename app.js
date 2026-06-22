@@ -7074,11 +7074,11 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
   if (form.dataset.type === "enrollment" && form.elements.freeSchedule?.value !== "Sim") {
     const dayFields = ["mondayTime", "tuesdayTime", "wednesdayTime", "thursdayTime", "fridayTime"];
     const filledTimes = dayFields.filter((name) => form.elements[name]?.value);
-    const sessions = Number(form.elements.sessions?.value) || 0;
-    if (filledTimes.length !== sessions) {
-      const msg = sessions === 0
-        ? "Informe a quantidade de sessões por semana."
-        : `Sessões por semana é ${sessions}, mas ${filledTimes.length === 0 ? "nenhum horário foi" : `apenas ${filledTimes.length} horário(s) foi(foram)`} preenchido(s). Preencha exatamente ${sessions} dia(s).`;
+    const planId = form.elements.planId?.value;
+    const plan = planId ? state.plans.find((p) => p.id === planId) : null;
+    const weeklyFreq = plan ? weeklySessionsFromPlan(plan) : Number(form.elements.sessions?.value) || 0;
+    if (weeklyFreq > 0 && filledTimes.length !== weeklyFreq) {
+      const msg = `Preencha exatamente ${weeklyFreq} dia(s) de semana (${filledTimes.length} preenchido(s)).`;
       const targetField = form.elements[dayFields.find((n) => !form.elements[n]?.value) || dayFields[0]];
       if (targetField) {
         targetField.setCustomValidity(msg);
