@@ -1776,6 +1776,24 @@
       </div>
     </div>
 
+    <div id="emailOverlay" class="pw-overlay" hidden>
+      <div class="pw-overlay-card">
+        <p class="eyebrow">Editar e-mail</p>
+        <h3 id="emailOverlayTitle"></h3>
+        <form id="emailOverlayForm" class="form-grid">
+          <label>
+            E-mail
+            <input id="overlayEmail" name="email" type="email" autocomplete="email" required placeholder="usuario@email.com" />
+          </label>
+          <span id="overlayEmailFeedback" class="login-feedback" role="alert"></span>
+          <div style="display:flex;gap:8px;">
+            <button class="primary-button" type="submit">Salvar</button>
+            <button class="ghost-button" type="button" id="emailOverlayCancel">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div id="passwordOverlay" class="pw-overlay" hidden>
       <div class="pw-overlay-card">
         <p class="eyebrow">Redefinir senha</p>
@@ -1814,7 +1832,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=18"></script>
+    <script src="app.js?v=19"></script>
   </body>
 </html>
 

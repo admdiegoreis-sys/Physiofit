@@ -6449,6 +6449,7 @@ async function renderAccessUsers() {
                 <td>
                   <div class="row-actions">
                     <button class="row-action-button edit-icon-button" data-set-password="${user.id}" data-set-password-name="${user.name}" type="button" title="Definir senha">Senha</button>
+                    <button class="row-action-button edit-icon-button" data-set-email="${user.id}" data-set-email-name="${user.name}" data-current-email="${user.email || ""}" type="button" title="Editar e-mail">E-mail</button>
                     <button class="row-action-button ${user.status === "Ativo" ? "delete-icon-button" : "edit-icon-button"}" data-toggle-user="${user.id}" data-user-status="${user.status === "Ativo" ? "Inativo" : "Ativo"}" type="button">${user.status === "Ativo" ? "Bloquear" : "Ativar"}</button>
                   </div>
                 </td>
@@ -6484,6 +6485,25 @@ function closePasswordOverlay() {
   const overlay = document.querySelector("#passwordOverlay");
   if (overlay) overlay.hidden = true;
   _pendingPasswordUserId = null;
+}
+
+let _pendingEmailUserId = null;
+
+function setUserEmail(userId, userName, currentEmail) {
+  _pendingEmailUserId = userId;
+  const overlay = document.querySelector("#emailOverlay");
+  if (!overlay) return;
+  document.querySelector("#emailOverlayTitle").textContent = userName || "Usuário";
+  document.querySelector("#overlayEmail").value = currentEmail || "";
+  document.querySelector("#overlayEmailFeedback").textContent = "";
+  overlay.hidden = false;
+  document.querySelector("#overlayEmail").focus();
+}
+
+function closeEmailOverlay() {
+  const overlay = document.querySelector("#emailOverlay");
+  if (overlay) overlay.hidden = true;
+  _pendingEmailUserId = null;
 }
 
 async function toggleUserStatus(userId, status) {
@@ -6974,6 +6994,9 @@ document.addEventListener("click", (event) => {
 
   const toggleUserButton = event.target.closest("[data-toggle-user]");
   if (toggleUserButton) toggleUserStatus(toggleUserButton.dataset.toggleUser, toggleUserButton.dataset.userStatus);
+
+  const setEmailButton = event.target.closest("[data-set-email]");
+  if (setEmailButton) setUserEmail(setEmailButton.dataset.setEmail, setEmailButton.dataset.setEmailName, setEmailButton.dataset.currentEmail);
 
   const importAccountsButton = event.target.closest("[data-import-accounts]");
   if (importAccountsButton) {
@@ -7593,6 +7616,26 @@ document.querySelector("#passwordOverlayForm")?.addEventListener("submit", async
 document.querySelector("#passwordOverlayCancel")?.addEventListener("click", closePasswordOverlay);
 document.querySelector("#passwordOverlay")?.addEventListener("click", (e) => {
   if (e.target === e.currentTarget) closePasswordOverlay();
+});
+
+document.querySelector("#emailOverlayForm")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const feedback = document.querySelector("#overlayEmailFeedback");
+  const email = document.querySelector("#overlayEmail").value.trim();
+  feedback.textContent = "";
+  if (!_pendingEmailUserId) return;
+  try {
+    await window.PhysiofitData.updateUser(_pendingEmailUserId, { email });
+    closeEmailOverlay();
+    await renderAccessUsers();
+    toast("E-mail atualizado.");
+  } catch (err) {
+    feedback.textContent = err.message || "Não foi possível atualizar o e-mail.";
+  }
+});
+document.querySelector("#emailOverlayCancel")?.addEventListener("click", closeEmailOverlay);
+document.querySelector("#emailOverlay")?.addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) closeEmailOverlay();
 });
 
 // Lose Lead overlay
