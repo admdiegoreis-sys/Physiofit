@@ -2099,34 +2099,39 @@ button {
 }
 
 .accounts-table-wrap table {
-  min-width: 1400px;
+  min-width: 1060px;
 }
 
-/* col: Status Fornecedor Descrição PlanoContas Comp Prev Pgto Valor Desc Líquido Concil Ações */
+/* 9 cols: Status | Fornecedor | Descrição/Plano | Competência | Vencimento | Pagamento | Valor | Conciliação | Ações */
 .accounts-table-wrap th:nth-child(1),
-.accounts-table-wrap td:nth-child(1) { width: 90px; }
+.accounts-table-wrap td:nth-child(1) { width: 88px; }
 .accounts-table-wrap th:nth-child(2),
-.accounts-table-wrap td:nth-child(2) { width: 180px; }
+.accounts-table-wrap td:nth-child(2) { width: 200px; max-width: 200px; overflow: hidden; }
 .accounts-table-wrap th:nth-child(3),
-.accounts-table-wrap td:nth-child(3) { width: 160px; }
+.accounts-table-wrap td:nth-child(3) { width: 220px; max-width: 220px; overflow: hidden; }
 .accounts-table-wrap th:nth-child(4),
-.accounts-table-wrap td:nth-child(4) { width: 160px; }
+.accounts-table-wrap td:nth-child(4),
 .accounts-table-wrap th:nth-child(5),
 .accounts-table-wrap td:nth-child(5),
 .accounts-table-wrap th:nth-child(6),
-.accounts-table-wrap td:nth-child(6),
+.accounts-table-wrap td:nth-child(6) { width: 100px; white-space: nowrap; }
 .accounts-table-wrap th:nth-child(7),
-.accounts-table-wrap td:nth-child(7) { width: 96px; white-space: nowrap; }
+.accounts-table-wrap td:nth-child(7) { width: 120px; text-align: right; }
 .accounts-table-wrap th:nth-child(8),
-.accounts-table-wrap td:nth-child(8),
-.accounts-table-wrap th:nth-child(10),
-.accounts-table-wrap td:nth-child(10) { width: 110px; text-align: right; }
+.accounts-table-wrap td:nth-child(8) { width: 110px; }
 .accounts-table-wrap th:nth-child(9),
-.accounts-table-wrap td:nth-child(9) { width: 90px; text-align: right; }
-.accounts-table-wrap th:nth-child(11),
-.accounts-table-wrap td:nth-child(11) { width: 110px; }
-.accounts-table-wrap th:nth-child(12),
-.accounts-table-wrap td:nth-child(12) { width: 88px; }
+.accounts-table-wrap td:nth-child(9) { width: 88px; }
+
+.accounts-table-wrap .patient-name strong,
+.accounts-table-wrap .patient-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.accounts-table-wrap td.amount-cell { text-align: right; }
+.accounts-table-wrap td.date-cell  { white-space: nowrap; }
 
 .chart-accounts-table-wrap table {
   min-width: 980px;

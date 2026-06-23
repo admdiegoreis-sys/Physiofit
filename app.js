@@ -4506,20 +4506,21 @@ function renderAccountTable(config) {
           const amtClass = item.direction === "Receber" ? "amount-in" : "amount-out";
           const sign = item.direction === "Receber" ? "" : "-";
           const person = supplierName(item.supplierId) || item.person || "-";
-          const doc = item.document || supplierById(item.supplierId)?.document || "";
+          const payMethod = item.bankLaunch ?? item.paymentMethod ?? "";
           const chartAcc = state.chartAccounts.find((a) => a.id === item.chartAccountId);
+          const planLabel = chartAccountName(item.chartAccountId) || "";
           return `
             <tr>
               <td><span class="monthly-status-button ${statusStyle}">${statusLabel}</span></td>
-              <td><div class="patient-name"><strong>${person}</strong>${doc ? `<span>${doc}</span>` : ""}</div></td>
-              <td><div class="patient-name"><strong>${item.description || "-"}</strong><span>${item.bankLaunch ?? item.paymentMethod ?? ""}</span></div></td>
-              <td><div class="patient-name"><strong>${chartAccountName(item.chartAccountId) || "-"}</strong>${chartAcc?.dfcGroup ? `<span>${chartAcc.dfcGroup}</span>` : ""}</div></td>
-              <td>${dateLabel(item.competenceDate)}</td>
-              <td>${dateLabel(item.forecastDate)}</td>
-              <td>${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
-              <td><strong class="${amtClass}">${sign}${currency(originalAmt)}</strong></td>
-              <td>${discount > 0 ? `<span style="color:var(--danger,#e53)">-${currency(discount)}</span>` : "-"}</td>
-              <td><strong class="${amtClass}">${sign}${currency(item.amount)}</strong></td>
+              <td><div class="patient-name"><strong title="${person}">${person}</strong>${payMethod ? `<span>${payMethod}</span>` : ""}</div></td>
+              <td><div class="patient-name"><strong title="${item.description || ""}">${item.description || "-"}</strong>${planLabel ? `<span title="${planLabel}">${planLabel}</span>` : ""}</div></td>
+              <td class="date-cell">${dateLabel(item.competenceDate)}</td>
+              <td class="date-cell">${dateLabel(item.forecastDate)}</td>
+              <td class="date-cell">${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
+              <td class="amount-cell">
+                <strong class="${amtClass}">${sign}${currency(item.amount)}</strong>
+                ${discount > 0 ? `<small style="color:var(--danger,#e53);display:block">desc. ${currency(discount)}</small>` : ""}
+              </td>
               <td><span class="source-pill ${sourceClass}">${sourceLabel}</span></td>
               <td class="row-actions">
                 <button class="row-action-button edit-icon-button" data-edit-account="${item.id}" type="button" title="Editar" aria-label="Editar conta">✎</button>
@@ -4533,7 +4534,7 @@ function renderAccountTable(config) {
           `;
         })
         .join("")
-    : `<tr><td colspan="12"><div class="empty-state">${config.emptyMessage}</div></td></tr>`;
+    : `<tr><td colspan="9"><div class="empty-state">${config.emptyMessage}</div></td></tr>`;
 }
 
 // ─── Contracts ───────────────────────────────────────────────────────────────
