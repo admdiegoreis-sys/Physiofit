@@ -1677,9 +1677,19 @@
                   <div class="panel-heading">
                     <div>
                       <p class="eyebrow">Segurança</p>
-                      <h2>Alterar minha senha</h2>
+                      <h2>Minha conta</h2>
                     </div>
                   </div>
+                  <form id="changeEmailForm" class="form-grid" style="margin-bottom:16px">
+                    <label>
+                      Meu e-mail (usado para recuperação de senha)
+                      <input id="changeEmailInput" name="email" type="email" autocomplete="email" placeholder="seu@email.com" />
+                    </label>
+                    <span id="changeEmailFeedback" class="login-feedback" role="alert"></span>
+                    <button class="primary-button" type="submit">Salvar e-mail</button>
+                  </form>
+                  <hr style="border:none;border-top:1px solid var(--border,#e5e7eb);margin:0 0 16px">
+                  <p class="eyebrow" style="margin-bottom:12px">Alterar senha</p>
                   <form id="changePasswordForm" class="form-grid">
                     <label>
                       Nova senha
@@ -1832,7 +1842,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=19"></script>
+    <script src="app.js?v=20"></script>
   </body>
 </html>
 

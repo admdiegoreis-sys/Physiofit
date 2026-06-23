@@ -7573,6 +7573,31 @@ document.querySelector("#logoutButton")?.addEventListener("click", logout);
 document.querySelector("#refreshUsersButton")?.addEventListener("click", renderAccessUsers);
 checkResetTokenInUrl();
 
+// Populate email field when settings tab opens
+function populateMyEmailField() {
+  const user = currentUser();
+  if (!user) return;
+  const input = document.querySelector("#changeEmailInput");
+  if (input && user.email) input.value = user.email;
+}
+document.querySelector("[data-nav='settings']")?.addEventListener("click", populateMyEmailField);
+
+// Change own email
+document.querySelector("#changeEmailForm")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const feedback = document.querySelector("#changeEmailFeedback");
+  const email = document.querySelector("#changeEmailInput").value.trim();
+  feedback.textContent = "";
+  const user = currentUser();
+  if (!user) return;
+  try {
+    await window.PhysiofitData.updateUser(user.id, { email });
+    toast("E-mail salvo.");
+  } catch (err) {
+    feedback.textContent = err.message || "Não foi possível salvar o e-mail.";
+  }
+});
+
 // Change own password
 document.querySelector("#changePasswordForm")?.addEventListener("submit", async (event) => {
   event.preventDefault();
