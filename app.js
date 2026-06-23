@@ -4501,19 +4501,26 @@ function renderAccountTable(config) {
           const sourceClass = item.reconciliationStatus === "reconciled" ? "ofx" : "manual";
           const statusLabel = accountAutoStatus(item);
           const statusStyle = accountAutoStatusClass(item);
+          const originalAmt = item.originalAmount ?? item.amount;
+          const discount = originalAmt > item.amount ? originalAmt - item.amount : 0;
+          const amtClass = item.direction === "Receber" ? "amount-in" : "amount-out";
+          const sign = item.direction === "Receber" ? "" : "-";
+          const person = supplierName(item.supplierId) || item.person || "-";
+          const doc = item.document || supplierById(item.supplierId)?.document || "";
+          const chartAcc = state.chartAccounts.find((a) => a.id === item.chartAccountId);
           return `
             <tr>
               <td><span class="monthly-status-button ${statusStyle}">${statusLabel}</span></td>
+              <td><div class="patient-name"><strong>${person}</strong>${doc ? `<span>${doc}</span>` : ""}</div></td>
+              <td><div class="patient-name"><strong>${item.description || "-"}</strong><span>${item.bankLaunch ?? item.paymentMethod ?? ""}</span></div></td>
+              <td><div class="patient-name"><strong>${chartAccountName(item.chartAccountId) || "-"}</strong>${chartAcc?.dfcGroup ? `<span>${chartAcc.dfcGroup}</span>` : ""}</div></td>
               <td>${dateLabel(item.competenceDate)}</td>
               <td>${dateLabel(item.forecastDate)}</td>
               <td>${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
-              <td><strong class="${item.direction === "Receber" ? "amount-in" : "amount-out"}">${item.direction === "Receber" ? "" : "-"}${currency(item.originalAmount ?? item.amount)}</strong></td>
-              <td>${(item.originalAmount ?? item.amount) > item.amount ? `<span style="color:var(--danger,#e53)">${currency((item.originalAmount ?? item.amount) - item.amount)}</span>` : "-"}</td>
-              <td><strong class="${item.direction === "Receber" ? "amount-in" : "amount-out"}">${item.direction === "Receber" ? "" : "-"}${currency(item.amount)}</strong></td>
-              <td><strong>${item.description}</strong><br><small>${item.bankLaunch ?? item.paymentMethod ?? ""}</small></td>
+              <td><strong class="${amtClass}">${sign}${currency(originalAmt)}</strong></td>
+              <td>${discount > 0 ? `<span style="color:var(--danger,#e53)">-${currency(discount)}</span>` : "-"}</td>
+              <td><strong class="${amtClass}">${sign}${currency(item.amount)}</strong></td>
               <td><span class="source-pill ${sourceClass}">${sourceLabel}</span></td>
-              <td>${supplierName(item.supplierId) || item.person || "-"}<br><small>${item.document || supplierById(item.supplierId)?.document || ""}</small></td>
-              <td>${chartAccountName(item.chartAccountId)}<br><small>${state.chartAccounts.find((account) => account.id === item.chartAccountId)?.dfcGroup ?? ""}</small></td>
               <td class="row-actions">
                 <button class="row-action-button edit-icon-button" data-edit-account="${item.id}" type="button" title="Editar" aria-label="Editar conta">✎</button>
                 ${item.paidDate
