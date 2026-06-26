@@ -6611,6 +6611,9 @@ function switchView(view) {
     view = "dashboard";
     if (currentUser()) toast("Seu perfil não tem acesso a essa tela.");
   }
+  if (view === "agenda" && window.innerWidth <= 720 && agendaMode === "week") {
+    agendaMode = "day";
+  }
   document.querySelectorAll(".view").forEach((element) => element.classList.remove("active"));
   document.querySelector(`#${view}View`).classList.add("active");
   openMenuGroup(menuGroupByView[view]);
