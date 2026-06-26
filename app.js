@@ -1871,6 +1871,18 @@ function monthYearLabel(value) {
   return new Intl.DateTimeFormat("pt-BR", { year: "numeric", month: "2-digit", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 }
 
+function shortDateLabel(value) {
+  if (!value || value === "-") return "-";
+  const d = new Date(`${value}T00:00:00Z`);
+  return `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+const ACCOUNT_STATUS_ICONS = { Pago: "✓", Recebido: "✓", Parcial: "◑", "Em aberto": "◌", Cancelado: "✕" };
+function accountStatusIcon(label, cssClass) {
+  if (cssClass === "atrasado") return "⚠";
+  return ACCOUNT_STATUS_ICONS[label] || "◌";
+}
+
 function dateTimeLabel(value) {
   if (!value) return "-";
   const date = new Date(value);
@@ -4516,12 +4528,12 @@ function renderAccountTable(config) {
           const planLabel = chartAccountName(item.chartAccountId) || "";
           return `
             <tr>
-              <td><span class="monthly-status-button ${statusStyle}">${statusLabel}</span></td>
+              <td><span class="monthly-status-button ${statusStyle}" title="${statusLabel}">${accountStatusIcon(statusLabel, statusStyle)}</span></td>
               <td><div class="patient-name"><strong title="${person}">${person}</strong>${payMethod ? `<span>${payMethod}</span>` : ""}</div></td>
               <td><div class="patient-name"><strong title="${item.description || ""}">${item.description || "-"}</strong>${planLabel ? `<span title="${planLabel}">${planLabel}</span>` : ""}</div></td>
               <td class="date-cell">${monthYearLabel(item.competenceDate)}</td>
-              <td class="date-cell">${dateLabel(item.forecastDate)}</td>
-              <td class="date-cell">${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
+              <td class="date-cell">${shortDateLabel(item.forecastDate)}</td>
+              <td class="date-cell">${item.paidDate ? shortDateLabel(item.paidDate) : "-"}</td>
               <td class="amount-cell">
                 <strong class="${amtClass}">${sign}${currency(item.amount)}</strong>
                 ${discount > 0 ? `<small style="color:var(--danger,#e53);display:block">desc. ${currency(discount)}</small>` : ""}

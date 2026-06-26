@@ -3307,36 +3307,59 @@ tr:last-child td {
 
 /* 9 cols: Status | Fornecedor/Cliente | Descrição/Plano | Competência | Vencimento | Pagamento | Valor | Conciliação | Ações */
 .accounts-table-wrap th:nth-child(1),
-.accounts-table-wrap td:nth-child(1) { width: 88px; }
+.accounts-table-wrap td:nth-child(1) { width: 42px; }
 
 .accounts-table-wrap th:nth-child(2),
-.accounts-table-wrap td:nth-child(2) { width: 155px; }
+.accounts-table-wrap td:nth-child(2) { width: 175px; }
 
 .accounts-table-wrap th:nth-child(3),
-.accounts-table-wrap td:nth-child(3) { width: 185px; }
+.accounts-table-wrap td:nth-child(3) { width: 200px; }
 
 .accounts-table-wrap th:nth-child(4),
-.accounts-table-wrap td:nth-child(4),
+.accounts-table-wrap td:nth-child(4) { width: 50px; }
+
 .accounts-table-wrap th:nth-child(5),
 .accounts-table-wrap td:nth-child(5),
 .accounts-table-wrap th:nth-child(6),
-.accounts-table-wrap td:nth-child(6) { width: 90px; }
+.accounts-table-wrap td:nth-child(6) { width: 40px; }
 
 .accounts-table-wrap th:nth-child(7),
-.accounts-table-wrap td:nth-child(7) { width: 125px; }
+.accounts-table-wrap td:nth-child(7) { width: 82px; }
 
 .accounts-table-wrap th:nth-child(8),
-.accounts-table-wrap td:nth-child(8) { width: 115px; }
+.accounts-table-wrap td:nth-child(8) { width: 88px; }
 
 .accounts-table-wrap th:nth-child(9),
-.accounts-table-wrap td:nth-child(9) { width: 92px; }
+.accounts-table-wrap td:nth-child(9) { width: 98px; }
 
+/* status: ícone compacto */
 .accounts-table-wrap .monthly-status-button {
-  min-width: 62px;
-  min-height: 26px;
-  padding: 0 7px;
-  border-radius: 5px;
-  font-size: 0.68rem;
+  min-width: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* fornecedor/descrição: fonte menor, mais caracteres visíveis */
+.accounts-table-wrap .patient-name strong {
+  font-size: 0.58rem;
+  font-weight: 600;
+}
+.accounts-table-wrap .patient-name span {
+  font-size: 0.52rem;
+}
+
+/* valor: fonte menor */
+.accounts-table-wrap .amount-cell strong {
+  font-size: 0.6rem;
+}
+.accounts-table-wrap .amount-cell small {
+  font-size: 0.5rem;
 }
 
 .accounts-table-wrap .row-actions {
