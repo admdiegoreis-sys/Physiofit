@@ -2207,28 +2207,9 @@ button {
 }
 
 .accounts-table-wrap table {
-  min-width: 1060px;
+  min-width: 980px;
+  table-layout: fixed;
 }
-
-/* 9 cols: Status | Fornecedor | Descrição/Plano | Competência | Vencimento | Pagamento | Valor | Conciliação | Ações */
-.accounts-table-wrap th:nth-child(1),
-.accounts-table-wrap td:nth-child(1) { width: 88px; }
-.accounts-table-wrap th:nth-child(2),
-.accounts-table-wrap td:nth-child(2) { width: 200px; max-width: 200px; overflow: hidden; }
-.accounts-table-wrap th:nth-child(3),
-.accounts-table-wrap td:nth-child(3) { width: 220px; max-width: 220px; overflow: hidden; }
-.accounts-table-wrap th:nth-child(4),
-.accounts-table-wrap td:nth-child(4),
-.accounts-table-wrap th:nth-child(5),
-.accounts-table-wrap td:nth-child(5),
-.accounts-table-wrap th:nth-child(6),
-.accounts-table-wrap td:nth-child(6) { width: 100px; white-space: nowrap; }
-.accounts-table-wrap th:nth-child(7),
-.accounts-table-wrap td:nth-child(7) { width: 120px; text-align: right; }
-.accounts-table-wrap th:nth-child(8),
-.accounts-table-wrap td:nth-child(8) { width: 110px; }
-.accounts-table-wrap th:nth-child(9),
-.accounts-table-wrap td:nth-child(9) { width: 88px; }
 
 .accounts-table-wrap .patient-name strong,
 .accounts-table-wrap .patient-name span {
@@ -3326,39 +3307,31 @@ tr:last-child td {
   width: 100px;
 }
 
+/* 9 cols: Status | Fornecedor/Cliente | Descrição/Plano | Competência | Vencimento | Pagamento | Valor | Conciliação | Ações */
 .accounts-table-wrap th:nth-child(1),
-.accounts-table-wrap td:nth-child(1) {
-  width: 78px;
-}
+.accounts-table-wrap td:nth-child(1) { width: 88px; }
 
 .accounts-table-wrap th:nth-child(2),
-.accounts-table-wrap td:nth-child(2),
-.accounts-table-wrap th:nth-child(3),
-.accounts-table-wrap td:nth-child(3),
-.accounts-table-wrap th:nth-child(4),
-.accounts-table-wrap td:nth-child(4) {
-  width: 82px;
-}
+.accounts-table-wrap td:nth-child(2) { width: 155px; }
 
+.accounts-table-wrap th:nth-child(3),
+.accounts-table-wrap td:nth-child(3) { width: 185px; }
+
+.accounts-table-wrap th:nth-child(4),
+.accounts-table-wrap td:nth-child(4),
+.accounts-table-wrap th:nth-child(5),
+.accounts-table-wrap td:nth-child(5),
 .accounts-table-wrap th:nth-child(6),
-.accounts-table-wrap td:nth-child(6) {
-  width: 220px;
-}
+.accounts-table-wrap td:nth-child(6) { width: 90px; }
 
 .accounts-table-wrap th:nth-child(7),
-.accounts-table-wrap td:nth-child(7) {
-  width: 70px;
-}
+.accounts-table-wrap td:nth-child(7) { width: 125px; }
 
 .accounts-table-wrap th:nth-child(8),
-.accounts-table-wrap td:nth-child(8) {
-  width: 176px;
-}
+.accounts-table-wrap td:nth-child(8) { width: 115px; }
 
 .accounts-table-wrap th:nth-child(9),
-.accounts-table-wrap td:nth-child(9) {
-  width: 188px;
-}
+.accounts-table-wrap td:nth-child(9) { width: 92px; }
 
 .accounts-table-wrap .monthly-status-button {
   min-width: 62px;
@@ -5881,38 +5854,66 @@ td.row-actions .row-action-button {
 #accountsReceivableView .accounts-toolbar > select,
 #accountsReceivableView .accounts-toolbar > input {
   min-width: 0;
-  min-height: 36px;
-  padding-inline: 9px;
-  font-size: 0.76rem;
+  min-height: 38px;
+  padding-inline: 10px;
+  font-size: 0.82rem;
 }
 
-#accountsPayableView .accounts-toolbar > select,
-#accountsReceivableView .accounts-toolbar > select {
+/* Tipo de período: span 2 */
+#accountsPayableView .accounts-toolbar > select:nth-child(1),
+#accountsReceivableView .accounts-toolbar > select:nth-child(1) {
   grid-column: span 2;
 }
 
+/* Mês/Ano: span 2 */
 #accountsPayableView .accounts-toolbar > input[type="month"],
 #accountsReceivableView .accounts-toolbar > input[type="month"] {
   grid-column: span 2;
 }
 
+/* Date range: span 3 */
 #accountsPayableView .accounts-toolbar .date-range-inputs,
 #accountsReceivableView .accounts-toolbar .date-range-inputs {
-  grid-column: span 4;
+  grid-column: span 3;
   gap: 5px;
   min-width: 0;
 }
 
 #accountsPayableView .accounts-toolbar .date-range-inputs span,
 #accountsReceivableView .accounts-toolbar .date-range-inputs span {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
 }
 
+/* Status: span 3 (era 2 — agora cabe "Todos (Pagos e Não Pagos)") */
+#accountsPayableView .accounts-toolbar > select:nth-child(4),
+#accountsReceivableView .accounts-toolbar > select:nth-child(4) {
+  grid-column: span 3;
+}
+
+/* Conciliação: span 2 */
+#accountsPayableView .accounts-toolbar > select:nth-child(5),
+#accountsReceivableView .accounts-toolbar > select:nth-child(5) {
+  grid-column: span 2;
+}
+
+/* Plano de contas: span 3 */
+#accountsPayableView .accounts-toolbar > select:nth-child(6),
+#accountsReceivableView .accounts-toolbar > select:nth-child(6) {
+  grid-column: span 3;
+}
+
+/* Fornecedores: span 3 */
+#accountsPayableView .accounts-toolbar > select:nth-child(7),
+#accountsReceivableView .accounts-toolbar > select:nth-child(7) {
+  grid-column: span 3;
+}
+
+/* Search row: span 6 — preenche a 2ª linha */
 #accountsPayableView .accounts-toolbar .accounts-search-row,
 #accountsReceivableView .accounts-toolbar .accounts-search-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(82px, auto) minmax(112px, auto);
-  grid-column: span 5;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, auto) minmax(110px, auto);
+  grid-column: span 6;
   min-width: 0;
 }
 
@@ -5961,10 +5962,20 @@ td.row-actions .row-action-button {
   }
 
   #accountsPayableView .accounts-toolbar > select,
+  #accountsPayableView .accounts-toolbar > select:nth-child(1),
+  #accountsPayableView .accounts-toolbar > select:nth-child(4),
+  #accountsPayableView .accounts-toolbar > select:nth-child(5),
+  #accountsPayableView .accounts-toolbar > select:nth-child(6),
+  #accountsPayableView .accounts-toolbar > select:nth-child(7),
   #accountsPayableView .accounts-toolbar > input,
   #accountsPayableView .accounts-toolbar .date-range-inputs,
   #accountsPayableView .accounts-toolbar .accounts-search-row,
   #accountsReceivableView .accounts-toolbar > select,
+  #accountsReceivableView .accounts-toolbar > select:nth-child(1),
+  #accountsReceivableView .accounts-toolbar > select:nth-child(4),
+  #accountsReceivableView .accounts-toolbar > select:nth-child(5),
+  #accountsReceivableView .accounts-toolbar > select:nth-child(6),
+  #accountsReceivableView .accounts-toolbar > select:nth-child(7),
   #accountsReceivableView .accounts-toolbar > input,
   #accountsReceivableView .accounts-toolbar .date-range-inputs,
   #accountsReceivableView .accounts-toolbar .accounts-search-row {
