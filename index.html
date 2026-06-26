@@ -1838,6 +1838,35 @@
       </div>
     </div>
 
+    <div id="editUserOverlay" class="pw-overlay" hidden>
+      <div class="pw-overlay-card" style="max-width:460px">
+        <p class="eyebrow">Editar usuário</p>
+        <h3 id="editUserOverlayTitle"></h3>
+        <form id="editUserForm" class="form-grid">
+          <label>Nome
+            <input id="editUserName" name="name" type="text" required />
+          </label>
+          <label>Usuário (login)
+            <input id="editUserUsername" name="username" type="text" required autocomplete="off" />
+          </label>
+          <label>E-mail
+            <input id="editUserEmail" name="email" type="email" autocomplete="off" placeholder="opcional" />
+          </label>
+          <label>Perfil
+            <select id="editUserRole" name="role">
+              <option value="Profissional">Profissional</option>
+              <option value="Administrador">Administrador</option>
+            </select>
+          </label>
+          <span id="editUserFeedback" class="login-feedback" role="alert"></span>
+          <div style="display:flex;gap:8px">
+            <button class="primary-button" type="submit" style="flex:1">Salvar</button>
+            <button class="ghost-button" type="button" id="editUserOverlayCancel">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div id="inviteOverlay" class="pw-overlay" hidden>
       <div class="pw-overlay-card" style="max-width:460px">
         <p class="eyebrow">Convidar usuário</p>
@@ -1909,7 +1938,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=28"></script>
+    <script src="app.js?v=29"></script>
   </body>
 </html>
 

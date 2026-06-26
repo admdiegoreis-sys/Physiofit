@@ -6453,6 +6453,7 @@ async function renderAccessUsers() {
 
   try {
     const users = await window.PhysiofitData.listUsers();
+    _cachedUsers = users;
     table.innerHTML = users.length
       ? users
           .map(
@@ -6464,6 +6465,9 @@ async function renderAccessUsers() {
                 <td>${user.has_password ? "Configurada" : "Pendente"}</td>
                 <td>
                   <div class="row-actions">
+                    <button class="icon-action-btn edit-user-btn" data-edit-user="${user.id}" type="button" title="Editar usuário">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
                     <button class="icon-action-btn invite-btn" data-invite-user="${user.id}" data-invite-name="${user.name}" type="button" title="Enviar convite de acesso">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                     </button>
@@ -6487,6 +6491,7 @@ async function renderAccessUsers() {
   }
 }
 
+let _cachedUsers = [];
 let _pendingPasswordUserId = null;
 
 function setUserPassword(userId, userName) {
@@ -6528,6 +6533,27 @@ function closeEmailOverlay() {
   const overlay = document.querySelector("#emailOverlay");
   if (overlay) overlay.hidden = true;
   _pendingEmailUserId = null;
+}
+
+let _editingUserId = null;
+
+function openEditUserOverlay(userId) {
+  const user = _cachedUsers.find((u) => u.id === userId);
+  if (!user) return;
+  _editingUserId = userId;
+  document.querySelector("#editUserOverlayTitle").textContent = user.name;
+  document.querySelector("#editUserName").value = user.name || "";
+  document.querySelector("#editUserUsername").value = user.username || "";
+  document.querySelector("#editUserEmail").value = user.email || "";
+  document.querySelector("#editUserRole").value = user.role || "Profissional";
+  document.querySelector("#editUserFeedback").textContent = "";
+  document.querySelector("#editUserOverlay").hidden = false;
+  document.querySelector("#editUserName").focus();
+}
+
+function closeEditUserOverlay() {
+  document.querySelector("#editUserOverlay").hidden = true;
+  _editingUserId = null;
 }
 
 async function inviteUser(userId, userName) {
@@ -7058,6 +7084,9 @@ document.addEventListener("click", (event) => {
 
   const setEmailButton = event.target.closest("[data-set-email]");
   if (setEmailButton) setUserEmail(setEmailButton.dataset.setEmail, setEmailButton.dataset.setEmailName, setEmailButton.dataset.currentEmail);
+
+  const editUserBtn = event.target.closest("[data-edit-user]");
+  if (editUserBtn) openEditUserOverlay(editUserBtn.dataset.editUser);
 
   const inviteBtn = event.target.closest("[data-invite-user]");
   if (inviteBtn) inviteUser(inviteBtn.dataset.inviteUser, inviteBtn.dataset.inviteName);
@@ -7717,6 +7746,29 @@ document.querySelector("#passwordOverlayForm")?.addEventListener("submit", async
 document.querySelector("#passwordOverlayCancel")?.addEventListener("click", closePasswordOverlay);
 document.querySelector("#passwordOverlay")?.addEventListener("click", (e) => {
   if (e.target === e.currentTarget) closePasswordOverlay();
+});
+
+document.querySelector("#editUserForm")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!_editingUserId) return;
+  const feedback = document.querySelector("#editUserFeedback");
+  feedback.textContent = "";
+  const name = document.querySelector("#editUserName").value.trim();
+  const username = document.querySelector("#editUserUsername").value.trim();
+  const email = document.querySelector("#editUserEmail").value.trim() || null;
+  const role = document.querySelector("#editUserRole").value;
+  try {
+    await window.PhysiofitData.updateUser(_editingUserId, { name, username, email, role });
+    closeEditUserOverlay();
+    await renderAccessUsers();
+    toast("Usuário atualizado.");
+  } catch (err) {
+    feedback.textContent = err.message || "Não foi possível salvar.";
+  }
+});
+document.querySelector("#editUserOverlayCancel")?.addEventListener("click", closeEditUserOverlay);
+document.querySelector("#editUserOverlay")?.addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) closeEditUserOverlay();
 });
 
 document.querySelector("#inviteOverlayClose")?.addEventListener("click", closeInviteOverlay);

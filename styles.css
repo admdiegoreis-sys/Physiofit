@@ -1819,6 +1819,12 @@ button {
   flex-shrink: 0;
 }
 
+.icon-action-btn.edit-user-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+.icon-action-btn.edit-user-btn:hover { background: #374151; color: #fff; }
+
 .icon-action-btn.invite-btn {
   background: #e8f4f7;
   color: #3d7d8f;

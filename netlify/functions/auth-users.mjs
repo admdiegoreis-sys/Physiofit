@@ -54,14 +54,20 @@ export async function handler(event) {
 
       const passwordHash = body.password ? hashPassword(body.password) : null;
       const email = body.email !== undefined ? (body.email || null) : undefined;
-      const status = isAdmin ? (body.status || null) : null;
+      const status = isAdmin && body.status !== undefined ? (body.status || null) : undefined;
+      const name = isAdmin && body.name ? body.name.trim() : undefined;
+      const username = isAdmin && body.username ? body.username.trim().toLowerCase() : undefined;
+      const role = isAdmin && body.role ? body.role : undefined;
 
       const rows = await sql`
         update public.auth_users
         set
-          password_hash = coalesce(${passwordHash}, password_hash),
+          password_hash = coalesce(${passwordHash ?? null}, password_hash),
           email = case when ${email !== undefined} then ${email ?? null} else email end,
-          status = coalesce(${status}, status),
+          status = case when ${status !== undefined} then ${status ?? null} else status end,
+          name = case when ${name !== undefined} then ${name ?? null} else name end,
+          username = case when ${username !== undefined} then ${username ?? null} else username end,
+          role = case when ${role !== undefined} then ${role ?? null} else role end,
           must_change_password = false,
           updated_at = now()
         where id = ${body.userId}
