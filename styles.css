@@ -4758,6 +4758,72 @@ body {
   }
 }
 
+@media (max-width: 720px) {
+  /* Topbar: esconde botões de ação rápida — acessíveis via menu */
+  .quick-action {
+    display: none;
+  }
+
+  /* Hero do dashboard: empilha verticalmente */
+  .executive-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .executive-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  /* Metric grid: 2 colunas com ícone menor */
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .metric {
+    padding: 12px 10px 10px 52px;
+    min-height: 96px;
+  }
+
+  .metric::before {
+    top: 14px;
+    left: 12px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .metric-icon {
+    top: 28px;
+    left: 26px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .metric-icon::before {
+    width: 16px;
+    height: 16px;
+  }
+
+  .metric strong {
+    margin-top: 10px;
+    font-size: 1.2rem;
+  }
+
+  .metric small {
+    font-size: 0.68rem;
+  }
+
+  /* Session chip compacto: mostra só primeiro nome */
+  .session-chip span {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
 /* Executive dashboard widgets inspired by the compact visual reference. */
 .metric {
   overflow: hidden;

@@ -6329,7 +6329,10 @@ function applyAuthSession() {
   document.body.classList.toggle("professional-session", Boolean(user && !isAdminSession()));
   document.querySelector("#loginScreen").hidden = Boolean(user);
   document.querySelector("#sessionChip").hidden = !user;
+  const firstName = user?.name?.split(" ")[0] || "Usuário";
   document.querySelector("#sessionUserName").textContent = user?.name || "Usuário";
+  const greetingEl = document.querySelector("#dashboardGreeting");
+  if (greetingEl) greetingEl.textContent = user ? `Olá, ${firstName}` : "Olá!";
 }
 
 async function handleLogin(event) {
