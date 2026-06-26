@@ -3327,7 +3327,7 @@ tr:last-child td {
 .accounts-table-wrap th:nth-child(5),
 .accounts-table-wrap td:nth-child(5),
 .accounts-table-wrap th:nth-child(6),
-.accounts-table-wrap td:nth-child(6) { width: 60px; }
+.accounts-table-wrap td:nth-child(6) { width: 82px; }
 
 .accounts-table-wrap th:nth-child(7),
 .accounts-table-wrap td:nth-child(7) { width: 88px; }
@@ -3341,11 +3341,12 @@ tr:last-child td {
 /* status: ícone compacto */
 .accounts-table-wrap .monthly-status-button {
   min-width: 0;
-  width: 30px;
-  height: 30px;
+  min-height: 0;
+  width: 16px;
+  height: 16px;
   padding: 0;
   border-radius: 50%;
-  font-size: 0.86rem;
+  font-size: 0.52rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4372,7 +4373,7 @@ table small,
 
 .monthly-table-wrap th,
 .accounts-table-wrap th {
-  font-size: 0.67rem;
+  font-size: 0.74rem;
 }
 
 /* Password overlay */

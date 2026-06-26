@@ -4532,8 +4532,8 @@ function renderAccountTable(config) {
               <td><div class="patient-name"><strong title="${person}">${person}</strong>${payMethod ? `<span>${payMethod}</span>` : ""}</div></td>
               <td><div class="patient-name"><strong title="${item.description || ""}">${item.description || "-"}</strong>${planLabel ? `<span title="${planLabel}">${planLabel}</span>` : ""}</div></td>
               <td class="date-cell">${monthYearLabel(item.competenceDate)}</td>
-              <td class="date-cell">${shortDateLabel(item.forecastDate)}</td>
-              <td class="date-cell">${item.paidDate ? shortDateLabel(item.paidDate) : "-"}</td>
+              <td class="date-cell">${dateLabel(item.forecastDate)}</td>
+              <td class="date-cell">${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
               <td class="amount-cell">
                 <strong class="${amtClass}">${sign}${currency(item.amount)}</strong>
                 ${discount > 0 ? `<small style="color:var(--danger,#e53);display:block">desc. ${currency(discount)}</small>` : ""}
