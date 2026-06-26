@@ -1866,6 +1866,11 @@ function dateLabel(value) {
   return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 }
 
+function monthYearLabel(value) {
+  if (!value || value === "-") return "-";
+  return new Intl.DateTimeFormat("pt-BR", { year: "numeric", month: "2-digit", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
+}
+
 function dateTimeLabel(value) {
   if (!value) return "-";
   const date = new Date(value);
@@ -4514,7 +4519,7 @@ function renderAccountTable(config) {
               <td><span class="monthly-status-button ${statusStyle}">${statusLabel}</span></td>
               <td><div class="patient-name"><strong title="${person}">${person}</strong>${payMethod ? `<span>${payMethod}</span>` : ""}</div></td>
               <td><div class="patient-name"><strong title="${item.description || ""}">${item.description || "-"}</strong>${planLabel ? `<span title="${planLabel}">${planLabel}</span>` : ""}</div></td>
-              <td class="date-cell">${dateLabel(item.competenceDate)}</td>
+              <td class="date-cell">${monthYearLabel(item.competenceDate)}</td>
               <td class="date-cell">${dateLabel(item.forecastDate)}</td>
               <td class="date-cell">${item.paidDate ? dateLabel(item.paidDate) : "-"}</td>
               <td class="amount-cell">
