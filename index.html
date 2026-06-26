@@ -1620,43 +1620,51 @@
             <div class="module-titlebar">
               <div>
                 <p class="eyebrow">Configurações</p>
-                <h2>Parâmetros do estúdio</h2>
+                <h2>Configurações do sistema</h2>
               </div>
             </div>
             <div class="module-body">
-              <div class="settings-top-grid">
-                <section class="panel">
-                  <div class="panel-heading">
-                    <div>
-                      <p class="eyebrow">Estúdio</p>
-                      <h2>Parâmetros principais</h2>
+              <div class="settings-tabs-bar">
+                <button class="settings-tab active" data-settings-tab="empresa" type="button">Empresa</button>
+                <button class="settings-tab" data-settings-tab="usuarios" data-admin-only type="button">Usuários</button>
+                <button class="settings-tab" data-settings-tab="minha-conta" type="button">Minha conta</button>
+                <button class="settings-tab" data-settings-tab="personalizacao" type="button">Personalização</button>
+              </div>
+
+              <!-- ABA: Empresa -->
+              <div class="settings-tab-panel active" data-settings-panel="empresa">
+                <div class="settings-top-grid">
+                  <section class="panel">
+                    <div class="panel-heading">
+                      <div>
+                        <p class="eyebrow">Estúdio</p>
+                        <h2>Dados da empresa</h2>
+                      </div>
                     </div>
-                  </div>
-                  <form id="settingsForm" class="form-grid">
-                    <label>
-                      Nome do estúdio
-                      <input name="studioName" required />
-                    </label>
-                    <label>
-                      WhatsApp
-                      <input name="whatsapp" required />
-                    </label>
-                    <label>
-                      Limite por turma
-                      <input name="classLimit" type="number" min="1" max="30" required />
-                    </label>
-                    <label>
-                      Lembrete automático
-                      <select name="reminder">
-                        <option>24 horas antes</option>
-                        <option>2 horas antes</option>
-                        <option>Manualmente</option>
-                      </select>
-                    </label>
-                    <button class="primary-button" type="submit">Salvar configurações</button>
-                  </form>
-                </section>
-                <div class="settings-side-stack">
+                    <form id="settingsForm" class="form-grid">
+                      <label>
+                        Nome do estúdio
+                        <input name="studioName" required />
+                      </label>
+                      <label>
+                        WhatsApp
+                        <input name="whatsapp" required />
+                      </label>
+                      <label>
+                        Limite por turma
+                        <input name="classLimit" type="number" min="1" max="30" required />
+                      </label>
+                      <label>
+                        Lembrete automático
+                        <select name="reminder">
+                          <option>24 horas antes</option>
+                          <option>2 horas antes</option>
+                          <option>Manualmente</option>
+                        </select>
+                      </label>
+                      <button class="primary-button" type="submit">Salvar configurações</button>
+                    </form>
+                  </section>
                   <section class="panel">
                     <div class="panel-heading">
                       <div>
@@ -1669,23 +1677,63 @@
                       <button class="ghost-button" id="copyPortalButton" type="button">Copiar link</button>
                     </div>
                   </section>
+                </div>
+              </div>
+
+              <!-- ABA: Usuários -->
+              <div class="settings-tab-panel" data-settings-panel="usuarios" data-admin-only>
+                <section class="panel">
+                  <div class="panel-heading">
+                    <div>
+                      <p class="eyebrow">Acesso</p>
+                      <h2>Usuários e senhas</h2>
+                    </div>
+                    <button class="ghost-button" id="refreshUsersButton" type="button">Atualizar</button>
+                  </div>
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Usuário</th>
+                          <th>Perfil</th>
+                          <th>Status</th>
+                          <th>Senha</th>
+                          <th>Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody id="accessUsersTable"></tbody>
+                    </table>
+                  </div>
+                </section>
+              </div>
+
+              <!-- ABA: Minha conta -->
+              <div class="settings-tab-panel" data-settings-panel="minha-conta">
+                <div class="settings-account-grid">
                   <section class="panel">
                     <div class="panel-heading">
                       <div>
                         <p class="eyebrow">Segurança</p>
-                        <h2>Minha conta</h2>
+                        <h2>E-mail de acesso</h2>
                       </div>
                     </div>
-                    <form id="changeEmailForm" class="form-grid" style="margin-bottom:16px">
+                    <form id="changeEmailForm" class="form-grid">
                       <label>
-                        Meu e-mail (recuperação de senha)
+                        Meu e-mail
                         <input id="changeEmailInput" name="email" type="email" autocomplete="email" placeholder="seu@email.com" />
                       </label>
+                      <p class="form-hint">Usado para recuperação de senha via link.</p>
                       <span id="changeEmailFeedback" class="login-feedback" role="alert"></span>
                       <button class="primary-button" type="submit">Salvar e-mail</button>
                     </form>
-                    <hr style="border:none;border-top:1px solid var(--border,#e5e7eb);margin:0 0 16px">
-                    <p class="eyebrow" style="margin-bottom:12px">Alterar senha</p>
+                  </section>
+                  <section class="panel">
+                    <div class="panel-heading">
+                      <div>
+                        <p class="eyebrow">Segurança</p>
+                        <h2>Alterar senha</h2>
+                      </div>
+                    </div>
                     <form id="changePasswordForm" class="form-grid">
                       <label>
                         Nova senha
@@ -1702,29 +1750,35 @@
                 </div>
               </div>
 
-              <section class="panel" style="margin-top:18px" data-admin-only>
-                <div class="panel-heading">
-                  <div>
-                    <p class="eyebrow">Acesso</p>
-                    <h2>Usuários e senhas</h2>
-                  </div>
-                  <button class="ghost-button" id="refreshUsersButton" type="button">Atualizar</button>
+              <!-- ABA: Personalização -->
+              <div class="settings-tab-panel" data-settings-panel="personalizacao">
+                <div class="settings-top-grid">
+                  <section class="panel">
+                    <div class="panel-heading">
+                      <div>
+                        <p class="eyebrow">Visual</p>
+                        <h2>Identidade do estúdio</h2>
+                      </div>
+                    </div>
+                    <div class="empty-state" style="padding:32px 0">
+                      <p style="margin:0 0 8px;font-weight:600">Em breve</p>
+                      <p style="margin:0;font-size:13px;color:var(--text-muted,#6b7280)">Logo, cores e identidade visual do sistema.</p>
+                    </div>
+                  </section>
+                  <section class="panel">
+                    <div class="panel-heading">
+                      <div>
+                        <p class="eyebrow">Notificações</p>
+                        <h2>Alertas e lembretes</h2>
+                      </div>
+                    </div>
+                    <div class="empty-state" style="padding:32px 0">
+                      <p style="margin:0 0 8px;font-weight:600">Em breve</p>
+                      <p style="margin:0;font-size:13px;color:var(--text-muted,#6b7280)">Configurações de notificações por WhatsApp e e-mail.</p>
+                    </div>
+                  </section>
                 </div>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Usuário</th>
-                        <th>Perfil</th>
-                        <th>Status</th>
-                        <th>Senha</th>
-                        <th>Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody id="accessUsersTable"></tbody>
-                  </table>
-                </div>
-              </section>
+              </div>
             </div>
           </div>
         </section>
@@ -1855,7 +1909,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=23"></script>
+    <script src="app.js?v=24"></script>
   </body>
 </html>
 

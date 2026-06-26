@@ -5985,6 +5985,13 @@ function setProfessionalTab(tab) {
   document.querySelectorAll("[data-professional-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.professionalPanel === tab));
 }
 
+function setSettingsTab(tab) {
+  document.querySelectorAll("[data-settings-tab]").forEach((btn) => btn.classList.toggle("active", btn.dataset.settingsTab === tab));
+  document.querySelectorAll("[data-settings-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.settingsPanel === tab));
+  if (tab === "usuarios") renderAccessUsers();
+  if (tab === "minha-conta") populateMyEmailField();
+}
+
 function renderLinkedEnrollments(professionalId) {
   const table = document.querySelector("#linkedEnrollmentsTable");
   if (!table) return;
@@ -7075,6 +7082,9 @@ document.addEventListener("click", (event) => {
 
   const professionalTab = event.target.closest("[data-professional-tab]");
   if (professionalTab) setProfessionalTab(professionalTab.dataset.professionalTab);
+
+  const settingsTab = event.target.closest("[data-settings-tab]");
+  if (settingsTab) setSettingsTab(settingsTab.dataset.settingsTab);
 
   const modeButton = event.target.closest("[data-agenda-mode]");
   if (modeButton) setAgendaMode(modeButton.dataset.agendaMode);

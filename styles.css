@@ -1748,10 +1748,63 @@ button {
   align-items: start;
 }
 
+.settings-account-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
 .settings-side-stack {
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+.settings-tabs-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border, #e5e7eb);
+  padding-bottom: 0;
+}
+
+.settings-tab {
+  padding: 10px 20px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  background: transparent;
+  color: var(--text-muted, #6b7280);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.settings-tab:hover {
+  color: var(--primary, #3d7d8f);
+}
+
+.settings-tab.active {
+  color: var(--primary, #3d7d8f);
+  border-bottom-color: var(--primary, #3d7d8f);
+  background: transparent;
+}
+
+.settings-tab-panel {
+  display: none;
+}
+
+.settings-tab-panel.active {
+  display: block;
+}
+
+.form-hint {
+  margin: -8px 0 4px;
+  font-size: 12px;
+  color: var(--text-muted, #6b7280);
 }
 
 .dashboard-grid {
@@ -3972,8 +4025,14 @@ td.row-actions .row-action-button:last-child {
   .records-layout,
   .settings-grid,
   .settings-top-grid,
+  .settings-account-grid,
   .schedule-board {
     grid-template-columns: 1fr;
+  }
+
+  .settings-tabs-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
   }
 
   .timeline-item {
