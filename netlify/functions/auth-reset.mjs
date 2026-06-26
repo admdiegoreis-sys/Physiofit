@@ -32,10 +32,11 @@ export async function handler(event) {
 
     const newHash = hashPassword(password);
 
-    await sql`
+    const updated = await sql`
       update public.auth_users
       set password_hash = ${newHash}, must_change_password = false, updated_at = now()
       where id = ${record.user_id}
+      returning username, name
     `;
 
     await sql`
@@ -44,7 +45,8 @@ export async function handler(event) {
       where token = ${token}
     `;
 
-    return json(200, { ok: true, message: "Senha redefinida com sucesso. Faça login com a nova senha." });
+    const username = updated[0]?.username || null;
+    return json(200, { ok: true, username, message: `Senha criada com sucesso! Seu usuário de acesso é: ${username}` });
   } catch (error) {
     console.error("auth-reset error:", error.message);
     return json(500, { error: "Nao foi possivel redefinir a senha. Tente novamente." });

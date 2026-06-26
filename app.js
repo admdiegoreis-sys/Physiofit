@@ -6404,13 +6404,18 @@ async function handleResetPassword(event) {
   btn.textContent = "Salvando...";
   try {
     const result = await window.PhysiofitData.resetPassword(token, password);
-    feedback.textContent = result.message || "Senha redefinida com sucesso!";
+    feedback.textContent = result.message || "Senha criada com sucesso!";
     feedback.className = "login-feedback success";
     document.querySelector("#resetPassword").value = "";
     document.querySelector("#resetPasswordConfirm").value = "";
-    // Clear token from URL and go to login after 2s
     history.replaceState({}, "", window.location.pathname);
-    setTimeout(() => showLoginPanel("login"), 2500);
+    setTimeout(() => {
+      showLoginPanel("login");
+      if (result.username) {
+        const usernameField = document.querySelector("#loginUsername");
+        if (usernameField) usernameField.value = result.username;
+      }
+    }, 2500);
   } catch (error) {
     feedback.textContent = error.message || "Não foi possível redefinir. Tente novamente.";
   } finally {
