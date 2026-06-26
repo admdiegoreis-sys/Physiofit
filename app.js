@@ -6422,6 +6422,10 @@ async function handleResetPassword(event) {
 function checkResetTokenInUrl() {
   const params = new URLSearchParams(window.location.search);
   if (params.get("action") === "reset" && params.get("token")) {
+    // Always clear any existing session — invite/reset links must start fresh
+    authSession = null;
+    window.PhysiofitData?.setSession(null);
+    applyAuthSession();
     showLoginPanel("reset");
   }
 }
