@@ -6455,9 +6455,17 @@ async function renderAccessUsers() {
                 <td>${user.has_password ? "Configurada" : "Pendente"}</td>
                 <td>
                   <div class="row-actions">
-                    <button class="row-action-button edit-icon-button" data-invite-user="${user.id}" data-invite-name="${user.name}" type="button" title="Gerar link de acesso">Convidar</button>
-                    <button class="row-action-button edit-icon-button" data-set-password="${user.id}" data-set-password-name="${user.name}" type="button" title="Definir senha">Senha</button>
-                    <button class="row-action-button ${user.status === "Ativo" ? "delete-icon-button" : "edit-icon-button"}" data-toggle-user="${user.id}" data-user-status="${user.status === "Ativo" ? "Inativo" : "Ativo"}" type="button">${user.status === "Ativo" ? "Bloquear" : "Ativar"}</button>
+                    <button class="icon-action-btn invite-btn" data-invite-user="${user.id}" data-invite-name="${user.name}" type="button" title="Enviar convite de acesso">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </button>
+                    <button class="icon-action-btn key-btn" data-set-password="${user.id}" data-set-password-name="${user.name}" type="button" title="Definir senha">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><line x1="16" y1="8" x2="12" y2="12"/><line x1="20" y1="4" x2="16" y2="8"/><line x1="20" y1="4" x2="22" y2="6"/></svg>
+                    </button>
+                    <button class="icon-action-btn ${user.status === "Ativo" ? "block-btn" : "activate-btn"}" data-toggle-user="${user.id}" data-user-status="${user.status === "Ativo" ? "Inativo" : "Ativo"}" type="button" title="${user.status === "Ativo" ? "Bloquear usuário" : "Ativar usuário"}">
+                      ${user.status === "Ativo"
+                        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+                        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`}
+                    </button>
                   </div>
                 </td>
               </tr>

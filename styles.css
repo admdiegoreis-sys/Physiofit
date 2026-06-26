@@ -1807,6 +1807,42 @@ button {
   color: var(--text-muted, #6b7280);
 }
 
+.icon-action-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.icon-action-btn.invite-btn {
+  background: #e8f4f7;
+  color: #3d7d8f;
+}
+.icon-action-btn.invite-btn:hover { background: #3d7d8f; color: #fff; }
+
+.icon-action-btn.key-btn {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+.icon-action-btn.key-btn:hover { background: #4f46e5; color: #fff; }
+
+.icon-action-btn.block-btn {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.icon-action-btn.block-btn:hover { background: #dc2626; color: #fff; }
+
+.icon-action-btn.activate-btn {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+.icon-action-btn.activate-btn:hover { background: #16a34a; color: #fff; }
+
 .dashboard-grid {
   margin: 0;
 }
