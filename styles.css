@@ -1741,6 +1741,19 @@ button {
   gap: 18px;
 }
 
+.settings-top-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.settings-side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
 .dashboard-grid {
   margin: 0;
 }
@@ -3958,6 +3971,7 @@ td.row-actions .row-action-button:last-child {
   .finance-layout,
   .records-layout,
   .settings-grid,
+  .settings-top-grid,
   .schedule-board {
     grid-template-columns: 1fr;
   }

@@ -1624,7 +1624,7 @@
               </div>
             </div>
             <div class="module-body">
-              <div class="settings-grid">
+              <div class="settings-top-grid">
                 <section class="panel">
                   <div class="panel-heading">
                     <div>
@@ -1656,72 +1656,75 @@
                     <button class="primary-button" type="submit">Salvar configurações</button>
                   </form>
                 </section>
-                <section class="panel">
-                  <div class="panel-heading">
-                    <div>
-                      <p class="eyebrow">Portal</p>
-                      <h2>Link para clientes</h2>
+                <div class="settings-side-stack">
+                  <section class="panel">
+                    <div class="panel-heading">
+                      <div>
+                        <p class="eyebrow">Portal</p>
+                        <h2>Link para clientes</h2>
+                      </div>
                     </div>
-                  </div>
-                  <div class="portal-preview">
-                    <p>Compartilhe este link em site, Instagram ou WhatsApp para novos agendamentos.</p>
-                    <button class="ghost-button" id="copyPortalButton" type="button">Copiar link</button>
-                  </div>
-                </section>
-                <section class="panel">
-                  <div class="panel-heading">
-                    <div>
-                      <p class="eyebrow">Segurança</p>
-                      <h2>Minha conta</h2>
+                    <div class="portal-preview">
+                      <p>Compartilhe este link em site, Instagram ou WhatsApp para novos agendamentos.</p>
+                      <button class="ghost-button" id="copyPortalButton" type="button">Copiar link</button>
                     </div>
-                  </div>
-                  <form id="changeEmailForm" class="form-grid" style="margin-bottom:16px">
-                    <label>
-                      Meu e-mail (usado para recuperação de senha)
-                      <input id="changeEmailInput" name="email" type="email" autocomplete="email" placeholder="seu@email.com" />
-                    </label>
-                    <span id="changeEmailFeedback" class="login-feedback" role="alert"></span>
-                    <button class="primary-button" type="submit">Salvar e-mail</button>
-                  </form>
-                  <hr style="border:none;border-top:1px solid var(--border,#e5e7eb);margin:0 0 16px">
-                  <p class="eyebrow" style="margin-bottom:12px">Alterar senha</p>
-                  <form id="changePasswordForm" class="form-grid">
-                    <label>
-                      Nova senha
-                      <input id="changePasswordNew" name="newPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Mínimo 6 caracteres" />
-                    </label>
-                    <label>
-                      Confirmar nova senha
-                      <input id="changePasswordConfirm" name="confirmPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Repita a nova senha" />
-                    </label>
-                    <span id="changePasswordFeedback" class="login-feedback" role="alert"></span>
-                    <button class="primary-button" type="submit">Salvar nova senha</button>
-                  </form>
-                </section>
-                <section class="panel access-panel">
-                  <div class="panel-heading">
-                    <div>
-                      <p class="eyebrow">Acesso</p>
-                      <h2>Usuários e senhas</h2>
+                  </section>
+                  <section class="panel">
+                    <div class="panel-heading">
+                      <div>
+                        <p class="eyebrow">Segurança</p>
+                        <h2>Minha conta</h2>
+                      </div>
                     </div>
-                    <button class="ghost-button" id="refreshUsersButton" type="button">Atualizar</button>
-                  </div>
-                  <div class="table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Usuário</th>
-                          <th>Perfil</th>
-                          <th>Status</th>
-                          <th>Senha</th>
-                          <th>Ações</th>
-                        </tr>
-                      </thead>
-                      <tbody id="accessUsersTable"></tbody>
-                    </table>
-                  </div>
-                </section>
+                    <form id="changeEmailForm" class="form-grid" style="margin-bottom:16px">
+                      <label>
+                        Meu e-mail (recuperação de senha)
+                        <input id="changeEmailInput" name="email" type="email" autocomplete="email" placeholder="seu@email.com" />
+                      </label>
+                      <span id="changeEmailFeedback" class="login-feedback" role="alert"></span>
+                      <button class="primary-button" type="submit">Salvar e-mail</button>
+                    </form>
+                    <hr style="border:none;border-top:1px solid var(--border,#e5e7eb);margin:0 0 16px">
+                    <p class="eyebrow" style="margin-bottom:12px">Alterar senha</p>
+                    <form id="changePasswordForm" class="form-grid">
+                      <label>
+                        Nova senha
+                        <input id="changePasswordNew" name="newPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Mínimo 6 caracteres" />
+                      </label>
+                      <label>
+                        Confirmar nova senha
+                        <input id="changePasswordConfirm" name="confirmPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Repita a nova senha" />
+                      </label>
+                      <span id="changePasswordFeedback" class="login-feedback" role="alert"></span>
+                      <button class="primary-button" type="submit">Salvar nova senha</button>
+                    </form>
+                  </section>
+                </div>
               </div>
+
+              <section class="panel" style="margin-top:18px" data-admin-only>
+                <div class="panel-heading">
+                  <div>
+                    <p class="eyebrow">Acesso</p>
+                    <h2>Usuários e senhas</h2>
+                  </div>
+                  <button class="ghost-button" id="refreshUsersButton" type="button">Atualizar</button>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Usuário</th>
+                        <th>Perfil</th>
+                        <th>Status</th>
+                        <th>Senha</th>
+                        <th>Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody id="accessUsersTable"></tbody>
+                  </table>
+                </div>
+              </section>
             </div>
           </div>
         </section>
@@ -1852,7 +1855,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=22"></script>
+    <script src="app.js?v=23"></script>
   </body>
 </html>
 
