@@ -118,7 +118,7 @@ export function createToken(user) {
     name: user.name,
     role: user.role,
     professionalId: user.professional_id || "",
-    exp: Date.now() + 1000 * 60 * 60 * 12,
+    exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
   };
   const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const signature = crypto.createHmac("sha256", tokenSecret).update(encoded).digest("base64url");

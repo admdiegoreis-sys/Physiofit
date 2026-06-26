@@ -7633,6 +7633,15 @@ document.querySelector("#showLoginFromResetBtn")?.addEventListener("click", () =
 });
 document.querySelector("#logoutButton")?.addEventListener("click", logout);
 document.querySelector("#refreshUsersButton")?.addEventListener("click", renderAccessUsers);
+
+window.addEventListener("physiofit:auth-expired", () => {
+  authSession = null;
+  applyAuthSession();
+  showLoginPanel("login");
+  const fb = document.querySelector("#loginFeedback");
+  if (fb) { fb.textContent = "Sessão expirada. Faça login novamente."; fb.className = "login-feedback error"; }
+});
+
 checkResetTokenInUrl();
 
 // Populate email field when settings tab opens

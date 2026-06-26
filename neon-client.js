@@ -13,6 +13,13 @@
 
     const payload = await response.json().catch(() => ({}));
 
+    if (response.status === 401) {
+      // Token expired or invalid — clear session and notify app
+      window.PhysiofitData?.setSession(null);
+      window.dispatchEvent(new CustomEvent("physiofit:auth-expired"));
+      throw new Error("Sessão expirada. Faça login novamente.");
+    }
+
     if (!response.ok) {
       const message = payload.error || "Nao foi possivel acessar o banco de dados.";
       throw new Error(message);
