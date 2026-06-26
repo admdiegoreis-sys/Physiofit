@@ -2206,6 +2206,11 @@ button {
   min-width: 1180px;
 }
 
+.accounts-table-wrap {
+  max-height: calc(100vh - 350px);
+  overflow-y: auto;
+}
+
 .accounts-table-wrap table {
   min-width: 980px;
   table-layout: fixed;
@@ -3224,6 +3229,7 @@ tr:last-child td {
 .accounts-table-wrap th {
   font-size: 0.58rem;
   letter-spacing: 0.01em;
+  text-align: center;
 }
 
 .monthly-table-wrap td,
