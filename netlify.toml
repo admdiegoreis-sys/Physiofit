@@ -41,6 +41,11 @@
   status = 200
 
 [[redirects]]
+  from = "/auth/invite"
+  to = "/.netlify/functions/auth-invite"
+  status = 200
+
+[[redirects]]
   from = "/auth/forgot"
   to = "/.netlify/functions/auth-forgot"
   status = 200

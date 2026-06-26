@@ -1786,6 +1786,21 @@
       </div>
     </div>
 
+    <div id="inviteOverlay" class="pw-overlay" hidden>
+      <div class="pw-overlay-card" style="max-width:460px">
+        <p class="eyebrow">Convidar usuário</p>
+        <h3 id="inviteOverlayTitle"></h3>
+        <p id="inviteOverlayStatus" style="margin:8px 0 16px;font-size:13px;color:var(--text-muted,#6b7280)"></p>
+        <label style="font-size:13px;font-weight:600;color:var(--text-muted,#6b7280);display:block;margin-bottom:6px">Link de acesso (válido 24h)</label>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input id="inviteLinkInput" type="text" readonly style="flex:1;font-size:12px;padding:8px 10px;border:1px solid var(--border,#dbe3ed);border-radius:8px;background:var(--surface-alt,#f8fafc);color:var(--text,#1a2332)" />
+          <button id="inviteCopyBtn" class="ghost-button" type="button" style="white-space:nowrap">Copiar</button>
+        </div>
+        <a id="inviteWhatsappBtn" href="#" target="_blank" rel="noopener" class="primary-button" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px">Enviar pelo WhatsApp</a>
+        <button id="inviteOverlayClose" class="ghost-button" type="button" style="width:100%">Fechar</button>
+      </div>
+    </div>
+
     <div id="emailOverlay" class="pw-overlay" hidden>
       <div class="pw-overlay-card">
         <p class="eyebrow">Editar e-mail</p>
@@ -1842,7 +1857,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=20"></script>
+    <script src="app.js?v=21"></script>
   </body>
 </html>
 

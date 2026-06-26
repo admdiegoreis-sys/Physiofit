@@ -6448,8 +6448,8 @@ async function renderAccessUsers() {
                 <td>${user.has_password ? "Configurada" : "Pendente"}</td>
                 <td>
                   <div class="row-actions">
+                    <button class="row-action-button edit-icon-button" data-invite-user="${user.id}" data-invite-name="${user.name}" type="button" title="Gerar link de acesso">Convidar</button>
                     <button class="row-action-button edit-icon-button" data-set-password="${user.id}" data-set-password-name="${user.name}" type="button" title="Definir senha">Senha</button>
-                    <button class="row-action-button edit-icon-button" data-set-email="${user.id}" data-set-email-name="${user.name}" data-current-email="${user.email || ""}" type="button" title="Editar e-mail">E-mail</button>
                     <button class="row-action-button ${user.status === "Ativo" ? "delete-icon-button" : "edit-icon-button"}" data-toggle-user="${user.id}" data-user-status="${user.status === "Ativo" ? "Inativo" : "Ativo"}" type="button">${user.status === "Ativo" ? "Bloquear" : "Ativar"}</button>
                   </div>
                 </td>
@@ -6504,6 +6504,43 @@ function closeEmailOverlay() {
   const overlay = document.querySelector("#emailOverlay");
   if (overlay) overlay.hidden = true;
   _pendingEmailUserId = null;
+}
+
+async function inviteUser(userId, userName) {
+  const overlay = document.querySelector("#inviteOverlay");
+  if (!overlay) return;
+
+  document.querySelector("#inviteOverlayTitle").textContent = userName || "Usuário";
+  document.querySelector("#inviteOverlayStatus").textContent = "Gerando link...";
+  document.querySelector("#inviteLinkInput").value = "";
+  document.querySelector("#inviteWhatsappBtn").href = "#";
+  overlay.hidden = false;
+
+  try {
+    const result = await window.PhysiofitData.inviteUser(userId);
+    const link = result.link;
+
+    document.querySelector("#inviteLinkInput").value = link;
+
+    const statusMsg = result.sentByEmail
+      ? `E-mail de convite enviado para ${result.email}`
+      : result.email
+      ? `Não foi possível enviar e-mail — use o link abaixo`
+      : `Usuário sem e-mail cadastrado — compartilhe o link abaixo`;
+    document.querySelector("#inviteOverlayStatus").textContent = statusMsg;
+
+    const whatsappText = encodeURIComponent(
+      `Olá, ${result.userName}! Acesse o Physiofit Studio e crie sua senha pelo link (válido 24h):\n${link}`
+    );
+    document.querySelector("#inviteWhatsappBtn").href = `https://wa.me/?text=${whatsappText}`;
+  } catch (err) {
+    document.querySelector("#inviteOverlayStatus").textContent = err.message || "Erro ao gerar convite.";
+  }
+}
+
+function closeInviteOverlay() {
+  const overlay = document.querySelector("#inviteOverlay");
+  if (overlay) overlay.hidden = true;
 }
 
 async function toggleUserStatus(userId, status) {
@@ -6997,6 +7034,9 @@ document.addEventListener("click", (event) => {
 
   const setEmailButton = event.target.closest("[data-set-email]");
   if (setEmailButton) setUserEmail(setEmailButton.dataset.setEmail, setEmailButton.dataset.setEmailName, setEmailButton.dataset.currentEmail);
+
+  const inviteBtn = event.target.closest("[data-invite-user]");
+  if (inviteBtn) inviteUser(inviteBtn.dataset.inviteUser, inviteBtn.dataset.inviteName);
 
   const importAccountsButton = event.target.closest("[data-import-accounts]");
   if (importAccountsButton) {
@@ -7641,6 +7681,20 @@ document.querySelector("#passwordOverlayForm")?.addEventListener("submit", async
 document.querySelector("#passwordOverlayCancel")?.addEventListener("click", closePasswordOverlay);
 document.querySelector("#passwordOverlay")?.addEventListener("click", (e) => {
   if (e.target === e.currentTarget) closePasswordOverlay();
+});
+
+document.querySelector("#inviteOverlayClose")?.addEventListener("click", closeInviteOverlay);
+document.querySelector("#inviteOverlay")?.addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) closeInviteOverlay();
+});
+document.querySelector("#inviteCopyBtn")?.addEventListener("click", () => {
+  const input = document.querySelector("#inviteLinkInput");
+  if (!input?.value) return;
+  navigator.clipboard.writeText(input.value).then(() => toast("Link copiado!")).catch(() => {
+    input.select();
+    document.execCommand("copy");
+    toast("Link copiado!");
+  });
 });
 
 document.querySelector("#emailOverlayForm")?.addEventListener("submit", async (event) => {

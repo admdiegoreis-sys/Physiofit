@@ -65,6 +65,13 @@
         body: JSON.stringify({ userId, ...payload }),
       });
     },
+    async inviteUser(userId) {
+      return request("/auth-invite", {
+        method: "POST",
+        headers: this.authHeaders(),
+        body: JSON.stringify({ userId }),
+      });
+    },
     async loadState(key = "production") {
       try {
         const data = await request(`/app-state?key=${encodeURIComponent(key)}`);
