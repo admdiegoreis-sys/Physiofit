@@ -3338,7 +3338,17 @@ tr:last-child td {
 .accounts-table-wrap th:nth-child(9),
 .accounts-table-wrap td:nth-child(9) { width: 98px; }
 
-/* status: ícone compacto */
+/* centralizar: status, competencia, vencimento, pagamento, conciliacao */
+.accounts-table-wrap td:nth-child(1),
+.accounts-table-wrap td:nth-child(4),
+.accounts-table-wrap td:nth-child(5),
+.accounts-table-wrap td:nth-child(6),
+.accounts-table-wrap td:nth-child(8) { text-align: center; }
+
+/* datas: fonte -20% */
+.accounts-table-wrap td.date-cell { font-size: 0.63rem; }
+
+/* status: icone compacto */
 .accounts-table-wrap .monthly-status-button {
   min-width: 0;
   min-height: 0;
@@ -4373,7 +4383,7 @@ table small,
 
 .monthly-table-wrap th,
 .accounts-table-wrap th {
-  font-size: 0.74rem;
+  font-size: 0.59rem;
 }
 
 /* Password overlay */
