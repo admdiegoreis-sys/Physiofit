@@ -1877,6 +1877,14 @@ function shortDateLabel(value) {
   return `${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
+function whatsappLeadUrl(phone) {
+  if (!phone) return null;
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return null;
+  const normalized = digits.startsWith("55") ? digits : "55" + digits;
+  return `https://wa.me/${normalized}`;
+}
+
 const ACCOUNT_STATUS_ICONS = { Pago: "✓", Recebido: "✓", Parcial: "◑", "Em aberto": "◌", Cancelado: "✕" };
 function accountStatusIcon(label, cssClass) {
   if (cssClass === "atrasado") return "⚠";
@@ -3168,6 +3176,7 @@ function renderCrm() {
                   <button class="row-action-button lead-action-button lead-register-student-btn" data-register-student-lead="${lead.id}" type="button" title="Cadastrar cliente" aria-label="Cadastrar cliente"><span class="lead-action-icon lead-action-person" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button lead-lose-btn" data-lose-lead="${lead.id}" type="button" title="Marcar como perdido" aria-label="Marcar como perdido"><span class="lead-action-icon lead-action-x" aria-hidden="true"></span></button>
                   <button class="row-action-button lead-action-button lead-del-btn" data-delete-lead="${lead.id}" type="button" title="Excluir lead" aria-label="Excluir lead"><span class="lead-action-icon lead-action-trash" aria-hidden="true"></span></button>
+                  ${lead.phone ? `<a class="row-action-button lead-action-button lead-whatsapp-btn" href="${whatsappLeadUrl(lead.phone)}" target="_blank" rel="noopener noreferrer" title="Enviar WhatsApp para ${lead.phone}" aria-label="WhatsApp"><span class="lead-action-icon lead-action-whatsapp" aria-hidden="true"></span></a>` : ""}
                 </div>
               </td>
               <td><div class="patient-name"><strong>${lead.name.toUpperCase()}</strong><span>${lead.phone || "-"} · ${lead.email || lead.instagram || "-"}</span></div></td>
