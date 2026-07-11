@@ -7082,6 +7082,17 @@ function toast(message) {
   window.setTimeout(() => element.classList.remove("show"), 2400);
 }
 
+// Sidebar collapse — persiste em localStorage
+(function () {
+  if (localStorage.getItem("sidebarCollapsed") === "1") {
+    document.body.classList.add("sidebar-collapsed");
+  }
+  document.getElementById("sidebarCollapseBtn")?.addEventListener("click", () => {
+    const collapsed = document.body.classList.toggle("sidebar-collapsed");
+    localStorage.setItem("sidebarCollapsed", collapsed ? "1" : "0");
+  });
+})();
+
 document.addEventListener("click", (event) => {
   const mobileMenuToggle = event.target.closest("#mobileMenuToggle");
   if (mobileMenuToggle) {

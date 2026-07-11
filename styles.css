@@ -379,6 +379,57 @@ button {
   display: grid;
 }
 
+/* ── Botão de colapso do menu ──────────────────── */
+.sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: auto;
+  padding: 9px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sidebar-collapse-btn:hover { background: #f1f5f9; color: #475569; }
+.sidebar-collapse-icon--open { display: none; }
+
+/* Estado colapsado */
+body.sidebar-collapsed { --side-menu-width: 56px; }
+
+body.sidebar-collapsed .top-menu-button span,
+body.sidebar-collapsed .sidebar-collapse-label { display: none; }
+
+body.sidebar-collapsed .top-menu-button {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding: 0;
+  min-height: 40px;
+}
+body.sidebar-collapsed .top-menu-group .top-menu-button { padding: 0; }
+
+body.sidebar-collapsed .sidebar-collapse-btn {
+  justify-content: center;
+  padding: 9px 0;
+}
+body.sidebar-collapsed .sidebar-collapse-icon--close { display: none; }
+body.sidebar-collapsed .sidebar-collapse-icon--open  { display: block; }
+
+body.sidebar-collapsed .top-menu-panel { display: none !important; }
+
+.top-menu,
+.workspace,
+.topbar {
+  transition: width 0.22s ease, padding-left 0.22s ease, grid-template-columns 0.22s ease;
+}
+
 .sidebar-footer {
   margin-top: auto;
   padding: 12px;
