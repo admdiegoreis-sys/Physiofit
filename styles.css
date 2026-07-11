@@ -994,8 +994,12 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
   background: #f8fafc;
 }
 
+.agenda-toolbar #teacherFilter {
+  grid-column: auto;
+}
+
 .agenda-toolbar .patient-search-row {
-  grid-column: 1 / -1;
+  grid-column: span 4;
 }
 
 .calendar-shell {
