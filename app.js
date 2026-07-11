@@ -551,8 +551,8 @@ const menuGroupByView = {
 };
 
 const leadStatuses = ["Novo lead", "Contato iniciado", "Respondido", "Visita agendada", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
-const leadChannels = ["WhatsApp", "Instagram", "E-mail", "Formulário do site", "Anúncio", "Presencial", "Atendimento presencial", "Outro"];
-const leadOrigins = ["WhatsApp", "Instagram", "Google", "Indicação", "Formulário do site", "Anúncio", "Presencial", "Parceria", "Outro"];
+const leadChannels = ["WhatsApp", "Instagram", "E-mail", "Web Site", "Anúncio", "Presencial", "Atendimento presencial", "Outro"];
+const leadOrigins = ["WhatsApp", "Instagram", "Google", "Indicação", "Web Site", "Anúncio", "Presencial", "Parceria", "Outro"];
 
 const modalSchemas = {
   lead: {
@@ -7102,6 +7102,10 @@ document.addEventListener("click", (event) => {
 
   const topMenuToggle = event.target.closest("[data-top-menu-toggle]");
   if (topMenuToggle) {
+    if (document.body.classList.contains("sidebar-collapsed")) {
+      document.body.classList.remove("sidebar-collapsed");
+      localStorage.setItem("sidebarCollapsed", "0");
+    }
     const group = topMenuToggle.closest(".top-menu-group");
     const willOpen = !group.classList.contains("open");
     closeTopMenus();
