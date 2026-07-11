@@ -282,13 +282,9 @@ button {
 }
 
 .menu-icon {
-  display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .menu-icon::before {
