@@ -3159,22 +3159,7 @@ function renderCrm() {
     .filter((item) => !term || normalizedText([item.name, item.phone, item.email, item.instagram, item.origin, item.entryChannel, item.interest, item.status, item.initialMessage, item.notes].join(" ")).includes(term))
     .sort((a, b) => dateValue(a.nextFollowUpDate) - dateValue(b.nextFollowUpDate));
 
-  const leadStatusShort = {
-    "Novo lead": "Novo",
-    "Contato iniciado": "Contato",
-    "Respondido": "Respondido",
-    "Visita agendada": "Vis. agend.",
-    "Visita realizada": "Vis. realiz.",
-    "Proposta enviada": "Proposta",
-    "Matriculado": "Matriculado",
-    "Perdido": "Perdido",
-  };
-  document.querySelector("#crmFunnel").innerHTML = leadStatuses
-    .map((status) => {
-      const count = state.leads.filter((item) => item.status === status).length;
-      return `<article class="crm-stage"><strong>${count}</strong><span>${leadStatusShort[status] || status}</span></article>`;
-    })
-    .join("");
+  renderCrmDashboard();
 
   table.innerHTML = leads.length
     ? leads
@@ -3205,6 +3190,149 @@ function renderCrm() {
         .join("")
     : `<tr><td colspan="9"><div class="empty-state">Nenhum lead encontrado.</div></td></tr>`;
 
+}
+
+function renderCrmDashboard() {
+  const funnel = document.querySelector("#crmFunnel");
+  if (!funnel) return;
+
+  const all = state.leads;
+  const active = all.filter((l) => l.status !== "Perdido");
+
+  const statusShort = {
+    "Novo lead": "Novo", "Contato iniciado": "Contato", "Respondido": "Respondido",
+    "Visita agendada": "Vis. agend.", "Visita realizada": "Vis. realiz.",
+    "Proposta enviada": "Proposta", "Matriculado": "Matriculado",
+  };
+  const funnelStages = leadStatuses.filter((s) => s !== "Perdido");
+  const funnelData = funnelStages.map((s) => ({ s, n: all.filter((l) => l.status === s).length }));
+  const maxF = Math.max(...funnelData.map((d) => d.n), 1);
+  const totalAtivos = active.length;
+  const matriculados = all.filter((l) => l.status === "Matriculado").length;
+  const perdidos = all.filter((l) => l.status === "Perdido").length;
+  const convPct = all.length > 0 ? Math.round((matriculados / all.length) * 100) : 0;
+
+  // --- Funil horizontal ---
+  const funnelBlock = `
+    <div class="crm-dash-block crm-dash-funnel">
+      <p class="crm-dash-title">Funil de Conversão</p>
+      <div class="crm-dash-funnel-rows">
+        ${funnelData.map(({ s, n }, i) => {
+          const prev = i > 0 ? funnelData[i - 1].n : null;
+          const pct = prev != null && prev > 0 ? Math.round((n / prev) * 100) : null;
+          const w = Math.max((n / maxF) * 100, n > 0 ? 3 : 0);
+          return `<div class="crm-frow">
+            <span class="crm-frow-label">${statusShort[s]}</span>
+            <div class="crm-frow-track"><div class="crm-frow-bar" style="width:${w}%"></div></div>
+            <span class="crm-frow-n">${n}</span>
+            <span class="crm-frow-pct">${pct !== null ? pct + "%" : ""}</span>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+
+  // --- Donut de origem ---
+  const originMap = {};
+  all.forEach((l) => { const k = l.origin || l.entryChannel || "Outro"; originMap[k] = (originMap[k] || 0) + 1; });
+  const originEntries = Object.entries(originMap).sort((a, b) => b[1] - a[1]);
+  const originColors = ["#0ea5a4", "#3b82f6", "#f59e0b", "#10b981", "#8b5cf6", "#ef4444"];
+  const total = all.length || 1;
+  const circ = 2 * Math.PI * 26;
+  let off = 0;
+  const segs = originEntries.map(([, n], i) => {
+    const dash = (n / total) * circ;
+    const s = `<circle cx="34" cy="34" r="26" fill="none" stroke="${originColors[i % 6]}" stroke-width="10"
+      stroke-dasharray="${dash} ${circ - dash}" stroke-dashoffset="${-off}" transform="rotate(-90 34 34)"/>`;
+    off += dash; return s;
+  });
+  const originBlock = `
+    <div class="crm-dash-block crm-dash-origin">
+      <p class="crm-dash-title">Origem</p>
+      <div class="crm-origin-inner">
+        <svg viewBox="0 0 68 68" class="crm-donut">
+          <circle cx="34" cy="34" r="26" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+          ${segs.join("")}
+          <text x="34" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">${all.length}</text>
+        </svg>
+        <ul class="crm-origin-legend">
+          ${originEntries.slice(0, 5).map(([k, n], i) =>
+            `<li><span class="crm-origin-dot" style="background:${originColors[i % 6]}"></span><span>${k}</span><b>${n}</b></li>`
+          ).join("")}
+        </ul>
+      </div>
+    </div>`;
+
+  // --- Por profissional ---
+  const profMap = {};
+  active.forEach((l) => { const k = l.ownerId || ""; profMap[k] = (profMap[k] || 0) + 1; });
+  const profEntries = Object.entries(profMap).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const maxP = Math.max(...profEntries.map((e) => e[1]), 1);
+  const profBlock = `
+    <div class="crm-dash-block crm-dash-prof">
+      <p class="crm-dash-title">Por Profissional</p>
+      ${profEntries.length ? `<div class="crm-dash-funnel-rows">
+        ${profEntries.map(([id, n]) => {
+          const name = (professionalName(id) || "Sem resp.").split(" ")[0];
+          const w = Math.max((n / maxP) * 100, 3);
+          return `<div class="crm-frow">
+            <span class="crm-frow-label">${name}</span>
+            <div class="crm-frow-track"><div class="crm-frow-bar crm-frow-bar--teal" style="width:${w}%"></div></div>
+            <span class="crm-frow-n">${n}</span>
+          </div>`;
+        }).join("")}
+      </div>` : `<p class="crm-dash-empty">Nenhum responsável atribuído.</p>`}
+    </div>`;
+
+  // --- Volume no tempo (últimos 6 meses) ---
+  const now = new Date();
+  const months = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    return { key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), n: 0 };
+  });
+  all.forEach((l) => { const slot = months.find((m) => m.key === String(l.entryDate || "").slice(0, 7)); if (slot) slot.n++; });
+  const maxM = Math.max(...months.map((m) => m.n), 1);
+  const W = 220, H = 64, pL = 6, pR = 6, pT = 14, pB = 20;
+  const iW = W - pL - pR, iH = H - pT - pB;
+  const step = iW / (months.length - 1);
+  const pts = months.map((m, i) => `${pL + i * step},${pT + iH - (m.n / maxM) * iH}`);
+  const area = `${pL},${pT + iH} ${pts.join(" ")} ${pL + (months.length - 1) * step},${pT + iH}`;
+  const timeBlock = `
+    <div class="crm-dash-block crm-dash-time">
+      <p class="crm-dash-title">Entradas por Mês</p>
+      <svg viewBox="0 0 ${W} ${H}" class="crm-time-svg" preserveAspectRatio="none">
+        <defs><linearGradient id="crmAreaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0ea5a4" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#0ea5a4" stop-opacity="0.02"/>
+        </linearGradient></defs>
+        <polygon points="${area}" fill="url(#crmAreaGrad)"/>
+        <polyline points="${pts.join(" ")}" fill="none" stroke="#0ea5a4" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+        ${months.map((m, i) => {
+          const x = pL + i * step; const y = pT + iH - (m.n / maxM) * iH;
+          return `${m.n > 0 ? `<circle cx="${x}" cy="${y}" r="2.5" fill="#0ea5a4"/><text x="${x}" y="${y - 5}" text-anchor="middle" font-size="7.5" fill="#0ea5a4" font-weight="600">${m.n}</text>` : ""}
+          <text x="${x}" y="${H - 4}" text-anchor="middle" font-size="7.5" fill="#94a3b8">${m.label}</text>`;
+        }).join("")}
+      </svg>
+    </div>`;
+
+  // --- KPIs rápidos ---
+  const kpiBlock = `
+    <div class="crm-dash-kpis">
+      <div class="crm-kpi"><strong>${all.length}</strong><span>Total</span></div>
+      <div class="crm-kpi"><strong>${totalAtivos}</strong><span>Ativos</span></div>
+      <div class="crm-kpi crm-kpi--green"><strong>${convPct}%</strong><span>Conversão</span></div>
+      <div class="crm-kpi crm-kpi--red"><strong>${perdidos}</strong><span>Perdidos</span></div>
+    </div>`;
+
+  funnel.innerHTML = `
+    <div class="crm-dash-wrap">
+      ${kpiBlock}
+      <div class="crm-dash-grid">
+        ${funnelBlock}
+        ${originBlock}
+        ${profBlock}
+        ${timeBlock}
+      </div>
+    </div>`;
 }
 
 function leadStatusClass(status) {
