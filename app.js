@@ -3414,6 +3414,7 @@ function deleteLead(leadId) {
   saveDeletedState();
   renderCrm();
   toast("Lead excluído.");
+  fetch(`/api/leads/${leadId}`, { method: "DELETE" }).catch(() => {});
 }
 
 function renderSchedule() {
