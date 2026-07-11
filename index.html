@@ -340,17 +340,21 @@
         </section>
 
         <section class="view" id="agendaView" aria-labelledby="viewTitle">
-          <div class="agenda-module">
-            <div class="agenda-titlebar">
-              <h2>Agenda</h2>
-              <div class="agenda-actions">
+          <div class="page-module">
+            <div class="module-header compact-header">
+              <div>
+                <p class="eyebrow">Sessões</p>
+                <h2>Agenda</h2>
+              </div>
+              <div class="module-actions">
+                <button class="action-button navy agenda-list-toggle" id="agendaListToggle" type="button">Lista</button>
                 <button class="primary-button success-button" data-open-modal="appointment" type="button">+ Agendar</button>
               </div>
             </div>
 
-            <div class="agenda-filters">
+            <div class="patient-toolbar agenda-toolbar">
               <select id="modalityFilter">
-                <option value="all">Modalidades</option>
+                <option value="all">Todas as modalidades</option>
                 <option>Pilates aparelho</option>
                 <option>Pilates solo</option>
                 <option>Fisioterapia</option>
@@ -369,21 +373,13 @@
                 <option>Concluída</option>
               </select>
               <select id="teacherFilter">
-                <option value="all">Profissional</option>
-                <option>Marina</option>
-                <option>Lucas</option>
-                <option>Renata</option>
+                <option value="all">Todos os profissionais</option>
               </select>
-              <select id="groupFilter">
-                <option>Agrupado por dia/semana/mês</option>
-                <option>Por profissional</option>
-              </select>
-              <div class="agenda-search-row">
-                <input id="agendaSearch" type="search" placeholder="Buscar por nome ou e-mail do cliente" />
+              <div class="patient-search-row">
+                <input id="agendaSearch" type="search" placeholder="Buscar por nome do cliente" />
                 <button class="action-button blue" id="agendaSearchButton" type="button">Buscar</button>
                 <button class="action-button clear-filter-button" id="agendaClearFiltersButton" type="button">Limpar filtros</button>
               </div>
-              <button class="action-button navy agenda-list-toggle" id="agendaListToggle" type="button">Agenda em Lista</button>
             </div>
 
             <div class="calendar-shell">
