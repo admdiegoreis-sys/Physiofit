@@ -3513,7 +3513,7 @@ function renderCalendarEvent(item) {
       <span>${item.time} - ${item.endTime}</span>
       <strong>${personName.toUpperCase()}</strong>
       <small>${professionalName(item.teacherId)} · ${relatedStudent?.plan ?? item.sessionKind}</small>
-      <button class="cal-event-delete" data-action="delete-appointment" data-id="${item.id}" type="button" title="Excluir agendamento" aria-label="Excluir agendamento">×</button>
+      <button class="cal-event-delete" data-action="delete-appointment" data-id="${item.id}" type="button" title="Excluir agendamento" aria-label="Excluir agendamento"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>button>
     </article>
   `;
 }
@@ -3760,8 +3760,8 @@ function renderStudents() {
             <tr>
               <td>
                 <div class="row-actions">
-                  <button class="row-action-button edit-icon-button" data-edit-student="${item.id}" type="button" title="Editar cliente" aria-label="Editar cliente">✎</button>
-                  <button class="row-action-button delete-icon-button" data-delete-student="${item.id}" type="button" title="Excluir cliente" aria-label="Excluir cliente">×</button>
+                  <button class="row-action-button edit-icon-button" data-edit-student="${item.id}" type="button" title="Editar cliente" aria-label="Editar cliente"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  <button class="row-action-button delete-icon-button" data-delete-student="${item.id}" type="button" title="Excluir cliente" aria-label="Excluir cliente"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>button>
                 </div>
               </td>
               <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${studentActivePlan(item.id)}</span></div></td>
@@ -3818,8 +3818,8 @@ function renderEnrollments() {
             <tr>
               <td>
                 <div class="row-actions">
-                  <button class="row-action-button edit-icon-button" data-edit-enrollment="${item.id}" type="button" title="Editar matrícula" aria-label="Editar matrícula">&#9998;</button>
-                  <button class="row-action-button delete-icon-button" data-delete-enrollment="${item.id}" type="button" title="Excluir matrícula" aria-label="Excluir matrícula">&times;</button>
+                  <button class="row-action-button edit-icon-button" data-edit-enrollment="${item.id}" type="button" title="Editar matrícula" aria-label="Editar matrícula"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  <button class="row-action-button delete-icon-button" data-delete-enrollment="${item.id}" type="button" title="Excluir matrícula" aria-label="Excluir matrícula"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
                 </div>
               </td>
               <td><div class="patient-name"><strong>${displayName(studentName(item.studentId))}</strong></div></td>
@@ -3864,8 +3864,8 @@ function renderProfessionals() {
             <tr>
               <td>
                 <div class="row-actions">
-                  <button class="row-action-button edit-icon-button" data-edit-professional="${item.id}" type="button" title="Editar profissional" aria-label="Editar profissional">✎</button>
-                  <button class="row-action-button delete-icon-button" data-delete-professional="${item.id}" type="button" title="Excluir profissional" aria-label="Excluir profissional">×</button>
+                  <button class="row-action-button edit-icon-button" data-edit-professional="${item.id}" type="button" title="Editar profissional" aria-label="Editar profissional"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  <button class="row-action-button delete-icon-button" data-delete-professional="${item.id}" type="button" title="Excluir profissional" aria-label="Excluir profissional"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>button>
                 </div>
               </td>
               <td><div class="patient-name"><strong>${item.name.toUpperCase()}</strong><span>${item.role}</span></div></td>
@@ -3900,8 +3900,8 @@ function renderSuppliers() {
           <tr>
             <td>
               <div class="row-actions">
-                <button class="row-action-button edit-icon-button" data-edit-supplier="${item.id}" type="button" title="Editar fornecedor" aria-label="Editar fornecedor">✎</button>
-                <button class="row-action-button delete-icon-button" data-delete-supplier="${item.id}" type="button" title="Excluir fornecedor" aria-label="Excluir fornecedor">&times;</button>
+                <button class="row-action-button edit-icon-button" data-edit-supplier="${item.id}" type="button" title="Editar fornecedor" aria-label="Editar fornecedor"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button class="row-action-button delete-icon-button" data-delete-supplier="${item.id}" type="button" title="Excluir fornecedor" aria-label="Excluir fornecedor"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
               </div>
             </td>
             <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.email || item.phone || item.notes || ""}</span></div></td>
@@ -3947,8 +3947,8 @@ function renderModalities() {
             <tr>
               <td>
                 <div class="row-actions">
-                  <button class="row-action-button edit-icon-button" data-edit-modality="${item.id}" type="button" title="Editar modalidade" aria-label="Editar modalidade">✎</button>
-                  <button class="row-action-button delete-icon-button" data-delete-modality="${item.id}" type="button" title="Excluir modalidade" aria-label="Excluir modalidade">×</button>
+                  <button class="row-action-button edit-icon-button" data-edit-modality="${item.id}" type="button" title="Editar modalidade" aria-label="Editar modalidade"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  <button class="row-action-button delete-icon-button" data-delete-modality="${item.id}" type="button" title="Excluir modalidade" aria-label="Excluir modalidade"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>button>
                 </div>
               </td>
               <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.notes || ""}</span></div></td>
@@ -4029,8 +4029,8 @@ function renderPlans() {
             <tr>
               <td>
                 <div class="row-actions">
-                  <button class="row-action-button edit-icon-button" data-edit-plan="${item.id}" type="button" title="Editar plano" aria-label="Editar plano">✎</button>
-                  <button class="row-action-button delete-icon-button" data-delete-plan="${item.id}" type="button" title="Excluir plano" aria-label="Excluir plano">×</button>
+                  <button class="row-action-button edit-icon-button" data-edit-plan="${item.id}" type="button" title="Editar plano" aria-label="Editar plano"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  <button class="row-action-button delete-icon-button" data-delete-plan="${item.id}" type="button" title="Excluir plano" aria-label="Excluir plano"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>button>
                 </div>
               </td>
               <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${item.sessions ?`${item.sessions} sessões inclusas` : "Plano livre"}</span></div></td>
@@ -4324,8 +4324,8 @@ function renderFiscalInvoices() {
       <tr>
         <td>
           <div class="row-actions">
-            <button class="row-action-button edit-icon-button" data-issue-invoice="${item.monthlyId}" type="button" title="Emitir ou reenviar NFS-e" aria-label="Emitir ou reenviar NFS-e">NF</button>
-            <button class="row-action-button delete-icon-button" data-cancel-invoice="${item.monthlyId}" type="button" title="Cancelar NFS-e" aria-label="Cancelar NFS-e">&times;</button>
+            <button class="row-action-button edit-icon-button" data-issue-invoice="${item.monthlyId}" type="button" title="Emitir ou reenviar NFS-e" aria-label="Emitir ou reenviar NFS-e"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></button>
+            <button class="row-action-button delete-icon-button" data-cancel-invoice="${item.monthlyId}" type="button" title="Cancelar NFS-e" aria-label="Cancelar NFS-e"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
           </div>
         </td>
         <td><div class="patient-name"><strong>${item.patient.toUpperCase()}</strong><span>${item.cpf || "CPF pendente"} · ${item.email || "email pendente"}</span></div></td>
@@ -4562,12 +4562,12 @@ function renderAccountTable(config) {
               </td>
               <td><span class="source-pill ${sourceClass}">${sourceLabel}</span></td>
               <td class="row-actions">
-                <button class="row-action-button edit-icon-button" data-edit-account="${item.id}" type="button" title="Editar" aria-label="Editar conta">✎</button>
+                <button class="row-action-button edit-icon-button" data-edit-account="${item.id}" type="button" title="Editar" aria-label="Editar conta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
                 ${item.paidDate
-                  ? `<button class="row-action-button reverse-icon-button" data-reverse-account="${item.id}" type="button" title="Estornar baixa" aria-label="Estornar baixa">↩</button>`
-                  : `<button class="row-action-button settle-icon-button" data-settle-account="${item.id}" type="button" title="Baixar" aria-label="Baixar conta">$</button>`
+                  ? `<button class="row-action-button reverse-icon-button" data-reverse-account="${item.id}" type="button" title="Estornar baixa" aria-label="Estornar baixa"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>`
+                  : `<button class="row-action-button settle-icon-button" data-settle-account="${item.id}" type="button" title="Baixar" aria-label="Baixar conta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>`
                 }
-                <button class="row-action-button delete-icon-button" data-delete-account="${item.id}" type="button" title="Excluir" aria-label="Excluir conta">&times;</button>
+                <button class="row-action-button delete-icon-button" data-delete-account="${item.id}" type="button" title="Excluir" aria-label="Excluir conta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
               </td>
             </tr>
           `;
@@ -4793,8 +4793,8 @@ function renderContracts() {
         <td>${c.endDate ? dateLabel(c.endDate) : "Indefinido"}</td>
         <td><strong>${currency(c.amount)}</strong></td>
         <td class="row-actions">
-          <button class="row-action-button edit-icon-button" data-edit-contract="${c.id}" type="button" title="Editar contrato" aria-label="Editar contrato">&#9998;</button>
-          <button class="row-action-button delete-icon-button" data-delete-contract="${c.id}" type="button" title="Excluir contrato" aria-label="Excluir contrato">&times;</button>
+          <button class="row-action-button edit-icon-button" data-edit-contract="${c.id}" type="button" title="Editar contrato" aria-label="Editar contrato"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="row-action-button delete-icon-button" data-delete-contract="${c.id}" type="button" title="Excluir contrato" aria-label="Excluir contrato"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
         </td>
       </tr>`;
     })
@@ -4906,8 +4906,8 @@ function renderBankReconciliation() {
             <span class="recon-row-status">${statusPill}</span>
             ${isSelected && !isReconciled && !isIgnored ? `
               <span class="recon-row-actions">
-                <button class="row-action-button edit-icon-button" data-create-title-from-movement="${m.id}" title="Criar título">+</button>
-                <button class="row-action-button delete-icon-button" data-ignore-movement="${m.id}" title="Ignorar">&times;</button>
+                <button class="row-action-button edit-icon-button" data-create-title-from-movement="${m.id}" title="Criar título"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                <button class="row-action-button delete-icon-button" data-ignore-movement="${m.id}" title="Ignorar"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
               </span>` : ""}
           </div>`;
       }).join("")
@@ -5105,9 +5105,9 @@ function renderOfxImport() {
               <td><span class="status-pill ${status}">${draft.status}</span></td>
               <td>
                 <div class="row-actions">
-                  <button class="row-action-button edit-icon-button" data-confirm-ofx-draft="${draft.id}" type="button" title="Confirmar lançamento" aria-label="Confirmar lançamento">&#10003;</button>
-                  <button class="row-action-button edit-icon-button" data-save-ofx-rule="${draft.id}" type="button" title="Salvar regra" aria-label="Salvar regra">R</button>
-                  <button class="row-action-button delete-icon-button" data-ignore-ofx-draft="${draft.id}" type="button" title="Ignorar" aria-label="Ignorar">&times;</button>
+                  <button class="row-action-button edit-icon-button" data-confirm-ofx-draft="${draft.id}" type="button" title="Confirmar lançamento" aria-label="Confirmar lançamento"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+                  <button class="row-action-button edit-icon-button" data-save-ofx-rule="${draft.id}" type="button" title="Salvar regra" aria-label="Salvar regra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+                  <button class="row-action-button delete-icon-button" data-ignore-ofx-draft="${draft.id}" type="button" title="Ignorar" aria-label="Ignorar"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
                 </div>
               </td>
             </tr>
@@ -5472,8 +5472,8 @@ function renderChartAccounts() {
               <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
               <td>
                 <div class="row-actions">
-                  <button class="row-action-button edit-icon-button" data-edit-chart-account="${item.id}" type="button" title="Editar conta" aria-label="Editar conta">✎</button>
-                  <button class="row-action-button delete-icon-button" data-delete-chart-account="${item.id}" type="button" title="Excluir conta" aria-label="Excluir conta">×</button>
+                  <button class="row-action-button edit-icon-button" data-edit-chart-account="${item.id}" type="button" title="Editar conta" aria-label="Editar conta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  <button class="row-action-button delete-icon-button" data-delete-chart-account="${item.id}" type="button" title="Excluir conta" aria-label="Excluir conta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>button>
                 </div>
               </td>
             </tr>
@@ -6051,7 +6051,7 @@ function renderLinkedEnrollments(professionalId) {
         .map(
           (row) => `
             <tr>
-              <td><button class="linked-edit-button edit-icon-button" type="button" title="Editar matrícula" aria-label="Editar matrícula">✎</button></td>
+              <td><button class="linked-edit-button edit-icon-button" type="button" title="Editar matrícula" aria-label="Editar matrícula"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></td>
               <td>${row.name.toUpperCase()}</td>
               <td>${dateLabel(row.date)}</td>
               <td>${currency(row.amount)}</td>
