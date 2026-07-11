@@ -2252,7 +2252,7 @@ button {
 }
 
 .crm-table-wrap table {
-  min-width: 1120px;
+  min-width: 960px;
 }
 
 .fiscal-table-wrap table {
@@ -2655,7 +2655,7 @@ button {
 
 .crm-table-wrap th:first-child,
 .crm-table-wrap td:first-child {
-  width: 232px;
+  width: 190px;
 }
 
 .professionals-table-wrap th:first-child,
