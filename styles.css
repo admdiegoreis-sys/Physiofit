@@ -985,7 +985,7 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 }
 
 .agenda-toolbar {
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  grid-template-columns: repeat(4, minmax(120px, 1fr)) !important;
   margin-bottom: 14px;
 }
 
