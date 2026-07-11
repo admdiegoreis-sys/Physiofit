@@ -1291,25 +1291,27 @@ function normalizeLead(item, index) {
     Fechado: "Matriculado",
   };
   const status = legacyStatus[item.status || defaults.status] || item.status || defaults.status || "Novo lead";
+  const entryDateRaw = item.entryDate || item.data_entrada || defaults.entryDate || item.firstContactDate || defaults.firstContactDate || demoToday;
+  const visitDateRaw = item.visitDate || item.data_visita || defaults.visitDate || "";
   return {
     id: item.id || defaults.id || uid("l"),
-    name: item.name || defaults.name || "",
-    phone: item.phone || defaults.phone || "",
+    name: item.name || item.nome || defaults.name || "",
+    phone: item.phone || item.telefone || defaults.phone || "",
     email: item.email || defaults.email || "",
     instagram: item.instagram || defaults.instagram || "",
-    origin: item.origin || defaults.origin || "Outro",
-    entryChannel: item.entryChannel || item.channel || defaults.entryChannel || defaults.channel || item.origin || "WhatsApp",
-    initialMessage: item.initialMessage || item.message || defaults.initialMessage || defaults.message || "",
-    interest: item.interest || defaults.interest || "Pilates",
+    origin: item.origin || item.origem_lead || defaults.origin || "Outro",
+    entryChannel: item.entryChannel || item.canal_entrada || item.channel || defaults.entryChannel || defaults.channel || item.origin || "WhatsApp",
+    initialMessage: item.initialMessage || item.mensagem_inicial || item.message || defaults.initialMessage || defaults.message || "",
+    interest: item.interest || item.interesse || defaults.interest || "Pilates",
     status,
-    ownerId: item.ownerId || "",
-    entryDate: item.entryDate || defaults.entryDate || item.firstContactDate || defaults.firstContactDate || demoToday,
-    visitDate: item.visitDate || defaults.visitDate || "",
+    ownerId: item.ownerId || item.responsavel || "",
+    entryDate: String(entryDateRaw).slice(0, 10),
+    visitDate: visitDateRaw ? String(visitDateRaw).slice(0, 10) : "",
     firstContactDate: item.firstContactDate || defaults.firstContactDate || demoToday,
     nextFollowUpDate: item.nextFollowUpDate || defaults.nextFollowUpDate || demoToday,
     lossReason: item.lossReason || defaults.lossReason || "",
-    notes: item.notes || defaults.notes || "",
-    history: item.history || defaults.history || "",
+    notes: item.notes || item.observacoes || defaults.notes || "",
+    history: item.history || item.historico || defaults.history || "",
     linkedStudentId: item.linkedStudentId || defaults.linkedStudentId || "",
     linkedAppointmentId: item.linkedAppointmentId || defaults.linkedAppointmentId || "",
   };
@@ -7899,7 +7901,25 @@ render();
   renderAccounts();
 })();
 
-hydrateStateFromNeon();
+async function mergeLeadsFromApi() {
+  try {
+    const res = await fetch("/api/leads");
+    if (!res.ok) return;
+    const remote = await res.json();
+    if (!Array.isArray(remote) || remote.length === 0) return;
+    const existingIds = new Set(state.leads.map((l) => l.id));
+    const newLeads = remote
+      .filter((r) => r.id && !existingIds.has(r.id))
+      .map((item, i) => normalizeLead(item, state.leads.length + i));
+    if (newLeads.length === 0) return;
+    state.leads = [...newLeads, ...state.leads];
+    renderCrm();
+  } catch (e) {
+    console.warn("Não foi possível carregar leads remotos:", e);
+  }
+}
+
+hydrateStateFromNeon().finally(() => mergeLeadsFromApi());
 
 
 
