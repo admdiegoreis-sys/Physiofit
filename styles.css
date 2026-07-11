@@ -3381,13 +3381,13 @@ tr:last-child td {
 }
 
 .accounts-table-wrap .row-action-button {
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  min-height: 28px;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
   border-radius: 4px;
   box-shadow: 0 2px 6px rgba(87, 169, 189, 0.16);
-  font-size: 0.66rem;
+  font-size: 0.62rem;
 }
 
 .accounts-table-wrap .row-action-button:hover {
@@ -4365,11 +4365,11 @@ table small,
 }
 
 .accounts-table-wrap .row-action-button {
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  min-height: 28px;
-  font-size: 0.76rem;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
+  font-size: 0.72rem;
 }
 
 .monthly-table-wrap table,
@@ -5598,6 +5598,13 @@ input[type="reset"],
   font-weight: 900;
   line-height: 1;
   box-shadow: 0 7px 16px rgba(15, 23, 42, 0.08);
+}
+
+.accounts-table-wrap .row-action-button {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
 }
 
 .edit-icon-button {
