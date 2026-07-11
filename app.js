@@ -3159,10 +3159,20 @@ function renderCrm() {
     .filter((item) => !term || normalizedText([item.name, item.phone, item.email, item.instagram, item.origin, item.entryChannel, item.interest, item.status, item.initialMessage, item.notes].join(" ")).includes(term))
     .sort((a, b) => dateValue(a.nextFollowUpDate) - dateValue(b.nextFollowUpDate));
 
+  const leadStatusShort = {
+    "Novo lead": "Novo",
+    "Contato iniciado": "Contato",
+    "Respondido": "Respondido",
+    "Visita agendada": "Vis. agend.",
+    "Visita realizada": "Vis. realiz.",
+    "Proposta enviada": "Proposta",
+    "Matriculado": "Matriculado",
+    "Perdido": "Perdido",
+  };
   document.querySelector("#crmFunnel").innerHTML = leadStatuses
     .map((status) => {
       const count = state.leads.filter((item) => item.status === status).length;
-      return `<article class="crm-stage"><strong>${count}</strong><span>${status}</span></article>`;
+      return `<article class="crm-stage"><strong>${count}</strong><span>${leadStatusShort[status] || status}</span></article>`;
     })
     .join("");
 
