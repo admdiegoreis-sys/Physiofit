@@ -3262,27 +3262,6 @@ function renderCrmDashboard() {
       </div>
     </div>`;
 
-  // --- Por profissional ---
-  const profMap = {};
-  active.forEach((l) => { const k = l.ownerId || ""; profMap[k] = (profMap[k] || 0) + 1; });
-  const profEntries = Object.entries(profMap).sort((a, b) => b[1] - a[1]).slice(0, 6);
-  const maxP = Math.max(...profEntries.map((e) => e[1]), 1);
-  const profBlock = `
-    <div class="crm-dash-block crm-dash-prof">
-      <p class="crm-dash-title">Por Profissional</p>
-      ${profEntries.length ? `<div class="crm-dash-funnel-rows">
-        ${profEntries.map(([id, n]) => {
-          const name = (professionalName(id) || "Sem resp.").split(" ")[0];
-          const w = Math.max((n / maxP) * 100, 3);
-          return `<div class="crm-frow">
-            <span class="crm-frow-label">${name}</span>
-            <div class="crm-frow-track"><div class="crm-frow-bar crm-frow-bar--teal" style="width:${w}%"></div></div>
-            <span class="crm-frow-n">${n}</span>
-          </div>`;
-        }).join("")}
-      </div>` : `<p class="crm-dash-empty">Nenhum responsável atribuído.</p>`}
-    </div>`;
-
   // --- Volume no tempo (últimos 6 meses) ---
   const now = new Date();
   const months = Array.from({ length: 6 }, (_, i) => {
@@ -3291,7 +3270,7 @@ function renderCrmDashboard() {
   });
   all.forEach((l) => { const slot = months.find((m) => m.key === String(l.entryDate || "").slice(0, 7)); if (slot) slot.n++; });
   const maxM = Math.max(...months.map((m) => m.n), 1);
-  const W = 220, H = 64, pL = 6, pR = 6, pT = 14, pB = 20;
+  const W = 300, H = 90, pL = 18, pR = 18, pT = 18, pB = 24;
   const iW = W - pL - pR, iH = H - pT - pB;
   const step = iW / (months.length - 1);
   const pts = months.map((m, i) => `${pL + i * step},${pT + iH - (m.n / maxM) * iH}`);
@@ -3299,17 +3278,25 @@ function renderCrmDashboard() {
   const timeBlock = `
     <div class="crm-dash-block crm-dash-time">
       <p class="crm-dash-title">Entradas por Mês</p>
-      <svg viewBox="0 0 ${W} ${H}" class="crm-time-svg" preserveAspectRatio="none">
+      <svg viewBox="0 0 ${W} ${H}" class="crm-time-svg">
         <defs><linearGradient id="crmAreaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#0ea5a4" stop-opacity="0.3"/>
+          <stop offset="0%" stop-color="#0ea5a4" stop-opacity="0.28"/>
           <stop offset="100%" stop-color="#0ea5a4" stop-opacity="0.02"/>
         </linearGradient></defs>
+        ${Array.from({ length: 4 }, (_, i) => {
+          const y = pT + (iH / 3) * i;
+          const val = Math.round(maxM - (maxM / 3) * i);
+          return `<line x1="${pL}" y1="${y}" x2="${W - pR}" y2="${y}" stroke="#e2e8f0" stroke-width="0.5"/>
+                  <text x="${pL - 4}" y="${y + 3}" text-anchor="end" font-size="7" fill="#cbd5e1">${val}</text>`;
+        }).join("")}
         <polygon points="${area}" fill="url(#crmAreaGrad)"/>
-        <polyline points="${pts.join(" ")}" fill="none" stroke="#0ea5a4" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+        <polyline points="${pts.join(" ")}" fill="none" stroke="#0ea5a4" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
         ${months.map((m, i) => {
-          const x = pL + i * step; const y = pT + iH - (m.n / maxM) * iH;
-          return `${m.n > 0 ? `<circle cx="${x}" cy="${y}" r="2.5" fill="#0ea5a4"/><text x="${x}" y="${y - 5}" text-anchor="middle" font-size="7.5" fill="#0ea5a4" font-weight="600">${m.n}</text>` : ""}
-          <text x="${x}" y="${H - 4}" text-anchor="middle" font-size="7.5" fill="#94a3b8">${m.label}</text>`;
+          const x = pL + i * step;
+          const y = pT + iH - (m.n / maxM) * iH;
+          return `${m.n > 0 ? `<circle cx="${x}" cy="${y}" r="3" fill="#0ea5a4" stroke="#fff" stroke-width="1.5"/>
+                  <text x="${x}" y="${y - 7}" text-anchor="middle" font-size="8" fill="#0ea5a4" font-weight="700">${m.n}</text>` : ""}
+                  <text x="${x}" y="${H - 4}" text-anchor="middle" font-size="8" fill="#94a3b8">${m.label}</text>`;
         }).join("")}
       </svg>
     </div>`;
@@ -3329,7 +3316,6 @@ function renderCrmDashboard() {
       <div class="crm-dash-grid">
         ${funnelBlock}
         ${originBlock}
-        ${profBlock}
         ${timeBlock}
       </div>
     </div>`;
