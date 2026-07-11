@@ -983,8 +983,19 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 }
 
 .agenda-toolbar {
-  grid-template-columns: repeat(4, minmax(120px, 1fr)) !important;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: stretch;
   margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid #dfe5ef;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.agenda-toolbar .patient-search-row {
+  grid-column: 1 / -1;
 }
 
 .calendar-shell {
@@ -6545,5 +6556,3 @@ td.row-actions .row-action-button {
 /* tabelas com scroll horizontal em telas pequenas */
 .table-wrap{overflow-x:auto !important;-webkit-overflow-scrolling:touch !important}}
 
-/* agenda toolbar: forcar 4 colunas mesmo em breakpoints responsivos */
-.patient-toolbar.agenda-toolbar { grid-template-columns: repeat(4, minmax(100px, 1fr)) !important; }
