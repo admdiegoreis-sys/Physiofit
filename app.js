@@ -1281,8 +1281,8 @@ function normalizeProfessional(item, index) {
   };
 }
 
-function normalizeLead(item, index) {
-  const defaults = seedLeads[index % seedLeads.length] ?? seedLeads[0] ?? {};
+function normalizeLead(item, index, useDefaults = true) {
+  const defaults = useDefaults ? (seedLeads[index % seedLeads.length] ?? seedLeads[0] ?? {}) : {};
   const legacyStatus = {
     "Primeiro contato": "Contato iniciado",
     "Sem resposta": "Contato iniciado",
@@ -1297,12 +1297,12 @@ function normalizeLead(item, index) {
     id: item.id || defaults.id || uid("l"),
     name: item.name || item.nome || defaults.name || "",
     phone: item.phone || item.telefone || defaults.phone || "",
-    email: item.email || defaults.email || "",
-    instagram: item.instagram || defaults.instagram || "",
+    email: item.email || (useDefaults ? defaults.email : "") || "",
+    instagram: item.instagram || (useDefaults ? defaults.instagram : "") || "",
     origin: item.origin || item.origem_lead || defaults.origin || "Outro",
-    entryChannel: item.entryChannel || item.canal_entrada || item.channel || defaults.entryChannel || defaults.channel || item.origin || "WhatsApp",
+    entryChannel: item.entryChannel || item.canal_entrada || item.channel || defaults.entryChannel || defaults.channel || item.origin || (useDefaults ? "WhatsApp" : ""),
     initialMessage: item.initialMessage || item.mensagem_inicial || item.message || defaults.initialMessage || defaults.message || "",
-    interest: item.interest || item.interesse || defaults.interest || "Pilates",
+    interest: item.interest || item.interesse || defaults.interest || (useDefaults ? "Pilates" : ""),
     status,
     ownerId: item.ownerId || item.responsavel || "",
     entryDate: String(entryDateRaw).slice(0, 10),
@@ -7910,7 +7910,7 @@ async function mergeLeadsFromApi() {
     const existingIds = new Set(state.leads.map((l) => l.id));
     const newLeads = remote
       .filter((r) => r.id && !existingIds.has(r.id))
-      .map((item, i) => normalizeLead(item, state.leads.length + i));
+      .map((item, i) => normalizeLead(item, state.leads.length + i, false));
     if (newLeads.length === 0) return;
     state.leads = [...newLeads, ...state.leads];
     renderCrm();
