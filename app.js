@@ -7909,7 +7909,7 @@ async function mergeLeadsFromApi() {
     if (!Array.isArray(remote) || remote.length === 0) return;
     const existingIds = new Set(state.leads.map((l) => l.id));
     const newLeads = remote
-      .filter((r) => r.id && !existingIds.has(r.id))
+      .filter((r) => r.id && !existingIds.has(r.id) && !isDeletedEntity(state, "leads", r.id))
       .map((item, i) => normalizeLead(item, state.leads.length + i, false));
     if (newLeads.length === 0) return;
     state.leads = [...newLeads, ...state.leads];
