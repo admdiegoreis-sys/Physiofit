@@ -6260,8 +6260,20 @@ td.row-actions .row-action-button {
 .sv-other-more { color: var(--muted); font-style: italic; }
 .sv-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
 
+/* CRM action buttons — visual refinado */
+.crm-table-wrap .row-action-button {
+  border-radius: 8px;
+  background: #475569;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  transition: background 0.14s ease, transform 0.12s ease, box-shadow 0.14s ease;
+}
+.crm-table-wrap .row-action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+}
+
 /* Lead action: X (perda) */
-.crm-table-wrap .lead-lose-btn { background: #b0545c; }
+.crm-table-wrap .lead-lose-btn { background: #e11d48; }
 .lead-action-x { position: relative; }
 .lead-action-x::before,
 .lead-action-x::after {
@@ -6277,7 +6289,7 @@ td.row-actions .row-action-button {
 .lead-action-x::after  { transform: translate(-50%, -50%) rotate(-45deg); }
 
 /* Lead action: Cadastrar aluno (pessoa) */
-.crm-table-wrap .lead-register-student-btn { background: #3b82a0; }
+.crm-table-wrap .lead-register-student-btn { background: #0369a1; }
 .crm-table-wrap .lead-action-person {
   display: block;
   width: 10px; height: 10px;
@@ -6325,7 +6337,7 @@ td.row-actions .row-action-button {
 }
 
 /* Lead action: Lixeira (excluir) */
-.crm-table-wrap .lead-del-btn { background: #7a5c6e; }
+.crm-table-wrap .lead-del-btn { background: #64748b; }
 .crm-table-wrap .lead-action-trash {
   width: 11px; height: 12px;
   border: 2.5px solid #fff;
@@ -6355,13 +6367,13 @@ td.row-actions .row-action-button {
 
 /* Lead action: WhatsApp */
 .crm-table-wrap .lead-whatsapp-btn {
-  background: #25d366;
+  background: #16a34a;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
 }
-.crm-table-wrap .lead-whatsapp-btn:hover { background: #1ebe5a; }
+.crm-table-wrap .lead-whatsapp-btn:hover { background: #15803d; }
 .crm-table-wrap .lead-action-whatsapp {
   display: block;
   position: relative;
