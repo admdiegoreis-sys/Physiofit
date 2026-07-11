@@ -7915,6 +7915,7 @@ async function mergeLeadsFromApi() {
     if (newLeads.length === 0) return;
     state.leads = [...newLeads, ...state.leads];
     renderCrm();
+    renderDashboard();
   } catch (e) {
     console.warn("Não foi possível carregar leads remotos:", e);
   }
