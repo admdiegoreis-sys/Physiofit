@@ -10,6 +10,32 @@ function phoneFromChatId(value = "") {
   return digits ? `+${digits}` : "";
 }
 
+function zapiLeadPayload(payload = {}) {
+  if (payload.type !== "ReceivedCallback") return null;
+  if (payload.fromMe) return { skip: true, skipReason: "Mensagem enviada pelo proprio estudio." };
+  if (payload.isGroup || payload.participantPhone) return { skip: true, skipReason: "Mensagem de grupo ignorada." };
+
+  const digits = phoneDigits(payload.phone || "");
+  const phone = digits ? `+${digits}` : "";
+  const body = payload.text?.message || payload.image?.caption || payload.audio?.caption || payload.video?.caption || "";
+
+  return {
+    nome: payload.senderName || "Lead WhatsApp",
+    telefone: phone,
+    email: "",
+    instagram: "",
+    origem_lead: "WhatsApp",
+    canal_entrada: "whatsapp",
+    mensagem_inicial: body,
+    interesse: "",
+    status: "Novo lead",
+    data_entrada: new Date().toISOString().slice(0, 10),
+    data_visita: null,
+    responsavel: "",
+    observacoes: `Z-API ${payload.instanceId || ""} · ReceivedCallback`,
+  };
+}
+
 function wahaLeadPayload(payload = {}) {
   const event = payload.event || "";
   const message = payload.payload;
@@ -136,6 +162,10 @@ export async function ensureLeadTables(sql) {
 }
 
 export function normalizeLeadPayload(payload = {}) {
+  const zapiPayload = zapiLeadPayload(payload);
+  if (zapiPayload?.skip) return zapiPayload;
+  if (zapiPayload) payload = zapiPayload;
+
   const wahaPayload = wahaLeadPayload(payload);
   if (wahaPayload?.skip) return wahaPayload;
   if (wahaPayload) payload = wahaPayload;
