@@ -1289,13 +1289,12 @@ button {
 
 .crm-dash-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: auto auto;
+  grid-template-columns: 2fr 1fr 2fr;
   gap: 10px;
 }
-.crm-dash-funnel { grid-column: 1; grid-row: 1; }
-.crm-dash-origin { grid-column: 2; grid-row: 1; }
-.crm-dash-time   { grid-column: 1 / 3; grid-row: 2; }
+.crm-dash-funnel { grid-column: 1; }
+.crm-dash-origin { grid-column: 2; }
+.crm-dash-time   { grid-column: 3; }
 
 .crm-dash-block {
   padding: 14px 16px;
