@@ -521,6 +521,37 @@ const viewTitles = {
   settings: "Configurações",
 };
 
+const viewPaths = {
+  dashboard: "/",
+  crm: "/leads",
+  agenda: "/agenda",
+  students: "/alunos",
+  patientEditor: "/aluno",
+  enrollments: "/matriculas",
+  professionals: "/profissionais",
+  professionalEditor: "/profissional",
+  suppliers: "/fornecedores",
+  modalities: "/modalidades",
+  modalityEditor: "/modalidade",
+  plans: "/planos",
+  planEditor: "/plano",
+  monthlyPayments: "/mensalidades",
+  fiscal: "/fiscal",
+  contracts: "/contratos",
+  accountsPayable: "/contas-pagar",
+  accountsReceivable: "/contas-receber",
+  ofxImport: "/importar-ofx",
+  bankReconciliation: "/conciliacao",
+  cashFlow: "/fluxo-caixa",
+  dre: "/dre",
+  chartAccounts: "/plano-contas",
+  finance: "/financeiro",
+  records: "/prontuario",
+  settings: "/configuracoes",
+};
+
+const pathToView = Object.fromEntries(Object.entries(viewPaths).map(([k, v]) => [v, k]));
+
 const menuGroupByView = {
   dashboard: "dashboard",
   crm: "crm",
@@ -6503,7 +6534,8 @@ async function handleLogin(event) {
     authSession = await window.PhysiofitData.login(username, password);
     document.querySelector("#loginPassword").value = "";
     applyAuthSession();
-    switchView(canAccessView(currentView()) ? currentView() : "dashboard");
+    const requestedView = pathToView[location.pathname] || "dashboard";
+    switchView(canAccessView(requestedView) ? requestedView : "dashboard");
     toast(`Bem-vindo, ${currentUser().name}.`);
   } catch (error) {
     feedback.textContent = error.message || "Não foi possível entrar.";
@@ -6763,7 +6795,7 @@ async function toggleUserStatus(userId, status) {
   }
 }
 
-function switchView(view) {
+function switchView(view, { pushState = true } = {}) {
   if (!canAccessView(view)) {
     view = "dashboard";
     if (currentUser()) toast("Seu perfil não tem acesso a essa tela.");
@@ -6783,6 +6815,10 @@ function switchView(view) {
   document.querySelectorAll("[data-agenda-mode-target]").forEach((button) => button.classList.toggle("active", view === "agenda" && button.dataset.agendaModeTarget === agendaMode));
   document.body.classList.remove("mobile-menu-open");
   document.querySelector("#viewTitle").textContent = viewTitles[view];
+  if (pushState) {
+    const path = viewPaths[view] || "/";
+    if (location.pathname !== path) history.pushState({ view }, "", path);
+  }
 }
 
 function openMenuGroup(groupName) {
@@ -8065,6 +8101,20 @@ async function mergeLeadsFromApi() {
 }
 
 hydrateStateFromNeon().finally(() => mergeLeadsFromApi());
+
+// Roteamento por URL
+window.addEventListener("popstate", (e) => {
+  if (!currentUser()) return;
+  const view = e.state?.view || pathToView[location.pathname] || "dashboard";
+  switchView(view, { pushState: false });
+});
+
+// Navegar para o path inicial após autenticação já aplicada
+(function applyInitialRoute() {
+  if (!currentUser()) return;
+  const view = pathToView[location.pathname] || "dashboard";
+  switchView(canAccessView(view) ? view : "dashboard");
+})();
 
 
 
