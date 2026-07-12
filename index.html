@@ -1,10 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StudioFlow Pilates</title>
-    <link rel="stylesheet" href="styles.css?v=26" />
+    <link rel="stylesheet" href="styles.css?v=27" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -408,7 +408,7 @@
 
         <section class="view" id="studentsView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastros</p>
                 <h2>Clientes</h2>
@@ -420,7 +420,6 @@
                 <button class="ghost-button" type="button">Exportar</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="patient-toolbar">
                 <select id="studentStatusFilter" aria-label="Filtrar por status">
                   <option value="all">Todos</option>
@@ -448,13 +447,12 @@
                   <tbody id="studentsTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="patientEditorView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastro</p>
                 <h2 id="patientEditorTitle">Cliente</h2>
@@ -464,7 +462,6 @@
                 <button class="primary-button success-button" form="patientEditorForm" type="submit">Salvar cadastro</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="patient-editor-tabs" role="tablist" aria-label="Abas do cadastro do cliente">
                 <button class="patient-tab active" data-patient-tab="personal" type="button">Dados Pessoais</button>
                 <button class="patient-tab" data-patient-tab="clinical" type="button">Saúde / Prontuário</button>
@@ -567,20 +564,20 @@
                   </div>
                 </section>
               </form>
-            </div>
           </div>
         </section>
 
         <section class="view" id="professionalsView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastros</p>
                 <h2>Profissionais</h2>
               </div>
-              <button class="primary-button success-button" id="newProfessionalButton" type="button">Novo Profissional</button>
+              <div class="module-actions">
+                <button class="primary-button success-button" id="newProfessionalButton" type="button">Novo Profissional</button>
+              </div>
             </div>
-            <div class="module-body">
               <div class="patient-toolbar">
                 <select id="professionalStatusFilter" aria-label="Filtrar profissionais por status">
                   <option value="all">Todos</option>
@@ -609,13 +606,12 @@
                   <tbody id="professionalsTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="professionalEditorView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastro</p>
                 <h2 id="professionalEditorTitle">Profissional</h2>
@@ -625,7 +621,6 @@
                 <button class="primary-button success-button" form="professionalEditorForm" type="submit">Salvar profissional</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="professional-summary-card">
                 <h2 id="professionalSummaryName">Profissional</h2>
                 <strong id="professionalSummaryDocument">CREFITO: -</strong>
@@ -672,23 +667,21 @@
                   </div>
                 </section>
               </form>
-            </div>
           </div>
         </section>
 
         <section class="view" id="enrollmentsView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastros</p>
             <h2>Matrículas</h2>
               </div>
-              <div class="title-actions">
+              <div class="module-actions">
                 <button class="primary-button success-button" data-open-modal="enrollment" type="button">Nova Matrícula</button>
                 <button class="secondary-button" type="button">Exportar</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="patient-toolbar enrollment-toolbar">
                 <select id="enrollmentModalityFilter">
                   <option value="all">Modalidades</option>
@@ -748,20 +741,20 @@
                   <tbody id="enrollmentsTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="suppliersView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastros</p>
                 <h2>Fornecedores</h2>
               </div>
-              <button class="primary-button success-button" data-open-modal="supplier" type="button">Novo Fornecedor</button>
+              <div class="module-actions">
+                <button class="primary-button success-button" data-open-modal="supplier" type="button">Novo Fornecedor</button>
+              </div>
             </div>
-            <div class="module-body">
               <div class="patient-toolbar">
                 <select id="supplierStatusFilter">
                   <option value="Ativo">Ativos</option>
@@ -794,20 +787,20 @@
                   <tbody id="suppliersTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="modalitiesView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastros</p>
                 <h2>Modalidades</h2>
               </div>
-              <button class="primary-button success-button" id="newModalityButton" type="button">Nova Modalidade</button>
+              <div class="module-actions">
+                <button class="primary-button success-button" id="newModalityButton" type="button">Nova Modalidade</button>
+              </div>
             </div>
-            <div class="module-body">
               <div class="patient-toolbar">
                 <div class="patient-search-row professionals-search-row">
                   <input id="modalitySearch" type="search" placeholder="Buscar por modalidade" />
@@ -829,13 +822,12 @@
                   <tbody id="modalitiesTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="modalityEditorView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastro</p>
                 <h2 id="modalityEditorTitle">Modalidade</h2>
@@ -845,7 +837,6 @@
                 <button class="primary-button success-button" form="modalityEditorForm" type="submit">Salvar modalidade</button>
               </div>
             </div>
-            <div class="module-body">
               <form id="modalityEditorForm" class="patient-editor-form">
                 <div class="form-section-heading">
                   <h3>Dados da modalidade</h3>
@@ -863,23 +854,21 @@
                   <label class="wide">Observações<textarea name="notes" rows="4"></textarea></label>
                 </div>
               </form>
-            </div>
           </div>
         </section>
 
         <section class="view" id="plansView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastros</p>
                 <h2>Planos</h2>
               </div>
-              <div style="display:flex;gap:.5rem;align-items:center;">
+              <div class="module-actions">
                 <button class="action-button" id="exportPlansButton" type="button">Exportar XLS</button>
                 <button class="primary-button success-button" id="newPlanButton" type="button">Novo Plano</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="patient-toolbar">
                 <select id="planStatusFilter" aria-label="Filtrar planos por status">
                   <option value="all">Todos</option>
@@ -922,13 +911,12 @@
                   <tbody id="plansTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="planEditorView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Cadastro</p>
                 <h2 id="planEditorTitle">Plano</h2>
@@ -938,7 +926,6 @@
                 <button class="primary-button success-button" form="planEditorForm" type="submit">Salvar plano</button>
               </div>
             </div>
-            <div class="module-body">
               <form id="planEditorForm" class="patient-editor-form">
                 <div class="form-section-heading">
                   <h3>Dados do plano</h3>
@@ -971,20 +958,20 @@
                   <label class="wide">Observações<textarea name="notes" rows="4"></textarea></label>
                 </div>
               </form>
-            </div>
           </div>
         </section>
 
         <section class="view" id="monthlyPaymentsView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Financeiro / Mensalidades</h2>
               </div>
-              <button class="ghost-button" type="button">Imprimir / Salvar</button>
+              <div class="module-actions">
+                <button class="ghost-button" type="button">Imprimir / Salvar</button>
+              </div>
             </div>
-            <div class="module-body">
               <div class="monthly-toolbar">
                 <button class="nav-square" id="prevMonthlyPeriod" type="button">&lt;</button>
                 <input type="month" id="monthlyPeriodFilter" aria-label="De" title="De" />
@@ -1052,23 +1039,21 @@
                   <tbody id="monthlyPaymentsTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="fiscalView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Emissão de NFS-e</h2>
               </div>
-              <div class="title-actions">
+              <div class="module-actions">
                 <button class="primary-button" id="issueSelectedInvoicesButton" type="button">Emitir pendentes</button>
                 <button class="ghost-button" type="button">Exportar</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="fiscal-summary" id="fiscalSummary"></div>
               <div class="accounts-toolbar fiscal-toolbar">
                 <select id="fiscalStatusFilter">
@@ -1105,22 +1090,20 @@
                   <tbody id="fiscalTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="contractsView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Contratos / Pagamentos Recorrentes</h2>
               </div>
-              <div class="title-actions">
+              <div class="module-actions">
                 <button class="primary-button" id="addContractButton" type="button">Adicionar Contrato</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="financial-summary-cards" id="contractsSummary"></div>
               <div class="accounts-toolbar">
                 <select id="contractStatusFilter">
@@ -1157,25 +1140,23 @@
                   <tbody id="contractsTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="accountsPayableView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Contas a Pagar</h2>
               </div>
-              <div class="title-actions">
+              <div class="module-actions">
                 <button class="primary-button" data-open-account-direction="Pagar" type="button">Adicionar Conta a Pagar</button>
                 <button class="ghost-button" data-import-accounts="Pagar" type="button">Importar Planilha</button>
                 <input id="importAccountsPayableFile" type="file" accept=".xlsx" hidden />
                 <button class="ghost-button" data-print-view="accountsPayable" type="button">Imprimir / Salvar</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="financial-summary-cards" id="payableAccountSummary"></div>
 
               <div class="accounts-toolbar">
@@ -1233,25 +1214,23 @@
                   <tbody id="payableAccountsTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="accountsReceivableView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Contas a Receber</h2>
               </div>
-              <div class="title-actions">
+              <div class="module-actions">
                 <button class="primary-button" data-open-account-direction="Receber" type="button">Adicionar Conta a Receber</button>
                 <button class="ghost-button" data-import-accounts="Receber" type="button">Importar Planilha</button>
                 <input id="importAccountsReceivableFile" type="file" accept=".xlsx" hidden />
                 <button class="ghost-button" data-print-view="accountsReceivable" type="button">Imprimir / Salvar</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="financial-summary-cards" id="receivableAccountSummary"></div>
 
               <div class="accounts-toolbar">
@@ -1309,23 +1288,21 @@
                   <tbody id="receivableAccountsTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="ofxImportView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Importar OFX</h2>
               </div>
-              <div class="title-actions">
+              <div class="module-actions">
                 <button class="ghost-button" id="clearOfxImportButton" type="button">Limpar importação</button>
                 <button class="primary-button" id="approveOfxValidButton" type="button">Confirmar válidos</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="ofx-import-panel">
                 <label>Conta/Banco de origem
                   <select id="ofxBankAccountSelect" required>
@@ -1366,23 +1343,21 @@
                   <tbody id="ofxReviewTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="bankReconciliationView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Conciliação Bancária</h2>
               </div>
-              <div class="recon-titlebar-actions">
+              <div class="module-actions">
                 <button class="ghost-button" id="reconcileSelectedButton" type="button" disabled>Conciliar</button>
                 <button class="ghost-button" id="bankReconciliationClearFiltersButton" type="button">Limpar filtros</button>
               </div>
             </div>
-            <div class="module-body">
               <div class="accounts-toolbar">
                 <select id="bankReconciliationStatusFilter">
                   <option value="unreconciled">Não conciliados</option>
@@ -1426,20 +1401,20 @@
                   <div class="recon-panel-body" id="bankMovementsPanel"></div>
                 </div>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="cashFlowView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Fluxo de Caixa</h2>
               </div>
-              <button class="ghost-button" type="button">Exportar</button>
+              <div class="module-actions">
+                <button class="ghost-button" type="button">Exportar</button>
+              </div>
             </div>
-            <div class="module-body">
               <div class="cashflow-summary" id="cashFlowSummary"></div>
               <div class="table-wrap cashflow-table-wrap">
                 <table class="cashflow-grid-table">
@@ -1455,20 +1430,20 @@
                   <tbody id="cashFlowTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="dreView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>DRE - Demonstração de Resultado</h2>
               </div>
-              <button class="ghost-button" type="button">Exportar</button>
+              <div class="module-actions">
+                <button class="ghost-button" type="button">Exportar</button>
+              </div>
             </div>
-            <div class="module-body">
               <div class="cashflow-summary" id="dreSummary"></div>
               <div class="table-wrap cashflow-table-wrap dre-table-wrap">
                 <table class="cashflow-grid-table dre-grid-table">
@@ -1476,20 +1451,20 @@
                   <tbody id="dreTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="chartAccountsView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Plano de Contas</h2>
               </div>
-              <button class="primary-button" data-open-modal="chartAccount" type="button">Nova Conta Contábil</button>
+              <div class="module-actions">
+                <button class="primary-button" data-open-modal="chartAccount" type="button">Nova Conta Contábil</button>
+              </div>
             </div>
-            <div class="module-body">
               <div class="patient-search-row chart-search-row">
                 <input id="chartAccountSearch" type="search" placeholder="Buscar por código, conta ou atividade" />
                 <button class="action-button blue" id="chartAccountSearchButton" type="button">Buscar</button>
@@ -1511,20 +1486,20 @@
                   <tbody id="chartAccountsTable"></tbody>
                 </table>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="financeView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Recebimentos e cobranças</h2>
               </div>
-              <button class="primary-button" data-open-modal="payment" type="button">Nova cobrança</button>
+              <div class="module-actions">
+                <button class="primary-button" data-open-modal="payment" type="button">Nova cobrança</button>
+              </div>
             </div>
-            <div class="module-body">
               <div class="toolbar">
                 <div class="segmented" role="group" aria-label="Filtro financeiro">
                   <button class="segment active" data-payment-filter="all" type="button">Todos</button>
@@ -1553,20 +1528,20 @@
                   <div class="finance-summary" id="financeSummary"></div>
                 </section>
               </div>
-            </div>
           </div>
         </section>
 
         <section class="view" id="recordsView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Prontuário</p>
                 <h2>Evolução e presenças</h2>
               </div>
-              <button class="primary-button" data-open-modal="record" type="button">Novo registro</button>
+              <div class="module-actions">
+                <button class="primary-button" data-open-modal="record" type="button">Novo registro</button>
+              </div>
             </div>
-            <div class="module-body">
               <div class="attendance-summary" id="attendanceSummary"></div>
               <div class="records-layout">
                 <section class="panel">
@@ -1611,19 +1586,17 @@
                   </table>
                 </div>
               </section>
-            </div>
           </div>
         </section>
 
         <section class="view" id="settingsView" aria-labelledby="viewTitle">
           <div class="page-module">
-            <div class="module-titlebar">
+            <div class="module-header compact-header">
               <div>
                 <p class="eyebrow">Configurações</p>
                 <h2>Configurações do sistema</h2>
               </div>
             </div>
-            <div class="module-body">
               <div class="settings-tabs-bar">
                 <button class="settings-tab active" data-settings-tab="empresa" type="button">Empresa</button>
                 <button class="settings-tab" data-settings-tab="usuarios" data-admin-only type="button">Usuários</button>
@@ -1779,7 +1752,6 @@
                   </section>
                 </div>
               </div>
-            </div>
           </div>
         </section>
       </main>

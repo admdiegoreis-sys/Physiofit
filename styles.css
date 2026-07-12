@@ -1488,8 +1488,8 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
   line-height: 1.25;
 }
 
-#ofxImportView .title-actions .primary-button,
-#ofxImportView .title-actions .ghost-button {
+#ofxImportView .module-actions .primary-button,
+#ofxImportView .module-actions .ghost-button {
   min-height: 38px;
   padding: 0 14px;
   font-size: 0.88rem;
@@ -2231,7 +2231,7 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
   min-height: unset;
 }
 
-.title-actions {
+.module-actions {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -4308,8 +4308,8 @@ input[type="reset"],
 .help-button,
 .user-button,
 .session-chip button,
-#ofxImportView .title-actions .primary-button,
-#ofxImportView .title-actions .ghost-button,
+#ofxImportView .module-actions .primary-button,
+#ofxImportView .module-actions .ghost-button,
 .agenda-search-row .action-button,
 .patient-search-row .action-button,
 .nav-square,
@@ -5572,7 +5572,7 @@ input[type="reset"],
 .quick-action.primary-button,
 .executive-hero .primary-button,
 .topbar .primary-button,
-#ofxImportView .title-actions .primary-button {
+#ofxImportView .module-actions .primary-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5610,7 +5610,7 @@ input[type="reset"],
 .dashboard-card .ghost-button,
 .executive-hero .ghost-button,
 .topbar .ghost-button,
-#ofxImportView .title-actions .ghost-button {
+#ofxImportView .module-actions .ghost-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
