@@ -6572,3 +6572,74 @@ td.row-actions .row-action-button {
 /* tabelas com scroll horizontal em telas pequenas */
 .table-wrap{overflow-x:auto !important;-webkit-overflow-scrolling:touch !important}}
 
+/* painel de ações do agendamento */
+#apptActionOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#apptActionOverlay[hidden] { display: none; }
+
+.appt-action-panel {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px 22px 20px;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
+  position: relative;
+}
+
+.appt-action-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+.appt-action-close:hover { color: #475569; }
+
+.appt-action-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.appt-action-header strong {
+  display: block;
+  font-size: 1rem;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+.appt-action-header span {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.appt-action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.appt-action-btn {
+  padding: 10px 8px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.82rem;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s;
+  text-align: center;
+  white-space: nowrap;
+}
+.appt-action-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
+

@@ -3658,7 +3658,7 @@ function renderCalendarEvent(item) {
   const relatedProfessional = professional(item.teacherId);
   const personName = appointmentPersonName(item);
   return `
-    <article class="calendar-event ${statusClass(item.status)}" style="${relatedProfessional?.color ?`background:${relatedProfessional.color}` : ""}" data-action="reschedule" data-id="${item.id}" title="Editar/remarcar ${item.type} - ${personName}">
+    <article class="calendar-event ${statusClass(item.status)}" style="${relatedProfessional?.color ?`background:${relatedProfessional.color}` : ""}" data-action="open-appt-panel" data-id="${item.id}" title="${item.type} - ${personName}">
       <span>${item.time} - ${item.endTime}</span>
       <strong>${personName.toUpperCase()}</strong>
       <small>${professionalName(item.teacherId)} · ${relatedStudent?.plan ?? item.sessionKind}</small>
@@ -5663,6 +5663,22 @@ function openAppointmentModal(appointmentId = null) {
   document.querySelector("#modalTitle").textContent = appointmentId ? "Remarcar sessão" : "Agendar sessão";
 }
 
+let _apptActionId = null;
+
+function openApptActionPanel(appointmentId) {
+  const appt = state.appointments.find((a) => a.id === appointmentId);
+  if (!appt) return;
+  _apptActionId = appointmentId;
+  document.querySelector("#apptActionName").textContent = appointmentPersonName(appt);
+  document.querySelector("#apptActionInfo").textContent = `${dateLabel(appt.date)} · ${appt.time}${appt.endTime ? " - " + appt.endTime : ""} · ${professionalName(appt.teacherId)}`;
+  document.querySelector("#apptActionOverlay").hidden = false;
+}
+
+function closeApptActionPanel() {
+  document.querySelector("#apptActionOverlay").hidden = true;
+  _apptActionId = null;
+}
+
 function openLeadModal(leadId = null) {
   editingLeadId = leadId;
   const item = leadId ? state.leads.find((lead) => lead.id === leadId) : null;
@@ -7382,6 +7398,10 @@ document.addEventListener("click", (event) => {
       toast("Agendamento excluído.");
       return;
     }
+    if (scheduleAction.dataset.action === "open-appt-panel" && appointment) {
+      openApptActionPanel(appointment.id);
+      return;
+    }
     if (scheduleAction.dataset.action === "reschedule" && appointment) {
       openAppointmentModal(appointment.id);
       return;
@@ -7414,6 +7434,43 @@ document.addEventListener("click", (event) => {
     render();
     toast("Agenda atualizada.");
   }
+});
+
+document.querySelector("#apptActionClose").addEventListener("click", closeApptActionPanel);
+document.querySelector("#apptActionOverlay").addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) closeApptActionPanel();
+  const btn = e.target.closest("[data-appt-action]");
+  if (!btn || !_apptActionId) return;
+  const action = btn.dataset.apptAction;
+  const appt = state.appointments.find((a) => a.id === _apptActionId);
+  if (!appt) return;
+  if (action === "reschedule") {
+    closeApptActionPanel();
+    openAppointmentModal(_apptActionId);
+    return;
+  }
+  if (action === "confirm") appt.status = "Confirmada";
+  if (action === "checkin") {
+    appt.status = "Visita realizada";
+    const s = state.students.find((item) => item.id === appt.studentId);
+    if (s) s.lastPresence = appt.date;
+    updateLeadAfterVisit(appt);
+  }
+  if (action === "missed") { appt.status = "Faltou"; appt.replacementCredit = false; }
+  if (action === "cancel") { appt.status = "Cancelada"; appt.replacementCredit = true; }
+  if (action === "replacement") {
+    if (replacementBalance(appt.studentId) <= 0 && !appt.replacementUsed) {
+      toast("Cliente sem crédito de reposição disponível.");
+      return;
+    }
+    appt.status = "Reposta";
+    appt.sessionKind = "Reposição";
+    appt.replacementUsed = true;
+  }
+  closeApptActionPanel();
+  saveState();
+  render();
+  toast("Agenda atualizada.");
 });
 
 document.querySelector("#closeModal").addEventListener("click", closeModal);
