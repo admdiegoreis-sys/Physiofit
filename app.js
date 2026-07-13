@@ -3671,11 +3671,10 @@ function renderCalendarEvent(item) {
   const bg = relatedProfessional?.color ? `background:${relatedProfessional.color}` : "";
   return `
     <article class="calendar-event ${statusClass(item.status)}" style="${bg}" data-action="open-appt-panel" data-id="${item.id}" title="${item.type} - ${personName}">
+      ${apptStatusBadge(item)}
       <span>${item.time} - ${item.endTime}</span>
       <strong>${personName.toUpperCase()}</strong>
       <small>${professionalName(item.teacherId)} · ${relatedStudent?.plan ?? item.sessionKind}</small>
-      ${apptStatusBadge(item)}
-      <button class="cal-event-delete" data-action="delete-appointment" data-id="${item.id}" type="button" title="Excluir agendamento" aria-label="Excluir agendamento"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
     </article>
   `;
 }
@@ -7525,6 +7524,13 @@ document.querySelector("#apptActionMainGrid").addEventListener("click", (e) => {
     appt.replacementUsed = true;
     closeApptActionPanel();
     saveState(); render(); toast("Reposição registrada.");
+    return;
+  }
+  if (action === "cancel") {
+    appt.status = "Cancelada";
+    appt.replacementCredit = true;
+    closeApptActionPanel();
+    saveState(); render(); toast("Agendamento cancelado.");
     return;
   }
 });
