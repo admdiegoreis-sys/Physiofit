@@ -3659,6 +3659,7 @@ function apptStatusBadge(item) {
   if (item.status === "Visita realizada") return '<span class="evt-badge evt-badge--presente" title="Presença">✓</span>';
   if (item.status === "Falta justificada") return '<span class="evt-badge evt-badge--fj" title="Falta justificada">FJ</span>';
   if (item.status === "Faltou") return '<span class="evt-badge evt-badge--fi" title="Falta injustificada">✗</span>';
+  if (item.status === "Cancelada") return '<span class="evt-badge evt-badge--cancelada" title="Cancelada">🗑</span>';
   if (item.sessionKind === "Experimental") return '<span class="evt-badge evt-badge--exp" title="Experimental">EXP</span>';
   if (item.wasRescheduled) return '<span class="evt-badge evt-badge--remar" title="Remarcada">↺</span>';
   return "";

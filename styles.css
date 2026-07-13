@@ -6679,7 +6679,8 @@ td.row-actions .row-action-button {
 .evt-badge--fj       { background: #d97706; color: #fff; }
 .evt-badge--fi       { background: #dc2626; color: #fff; }
 .evt-badge--exp      { background: #7c3aed; color: #fff; font-size: 0.52rem; }
-.evt-badge--remar    { background: #0284c7; color: #fff; }
+.evt-badge--remar      { background: #0284c7; color: #fff; }
+.evt-badge--cancelada  { background: #64748b; color: #fff; font-size: 0.75rem; }
 
 /* Legenda da agenda */
 .agenda-legend {
