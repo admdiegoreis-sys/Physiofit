@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StudioFlow Pilates</title>
-    <link rel="stylesheet" href="styles.css?v=27" />
+    <link rel="stylesheet" href="styles.css?v=28" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -1901,12 +1901,50 @@
           <strong id="apptActionName"></strong>
           <span id="apptActionInfo"></span>
         </div>
-        <div class="appt-action-grid">
-          <button class="appt-action-btn" data-appt-action="reschedule" type="button">Editar horário</button>
-          <button class="appt-action-btn" data-appt-action="confirm" type="button">Confirmar</button>
-          <button class="appt-action-btn" data-appt-action="checkin" type="button">Check-in</button>
-          <button class="appt-action-btn" data-appt-action="missed" type="button">Falta</button>
-          <button class="appt-action-btn" data-appt-action="replacement" type="button">Reposição</button>
+
+        <!-- Botões principais de situação -->
+        <div class="appt-action-grid" id="apptActionMainGrid">
+          <button class="appt-action-btn" data-appt-action="checkin" type="button">
+            <span class="appt-btn-icon appt-btn-icon--presente">✓</span>Presença
+          </button>
+          <button class="appt-action-btn" data-appt-action="missed-justified" type="button">
+            <span class="appt-btn-icon appt-btn-icon--fj">FJ</span>F. Justificada
+          </button>
+          <button class="appt-action-btn" data-appt-action="missed" type="button">
+            <span class="appt-btn-icon appt-btn-icon--fi">✗</span>F. Injustificada
+          </button>
+          <button class="appt-action-btn" data-appt-action="experimental" type="button">
+            <span class="appt-btn-icon appt-btn-icon--exp">EXP</span>Experimental
+          </button>
+          <button class="appt-action-btn" data-appt-action="reschedule" type="button">
+            <span class="appt-btn-icon appt-btn-icon--edit">✏</span>Editar horário
+          </button>
+          <button class="appt-action-btn" data-appt-action="replacement" type="button">
+            <span class="appt-btn-icon appt-btn-icon--remar">↺</span>Reposição
+          </button>
+        </div>
+
+        <!-- Sub-painel: Falta Justificada -->
+        <div id="apptJustifyPanel" class="appt-justify-panel" hidden>
+          <p class="appt-justify-title">Falta Justificada</p>
+          <label class="appt-justify-label">
+            Motivo da falta
+            <textarea id="apptJustifyReason" placeholder="Descreva o motivo..." rows="2"></textarea>
+          </label>
+          <p class="appt-justify-question">Deseja remarcar a aula?</p>
+          <div class="appt-justify-toggle">
+            <button class="appt-action-btn appt-justify-tog" data-justify="no" type="button">Não</button>
+            <button class="appt-action-btn appt-justify-tog" data-justify="yes" type="button">Sim</button>
+          </div>
+          <div id="apptRescheduleFields" class="appt-reschedule-fields" hidden>
+            <label>Nova data<input type="date" id="apptRescheduleDate" /></label>
+            <label>Início<input type="time" id="apptRescheduleStart" value="09:00" /></label>
+            <label>Fim<input type="time" id="apptRescheduleEnd" value="10:00" /></label>
+          </div>
+          <div class="appt-justify-actions">
+            <button class="ghost-button" id="apptJustifyBackBtn" type="button">Voltar</button>
+            <button class="primary-button success-button" id="apptJustifySaveBtn" type="button">Confirmar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1927,7 +1965,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=38"></script>
+    <script src="app.js?v=39"></script>
   </body>
 </html>
 

@@ -657,7 +657,7 @@ const modalSchemas = {
       { name: "teacherId", label: "Profissional", type: "professional" },
       { name: "type", label: "Modalidade", type: "modality" },
       { name: "sessionKind", label: "Tipo de sessão", type: "select", options: ["Mensalidade", "Experimental", "Avulso"] },
-      { name: "status", label: "Status", type: "select", options: ["Agendada", "Confirmada", "Aguardando", "Visita realizada", "Faltou", "Cancelada", "Reposta"] },
+      { name: "status", label: "Status", type: "select", options: ["Agendada", "Confirmada", "Aguardando", "Visita realizada", "Faltou", "Falta justificada", "Cancelada", "Reposta"] },
       { name: "notes", label: "Observação", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
@@ -665,7 +665,9 @@ const modalSchemas = {
         let savedAppointment = null;
         state.appointments = state.appointments.map((item) => {
           if (item.id !== editingAppointmentId) return item;
-          savedAppointment = { ...item, ...values, notes: appendNote(values.notes || item.notes, "Remarcação") };
+          const dateChanged = values.date && values.date !== item.date;
+          const timeChanged = values.time && values.time !== item.time;
+          savedAppointment = { ...item, ...values, wasRescheduled: dateChanged || timeChanged || !!item.wasRescheduled, notes: appendNote(values.notes || item.notes, "Remarcação") };
           return savedAppointment;
         });
         if (values.date) {
@@ -3653,15 +3655,26 @@ function appointmentPersonName(item) {
   return "Sem cliente";
 }
 
+function apptStatusBadge(item) {
+  if (item.status === "Visita realizada") return '<span class="evt-badge evt-badge--presente" title="Presença">✓</span>';
+  if (item.status === "Falta justificada") return '<span class="evt-badge evt-badge--fj" title="Falta justificada">FJ</span>';
+  if (item.status === "Faltou") return '<span class="evt-badge evt-badge--fi" title="Falta injustificada">✗</span>';
+  if (item.sessionKind === "Experimental") return '<span class="evt-badge evt-badge--exp" title="Experimental">EXP</span>';
+  if (item.wasRescheduled) return '<span class="evt-badge evt-badge--remar" title="Remarcada">↺</span>';
+  return "";
+}
+
 function renderCalendarEvent(item) {
   const relatedStudent = student(item.studentId);
   const relatedProfessional = professional(item.teacherId);
   const personName = appointmentPersonName(item);
+  const bg = relatedProfessional?.color ? `background:${relatedProfessional.color}` : "";
   return `
-    <article class="calendar-event ${statusClass(item.status)}" style="${relatedProfessional?.color ?`background:${relatedProfessional.color}` : ""}" data-action="open-appt-panel" data-id="${item.id}" title="${item.type} - ${personName}">
+    <article class="calendar-event ${statusClass(item.status)}" style="${bg}" data-action="open-appt-panel" data-id="${item.id}" title="${item.type} - ${personName}">
       <span>${item.time} - ${item.endTime}</span>
       <strong>${personName.toUpperCase()}</strong>
       <small>${professionalName(item.teacherId)} · ${relatedStudent?.plan ?? item.sessionKind}</small>
+      ${apptStatusBadge(item)}
       <button class="cal-event-delete" data-action="delete-appointment" data-id="${item.id}" type="button" title="Excluir agendamento" aria-label="Excluir agendamento"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
     </article>
   `;
@@ -5671,6 +5684,23 @@ function openApptActionPanel(appointmentId) {
   _apptActionId = appointmentId;
   document.querySelector("#apptActionName").textContent = appointmentPersonName(appt);
   document.querySelector("#apptActionInfo").textContent = `${dateLabel(appt.date)} · ${appt.time}${appt.endTime ? " - " + appt.endTime : ""} · ${professionalName(appt.teacherId)}`;
+  // Highlight the button matching current status
+  const statusMap = {
+    "Visita realizada": "checkin",
+    "Faltou": "missed",
+    "Falta justificada": "missed-justified",
+    "Experimental": "experimental",
+  };
+  const activeAction = appt.sessionKind === "Experimental" ? "experimental" : (statusMap[appt.status] || null);
+  document.querySelectorAll("#apptActionMainGrid [data-appt-action]").forEach((btn) => {
+    btn.classList.toggle("appt-action-btn--active", btn.dataset.apptAction === activeAction);
+  });
+  // Reset justify sub-panel
+  document.querySelector("#apptJustifyPanel").hidden = true;
+  document.querySelector("#apptActionMainGrid").hidden = false;
+  document.querySelector("#apptJustifyReason").value = "";
+  document.querySelector("#apptRescheduleFields").hidden = true;
+  document.querySelectorAll(".appt-justify-tog").forEach((b) => b.classList.remove("appt-justify-tog--active"));
   document.querySelector("#apptActionOverlay").hidden = false;
 }
 
@@ -7439,25 +7469,52 @@ document.addEventListener("click", (event) => {
 document.querySelector("#apptActionClose").addEventListener("click", closeApptActionPanel);
 document.querySelector("#apptActionOverlay").addEventListener("click", (e) => {
   if (e.target === e.currentTarget) closeApptActionPanel();
+});
+
+document.querySelector("#apptActionMainGrid").addEventListener("click", (e) => {
   const btn = e.target.closest("[data-appt-action]");
   if (!btn || !_apptActionId) return;
   const action = btn.dataset.apptAction;
   const appt = state.appointments.find((a) => a.id === _apptActionId);
   if (!appt) return;
+
   if (action === "reschedule") {
     closeApptActionPanel();
     openAppointmentModal(_apptActionId);
     return;
   }
-  if (action === "confirm") appt.status = "Confirmada";
   if (action === "checkin") {
     appt.status = "Visita realizada";
     const s = state.students.find((item) => item.id === appt.studentId);
     if (s) s.lastPresence = appt.date;
     updateLeadAfterVisit(appt);
+    closeApptActionPanel();
+    saveState(); render(); toast("Presença registrada.");
+    return;
   }
-  if (action === "missed") { appt.status = "Faltou"; appt.replacementCredit = false; }
-  if (action === "cancel") { appt.status = "Cancelada"; appt.replacementCredit = true; }
+  if (action === "missed") {
+    appt.status = "Faltou";
+    appt.replacementCredit = false;
+    closeApptActionPanel();
+    saveState(); render(); toast("Falta injustificada registrada.");
+    return;
+  }
+  if (action === "missed-justified") {
+    // Show justify sub-panel
+    document.querySelector("#apptActionMainGrid").hidden = true;
+    document.querySelector("#apptJustifyPanel").hidden = false;
+    const today = new Date().toISOString().slice(0, 10);
+    document.querySelector("#apptRescheduleDate").value = today;
+    document.querySelector("#apptRescheduleStart").value = appt.time || "09:00";
+    document.querySelector("#apptRescheduleEnd").value = appt.endTime || "10:00";
+    return;
+  }
+  if (action === "experimental") {
+    appt.sessionKind = "Experimental";
+    closeApptActionPanel();
+    saveState(); render(); toast("Sessão marcada como experimental.");
+    return;
+  }
   if (action === "replacement") {
     if (replacementBalance(appt.studentId) <= 0 && !appt.replacementUsed) {
       toast("Cliente sem crédito de reposição disponível.");
@@ -7466,11 +7523,53 @@ document.querySelector("#apptActionOverlay").addEventListener("click", (e) => {
     appt.status = "Reposta";
     appt.sessionKind = "Reposição";
     appt.replacementUsed = true;
+    closeApptActionPanel();
+    saveState(); render(); toast("Reposição registrada.");
+    return;
   }
+});
+
+// Justify sub-panel: toggle reschedule fields
+document.querySelector("#apptJustifyPanel").addEventListener("click", (e) => {
+  const tog = e.target.closest("[data-justify]");
+  if (!tog) return;
+  document.querySelectorAll(".appt-justify-tog").forEach((b) => b.classList.remove("appt-justify-tog--active"));
+  tog.classList.add("appt-justify-tog--active");
+  document.querySelector("#apptRescheduleFields").hidden = tog.dataset.justify !== "yes";
+});
+
+document.querySelector("#apptJustifyBackBtn").addEventListener("click", () => {
+  document.querySelector("#apptJustifyPanel").hidden = true;
+  document.querySelector("#apptActionMainGrid").hidden = false;
+});
+
+document.querySelector("#apptJustifySaveBtn").addEventListener("click", () => {
+  const appt = state.appointments.find((a) => a.id === _apptActionId);
+  if (!appt) return;
+  const reason = document.querySelector("#apptJustifyReason").value.trim();
+  const wantReschedule = document.querySelector(".appt-justify-tog--active")?.dataset.justify === "yes";
+
+  appt.status = "Falta justificada";
+  appt.justifyReason = reason;
+  if (reason) appt.notes = appendNote(appt.notes, `Motivo: ${reason}`);
+
+  if (wantReschedule) {
+    const newDate = document.querySelector("#apptRescheduleDate").value;
+    const newStart = document.querySelector("#apptRescheduleStart").value;
+    const newEnd = document.querySelector("#apptRescheduleEnd").value;
+    if (!newDate || !newStart) { toast("Informe a nova data e horário."); return; }
+    // Create new appointment as reschedule
+    const newAppt = { ...appt, id: uid("a"), date: newDate, time: newStart, endTime: newEnd, status: "Agendada", wasRescheduled: false, justifyReason: "", notes: `Reposição de ${dateLabel(appt.date)}` };
+    state.appointments.push(newAppt);
+    appt.wasRescheduled = true;
+    toast("Falta justificada registrada. Nova aula agendada.");
+  } else {
+    toast("Falta justificada registrada.");
+  }
+
   closeApptActionPanel();
   saveState();
   render();
-  toast("Agenda atualizada.");
 });
 
 document.querySelector("#closeModal").addEventListener("click", closeModal);

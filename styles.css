@@ -6642,4 +6642,87 @@ td.row-actions .row-action-button {
   white-space: nowrap;
 }
 .appt-action-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
+.appt-action-btn--active { border-color: #0ea5a4 !important; background: #e0f9f8 !important; color: #087f7e !important; }
+
+/* Ícone/badge dentro do botão de ação */
+.appt-btn-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  font-size: 0.65rem; font-weight: 800; margin-right: 4px;
+  vertical-align: middle; flex-shrink: 0;
+}
+.appt-btn-icon--presente { background: #16a34a; color: #fff; }
+.appt-btn-icon--fj       { background: #d97706; color: #fff; }
+.appt-btn-icon--fi       { background: #dc2626; color: #fff; }
+.appt-btn-icon--exp      { background: #7c3aed; color: #fff; font-size: 0.55rem; }
+.appt-btn-icon--edit     { background: #475569; color: #fff; }
+.appt-btn-icon--remar    { background: #0284c7; color: #fff; }
+
+/* Badges nos eventos do calendário */
+.evt-badge {
+  position: absolute;
+  bottom: 3px; right: 22px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.58rem; font-weight: 800;
+  line-height: 1.5; letter-spacing: 0.03em;
+  pointer-events: none;
+}
+.evt-badge--presente { background: #16a34a; color: #fff; }
+.evt-badge--fj       { background: #d97706; color: #fff; }
+.evt-badge--fi       { background: #dc2626; color: #fff; }
+.evt-badge--exp      { background: #7c3aed; color: #fff; }
+.evt-badge--remar    { background: #0284c7; color: #fff; }
+
+/* Status classes para eventos */
+.calendar-event.visita-realizada { background: #16a34a; }
+.calendar-event.faltou           { background: #dc2626; }
+.calendar-event.falta-justificada{ background: #d97706; }
+.calendar-event.cancelada        { background: #94a3b8; }
+.calendar-event.reposta          { background: #7c3aed; }
+
+/* Painel de falta justificada */
+.appt-justify-panel {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+}
+.appt-justify-title {
+  font-weight: 700; font-size: 0.9rem; color: #1e293b;
+  margin: 0 0 10px;
+}
+.appt-justify-label {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: 0.8rem; font-weight: 600; color: #475569;
+  margin-bottom: 10px;
+}
+.appt-justify-label textarea {
+  resize: vertical; padding: 6px 8px;
+  border: 1px solid #e2e8f0; border-radius: 6px;
+  font-size: 0.85rem; font-family: inherit;
+}
+.appt-justify-question {
+  font-size: 0.82rem; font-weight: 600; color: #374151;
+  margin: 0 0 8px;
+}
+.appt-justify-toggle {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.appt-justify-tog { flex: 1; }
+.appt-justify-tog--active { border-color: #0ea5a4 !important; background: #e0f9f8 !important; color: #087f7e !important; }
+.appt-reschedule-fields {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+  margin-bottom: 12px;
+}
+.appt-reschedule-fields label {
+  display: flex; flex-direction: column; gap: 3px;
+  font-size: 0.75rem; font-weight: 600; color: #475569;
+}
+.appt-reschedule-fields input {
+  padding: 5px 6px; border: 1px solid #e2e8f0; border-radius: 5px;
+  font-size: 0.8rem;
+}
+.appt-justify-actions {
+  display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px;
+}
 
