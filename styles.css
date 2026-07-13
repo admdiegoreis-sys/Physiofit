@@ -1160,13 +1160,13 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 .cal-event-delete {
   position: absolute;
   top: 3px; right: 3px;
-  width: 18px; height: 18px;
+  width: 20px; height: 20px;
   background: rgba(0,0,0,0.35);
   border: none; border-radius: 50%;
   color: #fff; font-size: 13px; line-height: 1;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   opacity: 0; transition: opacity .15s;
-  padding: 0;
+  padding: 0; z-index: 2;
 }
 .calendar-event:hover .cal-event-delete { opacity: 1; }
 .cal-event-delete:hover { background: rgba(180,0,0,0.7); }
@@ -6661,18 +6661,44 @@ td.row-actions .row-action-button {
 /* Badges nos eventos do calendário */
 .evt-badge {
   position: absolute;
-  bottom: 3px; right: 22px;
-  padding: 1px 4px;
-  border-radius: 3px;
-  font-size: 0.58rem; font-weight: 800;
-  line-height: 1.5; letter-spacing: 0.03em;
+  top: 3px; right: 3px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.68rem; font-weight: 800;
+  line-height: 1; letter-spacing: 0;
   pointer-events: none;
+  z-index: 1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
 }
 .evt-badge--presente { background: #16a34a; color: #fff; }
 .evt-badge--fj       { background: #d97706; color: #fff; }
 .evt-badge--fi       { background: #dc2626; color: #fff; }
-.evt-badge--exp      { background: #7c3aed; color: #fff; }
+.evt-badge--exp      { background: #7c3aed; color: #fff; font-size: 0.52rem; }
 .evt-badge--remar    { background: #0284c7; color: #fff; }
+
+/* Legenda da agenda */
+.agenda-legend {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 7px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.agenda-legend-label {
+  font-size: 0.72rem; font-weight: 700; color: #64748b;
+  white-space: nowrap;
+}
+.agenda-legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; color: #374151; white-space: nowrap;
+}
+.agenda-legend-item .evt-badge {
+  position: static;
+  width: 22px; height: 22px;
+  flex-shrink: 0;
+}
 
 /* Status classes para eventos */
 .calendar-event.visita-realizada { background: #16a34a; }
