@@ -6740,8 +6740,14 @@ td.row-actions .row-action-button {
   letter-spacing: -0.01em;
   line-height: 1;
 }
+.powered-by-img {
+  height: 22px;
+  width: auto;
+  display: block;
+}
 body.sidebar-collapsed .powered-by-label,
 body.sidebar-collapsed .powered-by-name { display: none; }
+body.sidebar-collapsed .powered-by-img { height: 16px; }
 body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
 
 /* Login screen — powered by footer */
