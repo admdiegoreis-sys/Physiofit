@@ -6586,9 +6586,9 @@ td.row-actions .row-action-button {
 
 .appt-action-panel {
   background: #fff;
-  border-radius: 14px;
-  padding: 24px 22px 20px;
-  width: 340px;
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  width: 460px;
   max-width: calc(100vw - 32px);
   box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
   position: relative;
