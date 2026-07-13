@@ -1,30 +1,30 @@
 :root {
-  --ink: #0f172a;
+  --ink: #15171A;
   --muted: #64748b;
   --line: #e2e8f0;
   --surface: #ffffff;
   --surface-alt: #f8fafc;
-  --accent: #0ea5a4;
-  --accent-strong: #087f7e;
+  --accent: #2454CC;
+  --accent-strong: #1a3fa8;
   --module-header: #eef2f7;
   --soft-border: #e2e6ee;
   --mint: #d9f7f1;
   --amber: #f59e0b;
   --rose: #ef4444;
-  --blue: #2563eb;
-  --sidebar: #32383f;
-  --sidebar-active: #4b525b;
+  --blue: #2454CC;
+  --sidebar: #15171A;
+  --sidebar-active: #2454CC;
   --shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
   --shadow-soft: 0 18px 44px rgba(15, 23, 42, 0.07);
   --topbar-height: 76px;
   --side-menu-width: 232px;
   --button-radius: 18px;
   --button-radius-sm: 12px;
-  --button-primary: #559eac;
-  --button-primary-strong: #3f8795;
-  --button-secondary: #3f756f;
-  --button-secondary-border: #b9ece5;
-  --button-shadow: 0 14px 30px rgba(70, 151, 164, 0.22);
+  --button-primary: #2454CC;
+  --button-primary-strong: #1a3fa8;
+  --button-secondary: #1a3fa8;
+  --button-secondary-border: #c3d4f8;
+  --button-shadow: 0 14px 30px rgba(36, 84, 204, 0.22);
   --app-font-size: 14px;
   --ui-font-size: 0.86rem;
   --ui-font-size-sm: 0.76rem;
@@ -32,7 +32,7 @@
   --table-font-size-sm: 0.7rem;
   --button-font-size: 0.76rem;
   --field-height: 38px;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: 'Plus Jakarta Sans', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 * {
@@ -90,7 +90,7 @@ button {
   display: grid;
   place-items: center;
   padding: 22px;
-  background: linear-gradient(135deg, #f7fafc 0%, #eef3f8 100%);
+  background: linear-gradient(135deg, #15171A 0%, #1c2230 100%);
 }
 
 .login-screen[hidden] {
@@ -155,7 +155,7 @@ button {
   background: none;
   border: none;
   padding: 0;
-  color: #3d7d8f;
+  color: #2454CC;
   font: inherit;
   font-size: 0.88rem;
   cursor: pointer;
@@ -165,7 +165,7 @@ button {
 }
 
 .login-link-button:hover {
-  color: #2c6070;
+  color: #1a3fa8;
 }
 
 .professional-session [data-admin-only] {
@@ -622,8 +622,8 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 .top-menu-button.active,
 .top-menu-group.open .top-menu-button {
   border-color: transparent;
-  background: #eaf8f5;
-  color: #075e5d;
+  background: #eff4ff;
+  color: #2454CC;
 }
 
 .top-menu-button.active::before,
@@ -634,7 +634,7 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
   width: 4px;
   height: 40px;
   border-radius: 0 999px 999px 0;
-  background: #0ea5a4;
+  background: #2454CC;
 }
 
 .top-menu-panel {
@@ -670,8 +670,8 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 
 .top-menu-option:hover,
 .top-menu-option.active {
-  color: #075e5d;
-  background: #ecfdf8;
+  color: #2454CC;
+  background: #eff4ff;
 }
 
 .topbar-tools {
@@ -854,13 +854,13 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 }
 
 .success-button {
-  background: #55a24a;
-  border-color: #55a24a;
-  box-shadow: 0 8px 18px rgba(85, 162, 74, 0.18);
+  background: #2454CC;
+  border-color: #2454CC;
+  box-shadow: 0 8px 18px rgba(36, 84, 204, 0.22);
 }
 
 .success-button:hover {
-  background: #478b3f;
+  background: #1a3fa8;
 }
 
 .secondary-button {
@@ -901,7 +901,7 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 }
 
 .action-button.blue {
-  background: #5275ff;
+  background: #2454CC;
 }
 
 .action-button.green {
@@ -6703,6 +6703,73 @@ td.row-actions .row-action-button {
   position: static;
   width: 22px; height: 22px;
   flex-shrink: 0;
+}
+
+/* Powered by OperaFit — menu footer */
+.powered-by-operafit {
+  margin-top: auto;
+  padding: 14px 6px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  border-top: 1px solid #e7edf4;
+}
+.powered-by-label {
+  font-size: 0.58rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+.powered-by-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.powered-by-mark {
+  display: block;
+  flex-shrink: 0;
+}
+.powered-by-name {
+  font-family: 'Unbounded', system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #2454CC;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+body.sidebar-collapsed .powered-by-label,
+body.sidebar-collapsed .powered-by-name { display: none; }
+body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
+
+/* Login screen — powered by footer */
+.login-powered-by {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+}
+.login-powered-by-label {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.38);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+.login-powered-by-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.login-powered-by-name {
+  font-family: 'Unbounded', system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: -0.01em;
 }
 
 /* Status classes para eventos */
