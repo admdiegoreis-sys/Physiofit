@@ -6865,6 +6865,31 @@ function switchView(view, { pushState = true } = {}) {
     const path = viewPaths[view] || "/";
     if (location.pathname !== path) history.pushState({ view }, "", path);
   }
+  const viewRenderFns = {
+    dashboard: renderDashboard,
+    crm: renderCrm,
+    agenda: renderSchedule,
+    students: renderStudents,
+    enrollments: renderEnrollments,
+    professionals: renderProfessionals,
+    suppliers: renderSuppliers,
+    modalities: renderModalities,
+    plans: renderPlans,
+    monthlyPayments: renderMonthlyPayments,
+    fiscal: renderFiscalInvoices,
+    contracts: renderContracts,
+    accountsPayable: renderAccounts,
+    accountsReceivable: renderAccounts,
+    ofxImport: renderOfxImport,
+    bankReconciliation: renderBankReconciliation,
+    cashFlow: renderCashFlow,
+    dre: renderDre,
+    chartAccounts: renderChartAccounts,
+    finance: renderFinance,
+    records: renderRecords,
+    settings: renderSettings,
+  };
+  viewRenderFns[view]?.();
 }
 
 function openMenuGroup(groupName) {
