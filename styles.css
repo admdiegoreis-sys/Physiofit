@@ -6437,6 +6437,15 @@ td.row-actions .row-action-button {
 
 /* Lead action: Cadastrar aluno (pessoa) */
 .crm-table-wrap .lead-register-student-btn { background: #0369a1; }
+.crm-table-wrap .lead-already-student-btn { background: #16a34a; }
+
+/* Badge: lead já é aluno cadastrado */
+.status-pill.pill-lead-aluno {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  font-weight: 700;
+}
 .crm-table-wrap .lead-action-person {
   display: block;
   width: 10px; height: 10px;
