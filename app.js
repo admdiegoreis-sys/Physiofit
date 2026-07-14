@@ -609,7 +609,7 @@ const modalSchemas = {
     ],
     handler: (values) => {
       const current = editingLeadId ? state.leads.find((item) => item.id === editingLeadId) : {};
-      const normalized = normalizeLead({ ...current, id: editingLeadId || uid("l"), ...values }, state.leads.length);
+      const normalized = normalizeLead({ ...current, id: editingLeadId || uid("l"), ...values }, state.leads.length, false);
       // Auto-link to existing student when phone matches (handles Brazilian 9th digit)
       if (!normalized.linkedStudentId && normalized.phone) {
         const match = findStudentByPhone(normalized.phone);
@@ -648,7 +648,7 @@ const modalSchemas = {
         status: "Visita realizada",
         entryDate: values.visitDate || demoToday,
         history: `Visita presencial registrada em ${dateLabel(values.visitDate || demoToday)}.`,
-      }, state.leads.length));
+      }, state.leads.length, false));
     },
   },
   appointment: {
@@ -1166,7 +1166,7 @@ function normalizeState(data) {
   };
   normalized.deletedEntityIds = Array.isArray(data.deletedEntityIds) ? [...new Set(data.deletedEntityIds.filter(Boolean))] : [];
   normalized.students = filterDeletedEntities(normalized, "students", normalized.students).map((item, index) => normalizeStudent(normalizeTextFields(item), index));
-  normalized.leads = filterDeletedEntities(normalized, "leads", Array.isArray(data.leads) ? data.leads : structuredClone(seedData.leads)).map((item, index) => normalizeLead(normalizeTextFields(item), index));
+  normalized.leads = filterDeletedEntities(normalized, "leads", Array.isArray(data.leads) ? data.leads : structuredClone(seedData.leads)).map((item, index) => normalizeLead(normalizeTextFields(item), index, false));
   normalized.professionals = filterDeletedEntities(normalized, "professionals", Array.isArray(data.professionals) ? data.professionals : structuredClone(seedData.professionals)).map((item, index) => normalizeProfessional(normalizeTextFields(item), index));
   const allRawSuppliers = Array.isArray(data.suppliers) ? data.suppliers : [];
   const savedSuppliers = filterDeletedEntities(normalized, "suppliers", allRawSuppliers);
@@ -1352,6 +1352,7 @@ function normalizeLead(item, index, useDefaults = true) {
     history: item.history || item.historico || defaults.history || "",
     linkedStudentId: item.linkedStudentId || defaults.linkedStudentId || "",
     linkedAppointmentId: item.linkedAppointmentId || defaults.linkedAppointmentId || "",
+    linkedEnrollmentId: item.linkedEnrollmentId || "",
   };
 }
 
@@ -3526,7 +3527,6 @@ function saveScheduleVisit() {
 
   lead.status = "Visita agendada";
   lead.visitDate = date;
-  if (studentId) lead.linkedStudentId = studentId;
   lead.linkedAppointmentId = appointment.id;
   lead.history = `${lead.history || ""}\nExperimental agendada para ${dateLabel(date)} às ${time}.`.trim();
 
@@ -3667,18 +3667,15 @@ function renderCalendarGrid(days) {
 
 function updateLeadAfterVisit(appointment) {
   if (!appointment?.id) return;
-  let updated = 0;
   state.leads = state.leads.map((lead) => {
     const byAppointmentId = lead.linkedAppointmentId && lead.linkedAppointmentId === appointment.id;
     const byLeadId = appointment.leadId && appointment.leadId === lead.id;
-    const byStudent = appointment.studentId && appointment.studentId === lead.linkedStudentId;
-    console.log("[updateLeadAfterVisit]", { leadId: lead.id, leadName: lead.name, leadStatus: lead.status, linkedAppointmentId: lead.linkedAppointmentId, appointmentId: appointment.id, appointmentLeadId: appointment.leadId, appointmentStudentId: appointment.studentId, linkedStudentId: lead.linkedStudentId, byAppointmentId, byLeadId, byStudent });
+    // Only experimental sessions count as a lead visit; regular sessions of a linked student must not promote the lead
+    const byStudent = appointment.sessionKind === "Experimental" && appointment.studentId && appointment.studentId === lead.linkedStudentId;
     if (!byAppointmentId && !byLeadId && !byStudent) return lead;
     if (["Matriculado", "Perdido"].includes(lead.status)) return lead;
-    updated++;
     return { ...lead, status: "Visita realizada" };
   });
-  console.log("[updateLeadAfterVisit] leads atualizados:", updated);
 }
 
 function appointmentPersonName(item) {
