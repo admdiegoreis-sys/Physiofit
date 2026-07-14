@@ -574,8 +574,9 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
   align-items: stretch;
   gap: 5px;
   min-width: 0;
-  overflow: auto;
-  padding: 18px 14px 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 14px 80px;
   border-right: 1px solid #e7edf4;
   background: #ffffff;
   box-shadow: 14px 0 34px rgba(15, 23, 42, 0.035);
@@ -6705,15 +6706,20 @@ td.row-actions .row-action-button {
   flex-shrink: 0;
 }
 
-/* Powered by OperaFit — menu footer */
+/* Powered by OperaFit — menu footer fixo */
 .powered-by-operafit {
-  margin-top: auto;
-  padding: 14px 6px 2px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 6px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
   border-top: 1px solid #e7edf4;
+  background: #ffffff;
+  z-index: 1;
 }
 .powered-by-label {
   font-size: 0.58rem;
