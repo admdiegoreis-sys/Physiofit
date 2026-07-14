@@ -2750,6 +2750,25 @@ function normalizedText(value = "") {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
+// Brazilian mobile 9th-digit: match (62) 98124-9930 when searching 62 8124-9930, or vice-versa
+function phoneMatchesTerm(storedPhone, termDigits) {
+  if (!termDigits || termDigits.length < 8) return false;
+  const stored = (storedPhone || "").replace(/\D/g, "");
+  if (!stored) return false;
+  const dropCC = (d) => (d.startsWith("55") && d.length > 11 ? d.slice(2) : d);
+  const sl = dropCC(stored);
+  const ql = dropCC(termDigits);
+  const variants = (d) => {
+    const v = [d];
+    if (d.length === 11 && d[2] === "9") v.push(d.slice(0, 2) + d.slice(3));
+    else if (d.length === 10) v.push(d.slice(0, 2) + "9" + d.slice(2));
+    return v;
+  };
+  const sv = variants(sl);
+  const qv = variants(ql);
+  return sv.some((s) => qv.some((q) => s === q || s.endsWith(q) || q.endsWith(s)));
+}
+
 function selectedValue(id) {
   return document.querySelector(`#${id}`)?.value ?? "all";
 }
@@ -3189,7 +3208,7 @@ function renderCrm() {
     .filter((item) => statusFilter === "all" || item.status === statusFilter)
     .filter((item) => ownerFilter === "all" || item.ownerId === ownerFilter)
     .filter((item) => originFilter === "all" || item.origin === originFilter || item.entryChannel === originFilter)
-    .filter((item) => !term || normalizedText([item.name, item.phone, item.email, item.instagram, item.origin, item.entryChannel, item.interest, item.status, item.initialMessage, item.notes].join(" ")).includes(term))
+    .filter((item) => !term || normalizedText([item.name, item.phone, item.email, item.instagram, item.origin, item.entryChannel, item.interest, item.status, item.initialMessage, item.notes].join(" ")).includes(term) || phoneMatchesTerm(item.phone, term.replace(/\D/g, "")))
     .sort((a, b) => dateValue(a.nextFollowUpDate) - dateValue(b.nextFollowUpDate));
 
   renderCrmDashboard();
@@ -3913,7 +3932,7 @@ function renderStudents() {
   const statusFilter = document.querySelector("#studentStatusFilter")?.value ?? "all";
   const list = state.students
     .filter((item) => statusFilter === "all" || item.status === statusFilter)
-    .filter((item) => normalizedText([item.name, item.phone, item.email, item.plan, item.status, item.cpf, item.responsible].join(" ")).includes(term))
+    .filter((item) => normalizedText([item.name, item.phone, item.email, item.plan, item.status, item.cpf, item.responsible].join(" ")).includes(term) || phoneMatchesTerm(item.phone, term.replace(/\D/g, "")))
     .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   document.querySelector("#studentsTable").innerHTML = list.length
     ?list
