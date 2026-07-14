@@ -6657,6 +6657,7 @@ td.row-actions .row-action-button {
 .appt-btn-icon--fi       { background: #dc2626; color: #fff; }
 .appt-btn-icon--exp      { background: #7c3aed; color: #fff; font-size: 0.55rem; }
 .appt-btn-icon--edit     { background: #475569; color: #fff; }
+.appt-btn-icon--prof     { background: #2454CC; color: #fff; }
 .appt-btn-icon--remar    { background: #0284c7; color: #fff; }
 .appt-btn-icon--cancel   { background: #dc2626; color: #fff; }
 .appt-action-btn--cancel { border-color: #fecaca; }
@@ -6811,6 +6812,12 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
   resize: vertical; padding: 6px 8px;
   border: 1px solid #e2e8f0; border-radius: 6px;
   font-size: 0.85rem; font-family: inherit;
+}
+.appt-justify-label select {
+  padding: 7px 8px;
+  border: 1px solid #e2e8f0; border-radius: 6px;
+  font-size: 0.85rem; font-family: inherit;
+  background: #fff; color: #1e293b;
 }
 .appt-justify-question {
   font-size: 0.82rem; font-weight: 600; color: #374151;

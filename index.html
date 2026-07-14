@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=39" />
+    <link rel="stylesheet" href="styles.css?v=40" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -1952,6 +1952,9 @@
           <button class="appt-action-btn" data-appt-action="reschedule" type="button">
             <span class="appt-btn-icon appt-btn-icon--edit">✏</span>Editar horário
           </button>
+          <button class="appt-action-btn" data-appt-action="edit-professional" type="button">
+            <span class="appt-btn-icon appt-btn-icon--prof">👤</span>Editar professor
+          </button>
           <button class="appt-action-btn" data-appt-action="replacement" type="button">
             <span class="appt-btn-icon appt-btn-icon--remar">↺</span>Reposição
           </button>
@@ -1982,6 +1985,33 @@
             <button class="primary-button success-button" id="apptJustifySaveBtn" type="button">Confirmar</button>
           </div>
         </div>
+
+        <!-- Sub-painel: Editar horário -->
+        <div id="apptTimePanel" class="appt-justify-panel" hidden>
+          <p class="appt-justify-title">Editar horário</p>
+          <div class="appt-reschedule-fields">
+            <label>Data<input type="date" id="apptTimeDate" /></label>
+            <label>Início<input type="time" id="apptTimeStart" /></label>
+            <label>Fim<input type="time" id="apptTimeEnd" /></label>
+          </div>
+          <div class="appt-justify-actions">
+            <button class="ghost-button" id="apptTimeBackBtn" type="button">Voltar</button>
+            <button class="primary-button success-button" id="apptTimeSaveBtn" type="button">Salvar horário</button>
+          </div>
+        </div>
+
+        <!-- Sub-painel: Editar professor -->
+        <div id="apptProfPanel" class="appt-justify-panel" hidden>
+          <p class="appt-justify-title">Editar professor</p>
+          <label class="appt-justify-label">
+            Professor
+            <select id="apptProfSelect"></select>
+          </label>
+          <div class="appt-justify-actions">
+            <button class="ghost-button" id="apptProfBackBtn" type="button">Voltar</button>
+            <button class="primary-button success-button" id="apptProfSaveBtn" type="button">Salvar professor</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2001,7 +2031,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=46"></script>
+    <script src="app.js?v=47"></script>
   </body>
 </html>
 

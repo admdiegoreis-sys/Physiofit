@@ -5727,8 +5727,10 @@ function openApptActionPanel(appointmentId) {
   document.querySelectorAll("#apptActionMainGrid [data-appt-action]").forEach((btn) => {
     btn.classList.toggle("appt-action-btn--active", btn.dataset.apptAction === activeAction);
   });
-  // Reset justify sub-panel
+  // Reset sub-panels
   document.querySelector("#apptJustifyPanel").hidden = true;
+  document.querySelector("#apptTimePanel").hidden = true;
+  document.querySelector("#apptProfPanel").hidden = true;
   document.querySelector("#apptActionMainGrid").hidden = false;
   document.querySelector("#apptJustifyReason").value = "";
   document.querySelector("#apptRescheduleFields").hidden = true;
@@ -7536,8 +7538,24 @@ document.querySelector("#apptActionMainGrid").addEventListener("click", (e) => {
   if (!appt) return;
 
   if (action === "reschedule") {
-    closeApptActionPanel();
-    openAppointmentModal(_apptActionId);
+    document.querySelector("#apptActionMainGrid").hidden = true;
+    document.querySelector("#apptTimePanel").hidden = false;
+    document.querySelector("#apptTimeDate").value = appt.date || "";
+    document.querySelector("#apptTimeStart").value = appt.time || "09:00";
+    document.querySelector("#apptTimeEnd").value = appt.endTime || "10:00";
+    return;
+  }
+  if (action === "edit-professional") {
+    document.querySelector("#apptActionMainGrid").hidden = true;
+    document.querySelector("#apptProfPanel").hidden = false;
+    const sel = document.querySelector("#apptProfSelect");
+    const profs = activeProfessionals();
+    const hasCurrent = profs.some((p) => p.id === appt.teacherId);
+    sel.innerHTML = [
+      ...(!hasCurrent && appt.teacherId ? [`<option value="${appt.teacherId}">${professionalName(appt.teacherId)}</option>`] : []),
+      ...profs.map((p) => `<option value="${p.id}">${p.name}</option>`),
+    ].join("");
+    sel.value = appt.teacherId || profs[0]?.id || "";
     return;
   }
   if (action === "checkin") {
@@ -7591,6 +7609,44 @@ document.querySelector("#apptActionMainGrid").addEventListener("click", (e) => {
     saveState(); render(); toast("Agendamento cancelado.");
     return;
   }
+});
+
+// Time sub-panel: edit only date/start/end
+document.querySelector("#apptTimeBackBtn")?.addEventListener("click", () => {
+  document.querySelector("#apptTimePanel").hidden = true;
+  document.querySelector("#apptActionMainGrid").hidden = false;
+});
+document.querySelector("#apptTimeSaveBtn")?.addEventListener("click", () => {
+  const appt = state.appointments.find((a) => a.id === _apptActionId);
+  if (!appt) return;
+  const date = document.querySelector("#apptTimeDate").value;
+  const start = document.querySelector("#apptTimeStart").value;
+  const end = document.querySelector("#apptTimeEnd").value;
+  if (!date || !start || !end) { toast("Preencha data, início e fim."); return; }
+  if (end <= start) { toast("O horário final deve ser depois do inicial."); return; }
+  const changed = appt.date !== date || appt.time !== start || appt.endTime !== end;
+  appt.wasRescheduled = changed || !!appt.wasRescheduled;
+  appt.date = date;
+  appt.time = start;
+  appt.endTime = end;
+  closeApptActionPanel();
+  currentWeekStart = toMonday(parseLocalDate(date));
+  saveState(); render(); toast("Horário atualizado.");
+});
+
+// Professional sub-panel: edit only the professional
+document.querySelector("#apptProfBackBtn")?.addEventListener("click", () => {
+  document.querySelector("#apptProfPanel").hidden = true;
+  document.querySelector("#apptActionMainGrid").hidden = false;
+});
+document.querySelector("#apptProfSaveBtn")?.addEventListener("click", () => {
+  const appt = state.appointments.find((a) => a.id === _apptActionId);
+  if (!appt) return;
+  const teacherId = document.querySelector("#apptProfSelect").value;
+  if (!teacherId) { toast("Selecione um professor."); return; }
+  appt.teacherId = teacherId;
+  closeApptActionPanel();
+  saveState(); render(); toast("Professor atualizado.");
 });
 
 // Justify sub-panel: toggle reschedule fields
