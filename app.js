@@ -3217,8 +3217,9 @@ function renderCrm() {
   const statusFilter = document.querySelector("#leadStatusFilter")?.value ?? "all";
   const ownerFilter = document.querySelector("#leadOwnerFilter")?.value ?? "all";
   const originFilter = document.querySelector("#leadOriginFilter")?.value ?? "all";
-  // Exclude contacts who are already registered students (phone match with/without 9th digit)
-  const activeLeads = state.leads.filter((item) => !findStudentByPhone(item.phone));
+  // Exclude contacts who were already students when they reached out (phone match with/without
+  // 9th digit). Leads converted through the funnel (Matriculado) must stay, or conversion zeroes out.
+  const activeLeads = state.leads.filter((item) => item.status === "Matriculado" || !findStudentByPhone(item.phone));
   const leads = activeLeads
     .filter((item) => statusFilter === "all" || item.status === statusFilter)
     .filter((item) => ownerFilter === "all" || item.ownerId === ownerFilter)
@@ -3263,7 +3264,7 @@ function renderCrmDashboard(activeLeads) {
   const funnel = document.querySelector("#crmFunnel");
   if (!funnel) return;
 
-  const all = activeLeads ?? state.leads.filter((l) => !findStudentByPhone(l.phone));
+  const all = activeLeads ?? state.leads.filter((l) => l.status === "Matriculado" || !findStudentByPhone(l.phone));
   const active = all.filter((l) => l.status !== "Perdido");
 
   const statusShort = {
