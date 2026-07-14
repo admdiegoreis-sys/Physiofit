@@ -6708,10 +6708,10 @@ td.row-actions .row-action-button {
 
 /* Powered by OperaFit — menu footer fixo */
 .powered-by-operafit {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
+  width: var(--side-menu-width);
   padding: 12px 6px 14px;
   display: flex;
   flex-direction: column;
@@ -6719,7 +6719,8 @@ td.row-actions .row-action-button {
   gap: 5px;
   border-top: 1px solid #e7edf4;
   background: #ffffff;
-  z-index: 1;
+  z-index: 26;
+  transition: width 0.22s ease;
 }
 .powered-by-label {
   font-size: 0.58rem;
