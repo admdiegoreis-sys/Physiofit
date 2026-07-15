@@ -5638,7 +5638,139 @@ function renderDre() {
     .join("");
 }
 
+let cashFlowViewMode = "chart";
+
+// Months covered by the top date-range filter; default = last 6 months ending today
+function cashFlowPeriodMonths() {
+  const from = document.querySelector("#cashFlowDateFrom")?.value || "";
+  const to = document.querySelector("#cashFlowDateTo")?.value || "";
+  const labels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const today = parseLocalDate(demoToday);
+  const end = to ? parseLocalDate(to) : today;
+  const start = from ? parseLocalDate(from) : new Date(end.getFullYear(), end.getMonth() - 5, 1);
+  const months = [];
+  let year = start.getFullYear();
+  let month = start.getMonth();
+  while ((year < end.getFullYear() || (year === end.getFullYear() && month <= end.getMonth())) && months.length < 24) {
+    months.push({ key: `${year}-${String(month + 1).padStart(2, "0")}`, label: `${labels[month]}/${String(year).slice(2)}` });
+    month += 1;
+    if (month > 11) { month = 0; year += 1; }
+  }
+  return months;
+}
+
+// Cash-basis view of every title: paid items by payment date, open items by expected date
+function cashFlowCashItems() {
+  return state.accounts
+    .filter((item) => item.origin !== "Importação OFX" && item.origin !== "ImportaÃ§Ã£o OFX")
+    .filter((item) => item.status !== "Cancelado")
+    .map((item) => ({ item, date: item.paidDate || accountExpectedDate(item) || "" }))
+    .filter((entry) => entry.date);
+}
+
+function renderCashFlowOverview() {
+  const cards = document.querySelector("#cashFlowCards");
+  const chart = document.querySelector("#cashFlowChart");
+  if (!cards || !chart) return;
+  const from = document.querySelector("#cashFlowDateFrom")?.value || "";
+  const to = document.querySelector("#cashFlowDateTo")?.value || "";
+  const months = cashFlowPeriodMonths();
+  const buckets = months.map((m) => ({ ...m, inflow: 0, outflow: 0 }));
+  const byKey = Object.fromEntries(buckets.map((b) => [b.key, b]));
+  const entries = cashFlowCashItems();
+  entries.forEach(({ item, date }) => {
+    if (from && date < from) return;
+    if (to && date > to) return;
+    const bucket = byKey[date.slice(0, 7)];
+    if (!bucket) return;
+    const value = Number(accountOriginalAmount(item)) || 0;
+    if (item.direction === "Receber") bucket.inflow += value;
+    else bucket.outflow += value;
+  });
+
+  const totalIn = buckets.reduce((sum, b) => sum + b.inflow, 0);
+  const totalOut = buckets.reduce((sum, b) => sum + b.outflow, 0);
+  const saldo = totalIn - totalOut;
+
+  cards.innerHTML = `
+    <article class="cashflow-card cashflow-card--in">
+      <span class="cashflow-card-dot"></span>
+      <div><span class="cashflow-card-label">Entradas</span><strong>${currency(totalIn)}</strong><small>dinheiro que entrou</small></div>
+    </article>
+    <article class="cashflow-card cashflow-card--out">
+      <span class="cashflow-card-dot"></span>
+      <div><span class="cashflow-card-label">Saídas</span><strong>${currency(totalOut)}</strong><small>dinheiro que saiu</small></div>
+    </article>
+    <article class="cashflow-card cashflow-card--saldo">
+      <span class="cashflow-card-dot"></span>
+      <div><span class="cashflow-card-label">Saldo</span><strong>${currency(saldo)}</strong><small>o que sobrou no período</small></div>
+    </article>
+  `;
+
+  // Grouped bar chart (SVG)
+  const W = 760, H = 250, pT = 14, pB = 26, pL = 8, pR = 8;
+  const iH = H - pT - pB;
+  const maxV = Math.max(...buckets.flatMap((b) => [b.inflow, b.outflow]), 1);
+  const slot = (W - pL - pR) / buckets.length;
+  const barW = Math.min(26, slot * 0.28);
+  const currentKey = demoToday.slice(0, 7);
+  const bars = buckets.map((b, i) => {
+    const cx = pL + slot * i + slot / 2;
+    const hIn = (b.inflow / maxV) * iH;
+    const hOut = (b.outflow / maxV) * iH;
+    const inColor = b.key === currentKey ? "#2454CC" : "#16a34a";
+    return `
+      <rect x="${cx - barW - 2}" y="${pT + iH - hIn}" width="${barW}" height="${Math.max(hIn, b.inflow > 0 ? 2 : 0)}" rx="4" fill="${inColor}"><title>${b.label} · Entrou: ${currency(b.inflow)}</title></rect>
+      <rect x="${cx + 2}" y="${pT + iH - hOut}" width="${barW}" height="${Math.max(hOut, b.outflow > 0 ? 2 : 0)}" rx="4" fill="#c0503f"><title>${b.label} · Saiu: ${currency(b.outflow)}</title></rect>
+      <text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#64748b" ${b.key === currentKey ? 'font-weight="700"' : ""}>${b.label}</text>
+    `;
+  }).join("");
+  chart.innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="cashflow-chart-svg" role="img" aria-label="Entradas e saídas por mês">
+    <line x1="${pL}" y1="${pT + iH}" x2="${W - pR}" y2="${pT + iH}" stroke="#e2e8f0" />
+    ${bars}
+  </svg>`;
+
+  // Insight
+  const insight = document.querySelector("#cashFlowInsight");
+  if (insight) {
+    if (saldo >= 0) {
+      insight.className = "cashflow-insight-card";
+      insight.innerHTML = `<span class="cashflow-insight-icon cashflow-insight-icon--ok">✓</span>
+        <div><strong>Seu studio está no azul</strong>
+        <p>Você recebeu mais do que gastou no período. Sobrou ${currency(saldo)} — continue assim.</p></div>`;
+    } else {
+      insight.className = "cashflow-insight-card cashflow-insight-card--negative";
+      insight.innerHTML = `<span class="cashflow-insight-icon cashflow-insight-icon--warn">!</span>
+        <div><strong>Atenção: saídas maiores que as entradas</strong>
+        <p>No período, saiu ${currency(Math.abs(saldo))} a mais do que entrou. Vale revisar os maiores gastos ao lado.</p></div>`;
+    }
+  }
+
+  // Top expenses of the current month
+  const expensesEl = document.querySelector("#cashFlowTopExpenses");
+  if (expensesEl) {
+    const grouped = {};
+    entries.forEach(({ item, date }) => {
+      if (item.direction !== "Pagar" || date.slice(0, 7) !== currentKey) return;
+      const key = chartAccountName(item.chartAccountId) || "Sem classificação";
+      grouped[key] = (grouped[key] || 0) + (Number(accountOriginalAmount(item)) || 0);
+    });
+    const top = Object.entries(grouped).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    expensesEl.innerHTML = `<strong class="cashflow-expenses-title">Maiores gastos do mês</strong>
+      ${top.length
+        ? top.map(([name, value]) => `<div class="cashflow-expense-row"><span>${name.replace(/^[\d.]+ - /, "")}</span><b>${currency(value)}</b></div>`).join("")
+        : '<p class="cashflow-expense-empty">Sem gastos lançados neste mês.</p>'}`;
+  }
+}
+
 function renderCashFlow() {
+  renderCashFlowOverview();
+  const chartPanel = document.querySelector("#cashFlowChartPanel");
+  const tablePanel = document.querySelector("#cashFlowTablePanel");
+  const toggleBtn = document.querySelector("#cashFlowToggleView");
+  if (chartPanel) chartPanel.hidden = cashFlowViewMode !== "chart";
+  if (tablePanel) tablePanel.hidden = cashFlowViewMode !== "table";
+  if (toggleBtn) toggleBtn.textContent = cashFlowViewMode === "chart" ? "Ver em tabela" : "Ver em gráficos";
   const table = document.querySelector("#cashFlowTable");
   const head = document.querySelector("#cashFlowHead");
   const summary = document.querySelector("#cashFlowSummary");
@@ -8091,6 +8223,19 @@ function clearChartAccountFilters() {
 ["agendaSearch", "globalStudentSearch", "modalityFilter", "sessionFilter", "statusFilter", "teacherFilter"].forEach((id) => {
   document.querySelector(`#${id}`)?.addEventListener("input", renderSchedule);
   document.querySelector(`#${id}`)?.addEventListener("change", renderSchedule);
+});
+
+document.querySelector("#cashFlowToggleView")?.addEventListener("click", () => {
+  cashFlowViewMode = cashFlowViewMode === "chart" ? "table" : "chart";
+  renderCashFlow();
+});
+["cashFlowDateFrom", "cashFlowDateTo"].forEach((id) => {
+  document.querySelector(`#${id}`)?.addEventListener("change", renderCashFlow);
+});
+document.querySelector("#cashFlowResetRange")?.addEventListener("click", () => {
+  setControlValue("cashFlowDateFrom", "");
+  setControlValue("cashFlowDateTo", "");
+  renderCashFlow();
 });
 
 ["leadSearch", "leadStatusFilter", "leadOwnerFilter", "leadOriginFilter"].forEach((id) => {

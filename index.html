@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=41" />
+    <link rel="stylesheet" href="styles.css?v=42" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -1427,11 +1427,39 @@
               <div>
                 <p class="eyebrow">Financeiro</p>
                 <h2>Fluxo de Caixa</h2>
+                <p class="cashflow-subtitle">Veja de forma simples quanto entrou, quanto saiu e o que sobrou no seu studio.</p>
               </div>
-              <div class="module-actions">
-                <button class="ghost-button" type="button">Exportar</button>
+              <div class="module-actions cashflow-actions">
+                <div class="cashflow-range">
+                  <input id="cashFlowDateFrom" type="date" aria-label="De" title="De" />
+                  <span>até</span>
+                  <input id="cashFlowDateTo" type="date" aria-label="Até" title="Até" />
+                  <button class="ghost-button" id="cashFlowResetRange" type="button" title="Voltar ao padrão">Últimos 6 meses</button>
+                </div>
+                <button class="ghost-button" id="cashFlowToggleView" type="button">Ver em tabela</button>
               </div>
             </div>
+
+            <div class="cashflow-cards" id="cashFlowCards"></div>
+
+            <div id="cashFlowChartPanel">
+              <div class="cashflow-chart-card">
+                <div class="cashflow-chart-head">
+                  <h3>Entradas x Saídas por mês</h3>
+                  <div class="cashflow-legend">
+                    <span class="cashflow-dot cashflow-dot--in"></span> Entrou
+                    <span class="cashflow-dot cashflow-dot--out"></span> Saiu
+                  </div>
+                </div>
+                <div id="cashFlowChart"></div>
+              </div>
+              <div class="cashflow-insights">
+                <div class="cashflow-insight-card" id="cashFlowInsight"></div>
+                <div class="cashflow-expenses-card" id="cashFlowTopExpenses"></div>
+              </div>
+            </div>
+
+            <div id="cashFlowTablePanel" hidden>
               <div class="cashflow-summary" id="cashFlowSummary"></div>
               <div class="table-wrap cashflow-table-wrap">
                 <table class="cashflow-grid-table">
@@ -1447,6 +1475,7 @@
                   <tbody id="cashFlowTable"></tbody>
                 </table>
               </div>
+            </div>
           </div>
         </section>
 
@@ -2015,7 +2044,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=53"></script>
+    <script src="app.js?v=54"></script>
   </body>
 </html>
 
