@@ -2979,12 +2979,6 @@ function renderAccountOptions() {
       chartFilter.innerHTML = `<option value="all">${label}</option>${chartOptions.map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("")}`;
       chartFilter.value = selected === "all" || chartOptions.some((item) => item.id === selected) ? selected : "all";
     }
-    const supplierFilter = document.querySelector(`#${config.supplierId}`);
-    if (supplierFilter) {
-      const selected = supplierFilter.value || "all";
-      supplierFilter.innerHTML = `<option value="all">Fornecedores</option>${activeSuppliers().map((item) => `<option value="${item.id}">${item.name}</option>`).join("")}`;
-      supplierFilter.value = selected === "all" || activeSuppliers().some((item) => item.id === selected) ? selected : "all";
-    }
   });
 }
 
@@ -4625,7 +4619,6 @@ const accountViewConfigs = {
     statusId: "payableAccountStatusFilter",
     reconciliationId: "payableAccountReconciliationFilter",
     chartId: "payableAccountChartFilter",
-    supplierId: "payableAccountSupplierFilter",
     emptyMessage: "Nenhuma conta a pagar encontrada.",
   },
   receivable: {
@@ -4641,7 +4634,6 @@ const accountViewConfigs = {
     statusId: "receivableAccountStatusFilter",
     reconciliationId: "receivableAccountReconciliationFilter",
     chartId: "receivableAccountChartFilter",
-    supplierId: "receivableAccountSupplierFilter",
     emptyMessage: "Nenhuma conta a receber encontrada.",
   },
 };
@@ -4651,7 +4643,6 @@ function accountRows(config) {
   const status = document.querySelector(`#${config.statusId}`)?.value ?? "all";
   const reconciliation = document.querySelector(`#${config.reconciliationId}`)?.value ?? "all";
   const chartAccount = document.querySelector(`#${config.chartId}`)?.value ?? "all";
-  const supplier = document.querySelector(`#${config.supplierId}`)?.value ?? "all";
   const month = document.querySelector(`#${config.monthId}`)?.value ?? "";
   const dateFrom = document.querySelector(`#${config.dateFromId}`)?.value ?? "";
   const dateTo = document.querySelector(`#${config.dateToId}`)?.value ?? "";
@@ -4679,7 +4670,6 @@ function accountRows(config) {
     })
     .filter((item) => reconciliation === "all" || (item.reconciliationStatus || "unreconciled") === reconciliation)
     .filter((item) => chartAccount === "all" || item.chartAccountId === chartAccount)
-    .filter((item) => supplier === "all" || item.supplierId === supplier)
     .sort((a, b) => {
       const dateA = a.paidDate || accountExpectedDate(a) || "";
       const dateB = b.paidDate || accountExpectedDate(b) || "";
@@ -6978,9 +6968,13 @@ function openModal(type, values = {}) {
   }
   refreshPersonLookupList();
   refreshAccountChartOptions(!!editingAccountId);
+  applyAccountPersonAutofill();
   backdrop.hidden = false;
   form.querySelector("input, select, textarea")?.focus();
 }
+
+// In-progress manual account entry, parked while the user registers a new supplier/client
+let _pendingAccountModalValues = null;
 
 // Plano de contas no modal de título: only accounts compatible with the direction (Pagar/Receber)
 function refreshAccountChartOptions(keepIncompatible = false) {
@@ -7001,6 +6995,31 @@ function refreshAccountChartOptions(keepIncompatible = false) {
       select.insertAdjacentHTML("afterbegin", `<option value="${acc.id}">${acc.code} - ${acc.name}</option>`);
       select.value = previous;
     }
+  }
+}
+
+// Cliente/Fornecedor: fills CPF/CNPJ from the matching record; shows register button when unknown
+function applyAccountPersonAutofill() {
+  const form = document.querySelector("#modalForm");
+  if (form.dataset.type !== "account") return;
+  const personInput = form.querySelector("input[name='person']");
+  const docInput = form.querySelector("input[name='document']");
+  const registerBtn = form.querySelector("#accountPersonRegisterBtn");
+  if (!personInput) return;
+  const name = personInput.value.trim();
+  const direction = form.querySelector("select[name='direction']")?.value || "Pagar";
+  let match = null;
+  if (name) {
+    const wanted = normalizedText(name);
+    match = direction === "Receber"
+      ? state.students.find((s) => normalizedText(displayName(s.name)) === wanted)
+      : state.suppliers.find((s) => normalizedText(displayName(s.name)) === wanted);
+  }
+  const matchDoc = match ? (match.document || match.cpf || "") : "";
+  if (docInput && matchDoc) docInput.value = matchDoc;
+  if (registerBtn) {
+    registerBtn.hidden = !name || !!match;
+    registerBtn.textContent = direction === "Receber" ? "+ Cadastrar cliente" : "+ Cadastrar fornecedor";
   }
 }
 
@@ -7227,6 +7246,7 @@ function renderField(field) {
       <label>${field.label}
         <input name="${field.name}" type="text" value="${escapeHtml(field.value ?? "")}" list="personLookupList" autocomplete="off" ${required} />
         <datalist id="personLookupList"></datalist>
+        <button type="button" class="ghost-button account-person-register" id="accountPersonRegisterBtn" hidden>+ Cadastrar fornecedor</button>
       </label>
     `;
   }
@@ -7259,6 +7279,16 @@ function closeModal() {
   _pendingEnrollLeadId = null;
   _pendingStudentLeadId = null;
   document.querySelector("#modalBackdrop").hidden = true;
+  // Resume a parked manual account entry after registering (or cancelling) a supplier/client
+  const closedType = document.querySelector("#modalForm").dataset.type;
+  if (_pendingAccountModalValues && (closedType === "supplier" || closedType === "student")) {
+    const pending = _pendingAccountModalValues;
+    _pendingAccountModalValues = null;
+    editingAccountId = pending._editingAccountId || null;
+    delete pending._editingAccountId;
+    openModal("account", pending);
+    document.querySelector("#modalTitle").textContent = editingAccountId ? "Editar título" : "Adicionar título";
+  }
 }
 
 function toast(message) {
@@ -7827,6 +7857,30 @@ document.querySelector("#modalForm").addEventListener("change", (event) => {
   if (event.target.matches("select[name='direction']")) {
     refreshPersonLookupList();
     refreshAccountChartOptions();
+    applyAccountPersonAutofill();
+  }
+});
+
+document.querySelector("#modalForm").addEventListener("input", (event) => {
+  if (event.target.matches("input[name='person']")) applyAccountPersonAutofill();
+});
+
+document.querySelector("#modalForm").addEventListener("click", (event) => {
+  if (!event.target.closest("#accountPersonRegisterBtn")) return;
+  const form = document.querySelector("#modalForm");
+  const values = Object.fromEntries(new FormData(form).entries());
+  values._editingAccountId = editingAccountId;
+  _pendingAccountModalValues = values;
+  const direction = values.direction || "Pagar";
+  const name = (values.person || "").trim();
+  if (direction === "Receber") {
+    editingStudentId = null;
+    openModal("student", { name });
+    document.querySelector("#modalTitle").textContent = "Cadastrar cliente";
+  } else {
+    editingSupplierId = null;
+    openModal("supplier", { name, status: "Ativo" });
+    document.querySelector("#modalTitle").textContent = "Cadastrar fornecedor";
   }
 });
 
@@ -7963,7 +8017,6 @@ function clearAccountFilters(config) {
   setControlValue(config.statusId, "all");
   setControlValue(config.reconciliationId, "all");
   setControlValue(config.chartId, "all");
-  setControlValue(config.supplierId, "all");
   renderAccounts();
 }
 
@@ -7972,7 +8025,6 @@ function resetAccountFiltersForImport(config) {
   setControlValue(config.statusId, "all");
   setControlValue(config.reconciliationId, "all");
   setControlValue(config.chartId, "all");
-  setControlValue(config.supplierId, "all");
 }
 
 function clearChartAccountFilters() {
@@ -8134,7 +8186,7 @@ document.querySelector("#fiscalClearFiltersButton")?.addEventListener("click", c
 document.querySelector("#issueSelectedInvoicesButton")?.addEventListener("click", issuePendingFiscalInvoices);
 
 Object.values(accountViewConfigs).forEach((config) => {
-  [config.searchId, config.monthId, config.dateFromId, config.dateToId, config.statusId, config.reconciliationId, config.chartId, config.supplierId].forEach((id) => {
+  [config.searchId, config.monthId, config.dateFromId, config.dateToId, config.statusId, config.reconciliationId, config.chartId].forEach((id) => {
     document.querySelector(`#${id}`)?.addEventListener("input", renderAccounts);
     document.querySelector(`#${id}`)?.addEventListener("change", renderAccounts);
   });

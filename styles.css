@@ -6044,22 +6044,15 @@ td.row-actions .row-action-button {
   font-size: 0.82rem;
 }
 
-/* Tipo de período: span 2 */
-#accountsPayableView .accounts-toolbar > select:nth-child(1),
-#accountsReceivableView .accounts-toolbar > select:nth-child(1) {
-  grid-column: span 2;
-}
-
-/* Mês/Ano: span 2 */
+/* Linha 1: Mês/Ano (3) + Intervalo (4) + Status (3) + Conciliação (2) = 12 */
 #accountsPayableView .accounts-toolbar > input[type="month"],
 #accountsReceivableView .accounts-toolbar > input[type="month"] {
-  grid-column: span 2;
+  grid-column: span 3;
 }
 
-/* Date range: span 3 */
 #accountsPayableView .accounts-toolbar .date-range-inputs,
 #accountsReceivableView .accounts-toolbar .date-range-inputs {
-  grid-column: span 3;
+  grid-column: span 4;
   gap: 5px;
   min-width: 0;
 }
@@ -6069,36 +6062,29 @@ td.row-actions .row-action-button {
   font-size: 0.78rem;
 }
 
-/* Status: span 3 (era 2 — agora cabe "Todos (Pagos e Não Pagos)") */
-#accountsPayableView .accounts-toolbar > select:nth-child(4),
-#accountsReceivableView .accounts-toolbar > select:nth-child(4) {
+/* Status */
+#accountsPayableView .accounts-toolbar > select:nth-of-type(1),
+#accountsReceivableView .accounts-toolbar > select:nth-of-type(1) {
   grid-column: span 3;
 }
 
-/* Conciliação: span 2 */
-#accountsPayableView .accounts-toolbar > select:nth-child(5),
-#accountsReceivableView .accounts-toolbar > select:nth-child(5) {
+/* Conciliação */
+#accountsPayableView .accounts-toolbar > select:nth-of-type(2),
+#accountsReceivableView .accounts-toolbar > select:nth-of-type(2) {
   grid-column: span 2;
 }
 
-/* Plano de contas: span 3 */
-#accountsPayableView .accounts-toolbar > select:nth-child(6),
-#accountsReceivableView .accounts-toolbar > select:nth-child(6) {
-  grid-column: span 3;
+/* Linha 2: Plano de contas (4) + Busca (8) = 12 */
+#accountsPayableView .accounts-toolbar > select:nth-of-type(3),
+#accountsReceivableView .accounts-toolbar > select:nth-of-type(3) {
+  grid-column: span 4;
 }
 
-/* Fornecedores: span 3 */
-#accountsPayableView .accounts-toolbar > select:nth-child(7),
-#accountsReceivableView .accounts-toolbar > select:nth-child(7) {
-  grid-column: span 3;
-}
-
-/* Search row: span 6 — preenche a 2ª linha */
 #accountsPayableView .accounts-toolbar .accounts-search-row,
 #accountsReceivableView .accounts-toolbar .accounts-search-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(80px, auto) minmax(110px, auto);
-  grid-column: span 6;
+  grid-column: span 8;
   min-width: 0;
 }
 
@@ -6129,6 +6115,14 @@ td.row-actions .row-action-button {
     grid-template-columns: repeat(8, minmax(0, 1fr));
   }
 
+  #accountsPayableView .accounts-toolbar > input[type="month"],
+  #accountsReceivableView .accounts-toolbar > input[type="month"],
+  #accountsPayableView .accounts-toolbar > select:nth-of-type(1),
+  #accountsReceivableView .accounts-toolbar > select:nth-of-type(1),
+  #accountsPayableView .accounts-toolbar > select:nth-of-type(2),
+  #accountsReceivableView .accounts-toolbar > select:nth-of-type(2),
+  #accountsPayableView .accounts-toolbar > select:nth-of-type(3),
+  #accountsReceivableView .accounts-toolbar > select:nth-of-type(3),
   #accountsPayableView .accounts-toolbar .date-range-inputs,
   #accountsReceivableView .accounts-toolbar .date-range-inputs {
     grid-column: span 4;
@@ -6136,7 +6130,7 @@ td.row-actions .row-action-button {
 
   #accountsPayableView .accounts-toolbar .accounts-search-row,
   #accountsReceivableView .accounts-toolbar .accounts-search-row {
-    grid-column: span 4;
+    grid-column: span 8;
   }
 }
 
@@ -6147,20 +6141,10 @@ td.row-actions .row-action-button {
   }
 
   #accountsPayableView .accounts-toolbar > select,
-  #accountsPayableView .accounts-toolbar > select:nth-child(1),
-  #accountsPayableView .accounts-toolbar > select:nth-child(4),
-  #accountsPayableView .accounts-toolbar > select:nth-child(5),
-  #accountsPayableView .accounts-toolbar > select:nth-child(6),
-  #accountsPayableView .accounts-toolbar > select:nth-child(7),
   #accountsPayableView .accounts-toolbar > input,
   #accountsPayableView .accounts-toolbar .date-range-inputs,
   #accountsPayableView .accounts-toolbar .accounts-search-row,
   #accountsReceivableView .accounts-toolbar > select,
-  #accountsReceivableView .accounts-toolbar > select:nth-child(1),
-  #accountsReceivableView .accounts-toolbar > select:nth-child(4),
-  #accountsReceivableView .accounts-toolbar > select:nth-child(5),
-  #accountsReceivableView .accounts-toolbar > select:nth-child(6),
-  #accountsReceivableView .accounts-toolbar > select:nth-child(7),
   #accountsReceivableView .accounts-toolbar > input,
   #accountsReceivableView .accounts-toolbar .date-range-inputs,
   #accountsReceivableView .accounts-toolbar .accounts-search-row {
@@ -6813,6 +6797,20 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
   border: 1px solid #e2e8f0; border-radius: 6px;
   font-size: 0.85rem; font-family: inherit;
 }
+.account-person-register {
+  margin-top: 6px;
+  align-self: flex-start;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #2454CC;
+  border: 1px dashed #2454CC;
+  border-radius: 6px;
+  background: #eff4ff;
+  cursor: pointer;
+}
+.account-person-register:hover { background: #dfe9ff; }
+
 .appt-justify-label select {
   padding: 7px 8px;
   border: 1px solid #e2e8f0; border-radius: 6px;
