@@ -1003,7 +1003,7 @@ const modalSchemas = {
     submit: "Salvar conta",
     fields: [
       { name: "direction", label: "Pagar/Receber", type: "select", options: ["Pagar", "Receber"], value: "Pagar" },
-      { name: "competenceDate", label: "Competência", type: "date", value: demoToday },
+      { name: "competenceDate", label: "Competência (mês/ano)", type: "month", value: demoToday.slice(0, 7) },
       { name: "forecastDate", label: "Previsão", type: "date", value: demoToday },
       { name: "amount", label: "Valor", type: "number", value: 0 },
       { name: "description", label: "Descrição", type: "text", value: "Nova conta" },
@@ -1021,6 +1021,9 @@ const modalSchemas = {
         ...current,
         id: editingAccountId || uid("cp"),
         ...values,
+        competenceDate: values.competenceDate
+          ? (values.competenceDate.length === 7 ? `${values.competenceDate}-01` : values.competenceDate)
+          : (current?.competenceDate || demoToday),
         supplierId,
         person: values.person || supplier?.name || "",
         document: values.document || supplier?.document || "",
@@ -1050,7 +1053,8 @@ const modalSchemas = {
               acc.forecastDate &&
               acc.forecastDate.startsWith(month) &&
               acc.supplierId &&
-              acc.supplierId === payload.supplierId
+              acc.supplierId === payload.supplierId &&
+              Number(accountOriginalAmount(acc)) === Number(payload.amount || 0)
           );
           if (duplicate) {
             const ok = confirm(
@@ -5760,7 +5764,7 @@ function openSupplierModal(supplierId = null) {
 function openAccountModal(accountId = null, defaults = {}) {
   editingAccountId = accountId;
   const item = accountId ? state.accounts.find((account) => account.id === accountId) : null;
-  openModal("account", item ?? defaults);
+  openModal("account", item ? { ...item, competenceDate: (item.competenceDate || "").slice(0, 7) } : defaults);
   document.querySelector("#modalTitle").textContent = accountId ? "Editar título" : "Adicionar título";
 }
 
@@ -6973,8 +6977,31 @@ function openModal(type, values = {}) {
     applyEnrollmentPlanDefaults(form, false);
   }
   refreshPersonLookupList();
+  refreshAccountChartOptions(true);
   backdrop.hidden = false;
   form.querySelector("input, select, textarea")?.focus();
+}
+
+// Plano de contas no modal de título: only accounts compatible with the direction (Pagar/Receber)
+function refreshAccountChartOptions(keepIncompatible = false) {
+  const form = document.querySelector("#modalForm");
+  if (form.dataset.type !== "account") return;
+  const select = form.querySelector("select[name='chartAccountId']");
+  if (!select) return;
+  const direction = form.querySelector("select[name='direction']")?.value || "Pagar";
+  const previous = select.value;
+  const options = chartAccountsForFinancialDirection(direction);
+  select.innerHTML = options.map((item) => `<option value="${item.id}">${item.code} - ${item.name}</option>`).join("");
+  if (previous && options.some((o) => o.id === previous)) {
+    select.value = previous;
+  } else if (keepIncompatible && previous) {
+    // Editing a historical title whose chart account doesn't match the direction: keep it selectable
+    const acc = state.chartAccounts.find((c) => c.id === previous);
+    if (acc) {
+      select.insertAdjacentHTML("afterbegin", `<option value="${acc.id}">${acc.code} - ${acc.name}</option>`);
+      select.value = previous;
+    }
+  }
 }
 
 // Cliente/Fornecedor datalist: suppliers for Pagar, clients for Receber
@@ -7797,7 +7824,10 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
 });
 
 document.querySelector("#modalForm").addEventListener("change", (event) => {
-  if (event.target.matches("select[name='direction']")) refreshPersonLookupList();
+  if (event.target.matches("select[name='direction']")) {
+    refreshPersonLookupList();
+    refreshAccountChartOptions();
+  }
 });
 
 document.querySelector("#modalForm").addEventListener("input", (event) => {
