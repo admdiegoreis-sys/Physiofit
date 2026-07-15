@@ -1007,7 +1007,7 @@ const modalSchemas = {
       { name: "forecastDate", label: "Previsão", type: "date", value: demoToday },
       { name: "amount", label: "Valor", type: "number", value: 0 },
       { name: "description", label: "Descrição", type: "text", value: "Nova conta" },
-      { name: "person", label: "Cliente/Fornecedor", type: "text", value: "" },
+      { name: "person", label: "Cliente/Fornecedor", type: "personLookup", value: "" },
       { name: "document", label: "CPF/CNPJ", type: "text", value: "" },
       { name: "chartAccountId", label: "Plano de contas", type: "chartAccount" },
       { name: "paymentMethod", label: "Forma de pagamento", type: "select", options: ["Pix", "Cartão de Débito", "Cartão de Crédito", "Boleto", "Transferência", "Dinheiro"], value: "Pix" },
@@ -6972,8 +6972,23 @@ function openModal(type, values = {}) {
     updateEnrollmentPlanOptions(form);
     applyEnrollmentPlanDefaults(form, false);
   }
+  refreshPersonLookupList();
   backdrop.hidden = false;
   form.querySelector("input, select, textarea")?.focus();
+}
+
+// Cliente/Fornecedor datalist: suppliers for Pagar, clients for Receber
+function refreshPersonLookupList() {
+  const list = document.querySelector("#modalForm #personLookupList");
+  if (!list) return;
+  const direction = document.querySelector("#modalForm select[name='direction']")?.value || "Pagar";
+  const names = direction === "Receber"
+    ? state.students.map((s) => displayName(s.name))
+    : activeSuppliers().map((s) => displayName(s.name));
+  list.innerHTML = [...new Set(names.filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "pt-BR"))
+    .map((name) => `<option value="${escapeHtml(name)}"></option>`)
+    .join("");
 }
 
 function plansForModality(modalityId = "") {
@@ -7177,6 +7192,14 @@ function renderField(field) {
         <select name="${field.name}" ${required}>
           ${options.map((option) => `<option value="${option.value}" ${isSelected(option.value)}>${option.label}</option>`).join("")}
         </select>
+      </label>
+    `;
+  }
+  if (field.type === "personLookup") {
+    return `
+      <label>${field.label}
+        <input name="${field.name}" type="text" value="${escapeHtml(field.value ?? "")}" list="personLookupList" autocomplete="off" ${required} />
+        <datalist id="personLookupList"></datalist>
       </label>
     `;
   }
@@ -7771,6 +7794,10 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
     }
   }
   toast(form.dataset.type === "accountSettlement" ? "Baixa registrada com sucesso." : "Cadastro salvo com sucesso.");
+});
+
+document.querySelector("#modalForm").addEventListener("change", (event) => {
+  if (event.target.matches("select[name='direction']")) refreshPersonLookupList();
 });
 
 document.querySelector("#modalForm").addEventListener("input", (event) => {
