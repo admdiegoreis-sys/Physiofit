@@ -5708,20 +5708,30 @@ function renderCashFlowOverview() {
   `;
 
   // Grouped bar chart (SVG)
-  const W = 760, H = 250, pT = 14, pB = 26, pL = 8, pR = 8;
+  const W = 760, H = 262, pT = 26, pB = 26, pL = 8, pR = 8;
   const iH = H - pT - pB;
   const maxV = Math.max(...buckets.flatMap((b) => [b.inflow, b.outflow]), 1);
   const slot = (W - pL - pR) / buckets.length;
   const barW = Math.min(26, slot * 0.28);
   const currentKey = demoToday.slice(0, 7);
+  const fmtBar = (v) => (v >= 1000
+    ? `${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: v >= 100000 ? 0 : 1 })} mil`
+    : Math.round(v).toLocaleString("pt-BR"));
   const bars = buckets.map((b, i) => {
     const cx = pL + slot * i + slot / 2;
     const hIn = (b.inflow / maxV) * iH;
     const hOut = (b.outflow / maxV) * iH;
-    const inColor = b.key === currentKey ? "#2454CC" : "#16a34a";
+    const cxIn = cx - 2 - barW / 2;
+    const cxOut = cx + 2 + barW / 2;
+    let yLabelIn = pT + iH - hIn - 6;
+    const yLabelOut = pT + iH - hOut - 6;
+    // Bars with similar heights: raise the inflow label so the two values don't collide
+    if (b.inflow > 0 && b.outflow > 0 && Math.abs(yLabelIn - yLabelOut) < 12) yLabelIn = yLabelOut - 12;
     return `
-      <rect x="${cx - barW - 2}" y="${pT + iH - hIn}" width="${barW}" height="${Math.max(hIn, b.inflow > 0 ? 2 : 0)}" rx="4" fill="${inColor}"><title>${b.label} · Entrou: ${currency(b.inflow)}</title></rect>
+      <rect x="${cx - barW - 2}" y="${pT + iH - hIn}" width="${barW}" height="${Math.max(hIn, b.inflow > 0 ? 2 : 0)}" rx="4" fill="#16a34a"><title>${b.label} · Entrou: ${currency(b.inflow)}</title></rect>
       <rect x="${cx + 2}" y="${pT + iH - hOut}" width="${barW}" height="${Math.max(hOut, b.outflow > 0 ? 2 : 0)}" rx="4" fill="#c0503f"><title>${b.label} · Saiu: ${currency(b.outflow)}</title></rect>
+      ${b.inflow > 0 ? `<text x="${cxIn}" y="${yLabelIn}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803d">${fmtBar(b.inflow)}</text>` : ""}
+      ${b.outflow > 0 ? `<text x="${cxOut}" y="${yLabelOut}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b03a2a">${fmtBar(b.outflow)}</text>` : ""}
       <text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#64748b" ${b.key === currentKey ? 'font-weight="700"' : ""}>${b.label}</text>
     `;
   }).join("");
