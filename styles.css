@@ -6769,6 +6769,14 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
   color: rgba(255,255,255,0.55);
   letter-spacing: -0.01em;
 }
+.login-powered-by-img {
+  height: 26px;
+  width: auto;
+  display: block;
+  /* Logo feita para fundo claro: converte para branco suave sobre o fundo escuro do login */
+  filter: brightness(0) invert(1);
+  opacity: 0.65;
+}
 
 /* Status classes para eventos */
 .calendar-event.visita-realizada { background: #16a34a; }
