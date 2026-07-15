@@ -4615,7 +4615,6 @@ const accountViewConfigs = {
     totalLabel: "Total de Pagamentos",
     paidLabel: "Total Pago",
     searchId: "payableAccountSearch",
-    periodTypeId: "payableAccountPeriodType",
     monthId: "payableAccountMonthFilter",
     dateFromId: "payableAccountDateFrom",
     dateToId: "payableAccountDateTo",
@@ -4632,7 +4631,6 @@ const accountViewConfigs = {
     totalLabel: "Total de Recebimentos",
     paidLabel: "Total Recebido",
     searchId: "receivableAccountSearch",
-    periodTypeId: "receivableAccountPeriodType",
     monthId: "receivableAccountMonthFilter",
     dateFromId: "receivableAccountDateFrom",
     dateToId: "receivableAccountDateTo",
@@ -4650,7 +4648,6 @@ function accountRows(config) {
   const reconciliation = document.querySelector(`#${config.reconciliationId}`)?.value ?? "all";
   const chartAccount = document.querySelector(`#${config.chartId}`)?.value ?? "all";
   const supplier = document.querySelector(`#${config.supplierId}`)?.value ?? "all";
-  const periodType = document.querySelector(`#${config.periodTypeId}`)?.value ?? "Mês/Ano Competência";
   const month = document.querySelector(`#${config.monthId}`)?.value ?? "";
   const dateFrom = document.querySelector(`#${config.dateFromId}`)?.value ?? "";
   const dateTo = document.querySelector(`#${config.dateToId}`)?.value ?? "";
@@ -4660,10 +4657,8 @@ function accountRows(config) {
     .filter((item) => item.origin !== "Importação OFX" && item.origin !== "ImportaÃ§Ã£o OFX")
     .filter((item) => item.direction === config.direction)
     .filter((item) => {
-      let dateField = item.competenceDate;
-      if (periodType === "Data de Vencimento") dateField = item.forecastDate || item.dueDate || item.competenceDate;
-      if (periodType === "Data de Pagamento") dateField = item.paidDate || item.competenceDate;
-      const d = dateField || "";
+      // Cash basis: paid items by payment date; open items by expected payment date
+      const d = item.paidDate || accountExpectedDate(item) || "";
       if (dateFrom || dateTo) {
         if (dateFrom && d < dateFrom) return false;
         if (dateTo && d > dateTo) return false;
@@ -7905,7 +7900,6 @@ function clearFiscalFilters() {
 
 function clearAccountFilters(config) {
   setControlValue(config.searchId, "");
-  setControlValue(config.periodTypeId, "Mês/Ano Competência");
   setControlValue(config.monthId, demoToday.slice(0, 7));
   setControlValue(config.dateFromId, "");
   setControlValue(config.dateToId, "");
@@ -8083,7 +8077,7 @@ document.querySelector("#fiscalClearFiltersButton")?.addEventListener("click", c
 document.querySelector("#issueSelectedInvoicesButton")?.addEventListener("click", issuePendingFiscalInvoices);
 
 Object.values(accountViewConfigs).forEach((config) => {
-  [config.searchId, config.periodTypeId, config.monthId, config.dateFromId, config.dateToId, config.statusId, config.reconciliationId, config.chartId, config.supplierId].forEach((id) => {
+  [config.searchId, config.monthId, config.dateFromId, config.dateToId, config.statusId, config.reconciliationId, config.chartId, config.supplierId].forEach((id) => {
     document.querySelector(`#${id}`)?.addEventListener("input", renderAccounts);
     document.querySelector(`#${id}`)?.addEventListener("change", renderAccounts);
   });
