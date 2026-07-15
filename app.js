@@ -1005,7 +1005,7 @@ const modalSchemas = {
       { name: "direction", label: "Pagar/Receber", type: "select", options: ["Pagar", "Receber"], value: "Pagar" },
       { name: "competenceDate", label: "Competência (mês/ano)", type: "month", value: demoToday.slice(0, 7) },
       { name: "forecastDate", label: "Previsão", type: "date", value: demoToday },
-      { name: "amount", label: "Valor", type: "number", value: 0 },
+      { name: "amount", label: "Valor", type: "currency", value: 0 },
       { name: "description", label: "Descrição", type: "text", value: "Nova conta" },
       { name: "person", label: "Cliente/Fornecedor", type: "personLookup", value: "" },
       { name: "document", label: "CPF/CNPJ", type: "text", value: "" },
@@ -1027,10 +1027,10 @@ const modalSchemas = {
         supplierId,
         person: values.person || supplier?.name || "",
         document: values.document || supplier?.document || "",
-        amount: Number(values.amount || 0),
-        originalAmount: Number(values.amount || 0),
+        amount: parseBrAmount(values.amount),
+        originalAmount: parseBrAmount(values.amount),
         paidAmount: current?.paidAmount || 0,
-        openAmount: Math.max(0, Number(values.amount || 0) - Number(current?.paidAmount || 0)),
+        openAmount: Math.max(0, parseBrAmount(values.amount) - Number(current?.paidAmount || 0)),
         dueDate: values.forecastDate || current?.dueDate || values.competenceDate || demoToday,
         modalityId: current?.modalityId || "",
         teacherId: current?.teacherId || "",
@@ -1075,14 +1075,14 @@ const modalSchemas = {
     fields: [
       { name: "paidDate", label: "Pagamento", type: "date", value: demoToday },
       { name: "bankAccountId", label: "Banco", type: "bankAccount", value: "itau" },
-      { name: "paidAmount", label: "Valor pago/recebido", type: "number", value: 0 },
+      { name: "paidAmount", label: "Valor pago/recebido", type: "currency", value: 0 },
       { name: "notes", label: "Observação", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
       const account = state.accounts.find((item) => item.id === settlingAccountId);
       if (!account) return;
       const originalAmount = accountOriginalAmount(account);
-      const paymentValue = Number(values.paidAmount || accountOpenAmount(account) || originalAmount);
+      const paymentValue = parseBrAmount(values.paidAmount) || accountOpenAmount(account) || originalAmount;
       account.paidDate = values.paidDate || demoToday;
       account.bankAccountId = values.bankAccountId || account.bankAccountId || "";
       account.paymentMethod = bankAccountLabel(account.bankAccountId) || account.paymentMethod || "";
@@ -1358,6 +1358,21 @@ function normalizeLead(item, index, useDefaults = true) {
     linkedAppointmentId: item.linkedAppointmentId || defaults.linkedAppointmentId || "",
     linkedEnrollmentId: item.linkedEnrollmentId || "",
   };
+}
+
+// Amount in pt-BR display format: 1857.06 -> "1.857,06"
+function formatBrAmount(value) {
+  return Number(parseBrAmount(value)).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// Parse "1.857,06", "1857,06" or "1857.06" into 1857.06
+function parseBrAmount(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  let s = String(value ?? "").trim().replace(/[^\d.,-]/g, "");
+  if (!s) return 0;
+  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  else if ((s.match(/\./g) || []).length > 1) s = s.replace(/\./g, "");
+  return Number(s) || 0;
 }
 
 function normalizeSupplier(item, index) {
@@ -4677,6 +4692,39 @@ function accountRows(config) {
     });
 }
 
+// Export the currently filtered rows of Contas a Pagar/Receber to .xlsx
+function exportAccountsToXlsx(key) {
+  const config = accountViewConfigs[key];
+  if (!config) return;
+  if (typeof XLSX === "undefined") { toast("Exportação indisponível: biblioteca não carregada."); return; }
+  const rows = accountRows(config);
+  if (!rows.length) { toast("Nenhum lançamento para exportar com os filtros atuais."); return; }
+  const personLabel = config.direction === "Pagar" ? "Fornecedor" : "Cliente";
+  const reconciliationLabels = { reconciled: "Conciliado", unreconciled: "Não conciliado", manual: "Baixa manual" };
+  const data = rows.map((item) => ({
+    "Status": accountAutoStatus(item),
+    [personLabel]: item.person || supplierName(item.supplierId) || "",
+    "CPF/CNPJ": item.document || "",
+    "Descrição": item.description || "",
+    "Plano de contas": chartAccountName(item.chartAccountId) || "",
+    "Competência": item.competenceDate ? dateLabel(item.competenceDate) : "",
+    "Vencimento": accountExpectedDate(item) ? dateLabel(accountExpectedDate(item)) : "",
+    "Pagamento": item.paidDate ? dateLabel(item.paidDate) : "",
+    "Valor": Number(accountOriginalAmount(item)),
+    "Pago": Number(accountPaidAmount(item)),
+    "Em aberto": Number(accountOpenAmount(item)),
+    "Conciliação": reconciliationLabels[item.reconciliationStatus || "unreconciled"] || "",
+    "Forma de pagamento": item.paymentMethod || "",
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  const sheetName = config.direction === "Pagar" ? "Contas a Pagar" : "Contas a Receber";
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  const slug = config.direction === "Pagar" ? "contas-a-pagar" : "contas-a-receber";
+  XLSX.writeFile(wb, `${slug}-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  toast(`Planilha exportada com ${rows.length} lançamentos.`);
+}
+
 function renderAccountSummary(config, rows = []) {
   const summary = document.querySelector(`#${config.summaryId}`);
   if (!summary) return;
@@ -7261,6 +7309,7 @@ function renderField(field) {
     `;
   }
   const enrollClass = field.enroll ? ' class="enroll-field"' : "";
+  if (field.type === "currency") return `<label${enrollClass}>${field.label}<input name="${field.name}" type="text" inputmode="decimal" value="${formatBrAmount(field.value)}" data-currency-input ${required} /></label>`;
   if (field.type === "textarea") return `<label${enrollClass}>${field.label}<textarea name="${field.name}" rows="4" ${required}>${field.value ?? ""}</textarea></label>`;
   const extraAttrs = field.type === "number" ? ' step="any"' : "";
   return `<label${enrollClass}>${field.label}<input name="${field.name}" type="${field.type}" value="${field.value ?? ""}"${extraAttrs} ${required} /></label>`;
@@ -7494,6 +7543,9 @@ document.addEventListener("click", (event) => {
 
   const printViewButton = event.target.closest("[data-print-view]");
   if (printViewButton) window.print();
+
+  const exportAccountsButton = event.target.closest("[data-export-accounts]");
+  if (exportAccountsButton) exportAccountsToXlsx(exportAccountsButton.dataset.exportAccounts);
 
   const issueInvoiceButton = event.target.closest("[data-issue-invoice]");
   if (issueInvoiceButton) issueFiscalInvoice(issueInvoiceButton.dataset.issueInvoice);
@@ -7863,6 +7915,10 @@ document.querySelector("#modalForm").addEventListener("change", (event) => {
 
 document.querySelector("#modalForm").addEventListener("input", (event) => {
   if (event.target.matches("input[name='person']")) applyAccountPersonAutofill();
+});
+
+document.querySelector("#modalForm").addEventListener("focusout", (event) => {
+  if (event.target.matches("[data-currency-input]")) event.target.value = formatBrAmount(event.target.value);
 });
 
 document.querySelector("#modalForm").addEventListener("click", (event) => {
