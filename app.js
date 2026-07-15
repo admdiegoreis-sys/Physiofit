@@ -6977,7 +6977,7 @@ function openModal(type, values = {}) {
     applyEnrollmentPlanDefaults(form, false);
   }
   refreshPersonLookupList();
-  refreshAccountChartOptions(true);
+  refreshAccountChartOptions(!!editingAccountId);
   backdrop.hidden = false;
   form.querySelector("input, select, textarea")?.focus();
 }
