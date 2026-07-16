@@ -5783,28 +5783,9 @@ function renderCashFlow() {
   if (toggleBtn) toggleBtn.textContent = cashFlowViewMode === "chart" ? "Ver em tabela" : "Ver em gráficos";
   const table = document.querySelector("#cashFlowTable");
   const head = document.querySelector("#cashFlowHead");
-  const summary = document.querySelector("#cashFlowSummary");
-  if (!table || !head || !summary) return;
+  if (!table || !head) return;
   const months = cashFlowMonths();
   const rows = buildCashFlowRows(months);
-  const totals = rows
-    .filter((row) => row.kind === "group")
-    .reduce(
-      (acc, row) => {
-        row.values.forEach((value) => {
-          if (value > 0) acc.inflow += value;
-          if (value < 0) acc.outflow += Math.abs(value);
-          acc.balance += value;
-        });
-        return acc;
-      },
-      { inflow: 0, outflow: 0, balance: 0 },
-    );
-  summary.innerHTML = `
-    <article class="metric"><span>Entradas</span><strong>${currency(totals.inflow)}</strong><small>movimentos recebidos</small></article>
-    <article class="metric"><span>Saídas</span><strong>${currency(totals.outflow)}</strong><small>contas pagas/previstas</small></article>
-    <article class="metric"><span>Saldo</span><strong>${currency(totals.balance)}</strong><small>resultado do período</small></article>
-  `;
   head.innerHTML = `
     <tr>
       <th>COD.</th>
