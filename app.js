@@ -1017,6 +1017,11 @@ const modalSchemas = {
       const currentSupplier = supplierById(current?.supplierId || values.supplierId);
       const supplierId = values.direction === "Pagar" ? upsertSupplierFromAccount(values.person, values.document) || current?.supplierId || "" : "";
       const supplier = supplierById(supplierId) || currentSupplier;
+      const newAmount = parseBrAmount(values.amount);
+      // If the title was already fully settled (baixado), keep it settled when the value is edited —
+      // e.g. updating a payroll title from its registered forecast — instead of leaving a residual "Parcial".
+      const wasFullySettled = !!current && Number(current.paidAmount || 0) > 0 && Number(current.openAmount || 0) <= 0;
+      const paidAmount = wasFullySettled ? newAmount : (current?.paidAmount || 0);
       const payload = {
         ...current,
         id: editingAccountId || uid("cp"),
@@ -1027,10 +1032,10 @@ const modalSchemas = {
         supplierId,
         person: values.person || supplier?.name || "",
         document: values.document || supplier?.document || "",
-        amount: parseBrAmount(values.amount),
-        originalAmount: parseBrAmount(values.amount),
-        paidAmount: current?.paidAmount || 0,
-        openAmount: Math.max(0, parseBrAmount(values.amount) - Number(current?.paidAmount || 0)),
+        amount: newAmount,
+        originalAmount: newAmount,
+        paidAmount,
+        openAmount: Math.max(0, newAmount - paidAmount),
         dueDate: values.forecastDate || current?.dueDate || values.competenceDate || demoToday,
         modalityId: current?.modalityId || "",
         teacherId: current?.teacherId || "",
