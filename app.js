@@ -4686,9 +4686,18 @@ function accountRows(config) {
     .filter((item) => reconciliation === "all" || (item.reconciliationStatus || "unreconciled") === reconciliation)
     .filter((item) => chartAccount === "all" || item.chartAccountId === chartAccount)
     .sort((a, b) => {
-      const dateA = a.paidDate || accountExpectedDate(a) || "";
-      const dateB = b.paidDate || accountExpectedDate(b) || "";
-      return dateA.localeCompare(dateB);
+      // Primary key: data de pagamento (paid items first, ordered by when they were paid).
+      // Secondary key: data de vencimento — used as tiebreaker and to order unpaid items among themselves.
+      const paidA = a.paidDate || "";
+      const paidB = b.paidDate || "";
+      if (paidA !== paidB) {
+        if (!paidA) return 1;
+        if (!paidB) return -1;
+        return paidA.localeCompare(paidB);
+      }
+      const dueA = accountExpectedDate(a) || "";
+      const dueB = accountExpectedDate(b) || "";
+      return dueA.localeCompare(dueB);
     });
 }
 
