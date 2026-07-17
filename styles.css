@@ -6844,6 +6844,7 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
 .cashflow-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-left: 10px; }
 .cashflow-dot--in { background: #16a34a; }
 .cashflow-dot--out { background: #c0503f; }
+.cashflow-dot--pending { background: repeating-linear-gradient(45deg, #94a3b8, #94a3b8 3px, transparent 3px, transparent 6px); opacity: 0.7; }
 .cashflow-chart-svg { width: 100%; height: auto; display: block; }
 
 .cashflow-insights { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; }

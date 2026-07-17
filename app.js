@@ -5690,7 +5690,9 @@ function cashFlowCashItems() {
   return state.accounts
     .filter((item) => item.origin !== "Importação OFX" && item.origin !== "ImportaÃ§Ã£o OFX")
     .filter((item) => item.status !== "Cancelado")
-    .map((item) => ({ item, date: item.paidDate || accountExpectedDate(item) || "" }))
+    // Paid items are placed by their actual payment date; open items fall back to the expected
+    // date so they still show up in the chart, but flagged so the bar renders them as pending.
+    .map((item) => ({ item, date: item.paidDate || accountExpectedDate(item) || "", paid: !!item.paidDate }))
     .filter((entry) => entry.date);
 }
 
@@ -5701,18 +5703,19 @@ function renderCashFlowOverview() {
   const from = document.querySelector("#cashFlowDateFrom")?.value || "";
   const to = document.querySelector("#cashFlowDateTo")?.value || "";
   const months = cashFlowPeriodMonths();
-  const buckets = months.map((m) => ({ ...m, inflow: 0, outflow: 0 }));
+  const buckets = months.map((m) => ({ ...m, inflowPaid: 0, inflowPending: 0, outflowPaid: 0, outflowPending: 0 }));
   const byKey = Object.fromEntries(buckets.map((b) => [b.key, b]));
   const entries = cashFlowCashItems();
-  entries.forEach(({ item, date }) => {
+  entries.forEach(({ item, date, paid }) => {
     if (from && date < from) return;
     if (to && date > to) return;
     const bucket = byKey[date.slice(0, 7)];
     if (!bucket) return;
     const value = Number(accountOriginalAmount(item)) || 0;
-    if (item.direction === "Receber") bucket.inflow += value;
-    else bucket.outflow += value;
+    if (item.direction === "Receber") bucket[paid ? "inflowPaid" : "inflowPending"] += value;
+    else bucket[paid ? "outflowPaid" : "outflowPending"] += value;
   });
+  buckets.forEach((b) => { b.inflow = b.inflowPaid + b.inflowPending; b.outflow = b.outflowPaid + b.outflowPending; });
 
   const totalIn = buckets.reduce((sum, b) => sum + b.inflow, 0);
   const totalOut = buckets.reduce((sum, b) => sum + b.outflow, 0);
@@ -5743,19 +5746,27 @@ function renderCashFlowOverview() {
   const fmtBar = (v) => (v >= 1000
     ? `${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: v >= 100000 ? 0 : 1 })} mil`
     : Math.round(v).toLocaleString("pt-BR"));
+  // Stacked segments: solid = already paid, translucent = still pending (open titles at their expected date)
   const bars = buckets.map((b, i) => {
     const cx = pL + slot * i + slot / 2;
-    const hIn = (b.inflow / maxV) * iH;
-    const hOut = (b.outflow / maxV) * iH;
+    const hInPaid = (b.inflowPaid / maxV) * iH;
+    const hInPending = (b.inflowPending / maxV) * iH;
+    const hOutPaid = (b.outflowPaid / maxV) * iH;
+    const hOutPending = (b.outflowPending / maxV) * iH;
+    const hIn = hInPaid + hInPending;
+    const hOut = hOutPaid + hOutPending;
     const cxIn = cx - 2 - barW / 2;
     const cxOut = cx + 2 + barW / 2;
     let yLabelIn = pT + iH - hIn - 6;
     const yLabelOut = pT + iH - hOut - 6;
     // Bars with similar heights: raise the inflow label so the two values don't collide
     if (b.inflow > 0 && b.outflow > 0 && Math.abs(yLabelIn - yLabelOut) < 12) yLabelIn = yLabelOut - 12;
+    const xIn = cx - barW - 2, xOut = cx + 2;
     return `
-      <rect x="${cx - barW - 2}" y="${pT + iH - hIn}" width="${barW}" height="${Math.max(hIn, b.inflow > 0 ? 2 : 0)}" rx="4" fill="#16a34a"><title>${b.label} · Entrou: ${currency(b.inflow)}</title></rect>
-      <rect x="${cx + 2}" y="${pT + iH - hOut}" width="${barW}" height="${Math.max(hOut, b.outflow > 0 ? 2 : 0)}" rx="4" fill="#c0503f"><title>${b.label} · Saiu: ${currency(b.outflow)}</title></rect>
+      ${hInPending > 0 ? `<rect x="${xIn}" y="${pT + iH - hIn}" width="${barW}" height="${Math.max(hInPending, 2)}" rx="4" fill="#16a34a" opacity="0.35"><title>${b.label} · Previsto a entrar: ${currency(b.inflowPending)}</title></rect>` : ""}
+      ${hInPaid > 0 ? `<rect x="${xIn}" y="${pT + iH - hInPaid}" width="${barW}" height="${Math.max(hInPaid, 2)}" rx="4" fill="#16a34a"><title>${b.label} · Recebido: ${currency(b.inflowPaid)}</title></rect>` : (hInPending > 0 ? `<rect x="${xIn}" y="${pT + iH}" width="${barW}" height="1" fill="#16a34a"/>` : "")}
+      ${hOutPending > 0 ? `<rect x="${xOut}" y="${pT + iH - hOut}" width="${barW}" height="${Math.max(hOutPending, 2)}" rx="4" fill="#c0503f" opacity="0.35"><title>${b.label} · Previsto a sair: ${currency(b.outflowPending)}</title></rect>` : ""}
+      ${hOutPaid > 0 ? `<rect x="${xOut}" y="${pT + iH - hOutPaid}" width="${barW}" height="${Math.max(hOutPaid, 2)}" rx="4" fill="#c0503f"><title>${b.label} · Pago: ${currency(b.outflowPaid)}</title></rect>` : (hOutPending > 0 ? `<rect x="${xOut}" y="${pT + iH}" width="${barW}" height="1" fill="#c0503f"/>` : "")}
       ${b.inflow > 0 ? `<text x="${cxIn}" y="${yLabelIn}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803d">${fmtBar(b.inflow)}</text>` : ""}
       ${b.outflow > 0 ? `<text x="${cxOut}" y="${yLabelOut}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b03a2a">${fmtBar(b.outflow)}</text>` : ""}
       <text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#64748b" ${b.key === currentKey ? 'font-weight="700"' : ""}>${b.label}</text>
