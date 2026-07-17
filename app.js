@@ -2414,6 +2414,10 @@ function sortChartAccountsByCode(accounts = []) {
 }
 
 function isRevenueChartAccount(account = {}) {
+  // Nature is the authoritative signal when set explicitly to an expense/outflow — text fields like
+  // "package" (e.g. "Simples Nacional" mis-tagged as package "Receitas") must not override it.
+  if (account.nature === "Despesa" || account.nature === "Saída") return false;
+
   const code = String(account.code || "").trim();
   const content = normalizedText([
     account.nature,
