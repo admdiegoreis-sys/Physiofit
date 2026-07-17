@@ -5704,6 +5704,16 @@ function accountActivityGroup(item) {
 
 let cashFlowActivityFilter = "all";
 
+const CASHFLOW_ACTIVITY_ORDER = ["Operacional", "Investimento", "Financiamento"];
+const CASHFLOW_ACTIVITY_COLORS = {
+  Operacional: { in: "#16a34a", out: "#c0503f" },
+  Investimento: { in: "#0891b2", out: "#d97706" },
+  Financiamento: { in: "#2454CC", out: "#7c3aed" },
+};
+function cashFlowActivityKey(activity) {
+  return CASHFLOW_ACTIVITY_ORDER.includes(activity) ? activity : "Operacional";
+}
+
 function renderCashFlowOverview() {
   const cards = document.querySelector("#cashFlowCards");
   const chart = document.querySelector("#cashFlowChart");
@@ -5711,7 +5721,10 @@ function renderCashFlowOverview() {
   const from = document.querySelector("#cashFlowDateFrom")?.value || "";
   const to = document.querySelector("#cashFlowDateTo")?.value || "";
   const months = cashFlowPeriodMonths();
-  const buckets = months.map((m) => ({ ...m, inflowPaid: 0, inflowPending: 0, outflowPaid: 0, outflowPending: 0 }));
+  const emptyActivityTotals = () => Object.fromEntries(
+    CASHFLOW_ACTIVITY_ORDER.map((act) => [act, { inflowPaid: 0, inflowPending: 0, outflowPaid: 0, outflowPending: 0 }])
+  );
+  const buckets = months.map((m) => ({ ...m, byActivity: emptyActivityTotals() }));
   const byKey = Object.fromEntries(buckets.map((b) => [b.key, b]));
   const entries = cashFlowCashItems().filter(
     ({ item }) => cashFlowActivityFilter === "all" || accountActivityGroup(item) === cashFlowActivityFilter
@@ -5722,10 +5735,18 @@ function renderCashFlowOverview() {
     const bucket = byKey[date.slice(0, 7)];
     if (!bucket) return;
     const value = Number(accountOriginalAmount(item)) || 0;
-    if (item.direction === "Receber") bucket[paid ? "inflowPaid" : "inflowPending"] += value;
-    else bucket[paid ? "outflowPaid" : "outflowPending"] += value;
+    const activityTotals = bucket.byActivity[cashFlowActivityKey(accountActivityGroup(item))];
+    if (item.direction === "Receber") activityTotals[paid ? "inflowPaid" : "inflowPending"] += value;
+    else activityTotals[paid ? "outflowPaid" : "outflowPending"] += value;
   });
-  buckets.forEach((b) => { b.inflow = b.inflowPaid + b.inflowPending; b.outflow = b.outflowPaid + b.outflowPending; });
+  buckets.forEach((b) => {
+    b.inflow = 0; b.outflow = 0;
+    CASHFLOW_ACTIVITY_ORDER.forEach((act) => {
+      const a = b.byActivity[act];
+      b.inflow += a.inflowPaid + a.inflowPending;
+      b.outflow += a.outflowPaid + a.outflowPending;
+    });
+  });
 
   const totalIn = buckets.reduce((sum, b) => sum + b.inflow, 0);
   const totalOut = buckets.reduce((sum, b) => sum + b.outflow, 0);
@@ -5756,27 +5777,36 @@ function renderCashFlowOverview() {
   const fmtBar = (v) => (v >= 1000
     ? `${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: v >= 100000 ? 0 : 1 })} mil`
     : Math.round(v).toLocaleString("pt-BR"));
-  // Stacked segments: solid = already paid, translucent = still pending (open titles at their expected date)
+  // Each bar stacks one segment per activity (Operacional/Investimento/Financiamento), each with
+  // its own hue; within an activity, solid = already paid, translucent = still pending.
   const bars = buckets.map((b, i) => {
     const cx = pL + slot * i + slot / 2;
-    const hInPaid = (b.inflowPaid / maxV) * iH;
-    const hInPending = (b.inflowPending / maxV) * iH;
-    const hOutPaid = (b.outflowPaid / maxV) * iH;
-    const hOutPending = (b.outflowPending / maxV) * iH;
-    const hIn = hInPaid + hInPending;
-    const hOut = hOutPaid + hOutPending;
     const cxIn = cx - 2 - barW / 2;
     const cxOut = cx + 2 + barW / 2;
-    let yLabelIn = pT + iH - hIn - 6;
-    const yLabelOut = pT + iH - hOut - 6;
+    const xIn = cx - barW - 2, xOut = cx + 2;
+    let cumIn = 0, cumOut = 0;
+    const segments = [];
+    CASHFLOW_ACTIVITY_ORDER.forEach((act) => {
+      const a = b.byActivity[act];
+      const colors = CASHFLOW_ACTIVITY_COLORS[act];
+      const hInPaid = (a.inflowPaid / maxV) * iH;
+      const hInPending = (a.inflowPending / maxV) * iH;
+      if (hInPending > 0) segments.push(`<rect x="${xIn}" y="${pT + iH - cumIn - hInPaid - hInPending}" width="${barW}" height="${hInPending}" fill="${colors.in}" opacity="0.35"><title>${b.label} · ${act} previsto a entrar: ${currency(a.inflowPending)}</title></rect>`);
+      if (hInPaid > 0) segments.push(`<rect x="${xIn}" y="${pT + iH - cumIn - hInPaid}" width="${barW}" height="${hInPaid}" fill="${colors.in}"><title>${b.label} · ${act} recebido: ${currency(a.inflowPaid)}</title></rect>`);
+      cumIn += hInPaid + hInPending;
+
+      const hOutPaid = (a.outflowPaid / maxV) * iH;
+      const hOutPending = (a.outflowPending / maxV) * iH;
+      if (hOutPending > 0) segments.push(`<rect x="${xOut}" y="${pT + iH - cumOut - hOutPaid - hOutPending}" width="${barW}" height="${hOutPending}" fill="${colors.out}" opacity="0.35"><title>${b.label} · ${act} previsto a sair: ${currency(a.outflowPending)}</title></rect>`);
+      if (hOutPaid > 0) segments.push(`<rect x="${xOut}" y="${pT + iH - cumOut - hOutPaid}" width="${barW}" height="${hOutPaid}" fill="${colors.out}"><title>${b.label} · ${act} pago: ${currency(a.outflowPaid)}</title></rect>`);
+      cumOut += hOutPaid + hOutPending;
+    });
+    let yLabelIn = pT + iH - cumIn - 6;
+    const yLabelOut = pT + iH - cumOut - 6;
     // Bars with similar heights: raise the inflow label so the two values don't collide
     if (b.inflow > 0 && b.outflow > 0 && Math.abs(yLabelIn - yLabelOut) < 12) yLabelIn = yLabelOut - 12;
-    const xIn = cx - barW - 2, xOut = cx + 2;
     return `
-      ${hInPending > 0 ? `<rect x="${xIn}" y="${pT + iH - hIn}" width="${barW}" height="${Math.max(hInPending, 2)}" rx="4" fill="#16a34a" opacity="0.35"><title>${b.label} · Previsto a entrar: ${currency(b.inflowPending)}</title></rect>` : ""}
-      ${hInPaid > 0 ? `<rect x="${xIn}" y="${pT + iH - hInPaid}" width="${barW}" height="${Math.max(hInPaid, 2)}" rx="4" fill="#16a34a"><title>${b.label} · Recebido: ${currency(b.inflowPaid)}</title></rect>` : (hInPending > 0 ? `<rect x="${xIn}" y="${pT + iH}" width="${barW}" height="1" fill="#16a34a"/>` : "")}
-      ${hOutPending > 0 ? `<rect x="${xOut}" y="${pT + iH - hOut}" width="${barW}" height="${Math.max(hOutPending, 2)}" rx="4" fill="#c0503f" opacity="0.35"><title>${b.label} · Previsto a sair: ${currency(b.outflowPending)}</title></rect>` : ""}
-      ${hOutPaid > 0 ? `<rect x="${xOut}" y="${pT + iH - hOutPaid}" width="${barW}" height="${Math.max(hOutPaid, 2)}" rx="4" fill="#c0503f"><title>${b.label} · Pago: ${currency(b.outflowPaid)}</title></rect>` : (hOutPending > 0 ? `<rect x="${xOut}" y="${pT + iH}" width="${barW}" height="1" fill="#c0503f"/>` : "")}
+      ${segments.join("")}
       ${b.inflow > 0 ? `<text x="${cxIn}" y="${yLabelIn}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#15803d">${fmtBar(b.inflow)}</text>` : ""}
       ${b.outflow > 0 ? `<text x="${cxOut}" y="${yLabelOut}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b03a2a">${fmtBar(b.outflow)}</text>` : ""}
       <text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#64748b" ${b.key === currentKey ? 'font-weight="700"' : ""}>${b.label}</text>
@@ -5786,6 +5816,14 @@ function renderCashFlowOverview() {
     <line x1="${pL}" y1="${pT + iH}" x2="${W - pR}" y2="${pT + iH}" stroke="#e2e8f0" />
     ${bars}
   </svg>`;
+
+  const activityLegend = document.querySelector("#cashFlowActivityLegend");
+  if (activityLegend) {
+    activityLegend.innerHTML = CASHFLOW_ACTIVITY_ORDER.map((act) => {
+      const colors = CASHFLOW_ACTIVITY_COLORS[act];
+      return `<span class="cashflow-activity-swatch" style="background:linear-gradient(90deg, ${colors.in} 50%, ${colors.out} 50%)"></span> ${act}`;
+    }).join("  ");
+  }
 
   // Insight
   const insight = document.querySelector("#cashFlowInsight");

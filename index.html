@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=48" />
+    <link rel="stylesheet" href="styles.css?v=49" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -1441,11 +1441,10 @@
                 <div class="cashflow-chart-head">
                   <h3>Entradas x Saídas por mês</h3>
                   <div class="cashflow-legend">
-                    <span class="cashflow-dot cashflow-dot--in"></span> Entrou
-                    <span class="cashflow-dot cashflow-dot--out"></span> Saiu
-                    <span class="cashflow-dot cashflow-dot--pending"></span> Previsto (em aberto)
+                    <span class="cashflow-dot cashflow-dot--pending"></span> Previsto (em aberto) — cor sólida = já realizado
                   </div>
                 </div>
+                <div class="cashflow-activity-legend" id="cashFlowActivityLegend"></div>
                 <div class="cashflow-activity-tabs" id="cashFlowActivityTabs">
                   <button class="cashflow-activity-tab active" data-cashflow-activity="all" type="button">Todas</button>
                   <button class="cashflow-activity-tab" data-cashflow-activity="Operacional" type="button">Operacional</button>
@@ -2044,7 +2043,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=68"></script>
+    <script src="app.js?v=69"></script>
   </body>
 </html>
 
