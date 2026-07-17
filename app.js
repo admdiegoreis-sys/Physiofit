@@ -4921,7 +4921,9 @@ function generateContractForecastTitles(contract, minDate = null) {
         chartAccountId: contract.chartAccountId || "",
         amount: contract.amount,
         forecastDate,
-        competenceDate: forecastDate,
+        // Some obligations (taxes, service fees billed in arrears) belong to the prior month's
+        // competência even though paid this month — set per-contract via competenceOffsetMonths.
+        competenceDate: contract.competenceOffsetMonths ? addMonthsToDate(forecastDate, contract.competenceOffsetMonths) : forecastDate,
         paymentMethod: contract.paymentMethod || "Pix",
         status: forecastDate < today ? "Em aberto" : "A vencer",
         openAmount: contract.amount,
