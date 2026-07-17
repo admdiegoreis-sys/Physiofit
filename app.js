@@ -4798,13 +4798,12 @@ function renderAccountTable(config) {
           const amtClass = item.direction === "Receber" ? "amount-in" : "amount-out";
           const sign = item.direction === "Receber" ? "" : "-";
           const person = supplierName(item.supplierId) || item.person || "-";
-          const payMethod = item.bankLaunch ?? item.paymentMethod ?? "";
           const chartAcc = state.chartAccounts.find((a) => a.id === item.chartAccountId);
           const planLabel = chartAccountName(item.chartAccountId) || "";
           return `
             <tr>
               <td><span class="monthly-status-button ${statusStyle}" title="${statusLabel}">${accountStatusIcon(statusLabel, statusStyle)}</span></td>
-              <td><div class="patient-name"><strong title="${person}">${person}</strong>${payMethod ? `<span>${payMethod}</span>` : ""}</div></td>
+              <td><div class="patient-name"><strong title="${person}">${person}</strong></div></td>
               <td><div class="patient-name"><strong title="${item.description || ""}">${item.description || "-"}</strong>${planLabel ? `<span title="${planLabel}">${planLabel}</span>` : ""}</div></td>
               <td class="date-cell">${monthYearLabel(item.competenceDate)}</td>
               <td class="date-cell">${dateLabel(item.forecastDate)}</td>
