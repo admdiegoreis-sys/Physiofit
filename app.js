@@ -1551,6 +1551,8 @@ function normalizeAccount(item, index) {
     paidAmount,
     openAmount,
     supplierId: item.supplierId || "",
+    // Competência is always the 1st of its month/year, regardless of the exact day it came in with.
+    competenceDate: item.competenceDate ? `${String(item.competenceDate).slice(0, 7)}-01` : (defaults.competenceDate || ""),
   };
 }
 
@@ -4922,7 +4924,8 @@ function generateContractForecastTitles(contract, minDate = null) {
         forecastDate,
         // Some obligations (taxes, service fees billed in arrears) belong to the prior month's
         // competência even though paid this month — set per-contract via competenceOffsetMonths.
-        competenceDate: contract.competenceOffsetMonths ? addMonthsToDate(forecastDate, contract.competenceOffsetMonths) : forecastDate,
+        // Competência is always the 1st of its month, regardless of the forecast's due day.
+        competenceDate: addMonthsToDate(forecastDate, contract.competenceOffsetMonths || 0),
         paymentMethod: contract.paymentMethod || "Pix",
         status: forecastDate < today ? "Em aberto" : "A vencer",
         openAmount: contract.amount,
