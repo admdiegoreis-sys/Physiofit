@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=49" />
+    <link rel="stylesheet" href="styles.css?v=50" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -1425,10 +1425,11 @@
               </div>
               <div class="module-actions cashflow-actions">
                 <div class="cashflow-range">
+                  <select id="cashFlowYearFilter" aria-label="Ano" title="Ano"></select>
                   <input id="cashFlowDateFrom" type="date" aria-label="De" title="De" />
                   <span>até</span>
                   <input id="cashFlowDateTo" type="date" aria-label="Até" title="Até" />
-                  <button class="ghost-button" id="cashFlowResetRange" type="button" title="Voltar ao padrão">Últimos 6 meses</button>
+                  <button class="ghost-button" id="cashFlowResetRange" type="button" title="Voltar ao padrão">Ano atual</button>
                 </div>
                 <button class="ghost-button" id="cashFlowToggleView" type="button">Ver em tabela</button>
               </div>
@@ -2043,7 +2044,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=69"></script>
+    <script src="app.js?v=70"></script>
   </body>
 </html>
 

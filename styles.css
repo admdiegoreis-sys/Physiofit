@@ -6811,11 +6811,13 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
 .cashflow-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .cashflow-range { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .cashflow-range span { color: #697386; font-size: 0.8rem; }
-.cashflow-range input {
+.cashflow-range input,
+.cashflow-range select {
   padding: 6px 8px; border: 1px solid #cfd5de; border-radius: 6px;
   font-size: 0.82rem; color: #535b66; background: #fff;
   min-width: 0;
 }
+.cashflow-range select { font-weight: 700; }
 
 .cashflow-cards {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -6901,7 +6903,7 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
   #cashFlowView .module-header { flex-direction: column; align-items: stretch; }
   .cashflow-actions { width: 100%; }
   .cashflow-range { width: 100%; }
-  .cashflow-range input { flex: 1 1 120px; }
+  .cashflow-range input, .cashflow-range select { flex: 1 1 120px; }
   #cashFlowResetRange, #cashFlowToggleView { flex: 1 1 auto; }
   .cashflow-card { padding: 14px 16px; gap: 10px; }
   .cashflow-card-dot { width: 30px; height: 30px; }

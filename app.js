@@ -5672,8 +5672,9 @@ function cashFlowPeriodMonths() {
   const to = document.querySelector("#cashFlowDateTo")?.value || "";
   const labels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
   const today = parseLocalDate(demoToday);
-  const end = to ? parseLocalDate(to) : today;
-  const start = from ? parseLocalDate(from) : new Date(end.getFullYear(), end.getMonth() - 5, 1);
+  // Default view is the full current year (Jan–Dec), not a rolling 6-month window.
+  const end = to ? parseLocalDate(to) : new Date(today.getFullYear(), 11, 31);
+  const start = from ? parseLocalDate(from) : new Date(today.getFullYear(), 0, 1);
   const months = [];
   let year = start.getFullYear();
   let month = start.getMonth();
@@ -5714,10 +5715,27 @@ function cashFlowActivityKey(activity) {
   return CASHFLOW_ACTIVITY_ORDER.includes(activity) ? activity : "Operacional";
 }
 
+// Keeps the year dropdown in sync with whatever date range is active (defaults to the current year)
+function populateCashFlowYearFilter() {
+  const select = document.querySelector("#cashFlowYearFilter");
+  if (!select) return;
+  const years = new Set([Number(demoToday.slice(0, 4))]);
+  state.accounts.forEach((a) => {
+    const y = Number((a.competenceDate || a.forecastDate || "").slice(0, 4));
+    if (y) years.add(y);
+  });
+  const sorted = [...years].sort((a, b) => a - b);
+  const from = document.querySelector("#cashFlowDateFrom")?.value || "";
+  const selectedYear = from ? Number(from.slice(0, 4)) : Number(demoToday.slice(0, 4));
+  const options = sorted.map((y) => `<option value="${y}" ${y === selectedYear ? "selected" : ""}>${y}</option>`).join("");
+  if (select.innerHTML !== options) select.innerHTML = options;
+}
+
 function renderCashFlowOverview() {
   const cards = document.querySelector("#cashFlowCards");
   const chart = document.querySelector("#cashFlowChart");
   if (!cards || !chart) return;
+  populateCashFlowYearFilter();
   const from = document.querySelector("#cashFlowDateFrom")?.value || "";
   const to = document.querySelector("#cashFlowDateTo")?.value || "";
   const months = cashFlowPeriodMonths();
@@ -8319,6 +8337,12 @@ document.querySelector("#cashFlowToggleView")?.addEventListener("click", () => {
 document.querySelector("#cashFlowResetRange")?.addEventListener("click", () => {
   setControlValue("cashFlowDateFrom", "");
   setControlValue("cashFlowDateTo", "");
+  renderCashFlow();
+});
+document.querySelector("#cashFlowYearFilter")?.addEventListener("change", (event) => {
+  const year = event.target.value;
+  setControlValue("cashFlowDateFrom", `${year}-01-01`);
+  setControlValue("cashFlowDateTo", `${year}-12-31`);
   renderCashFlow();
 });
 document.querySelector("#cashFlowActivityTabs")?.addEventListener("click", (event) => {
