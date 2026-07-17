@@ -5737,7 +5737,7 @@ function renderCashFlowOverview() {
   `;
 
   // Grouped bar chart (SVG)
-  const W = 760, H = 262, pT = 26, pB = 26, pL = 8, pR = 8;
+  const W = 760, H = 180, pT = 22, pB = 22, pL = 8, pR = 8;
   const iH = H - pT - pB;
   const maxV = Math.max(...buckets.flatMap((b) => [b.inflow, b.outflow]), 1);
   const slot = (W - pL - pR) / buckets.length;
