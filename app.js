@@ -7554,7 +7554,15 @@ document.addEventListener("click", (event) => {
   if (editChartAccountButton) openChartAccountModal(editChartAccountButton.dataset.editChartAccount);
 
   const editAccountButton = event.target.closest("[data-edit-account]");
-  if (editAccountButton) openAccountModal(editAccountButton.dataset.editAccount);
+  if (editAccountButton) {
+    const accountId = editAccountButton.dataset.editAccount;
+    const account = state.accounts.find((item) => item.id === accountId);
+    if (account?.paidDate) {
+      toast("Título já baixado. Estorne a baixa para poder editá-lo.");
+    } else {
+      openAccountModal(accountId);
+    }
+  }
 
   const settleAccountButton = event.target.closest("[data-settle-account]");
   if (settleAccountButton) openAccountSettlementModal(settleAccountButton.dataset.settleAccount);
