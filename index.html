@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=47" />
+    <link rel="stylesheet" href="styles.css?v=48" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -1447,6 +1447,12 @@
                     <span class="cashflow-dot cashflow-dot--pending"></span> Previsto (em aberto)
                   </div>
                 </div>
+                <div class="cashflow-activity-tabs" id="cashFlowActivityTabs">
+                  <button class="cashflow-activity-tab active" data-cashflow-activity="all" type="button">Todas</button>
+                  <button class="cashflow-activity-tab" data-cashflow-activity="Operacional" type="button">Operacional</button>
+                  <button class="cashflow-activity-tab" data-cashflow-activity="Investimento" type="button">Investimento</button>
+                  <button class="cashflow-activity-tab" data-cashflow-activity="Financiamento" type="button">Financiamento</button>
+                </div>
                 <div id="cashFlowChart"></div>
               </div>
               <div class="cashflow-insights">
@@ -2039,7 +2045,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=66"></script>
+    <script src="app.js?v=67"></script>
   </body>
 </html>
 

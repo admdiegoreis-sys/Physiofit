@@ -5696,6 +5696,14 @@ function cashFlowCashItems() {
     .filter((entry) => entry.date);
 }
 
+// Classifies an account by its DFC activity group (Operacional/Investimento/Financiamento),
+// falling back to Operacional when the chart account has no explicit activity set.
+function accountActivityGroup(item) {
+  return state.chartAccounts.find((c) => c.id === item.chartAccountId)?.activity || "Operacional";
+}
+
+let cashFlowActivityFilter = "all";
+
 function renderCashFlowOverview() {
   const cards = document.querySelector("#cashFlowCards");
   const chart = document.querySelector("#cashFlowChart");
@@ -5705,7 +5713,9 @@ function renderCashFlowOverview() {
   const months = cashFlowPeriodMonths();
   const buckets = months.map((m) => ({ ...m, inflowPaid: 0, inflowPending: 0, outflowPaid: 0, outflowPending: 0 }));
   const byKey = Object.fromEntries(buckets.map((b) => [b.key, b]));
-  const entries = cashFlowCashItems();
+  const entries = cashFlowCashItems().filter(
+    ({ item }) => cashFlowActivityFilter === "all" || accountActivityGroup(item) === cashFlowActivityFilter
+  );
   entries.forEach(({ item, date, paid }) => {
     if (from && date < from) return;
     if (to && date > to) return;
@@ -8271,6 +8281,15 @@ document.querySelector("#cashFlowToggleView")?.addEventListener("click", () => {
 document.querySelector("#cashFlowResetRange")?.addEventListener("click", () => {
   setControlValue("cashFlowDateFrom", "");
   setControlValue("cashFlowDateTo", "");
+  renderCashFlow();
+});
+document.querySelector("#cashFlowActivityTabs")?.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-cashflow-activity]");
+  if (!btn) return;
+  cashFlowActivityFilter = btn.dataset.cashflowActivity;
+  document.querySelectorAll("#cashFlowActivityTabs .cashflow-activity-tab").forEach((tab) => {
+    tab.classList.toggle("active", tab === btn);
+  });
   renderCashFlow();
 });
 

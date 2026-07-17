@@ -6850,6 +6850,20 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
 #cashFlowChart { overflow-x: auto; }
 .cashflow-chart-svg { width: 100%; min-width: 560px; height: auto; display: block; }
 
+.cashflow-activity-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.cashflow-activity-tab {
+  padding: 4px 12px;
+  border: 1px solid #dbe3ed;
+  border-radius: 999px;
+  background: #fff;
+  color: #5f6876;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cashflow-activity-tab:hover { border-color: #2454CC; color: #2454CC; }
+.cashflow-activity-tab.active { background: #2454CC; border-color: #2454CC; color: #fff; }
+
 .cashflow-insights { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; }
 .cashflow-insight-card {
   display: flex; gap: 12px; align-items: flex-start;
