@@ -2414,9 +2414,13 @@ function sortChartAccountsByCode(accounts = []) {
 }
 
 function isRevenueChartAccount(account = {}) {
-  // Nature is the authoritative signal when set explicitly to an expense/outflow — text fields like
-  // "package" (e.g. "Simples Nacional" mis-tagged as package "Receitas") must not override it.
-  if (account.nature === "Despesa" || account.nature === "Saída") return false;
+  // dreGroup's (+)/(-) prefix is the most reliable revenue/expense signal in this chart of accounts:
+  // some rows have an inconsistent "nature" field (e.g. "Simples Nacional" tagged Despesa but
+  // package "Receitas"; "Venda de Serviço - Fisioterapia" tagged Despesa despite being revenue),
+  // but dreGroup's sign has held correct across every account sampled — it takes priority when present.
+  const dreGroup = String(account.dreGroup || "").trim();
+  if (dreGroup.startsWith("(+)")) return true;
+  if (dreGroup.startsWith("(-)")) return false;
 
   const code = String(account.code || "").trim();
   const content = normalizedText([
