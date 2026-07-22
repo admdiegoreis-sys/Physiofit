@@ -1,4 +1,4 @@
-import { ensureLeadTables, normalizeLeadPayload, phoneDigits } from "./_leads.mjs";
+import { ensureLeadTables, normalizeLeadPayload, phoneMatchVariants } from "./_leads.mjs";
 import { getSql, json } from "./_db.mjs";
 
 function parseBody(event) {
@@ -7,13 +7,12 @@ function parseBody(event) {
 }
 
 async function findStudentByPhone(sql, phone) {
-  const digits = phoneDigits(phone);
-  if (!digits) return null;
+  const variants = phoneMatchVariants(phone);
+  if (!variants.length) return null;
   const rows = await sql`
     select id, name, phone
     from public.students
-    where regexp_replace(coalesce(phone, ''), '\\D', '', 'g') = ${digits}
-       or regexp_replace(coalesce(phone, ''), '\\D', '', 'g') = ${digits.replace(/^55/, "")}
+    where regexp_replace(coalesce(phone, ''), '\\D', '', 'g') = ANY(${variants})
     order by updated_at desc nulls last, created_at desc
     limit 1
   `;
@@ -21,13 +20,12 @@ async function findStudentByPhone(sql, phone) {
 }
 
 async function findLeadByPhone(sql, phone) {
-  const digits = phoneDigits(phone);
-  if (!digits) return null;
+  const variants = phoneMatchVariants(phone);
+  if (!variants.length) return null;
   const rows = await sql`
     select id, nome, telefone, status, historico
     from public.leads
-    where regexp_replace(coalesce(telefone, ''), '\\D', '', 'g') = ${digits}
-       or regexp_replace(coalesce(telefone, ''), '\\D', '', 'g') = ${digits.replace(/^55/, "")}
+    where regexp_replace(coalesce(telefone, ''), '\\D', '', 'g') = ANY(${variants})
     order by updated_at desc nulls last, created_at desc
     limit 1
   `;

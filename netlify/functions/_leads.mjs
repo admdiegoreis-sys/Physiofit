@@ -4,6 +4,22 @@ export function phoneDigits(value = "") {
   return String(value).replace(/\D/g, "");
 }
 
+// Brazilian mobile numbers added a 9th digit after the DDD (~2012); a contact's WhatsApp
+// registration and a student's/lead's stored phone may use either format for the same number.
+// Returns every digit-string variant worth matching against (with/without country code, with/without the 9).
+export function phoneMatchVariants(value = "") {
+  const digits = phoneDigits(value);
+  if (!digits) return [];
+  const withCC = digits.startsWith("55") && digits.length > 11 ? digits : `55${digits}`;
+  const withoutCC = digits.startsWith("55") && digits.length > 11 ? digits.slice(2) : digits;
+  const variants = new Set([withCC, withoutCC]);
+  [withCC, withoutCC].forEach((d) => {
+    if (d.length === 11 && d[2] === "9") variants.add(d.slice(0, 2) + d.slice(3));
+    else if (d.length === 10) variants.add(d.slice(0, 2) + "9" + d.slice(2));
+  });
+  return [...variants].filter(Boolean);
+}
+
 function phoneFromChatId(value = "") {
   const [chatId] = String(value).split("@");
   const digits = phoneDigits(chatId);

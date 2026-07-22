@@ -3632,7 +3632,7 @@ function deleteLead(leadId) {
   if (!isAdminSession()) return toast("Apenas administradores podem excluir leads.");
   const lead = state.leads.find((l) => l.id === leadId);
   const name = lead?.name || "este lead";
-  if (!window.confirm(`Excluir "${name}"? Esta ação não pode ser desfeita.`)) return;
+  if (!window.confirm(`Excluir "${name}"? Esta ação não pode ser desfeita.\n\nSe essa pessoa continuar mandando mensagem pelo WhatsApp, um novo lead será criado automaticamente na próxima mensagem — o histórico de conversa atual será perdido.`)) return;
   rememberDeletedEntities("leads", leadId);
   state.leads = state.leads.filter((item) => item.id !== leadId);
   saveDeletedState();
