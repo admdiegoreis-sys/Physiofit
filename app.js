@@ -3419,6 +3419,7 @@ function renderCrmDashboard(activeLeads) {
 }
 
 let waLogRows = [];
+let waLogFilteredRows = [];
 
 function waLogBadgeClass(classification) {
   const map = {
@@ -3449,10 +3450,14 @@ function renderWaLogTable() {
   if (!table) return;
   const term = normalizedText(document.querySelector("#waLogSearch")?.value.trim() ?? "");
   const rows = waLogRows.filter((r) => !term || normalizedText([r.phone, r.contact_name, r.message, r.classification].join(" ")).includes(term) || phoneMatchesTerm(r.phone, term.replace(/\D/g, "")));
+  waLogFilteredRows = rows;
 
   table.innerHTML = rows.length
-    ? rows.map((r) => `
+    ? rows.map((r, i) => `
         <tr>
+          <td>
+            ${r.phone ? `<button class="row-action-button lead-action-button" data-wa-restore-index="${i}" type="button" title="Restaurar como lead" aria-label="Restaurar como lead"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>` : ""}
+          </td>
           <td>${r.created_at ? new Date(r.created_at).toLocaleString("pt-BR") : "-"}</td>
           <td>${r.phone || "-"}</td>
           <td>${r.contact_name || "-"}</td>
@@ -3460,7 +3465,43 @@ function renderWaLogTable() {
           <td><span class="wa-log-badge ${waLogBadgeClass(r.classification)}">${r.classification || "-"}</span></td>
         </tr>
       `).join("")
-    : `<tr><td colspan="5"><div class="empty-state">Nenhuma interação encontrada.</div></td></tr>`;
+    : `<tr><td colspan="6"><div class="empty-state">Nenhuma interação encontrada.</div></td></tr>`;
+}
+
+function restoreLeadFromWaLog(row) {
+  if (!row?.phone) { toast("Telefone não informado nesta mensagem."); return; }
+
+  const existingStudent = findStudentByPhone(row.phone);
+  if (existingStudent) { toast(`${existingStudent.name} já é aluno(a) cadastrado(a) — não é necessário restaurar.`); return; }
+
+  const digits = row.phone.replace(/\D/g, "");
+  const existingLead = state.leads.find((l) => phoneMatchesTerm(l.phone, digits));
+  if (existingLead) {
+    closeWaLogOverlay();
+    switchView("crm");
+    const search = document.querySelector("#leadSearch");
+    if (search) search.value = existingLead.name;
+    renderCrm();
+    toast(`Lead "${existingLead.name}" já está na lista.`);
+    return;
+  }
+
+  const lead = normalizeLead({
+    name: row.contact_name || "Lead WhatsApp",
+    phone: row.phone,
+    initialMessage: row.message || "",
+    entryDate: row.created_at ? String(row.created_at).slice(0, 10) : demoToday,
+    entryChannel: "WhatsApp",
+    origin: "WhatsApp",
+    status: "Novo lead",
+    notes: "Restaurado a partir do log de mensagens do WhatsApp.",
+  }, 0, false);
+  state.leads.push(lead);
+  saveState({ immediate: true });
+  closeWaLogOverlay();
+  switchView("crm");
+  render();
+  toast(`Lead "${lead.name}" restaurado com sucesso.`);
 }
 
 function openWaLogOverlay() {
@@ -3481,6 +3522,12 @@ document.querySelector("#crmWhatsappLogButton")?.addEventListener("click", openW
 document.querySelector("#waLogClose")?.addEventListener("click", closeWaLogOverlay);
 document.querySelector("#waLogRefresh")?.addEventListener("click", fetchWaLog);
 document.querySelector("#waLogSearch")?.addEventListener("input", renderWaLogTable);
+document.querySelector("#waLogTable")?.addEventListener("click", (e) => {
+  const button = e.target.closest("[data-wa-restore-index]");
+  if (!button) return;
+  const row = waLogFilteredRows[Number(button.dataset.waRestoreIndex)];
+  if (row) restoreLeadFromWaLog(row);
+});
 document.querySelector("#whatsappLogOverlay")?.addEventListener("click", (e) => {
   if (e.target.id === "whatsappLogOverlay") closeWaLogOverlay();
 });

@@ -4555,6 +4555,7 @@ table small,
 .wa-log-toolbar { display: flex; gap: 10px; }
 .wa-log-toolbar input { flex: 1; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: .9rem; }
 .wa-log-table-wrap { max-height: 55vh; overflow-y: auto; }
+.wa-log-table-wrap th:first-child, .wa-log-table-wrap td:first-child { width: 40px; }
 .wa-log-table-wrap td { font-size: .82rem; vertical-align: top; }
 .wa-log-msg { max-width: 320px; white-space: pre-wrap; word-break: break-word; }
 .wa-log-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .72rem; font-weight: 600; white-space: nowrap; }
