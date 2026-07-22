@@ -3418,6 +3418,73 @@ function renderCrmDashboard(activeLeads) {
     </div>`;
 }
 
+let waLogRows = [];
+
+function waLogBadgeClass(classification) {
+  const map = {
+    "Novo lead": "wa-log-badge--novo",
+    "Lead existente": "wa-log-badge--existente",
+    "Aluno existente": "wa-log-badge--aluno",
+    "Ignorado": "wa-log-badge--ignorado",
+    "Mensagem sem contato": "wa-log-badge--semcontato",
+  };
+  return map[classification] || "wa-log-badge--ignorado";
+}
+
+async function fetchWaLog() {
+  const table = document.querySelector("#waLogTable");
+  if (table) table.innerHTML = `<tr><td colspan="5"><div class="empty-state">Carregando...</div></td></tr>`;
+  try {
+    const res = await fetch("/.netlify/functions/records?table=whatsapp_interactions&limit=500&columns=phone,contact_name,message,classification,created_at");
+    waLogRows = res.ok ? await res.json() : [];
+  } catch {
+    waLogRows = [];
+  }
+  waLogRows.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  renderWaLogTable();
+}
+
+function renderWaLogTable() {
+  const table = document.querySelector("#waLogTable");
+  if (!table) return;
+  const term = normalizedText(document.querySelector("#waLogSearch")?.value.trim() ?? "");
+  const rows = waLogRows.filter((r) => !term || normalizedText([r.phone, r.contact_name, r.message, r.classification].join(" ")).includes(term) || phoneMatchesTerm(r.phone, term.replace(/\D/g, "")));
+
+  table.innerHTML = rows.length
+    ? rows.map((r) => `
+        <tr>
+          <td>${r.created_at ? new Date(r.created_at).toLocaleString("pt-BR") : "-"}</td>
+          <td>${r.phone || "-"}</td>
+          <td>${r.contact_name || "-"}</td>
+          <td class="wa-log-msg">${(r.message || "-").replace(/</g, "&lt;")}</td>
+          <td><span class="wa-log-badge ${waLogBadgeClass(r.classification)}">${r.classification || "-"}</span></td>
+        </tr>
+      `).join("")
+    : `<tr><td colspan="5"><div class="empty-state">Nenhuma interação encontrada.</div></td></tr>`;
+}
+
+function openWaLogOverlay() {
+  const overlay = document.querySelector("#whatsappLogOverlay");
+  if (!overlay) return;
+  overlay.hidden = false;
+  const search = document.querySelector("#waLogSearch");
+  if (search) search.value = "";
+  fetchWaLog();
+}
+
+function closeWaLogOverlay() {
+  const overlay = document.querySelector("#whatsappLogOverlay");
+  if (overlay) overlay.hidden = true;
+}
+
+document.querySelector("#crmWhatsappLogButton")?.addEventListener("click", openWaLogOverlay);
+document.querySelector("#waLogClose")?.addEventListener("click", closeWaLogOverlay);
+document.querySelector("#waLogRefresh")?.addEventListener("click", fetchWaLog);
+document.querySelector("#waLogSearch")?.addEventListener("input", renderWaLogTable);
+document.querySelector("#whatsappLogOverlay")?.addEventListener("click", (e) => {
+  if (e.target.id === "whatsappLogOverlay") closeWaLogOverlay();
+});
+
 function leadStatusClass(status) {
   if (status === "Matriculado") return "ativo";
   if (status === "Perdido") return "atrasado";

@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=50" />
+    <link rel="stylesheet" href="styles.css?v=51" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -302,6 +302,7 @@
                 <h2>Central de Captação de Leads</h2>
               </div>
               <div class="module-actions">
+                <button class="ghost-button" id="crmWhatsappLogButton" type="button">Log de mensagens</button>
                 <button class="primary-button success-button" data-open-modal="lead" type="button">Novo Lead</button>
               </div>
             </div>
@@ -1856,6 +1857,37 @@
       </div>
     </div>
 
+    <!-- WhatsApp interactions log overlay -->
+    <div id="whatsappLogOverlay" class="pw-overlay" hidden>
+      <div class="pw-overlay-card wa-log-card">
+        <div class="wa-log-head">
+          <div>
+            <p class="eyebrow">Central de Leads</p>
+            <h3>Log de mensagens recebidas (WhatsApp)</h3>
+          </div>
+          <button id="waLogClose" class="ghost-button" type="button">Fechar</button>
+        </div>
+        <div class="wa-log-toolbar">
+          <input id="waLogSearch" type="search" placeholder="Buscar por telefone, contato, mensagem ou classificação" />
+          <button id="waLogRefresh" class="ghost-button" type="button">Atualizar</button>
+        </div>
+        <div class="table-wrap wa-log-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Recebido em</th>
+                <th>Telefone</th>
+                <th>Contato</th>
+                <th>Mensagem</th>
+                <th>Classificação</th>
+              </tr>
+            </thead>
+            <tbody id="waLogTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <div id="editUserOverlay" class="pw-overlay" hidden>
       <div class="pw-overlay-card" style="max-width:460px">
         <p class="eyebrow">Editar usuário</p>
@@ -2044,7 +2076,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=71"></script>
+    <script src="app.js?v=72"></script>
   </body>
 </html>
 
