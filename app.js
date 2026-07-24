@@ -601,11 +601,8 @@ const modalSchemas = {
       { name: "entryDate", label: "Data de entrada", type: "date", value: demoToday },
       { name: "visitDate", label: "Data da visita", type: "date", value: "", required: false },
       { name: "ownerId", label: "Responsável", type: "professionalOptional", required: false },
-      { name: "initialMessage", label: "Mensagem inicial", type: "textarea", value: "", required: false },
       { name: "nextFollowUpDate", label: "Próximo follow-up", type: "date", value: demoToday },
       { name: "lossReason", label: "Motivo de perda", type: "select", options: ["", "Preço", "Horário incompatível", "Não respondeu", "Fechou com concorrente", "Desistiu", "Outro"], value: "", required: false },
-      { name: "notes", label: "Observações", type: "textarea", value: "", required: false },
-      { name: "history", label: "Histórico de contatos", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
       const current = editingLeadId ? state.leads.find((item) => item.id === editingLeadId) : {};
