@@ -8340,12 +8340,13 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
     if (values.status === "Perdido" && currentLead && currentLead.status !== "Perdido") {
       // Marcar como perdido sempre exige motivo — salva as demais edições mantendo o status
       // atual e abre o popup dedicado, que grava o motivo junto com o novo status.
+      const leadIdForLoseOverlay = editingLeadId;
       values.status = currentLead.status;
       schema.handler(values);
       saveState();
       closeModal();
       render();
-      openLoseLeadOverlay(editingLeadId);
+      openLoseLeadOverlay(leadIdForLoseOverlay);
       return;
     }
   }
