@@ -602,6 +602,7 @@ const modalSchemas = {
       { name: "visitDate", label: "Data da visita", type: "date", value: "", required: false },
       { name: "ownerId", label: "Responsável", type: "professionalOptional", required: false },
       { name: "nextFollowUpDate", label: "Próximo follow-up", type: "date", value: demoToday },
+      { name: "notes", label: "Informações gerais", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
       const current = editingLeadId ? state.leads.find((item) => item.id === editingLeadId) : {};
