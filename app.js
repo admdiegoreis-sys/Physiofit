@@ -3342,7 +3342,15 @@ function renderCrmDashboard(activeLeads) {
   };
   const funnelStages = leadStatuses.filter((s) => s !== "Perdido");
   const funnelData = funnelStages.map((s) => ({ s, n: all.filter((l) => l.status === s).length }));
-  const maxF = Math.max(...funnelData.map((d) => d.n), 1);
+  // Leads currently sitting at a later stage already passed through every earlier one, so the
+  // funnel's shape/percentages must use "reached at least this stage" (cumulative from the bottom
+  // up), not each stage's raw headcount — otherwise a stage with many leads parked in it (e.g.
+  // "Respondido") looks bigger than the stages that fed into it, and conversion rates exceed 100%.
+  const cumulative = funnelData.reduceRight((acc, { n }, i) => {
+    acc[i] = n + (acc[i + 1] || 0);
+    return acc;
+  }, []);
+  const maxF = Math.max(cumulative[0] || 0, 1);
   const totalAtivos = active.length;
   const matriculados = all.filter((l) => l.status === "Matriculado").length;
   const perdidos = all.filter((l) => l.status === "Perdido").length;
@@ -3354,9 +3362,9 @@ function renderCrmDashboard(activeLeads) {
       <p class="crm-dash-title">Funil de Conversão</p>
       <div class="crm-dash-funnel-rows">
         ${funnelData.map(({ s, n }, i) => {
-          const prev = i > 0 ? funnelData[i - 1].n : null;
-          const pct = prev != null && prev > 0 ? Math.round((n / prev) * 100) : null;
-          const w = Math.max((n / maxF) * 100, n > 0 ? 3 : 0);
+          const prevCum = i > 0 ? cumulative[i - 1] : null;
+          const pct = prevCum != null && prevCum > 0 ? Math.round((cumulative[i] / prevCum) * 100) : null;
+          const w = Math.max((cumulative[i] / maxF) * 100, cumulative[i] > 0 ? 3 : 0);
           return `<div class="crm-frow">
             <span class="crm-frow-label">${statusShort[s]}</span>
             <div class="crm-frow-track"><div class="crm-frow-bar" style="width:${w}%"></div></div>
