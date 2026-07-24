@@ -94,7 +94,6 @@ export async function processLeadWebhook(event, sourceOverride = "") {
         update public.leads
         set
           historico = coalesce(historico, '[]'::jsonb) || ${JSON.stringify([historyItem])}::jsonb,
-          observacoes = trim(coalesce(observacoes, '') || E'\n' || ${lead.mensagem_inicial || ""}),
           updated_at = now()
         where id = ${existingLead.id}
         returning *
