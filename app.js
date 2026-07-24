@@ -3351,6 +3351,7 @@ function renderCrmDashboard(activeLeads) {
     return acc;
   }, []);
   const maxF = Math.max(cumulative[0] || 0, 1);
+  const totalFunnel = cumulative[0] || 0;
   const totalAtivos = active.length;
   const matriculados = all.filter((l) => l.status === "Matriculado").length;
   const perdidos = all.filter((l) => l.status === "Perdido").length;
@@ -3362,8 +3363,9 @@ function renderCrmDashboard(activeLeads) {
       <p class="crm-dash-title">Funil de Conversão</p>
       <div class="crm-dash-funnel-rows">
         ${funnelData.map(({ s, n }, i) => {
-          const prevCum = i > 0 ? cumulative[i - 1] : null;
-          const pct = prevCum != null && prevCum > 0 ? Math.round((cumulative[i] / prevCum) * 100) : null;
+          // Percentual de cada etapa é a fatia do total de leads do funil que está parada ali —
+          // soma sempre 100% entre as etapas (diluído), em vez de taxa de conversão etapa a etapa.
+          const pct = totalFunnel > 0 ? Math.round((n / totalFunnel) * 100) : null;
           const w = Math.max((cumulative[i] / maxF) * 100, cumulative[i] > 0 ? 3 : 0);
           return `<div class="crm-frow">
             <span class="crm-frow-label">${statusShort[s]}</span>
