@@ -602,7 +602,6 @@ const modalSchemas = {
       { name: "visitDate", label: "Data da visita", type: "date", value: "", required: false },
       { name: "ownerId", label: "Responsável", type: "professionalOptional", required: false },
       { name: "nextFollowUpDate", label: "Próximo follow-up", type: "date", value: demoToday },
-      { name: "lossReason", label: "Motivo de perda", type: "select", options: ["", "Preço", "Horário incompatível", "Não respondeu", "Fechou com concorrente", "Desistiu", "Outro"], value: "", required: false },
     ],
     handler: (values) => {
       const current = editingLeadId ? state.leads.find((item) => item.id === editingLeadId) : {};
@@ -8336,6 +8335,20 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
   form.querySelectorAll("[data-student-search]").forEach((input) => {
     delete values[`${input.dataset.studentTarget}Search`];
   });
+  if (form.dataset.type === "lead") {
+    const currentLead = editingLeadId ? state.leads.find((l) => l.id === editingLeadId) : null;
+    if (values.status === "Perdido" && currentLead && currentLead.status !== "Perdido") {
+      // Marcar como perdido sempre exige motivo — salva as demais edições mantendo o status
+      // atual e abre o popup dedicado, que grava o motivo junto com o novo status.
+      values.status = currentLead.status;
+      schema.handler(values);
+      saveState();
+      closeModal();
+      render();
+      openLoseLeadOverlay(editingLeadId);
+      return;
+    }
+  }
   const savedLeadId = form.dataset.type === "lead" ? editingLeadId : null;
   schema.handler(values);
   saveState();
