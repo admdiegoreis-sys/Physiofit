@@ -592,7 +592,7 @@ const modalSchemas = {
     fields: [
       { name: "name", label: "Nome", type: "text" },
       { name: "phone", label: "Telefone", type: "tel" },
-      { name: "email", label: "E-mail", type: "email" },
+      { name: "email", label: "E-mail", type: "email", required: false },
       { name: "instagram", label: "Instagram", type: "text", required: false },
       { name: "origin", label: "Origem do lead", type: "select", options: ["", ...leadOrigins], value: "" },
       { name: "entryChannel", label: "Canal de entrada", type: "select", options: ["", ...leadChannels], value: "" },
