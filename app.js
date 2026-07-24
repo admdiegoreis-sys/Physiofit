@@ -3270,7 +3270,11 @@ function renderCrm() {
               <td>${lead.entryChannel || "-"}</td>
               <td>${lead.origin}</td>
               <td>${lead.interest}</td>
-              <td><span class="status-pill ${leadStatusClass(lead.status)}">${lead.status}</span></td>
+              <td>
+                <select class="status-pill-select ${leadStatusClass(lead.status)}" data-lead-status-select="${lead.id}" title="Alterar status">
+                  ${leadStatuses.map((s) => `<option value="${s}" ${s === lead.status ? "selected" : ""}>${s}</option>`).join("")}
+                </select>
+              </td>
               <td>${professionalName(lead.ownerId)}</td>
               <td>${dateLabel(lead.entryDate)}${lead.visitDate ? ` / ${dateLabel(lead.visitDate)}` : ""}</td>
               <td>${lead.lossReason || "-"}</td>
@@ -3328,6 +3332,11 @@ function toggleLeadActionMenu(leadId, anchorButton) {
 
 window.addEventListener("scroll", () => closeLeadActionMenu(), true);
 window.addEventListener("resize", () => closeLeadActionMenu());
+
+document.addEventListener("change", (event) => {
+  const statusSelect = event.target.closest("[data-lead-status-select]");
+  if (statusSelect) changeLeadStatusInline(statusSelect.dataset.leadStatusSelect, statusSelect.value);
+});
 
 function renderCrmDashboard(activeLeads) {
   const funnel = document.querySelector("#crmFunnel");
@@ -3798,6 +3807,32 @@ function convertLead(leadId) {
   editingEnrollmentId = null;
   openModal("enrollment", { studentId: student.id });
   document.querySelector("#modalTitle").textContent = "Nova matrícula";
+}
+
+function changeLeadStatusInline(leadId, newStatus) {
+  const lead = state.leads.find((l) => l.id === leadId);
+  if (!lead || lead.status === newStatus) return;
+
+  if (lead.status === "Matriculado") {
+    toast("Lead já matriculado — o status é controlado pela matrícula, não pode ser alterado aqui.");
+    renderCrm();
+    return;
+  }
+  if (newStatus === "Perdido") {
+    openLoseLeadOverlay(leadId);
+    renderCrm();
+    return;
+  }
+  if (newStatus === "Matriculado") {
+    convertLead(leadId);
+    renderCrm();
+    return;
+  }
+
+  lead.status = newStatus;
+  saveState();
+  renderCrm();
+  toast(`Status atualizado para "${newStatus}".`);
 }
 
 function deleteLead(leadId) {
