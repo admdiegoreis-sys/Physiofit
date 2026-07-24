@@ -2334,7 +2334,7 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 }
 
 .crm-table-wrap table {
-  min-width: 960px;
+  min-width: 860px;
 }
 
 .fiscal-table-wrap table {
@@ -2737,7 +2737,8 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 
 .crm-table-wrap th:first-child,
 .crm-table-wrap td:first-child {
-  width: 190px;
+  width: 56px;
+  text-align: center;
 }
 
 .professionals-table-wrap th:first-child,
