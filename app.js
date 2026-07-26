@@ -3783,7 +3783,6 @@ function registerStudentFromLead(leadId) {
     return;
   }
   _pendingStudentLeadId = leadId;
-  switchView("students");
   editingStudentId = null;
   openModal("student", { name: lead.name, email: lead.email || "", phone: lead.phone || "" });
   document.querySelector("#modalTitle").textContent = "Cadastrar cliente";
