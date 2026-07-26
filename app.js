@@ -7394,6 +7394,8 @@ function openMenuGroup(groupName) {
 
 function setAgendaMode(mode) {
   agendaMode = mode;
+  // Semana sempre começa na segunda-feira — mesmo vindo de "Hoje" caindo num fim de semana.
+  if (mode === "week") currentWeekStart = toMonday(currentWeekStart);
   document.querySelectorAll("[data-agenda-mode-target]").forEach((button) => button.classList.toggle("active", button.dataset.agendaModeTarget === mode));
   renderSchedule();
 }
