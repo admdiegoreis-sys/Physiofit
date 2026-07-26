@@ -57,10 +57,14 @@ export async function handler(event) {
       });
     }
 
-    // Cliente preenche e envia o formulario publico.
+    // Cliente preenche e envia o formulario publico. Uma vez enviado, o link "expira" para
+    // novos envios — evita que o mesmo cadastro seja reenviado/alterado sem passar pelo estudio.
     if (event.httpMethod === "POST" && token) {
-      const rows = await sql`select token from public.precadastro_links where token = ${token} limit 1`;
+      const rows = await sql`select token, status from public.precadastro_links where token = ${token} limit 1`;
       if (!rows[0]) return json(404, { error: "Link invalido ou expirado." });
+      if (rows[0].status === "Preenchido" || rows[0].status === "Aplicado") {
+        return json(409, { error: "Este cadastro ja foi enviado." });
+      }
       const payload = JSON.parse(event.body || "{}");
       await sql`
         update public.precadastro_links
