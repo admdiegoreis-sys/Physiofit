@@ -3841,6 +3841,34 @@ td.row-actions .row-action-button:last-child {
   padding: 18px;
 }
 
+.precadastro-link-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 14px 18px 0;
+  padding: 12px 16px;
+  background: #eaf2ff;
+  border: 1px solid #c3d4f8;
+  border-radius: 12px;
+}
+.precadastro-link-banner div { display: flex; flex-direction: column; gap: 2px; }
+.precadastro-link-banner strong { font-size: 0.88rem; color: #1a3fa8; }
+.precadastro-link-banner span { font-size: 0.78rem; color: #4b5f8f; }
+.precadastro-link-banner .primary-button { white-space: nowrap; flex-shrink: 0; }
+.form-source-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #eaf2ff;
+  color: #1a3fa8;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+@media (max-width: 560px) {
+  .precadastro-link-banner { flex-direction: column; align-items: stretch; }
+}
+
 .toast {
   position: fixed;
   right: 22px;

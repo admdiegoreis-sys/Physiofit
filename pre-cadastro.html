@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pré-cadastro · Physiofit Studio</title>
+  <link rel="icon" type="image/png" href="assets/operafit-icon.png" />
+  <style>
+    :root {
+      --ink: #15171A;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --surface: #ffffff;
+      --surface-alt: #f8fafc;
+      --accent: #2454CC;
+      --amber: #f59e0b;
+      --rose: #ef4444;
+      --mint: #0f9692;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: var(--surface-alt);
+      color: var(--ink);
+      padding: 18px;
+    }
+    .pc-wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+    .pc-header {
+      display: flex; align-items: center; gap: 16px;
+      background: linear-gradient(135deg, #eef4fb, #f4f7fb);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px 22px;
+    }
+    .pc-header img { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: #fff; }
+    .pc-eyebrow { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; margin: 0 0 4px; }
+    .pc-header h1 { font-size: 1.5rem; margin: 0 0 4px; }
+    .pc-header p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+    .pc-header .pc-studio { color: var(--ink); font-weight: 700; }
+
+    .pc-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px 22px;
+    }
+    .pc-warning {
+      background: #fef7e6;
+      border: 1px solid #fbd98a;
+      border-radius: 16px;
+      padding: 18px 20px;
+    }
+    .pc-warning strong { display: flex; align-items: center; gap: 8px; font-size: 1.02rem; color: #7a5209; }
+    .pc-warning p { margin: 10px 0 0; color: #7a5209; font-size: 0.9rem; }
+
+    .pc-notice {
+      background: #eaf2ff;
+      border: 1px solid #c3d4f8;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.84rem;
+      color: #1a3fa8;
+    }
+
+    .pc-section-title {
+      font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--muted); margin: 22px 0 10px; padding-top: 12px; border-top: 1px solid var(--line);
+    }
+    .pc-section-title:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+    .pc-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .pc-field label { font-size: 0.82rem; font-weight: 700; color: #334155; }
+    .pc-field input, .pc-field select, .pc-field textarea {
+      border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+      font-size: 0.92rem; font-family: inherit; color: var(--ink); background: #fff;
+    }
+    .pc-field textarea { min-height: 70px; resize: vertical; }
+    .pc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+    @media (max-width: 560px) { .pc-grid { grid-template-columns: 1fr; } }
+
+    .pc-submit {
+      width: 100%; padding: 14px; border: none; border-radius: 12px;
+      background: var(--accent); color: #fff; font-size: 1rem; font-weight: 800;
+      cursor: pointer; margin-top: 10px;
+    }
+    .pc-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .pc-error { color: var(--rose); font-size: 0.86rem; margin-top: 8px; display: none; }
+
+    .pc-success { text-align: center; padding: 40px 20px; }
+    .pc-success h2 { color: var(--mint); }
+
+    #pcLoading { text-align: center; padding: 40px; color: var(--muted); }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="pc-wrap">
+    <div id="pcLoading">Carregando...</div>
+
+    <div id="pcContent" hidden>
+      <div class="pc-header">
+        <img src="assets/physiofit-logo.jpeg" alt="Physiofit Studio" />
+        <div>
+          <p class="pc-eyebrow">Pré-cadastro</p>
+          <h1>Vamos completar seu cadastro?</h1>
+          <p>Preencha seus dados para que o estúdio mantenha seu cadastro completo e atualizado.<br />Você está se cadastrando em <span class="pc-studio">Physiofit Studio</span>.</p>
+        </div>
+      </div>
+
+      <div id="pcDuplicateWarning" class="pc-warning" hidden>
+        <strong>⚠ Número de telefone já cadastrado</strong>
+        <p id="pcDuplicateText"></p>
+        <p>Fale diretamente com o estúdio para atualizar seus dados.</p>
+      </div>
+
+      <div id="pcFormCard" class="pc-card">
+        <div id="pcAlreadySentNotice" class="pc-notice" hidden>Você já enviou esse formulário antes. Pode revisar e atualizar os dados abaixo se precisar.</div>
+        <form id="pcForm">
+          <p class="pc-section-title">Identificação</p>
+          <div class="pc-field"><label>Nome completo *</label><input name="name" type="text" required /></div>
+          <div class="pc-grid">
+            <div class="pc-field"><label>CPF</label><input name="cpf" type="text" /></div>
+            <div class="pc-field"><label>Data de nascimento</label><input name="birthDate" type="date" /></div>
+          </div>
+          <div class="pc-grid">
+            <div class="pc-field"><label>Sexo</label>
+              <select name="gender"><option value="Feminino">Feminino</option><option value="Masculino">Masculino</option></select>
+            </div>
+            <div class="pc-field"><label>Profissão</label><input name="profession" type="text" /></div>
+          </div>
+
+          <p class="pc-section-title">Contato e endereço</p>
+          <div class="pc-grid">
+            <div class="pc-field"><label>E-mail</label><input name="email" type="email" /></div>
+            <div class="pc-field"><label>Celular *</label><input name="phone" type="tel" required /></div>
+          </div>
+          <div class="pc-grid">
+            <div class="pc-field"><label>Telefone alternativo</label><input name="alternatePhone" type="tel" /></div>
+            <div class="pc-field"><label>CEP</label><input name="zip" type="text" /></div>
+          </div>
+          <div class="pc-grid">
+            <div class="pc-field"><label>Endereço</label><input name="address" type="text" /></div>
+            <div class="pc-field"><label>Número</label><input name="addressNumber" type="text" /></div>
+          </div>
+          <div class="pc-grid">
+            <div class="pc-field"><label>Bairro</label><input name="neighborhood" type="text" /></div>
+            <div class="pc-field"><label>Cidade</label><input name="city" type="text" /></div>
+          </div>
+          <div class="pc-field"><label>UF</label><input name="stateCode" type="text" maxlength="2" style="max-width:100px" /></div>
+
+          <p class="pc-section-title">Saúde / Prontuário</p>
+          <div class="pc-field"><label>Objetivo</label><textarea name="clinicalGoal"></textarea></div>
+          <div class="pc-field"><label>Restrições / dores / contraindicações</label><textarea name="restrictions"></textarea></div>
+          <div class="pc-field"><label>Medicamentos / observações de saúde</label><textarea name="medication"></textarea></div>
+          <div class="pc-grid">
+            <div class="pc-field"><label>Altura</label><input name="height" type="text" /></div>
+            <div class="pc-field"><label>Peso</label><input name="weight" type="text" /></div>
+          </div>
+
+          <p class="pc-section-title">Responsáveis e emergência</p>
+          <div class="pc-grid">
+            <div class="pc-field"><label>Responsável financeiro</label><input name="responsible" type="text" /></div>
+            <div class="pc-field"><label>Contato do responsável</label><input name="responsiblePhone" type="tel" /></div>
+          </div>
+          <div class="pc-grid">
+            <div class="pc-field"><label>Contato de emergência</label><input name="emergencyContact" type="text" /></div>
+            <div class="pc-field"><label>Telefone de emergência</label><input name="emergencyPhone" type="tel" /></div>
+          </div>
+
+          <p class="pc-section-title">Outras informações</p>
+          <div class="pc-field"><label>Observações gerais</label><textarea name="notes"></textarea></div>
+
+          <button class="pc-submit" type="submit" id="pcSubmitBtn">Enviar cadastro</button>
+          <p class="pc-error" id="pcError"></p>
+        </form>
+      </div>
+    </div>
+
+    <div id="pcSuccess" class="pc-card pc-success" hidden>
+      <h2>Cadastro enviado! ✓</h2>
+      <p>Obrigado por preencher seus dados. O estúdio vai concluir seu cadastro em breve.</p>
+    </div>
+
+    <div id="pcInvalid" class="pc-card" hidden>
+      <h2>Link inválido</h2>
+      <p>Esse link de pré-cadastro não é válido ou já expirou. Entre em contato com o estúdio para receber um novo link.</p>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token") || "";
+    const API = `/.netlify/functions/precadastro?token=${encodeURIComponent(token)}`;
+
+    function show(id) {
+      ["pcLoading", "pcContent", "pcSuccess", "pcInvalid"].forEach((elId) => {
+        document.getElementById(elId).hidden = elId !== id;
+      });
+    }
+
+    async function init() {
+      if (!token) { show("pcInvalid"); return; }
+      try {
+        const res = await fetch(API);
+        if (!res.ok) { show("pcInvalid"); return; }
+        const data = await res.json();
+
+        document.querySelector('#pcForm [name="name"]').value = data.name || "";
+        document.querySelector('#pcForm [name="phone"]').value = data.phone || "";
+
+        if (data.duplicateStudent) {
+          document.getElementById("pcDuplicateText").textContent =
+            `Já existe um cadastro com este número de celular${data.duplicateStudent.name ? ` (${data.duplicateStudent.name})` : ""}.`;
+          document.getElementById("pcDuplicateWarning").hidden = false;
+          document.getElementById("pcFormCard").hidden = true;
+        } else if (data.status === "Preenchido" || data.status === "Aplicado") {
+          document.getElementById("pcAlreadySentNotice").hidden = false;
+        }
+
+        show("pcContent");
+      } catch (err) {
+        show("pcInvalid");
+      }
+    }
+
+    document.getElementById("pcForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const btn = document.getElementById("pcSubmitBtn");
+      const errorEl = document.getElementById("pcError");
+      errorEl.style.display = "none";
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+      try {
+        const formData = new FormData(event.target);
+        const payload = Object.fromEntries(formData.entries());
+        const res = await fetch(API, { method: "POST", body: JSON.stringify(payload) });
+        if (!res.ok) throw new Error("Falha ao enviar.");
+        show("pcSuccess");
+      } catch (err) {
+        errorEl.textContent = "Não foi possível enviar seu cadastro agora. Tente novamente em instantes.";
+        errorEl.style.display = "block";
+        btn.disabled = false;
+        btn.textContent = "Enviar cadastro";
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>

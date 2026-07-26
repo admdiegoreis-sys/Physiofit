@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=56" />
+    <link rel="stylesheet" href="styles.css?v=57" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -2075,6 +2075,13 @@
           <h2 id="modalTitle">Cadastro</h2>
           <button class="icon-button" id="closeModal" type="button" aria-label="Fechar">x</button>
         </div>
+        <div id="precadastroLinkBanner" class="precadastro-link-banner" hidden>
+          <div>
+            <strong>Prefere que o cliente preencha sozinho?</strong>
+            <span>Envie um link de pré-cadastro pelo WhatsApp — os dados voltam prontos para você conferir.</span>
+          </div>
+          <button type="button" class="primary-button" id="precadastroLinkSendBtn">Enviar link pelo WhatsApp</button>
+        </div>
         <form id="modalForm" class="modal-body"></form>
       </div>
     </div>
@@ -2087,7 +2094,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=87"></script>
+    <script src="app.js?v=88"></script>
   </body>
 </html>
 

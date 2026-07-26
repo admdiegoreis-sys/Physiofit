@@ -1295,6 +1295,7 @@ function normalizeStudent(item, index) {
     responsiblePhone: "",
     emergencyContact: "",
     emergencyPhone: "",
+    formSource: "Manual",
     paymentStatus: "Pendente",
     lastPaymentDate: "",
     lastPaidAmount: 0,
@@ -3786,6 +3787,77 @@ function registerStudentFromLead(leadId) {
   editingStudentId = null;
   openModal("student", { name: lead.name, email: lead.email || "", phone: lead.phone || "" });
   document.querySelector("#modalTitle").textContent = "Cadastrar cliente";
+  const banner = document.querySelector("#precadastroLinkBanner");
+  if (banner) banner.hidden = false;
+}
+
+async function sendPrecadastroLink() {
+  const nameInput = document.querySelector('#modalForm [name="name"]');
+  const phoneInput = document.querySelector('#modalForm [name="phone"]');
+  const name = nameInput?.value.trim() || "";
+  const phone = phoneInput?.value.trim() || "";
+  if (!phone) { toast("Informe o telefone do cliente antes de enviar o link."); phoneInput?.focus(); return; }
+
+  const btn = document.querySelector("#precadastroLinkSendBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Gerando link..."; }
+  try {
+    const res = await fetch("/.netlify/functions/precadastro", {
+      method: "POST",
+      body: JSON.stringify({ name, phone, leadId: _pendingStudentLeadId || "" }),
+    });
+    if (!res.ok) throw new Error("Falha ao gerar link.");
+    const { token } = await res.json();
+    const link = `${location.origin}/pre-cadastro.html?token=${token}`;
+    const digits = phone.replace(/\D/g, "");
+    const waNumber = digits.startsWith("55") ? digits : `55${digits}`;
+    const message = `Olá${name ? ` ${name}` : ""}! Para agilizar seu cadastro na Physiofit Studio, preencha seus dados por aqui: ${link}`;
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+    closeModal();
+    toast("Link de pré-cadastro enviado. Assim que o cliente preencher, o cadastro será atualizado automaticamente.");
+  } catch (err) {
+    toast("Não foi possível gerar o link agora. Tente novamente.");
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Enviar link pelo WhatsApp"; }
+  }
+}
+
+document.querySelector("#precadastroLinkSendBtn")?.addEventListener("click", sendPrecadastroLink);
+
+async function mergePrecadastroSubmissions() {
+  try {
+    const res = await fetch("/.netlify/functions/precadastro?status=Preenchido");
+    if (!res.ok) return;
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length === 0) return;
+
+    let changed = false;
+    for (const row of rows) {
+      const payload = row.payload || {};
+      const existingLead = row.lead_id ? state.leads.find((l) => l.id === row.lead_id) : null;
+      const existingStudentId = existingLead?.linkedStudentId;
+      const existingStudent = existingStudentId ? state.students.find((s) => s.id === existingStudentId) : null;
+
+      const studentData = { ...payload, formSource: "Cliente" };
+      if (existingStudent) {
+        Object.assign(existingStudent, studentData);
+      } else {
+        const newStudent = normalizeStudent({ id: uid("s"), gender: payload.gender === "Masculino" ? "M" : "F", lastPresence: "-", membership: "Avulsa", ...studentData }, state.students.length);
+        state.students.push(newStudent);
+        if (existingLead) existingLead.linkedStudentId = newStudent.id;
+      }
+      changed = true;
+
+      await fetch(`/.netlify/functions/precadastro?token=${row.token}`, { method: "PATCH" }).catch(() => {});
+    }
+
+    if (changed) {
+      saveState({ immediate: true });
+      render();
+      toast(`${rows.length === 1 ? "1 cadastro recebido" : `${rows.length} cadastros recebidos`} pelo formulário do cliente.`);
+    }
+  } catch (e) {
+    console.warn("Não foi possível verificar pré-cadastros:", e);
+  }
 }
 
 function convertLead(leadId) {
@@ -4189,7 +4261,7 @@ function renderStudents() {
                   <button class="row-action-button delete-icon-button" data-delete-student="${item.id}" type="button" title="Excluir cliente" aria-label="Excluir cliente"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
                 </div>
               </td>
-              <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${studentActivePlan(item.id)}</span></div></td>
+              <td><div class="patient-name"><strong>${displayName(item.name)}</strong><span>${studentActivePlan(item.id)}${item.formSource === "Cliente" ? ` · <span class="form-source-badge" title="Cadastro preenchido pelo próprio cliente via link">Formulário cliente</span>` : ""}</span></div></td>
               <td><span class="status-pill ${statusClass(item.membership)}">${item.membership}</span></td>
               <td><div class="patient-contact"><span>${item.email || "-"}</span><a href="tel:${item.phone}">${item.phone}</a></div></td>
               <td>${maskedCpf(item.cpf)}</td>
@@ -7408,6 +7480,7 @@ function openModal(type, values = {}) {
   const backdrop = document.querySelector("#modalBackdrop");
   const form = document.querySelector("#modalForm");
   document.querySelector("#modalTitle").textContent = schema.title;
+  document.querySelector("#precadastroLinkBanner").hidden = true;
   form.dataset.type = type;
   const fields = schema.fields.map((field) => ({ ...field, value: values[field.name] ?? field.value, _leadDisplayName: field.name === "studentId" ? (values._leadDisplayName || "") : "" }));
   if (type === "student") {
@@ -9024,7 +9097,10 @@ async function mergeLeadsFromApi() {
   }
 }
 
-hydrateStateFromNeon().finally(() => mergeLeadsFromApi());
+hydrateStateFromNeon().finally(() => {
+  mergeLeadsFromApi();
+  mergePrecadastroSubmissions();
+});
 
 // Roteamento por URL
 window.addEventListener("popstate", (e) => {
