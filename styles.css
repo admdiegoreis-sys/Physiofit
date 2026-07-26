@@ -3856,6 +3856,20 @@ td.row-actions .row-action-button:last-child {
 .precadastro-link-banner strong { font-size: 0.88rem; color: #1a3fa8; }
 .precadastro-link-banner span { font-size: 0.78rem; color: #4b5f8f; }
 .precadastro-link-banner .primary-button { white-space: nowrap; flex-shrink: 0; }
+.lead-pending-enroll-alert {
+  display: block;
+  margin-top: 6px;
+  padding: 3px 9px;
+  border: 1px solid #fbd98a;
+  border-radius: 999px;
+  background: #fef7e6;
+  color: #7a5209;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lead-pending-enroll-alert:hover { background: #fdecc2; }
 .form-source-badge {
   display: inline-block;
   padding: 1px 7px;

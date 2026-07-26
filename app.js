@@ -761,11 +761,11 @@ const modalSchemas = {
       state.students.push(newStudent);
       const leadId = _pendingStudentLeadId;
       if (leadId) {
-        // Cadastrar o cliente a partir do lead já conta como fechamento — mantém o lead
-        // visível no funil (a regra de exclusão da tela só esconde quem "já era cliente"
-        // antes de virar lead) e reflete a conversão mesmo antes de escolher o plano.
+        // Cadastrar o cliente a partir do lead ainda não é matrícula — só vincula o cliente
+        // criado ao lead (mantendo-o visível/ativo na tela via isLeadActiveForCrm) e deixa um
+        // alerta na linha do lead lembrando de vincular a matrícula depois.
         state.leads = state.leads.map((lead) =>
-          lead.id === leadId ? { ...lead, linkedStudentId: newStudent.id, status: "Matriculado" } : lead
+          lead.id === leadId ? { ...lead, linkedStudentId: newStudent.id } : lead
         );
         _pendingStudentLeadId = null;
       }
@@ -3284,6 +3284,7 @@ function renderCrm() {
                 <select class="status-pill-select ${leadStatusClass(lead.status)}" data-lead-status-select="${lead.id}" title="Alterar status">
                   ${leadStatuses.map((s) => `<option value="${s}" ${s === lead.status ? "selected" : ""}>${s}</option>`).join("")}
                 </select>
+                ${lead.linkedStudentId && lead.status !== "Matriculado" ? `<button class="lead-pending-enroll-alert" data-convert-lead="${lead.id}" type="button" title="Cliente cadastrado — falta vincular a matrícula">⚠ Vincular matrícula</button>` : ""}
               </td>
               <td>${professionalName(lead.ownerId)}</td>
               <td>${dateLabel(lead.entryDate)}${lead.visitDate ? ` / ${dateLabel(lead.visitDate)}` : ""}</td>
