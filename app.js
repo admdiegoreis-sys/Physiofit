@@ -3251,7 +3251,7 @@ function renderCrm() {
     .filter((item) => ownerFilter === "all" || item.ownerId === ownerFilter)
     .filter((item) => originFilter === "all" || item.origin === originFilter || item.entryChannel === originFilter)
     .filter((item) => !term || normalizedText([item.name, item.phone, item.email, item.instagram, item.origin, item.entryChannel, item.interest, item.status, item.initialMessage, item.notes].join(" ")).includes(term) || phoneMatchesTerm(item.phone, term.replace(/\D/g, "")))
-    .sort((a, b) => dateValue(a.nextFollowUpDate) - dateValue(b.nextFollowUpDate));
+    .sort((a, b) => dateValue(a.entryDate) - dateValue(b.entryDate));
 
   renderCrmDashboard(activeLeads);
 
