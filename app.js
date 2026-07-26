@@ -3884,7 +3884,6 @@ function convertLead(leadId) {
   saveState();
   render();
   _pendingEnrollLeadId = leadId;
-  switchView("enrollments");
   editingEnrollmentId = null;
   openModal("enrollment", { studentId: student.id });
   document.querySelector("#modalTitle").textContent = "Nova matrícula";
