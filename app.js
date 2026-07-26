@@ -573,10 +573,10 @@ const menuGroupByView = {
   accountsReceivable: "finance",
   ofxImport: "finance",
   bankReconciliation: "finance",
-  cashFlow: "finance",
-  dre: "finance",
   chartAccounts: "finance",
-  finance: "finance",
+  cashFlow: "management",
+  dre: "management",
+  finance: "management",
   records: "records",
   settings: "settings",
 };
@@ -3101,7 +3101,7 @@ function renderDashboard() {
         .join("")
     : `<div class="empty-state">Nenhuma aula prevista para hoje.</div>`;
 
-  const heatmapDays = weekDays().slice(0, 6);
+  const heatmapDays = weekDays().slice(0, 5);
   const heatmapHours = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 20, 21];
   const maxHourCount = Math.max(
     1,
@@ -3113,7 +3113,7 @@ function renderDashboard() {
   document.querySelector("#occupancyHeatmap").innerHTML = `
     <div class="heatmap-grid">
       <span></span>
-      ${["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => `<strong>${day}</strong>`).join("")}
+      ${["Seg", "Ter", "Qua", "Qui", "Sex"].map((day) => `<strong>${day}</strong>`).join("")}
       ${heatmapHours
         .map((hour) => {
           const cells = heatmapDays
@@ -4905,15 +4905,7 @@ function accountRows(config) {
     .filter((item) => reconciliation === "all" || (item.reconciliationStatus || "unreconciled") === reconciliation)
     .filter((item) => chartAccount === "all" || item.chartAccountId === chartAccount)
     .sort((a, b) => {
-      // Primary key: data de pagamento (paid items first, ordered by when they were paid).
-      // Secondary key: data de vencimento — used as tiebreaker and to order unpaid items among themselves.
-      const paidA = a.paidDate || "";
-      const paidB = b.paidDate || "";
-      if (paidA !== paidB) {
-        if (!paidA) return 1;
-        if (!paidB) return -1;
-        return paidA.localeCompare(paidB);
-      }
+      // Ordenação por data de vencimento, mais antigo para mais novo.
       const dueA = accountExpectedDate(a) || "";
       const dueB = accountExpectedDate(b) || "";
       return dueA.localeCompare(dueB);
@@ -8161,6 +8153,11 @@ document.querySelector("#apptActionMainGrid").addEventListener("click", (e) => {
   }
   if (action === "experimental") {
     appt.sessionKind = "Experimental";
+    // Marcar como experimental deve valer como uma sessão normal/ativa — limpa um status
+    // anterior de falta/cancelamento que faria o card mostrar o ícone errado (X, lixeira etc.).
+    if (["Faltou", "Falta justificada", "Cancelada"].includes(appt.status)) {
+      appt.status = "Confirmada";
+    }
     closeApptActionPanel();
     saveState(); render(); toast("Sessão marcada como experimental.");
     return;
@@ -8617,8 +8614,8 @@ document.querySelector("#nextWeek").addEventListener("click", () => {
 });
 
 document.querySelector("#todayButton").addEventListener("click", () => {
-  currentWeekStart = toMonday(parseLocalDate(demoToday));
-  renderSchedule();
+  currentWeekStart = parseLocalDate(demoToday);
+  setAgendaMode("day");
 });
 
 document.querySelector("#agendaSearchButton").addEventListener("click", renderSchedule);

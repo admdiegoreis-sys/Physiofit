@@ -3385,7 +3385,7 @@ tr:last-child td {
 
 .accounts-table-wrap th,
 .accounts-table-wrap td {
-  padding: 5px 7px;
+  padding: 8px 11px;
   line-height: 1.15;
 }
 
@@ -4126,6 +4126,13 @@ td.row-actions .row-action-button:last-child {
 
   .workspace {
     padding: calc(var(--topbar-height) + 20px) 12px 18px;
+  }
+
+  /* Em telas estreitas --side-menu-width vira 0px, então o rodapé "powered by"
+     (que reusa essa variável pra largura) encolhia mas ficava com padding visível,
+     sobrando um retângulo cortado grudado no canto da tela por cima do conteúdo. */
+  .powered-by-operafit {
+    display: none;
   }
 
   .topbar,
@@ -5248,7 +5255,7 @@ body {
 
 .heatmap-grid {
   display: grid;
-  grid-template-columns: 34px repeat(6, minmax(24px, 1fr));
+  grid-template-columns: 34px repeat(5, minmax(24px, 1fr));
   gap: 3px;
   align-items: center;
 }
@@ -6731,9 +6738,9 @@ td.row-actions .row-action-button {
 .appt-btn-icon--edit     { background: #475569; color: #fff; }
 .appt-btn-icon--prof     { background: #2454CC; color: #fff; }
 .appt-btn-icon--remar    { background: #0284c7; color: #fff; }
-.appt-btn-icon--cancel   { background: #dc2626; color: #fff; }
-.appt-action-btn--cancel { border-color: #fecaca; }
-.appt-action-btn--cancel:hover { background: #fef2f2 !important; border-color: #dc2626 !important; color: #dc2626 !important; }
+.appt-btn-icon--cancel   { background: #64748b; color: #fff; }
+.appt-action-btn--cancel { border-color: #cbd5e1; }
+.appt-action-btn--cancel:hover { background: #f8fafc !important; border-color: #64748b !important; color: #475569 !important; }
 
 /* Badges nos eventos do calendário */
 .evt-badge {

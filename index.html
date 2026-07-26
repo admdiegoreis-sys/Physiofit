@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=55" />
+    <link rel="stylesheet" href="styles.css?v=56" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -107,9 +107,18 @@
                 <button class="top-menu-option" data-view="accountsReceivable" type="button">Contas a Receber</button>
                 <button class="top-menu-option" data-view="ofxImport" type="button">Importar OFX</button>
                 <button class="top-menu-option" data-view="bankReconciliation" type="button">Conciliação Bancária</button>
+                <button class="top-menu-option" data-view="chartAccounts" type="button">Plano de Contas</button>
+              </div>
+            </div>
+
+            <div class="top-menu-group" data-menu-wrapper="management" data-admin-only>
+              <button class="top-menu-button" data-top-menu-toggle="management" type="button">
+                <svg class="menu-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M18.7 8 13 13.7l-4-4L3 16.3"/></svg>
+                <span><strong>Gestão</strong><small>Resultados</small></span>
+              </button>
+              <div class="top-menu-panel">
                 <button class="top-menu-option" data-view="cashFlow" type="button">Fluxo de Caixa</button>
                 <button class="top-menu-option" data-view="dre" type="button">DRE</button>
-                <button class="top-menu-option" data-view="chartAccounts" type="button">Plano de Contas</button>
                 <button class="top-menu-option" data-view="finance" type="button">Cobranças</button>
               </div>
             </div>
@@ -426,7 +435,6 @@
                 <h2 id="calendarRange">11 - 15 de mai. de 2026</h2>
                 <div class="calendar-modes" role="group" aria-label="Modo da agenda">
                   <button class="mode-button active" data-agenda-mode="week" type="button">Semana</button>
-                  <button class="mode-button" data-agenda-mode="day" type="button">Dia</button>
                   <button class="mode-button" data-agenda-mode="month" type="button">Mês</button>
                 </div>
               </div>
@@ -2079,7 +2087,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=83"></script>
+    <script src="app.js?v=84"></script>
   </body>
 </html>
 
