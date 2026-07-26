@@ -761,8 +761,11 @@ const modalSchemas = {
       state.students.push(newStudent);
       const leadId = _pendingStudentLeadId;
       if (leadId) {
+        // Cadastrar o cliente a partir do lead já conta como fechamento — mantém o lead
+        // visível no funil (a regra de exclusão da tela só esconde quem "já era cliente"
+        // antes de virar lead) e reflete a conversão mesmo antes de escolher o plano.
         state.leads = state.leads.map((lead) =>
-          lead.id === leadId ? { ...lead, linkedStudentId: newStudent.id } : lead
+          lead.id === leadId ? { ...lead, linkedStudentId: newStudent.id, status: "Matriculado" } : lead
         );
         _pendingStudentLeadId = null;
       }
@@ -3237,6 +3240,17 @@ function renderDashboard() {
     : `<div class="empty-state">Sem atividades recentes.</div>`;
 }
 
+// Exclude contacts who were ALREADY students before reaching out (phone match with/without 9th
+// digit) — that's a different person's history, not this lead's funnel. But a lead we ourselves
+// just registered via "Cadastrar cliente" (linkedStudentId is that exact match) must stay visible
+// until the matrícula is actually completed, or the operator loses track of it mid-conversion.
+function isLeadActiveForCrm(lead) {
+  if (lead.status === "Matriculado") return true;
+  const matchedStudent = findStudentByPhone(lead.phone);
+  if (!matchedStudent) return true;
+  return Boolean(lead.linkedStudentId) && matchedStudent.id === lead.linkedStudentId;
+}
+
 function renderCrm() {
   const table = document.querySelector("#leadsTable");
   if (!table) return;
@@ -3244,9 +3258,7 @@ function renderCrm() {
   const statusFilter = document.querySelector("#leadStatusFilter")?.value ?? "all";
   const ownerFilter = document.querySelector("#leadOwnerFilter")?.value ?? "all";
   const originFilter = document.querySelector("#leadOriginFilter")?.value ?? "all";
-  // Exclude contacts who were already students when they reached out (phone match with/without
-  // 9th digit). Leads converted through the funnel (Matriculado) must stay, or conversion zeroes out.
-  const activeLeads = state.leads.filter((item) => item.status === "Matriculado" || !findStudentByPhone(item.phone));
+  const activeLeads = state.leads.filter(isLeadActiveForCrm);
   const leads = activeLeads
     .filter((item) => statusFilter === "all" || item.status === statusFilter)
     .filter((item) => ownerFilter === "all" || item.ownerId === ownerFilter)
@@ -3340,7 +3352,7 @@ function renderCrmDashboard(activeLeads) {
   const funnel = document.querySelector("#crmFunnel");
   if (!funnel) return;
 
-  const all = activeLeads ?? state.leads.filter((l) => l.status === "Matriculado" || !findStudentByPhone(l.phone));
+  const all = activeLeads ?? state.leads.filter(isLeadActiveForCrm);
   const active = all.filter((l) => l.status !== "Perdido");
 
   const statusShort = {
