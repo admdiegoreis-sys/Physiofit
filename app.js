@@ -757,7 +757,10 @@ const modalSchemas = {
       const enrollValues = Object.fromEntries(enrollFields.map(k => [k, values[k]]));
       enrollFields.forEach(k => delete values[k]);
       const hasEnroll = !!(enrollValues.modalityId && enrollValues.planId);
-      const newStudent = { id: uid("s"), gender: "F", lastPresence: "-", membership: hasEnroll ? "Matriculado" : "Avulsa", ...values };
+      // Cadastro feito a partir de um lead sem matrícula junto fica "Pendente" — só vira "Ativo"
+      // quando a matrícula é de fato concluída (ver convertLead / handler de enrollment abaixo).
+      const membership = hasEnroll ? "Matriculado" : (_pendingStudentLeadId ? "Pendente" : "Avulsa");
+      const newStudent = { id: uid("s"), gender: "F", lastPresence: "-", membership, ...values };
       state.students.push(newStudent);
       const leadId = _pendingStudentLeadId;
       if (leadId) {
@@ -936,6 +939,9 @@ const modalSchemas = {
             history: `${lead.history || ""}\nMatriculado em ${dateLabel(demoToday)}.`.trim(),
           };
         });
+        // Matrícula concluída pela tela de lead: o cliente sai de "Pendente" para "Ativo".
+        const enrolledStudent = state.students.find((s) => s.id === normalized.studentId);
+        if (enrolledStudent) enrolledStudent.membership = "Ativo";
         _pendingEnrollLeadId = null;
       }
       ensureEnrollmentFinancialTitles(normalized);
@@ -2061,6 +2067,13 @@ function addMonthsToIsoDate(value, months) {
   return isoDate(date);
 }
 
+// plan.value é o preço TOTAL do pacote (ex: Semestral já vem com desconto vs. 6x o mensal),
+// não um valor mensal — por isso todo lugar que gera parcelas por período precisa dividir por
+// esse número de parcelas, nunca cobrar o valor total em cada uma.
+function installmentsForPlanType(planType) {
+  return planType === "Trimestral" ? 3 : planType === "Semestral" ? 6 : 1;
+}
+
 function ensureEnrollmentFinancialTitles(enrollment) {
   if (!enrollment?.id || state.accounts.some((item) => item.enrollmentId === enrollment.id)) {
     enrollment.financialTitlesGenerated = state.accounts.some((item) => item.enrollmentId === enrollment.id);
@@ -2070,7 +2083,7 @@ function ensureEnrollmentFinancialTitles(enrollment) {
   const plan = state.plans.find((item) => item.id === enrollment.planId);
   const chartAccount = state.chartAccounts.find((item) => item.id === plan?.chartAccountId) || revenueChartAccountForModality(enrollment.modalityId);
   const planType = planTypeLabel(enrollment.planType || plan?.type);
-  const installments = planType === "Trimestral" ? 3 : planType === "Semestral" ? 6 : 1;
+  const installments = installmentsForPlanType(planType);
   const firstDate = enrollment.firstPaymentDate || enrollment.startDate || demoToday;
   const titlePrefix = planType === "Avulsa" ? "Sessão Avulsa" : planType === "Pacote" ? "Pacote de Sessões" : installments > 1 ? "Parcela" : "Mensalidade";
   const titles = [];
@@ -3854,7 +3867,7 @@ async function mergePrecadastroSubmissions() {
       if (existingStudent) {
         Object.assign(existingStudent, studentData);
       } else {
-        const newStudent = normalizeStudent({ id: uid("s"), gender: payload.gender === "Masculino" ? "M" : "F", lastPresence: "-", membership: "Avulsa", ...studentData }, state.students.length);
+        const newStudent = normalizeStudent({ id: uid("s"), gender: payload.gender === "Masculino" ? "M" : "F", lastPresence: "-", membership: existingLead ? "Pendente" : "Avulsa", ...studentData }, state.students.length);
         state.students.push(newStudent);
         if (existingLead) existingLead.linkedStudentId = newStudent.id;
       }
@@ -7626,7 +7639,8 @@ function applyEnrollmentPlanDefaults(form, overwrite = true) {
   };
   setIfNeeded("modalityId", plan.modalityId || "");
   setIfNeeded("planType", planTypeLabel(plan.type));
-  setIfNeeded("monthlyValue", Number(plan.value || 0).toFixed(2));
+  const planInstallments = installmentsForPlanType(planTypeLabel(plan.type));
+  setIfNeeded("monthlyValue", (Number(plan.value || 0) / planInstallments).toFixed(2));
   setIfNeeded("sessions", weeklySessionsFromPlan(plan));
   if (!form.elements.firstPaymentDate?.value) setIfNeeded("firstPaymentDate", form.elements.startDate?.value || demoToday);
   if (form.elements.startDate?.value) setIfNeeded("endDate", calculatedEnrollmentEndDate(form.elements.startDate.value, form.elements.planType?.value || plan.type));
