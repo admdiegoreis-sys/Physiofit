@@ -3295,7 +3295,7 @@ function renderCrm() {
               <td>${lead.interest}</td>
               <td>
                 <select class="status-pill-select ${leadStatusClass(lead.status)}" data-lead-status-select="${lead.id}" title="Alterar status">
-                  ${leadStatuses.map((s) => `<option value="${s}" ${s === lead.status ? "selected" : ""}>${s}</option>`).join("")}
+                  ${leadStatuses.map((s) => `<option value="${s}" style="background:${leadStatusOptionColor(s)};color:#1f2937" ${s === lead.status ? "selected" : ""}>${s}</option>`).join("")}
                 </select>
                 ${lead.linkedStudentId && lead.status !== "Matriculado" ? `<button class="lead-pending-enroll-alert" data-convert-lead="${lead.id}" type="button" title="Cliente cadastrado — falta vincular a matrícula">⚠ Vincular matrícula</button>` : ""}
               </td>
@@ -3624,10 +3624,33 @@ document.querySelector("#whatsappLogOverlay")?.addEventListener("click", (e) => 
 });
 
 function leadStatusClass(status) {
-  if (status === "Matriculado") return "ativo";
-  if (status === "Perdido") return "atrasado";
-  if (["Visita agendada", "Visita realizada", "Proposta enviada"].includes(status)) return "pendente";
-  return "aguardando";
+  const map = {
+    "Novo lead": "lead-status-novo",
+    "Contato iniciado": "lead-status-contato",
+    "Respondido": "lead-status-respondido",
+    "Visita agendada": "lead-status-visita-agendada",
+    "Visita realizada": "lead-status-visita-realizada",
+    "Proposta enviada": "lead-status-proposta",
+    "Matriculado": "lead-status-matriculado",
+    "Perdido": "lead-status-perdido",
+  };
+  return map[status] || "lead-status-novo";
+}
+
+// Cor de fundo de cada <option> na lista suspensa do select (navegadores aplicam
+// background-color em <option> de forma mais confiável via style inline do que via classe).
+function leadStatusOptionColor(status) {
+  const map = {
+    "Novo lead": "#e0f2fe",
+    "Contato iniciado": "#ede9fe",
+    "Respondido": "#fff0ca",
+    "Visita agendada": "#dbeafe",
+    "Visita realizada": "#cffafe",
+    "Proposta enviada": "#fde4cb",
+    "Matriculado": "#dff2e8",
+    "Perdido": "#ffe0e3",
+  };
+  return map[status] || "#eef2ef";
 }
 
 let _svLeadId = null;
