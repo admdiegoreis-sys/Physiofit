@@ -175,6 +175,18 @@ export async function ensureLeadTables(sql) {
       created_at timestamptz not null default now()
     )
   `;
+
+  // Duas mensagens de WhatsApp chegando quase juntas podiam disparar duas execuções do
+  // webhook em paralelo: ambas checam "existe lead?" antes de qualquer uma terminar de
+  // inserir, e as duas concluem que não existe — duplicando o lead. Esse índice único
+  // (parcial, só enquanto o lead não foi convertido/perdido) faz o Postgres rejeitar a
+  // segunda inserção simultânea; o webhook trata esse erro e atualiza o lead já criado
+  // pela outra execução, em vez de duplicar.
+  await sql`
+    create unique index if not exists leads_telefone_ativo_uidx
+    on public.leads (regexp_replace(coalesce(telefone, ''), '\\D', '', 'g'))
+    where telefone is not null and telefone <> '' and status not in ('Matriculado', 'Perdido')
+  `;
 }
 
 export function normalizeLeadPayload(payload = {}) {

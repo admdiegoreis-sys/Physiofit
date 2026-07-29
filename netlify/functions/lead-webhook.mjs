@@ -117,21 +117,46 @@ export async function processLeadWebhook(event, sourceOverride = "") {
     }
 
     if (!lead.skip && !existingStudent && !existingLead && (lead.nome || lead.telefone || lead.email || lead.instagram)) {
-      classification = "Novo lead";
-      const leadRows = await sql`
-        insert into public.leads (nome, telefone, email, instagram, origem_lead, canal_entrada, mensagem_inicial, interesse, status, data_entrada, data_visita, responsavel, observacoes, historico)
-        values (${lead.nome || "Lead sem nome"}, ${lead.telefone}, ${lead.email}, ${lead.instagram}, ${lead.origem_lead}, ${lead.canal_entrada}, ${lead.mensagem_inicial}, ${lead.interesse}, ${lead.status}, ${lead.data_entrada}, ${lead.data_visita}, ${lead.responsavel}, ${lead.observacoes}, ${JSON.stringify([{ at: new Date().toISOString(), event: `Recebido via webhook ${source}` }])}::jsonb)
-        returning *
-      `;
-      createdLead = leadRows[0];
-      interaction = await saveWhatsappInteraction(sql, {
-        source,
-        lead,
-        payload,
-        classification,
-        leadId: createdLead.id,
-      });
-      await sql`update public.lead_inbox set lead_id = ${createdLead.id}, status = 'Convertido', converted_at = now() where id = ${inboxRows[0].id}`;
+      try {
+        classification = "Novo lead";
+        const leadRows = await sql`
+          insert into public.leads (nome, telefone, email, instagram, origem_lead, canal_entrada, mensagem_inicial, interesse, status, data_entrada, data_visita, responsavel, observacoes, historico)
+          values (${lead.nome || "Lead sem nome"}, ${lead.telefone}, ${lead.email}, ${lead.instagram}, ${lead.origem_lead}, ${lead.canal_entrada}, ${lead.mensagem_inicial}, ${lead.interesse}, ${lead.status}, ${lead.data_entrada}, ${lead.data_visita}, ${lead.responsavel}, ${lead.observacoes}, ${JSON.stringify([{ at: new Date().toISOString(), event: `Recebido via webhook ${source}` }])}::jsonb)
+          returning *
+        `;
+        createdLead = leadRows[0];
+        interaction = await saveWhatsappInteraction(sql, {
+          source,
+          lead,
+          payload,
+          classification,
+          leadId: createdLead.id,
+        });
+        await sql`update public.lead_inbox set lead_id = ${createdLead.id}, status = 'Convertido', converted_at = now() where id = ${inboxRows[0].id}`;
+      } catch (error) {
+        // Duas mensagens quase simultâneas do mesmo contato podem cair aqui ao mesmo tempo;
+        // o índice único (leads_telefone_ativo_uidx) rejeita a segunda inserção em vez de
+        // duplicar o lead — tratamos isso como "lead existente" (a outra chamada já criou).
+        if (error.code !== "23505") throw error;
+        classification = "Lead existente";
+        existingLead = await findLeadByPhone(sql, lead.telefone);
+        if (existingLead) {
+          const historyItem = {
+            at: new Date().toISOString(),
+            event: `Mensagem recebida via ${source}`,
+            message: lead.mensagem_inicial || "",
+          };
+          const leadRows = await sql`
+            update public.leads
+            set historico = coalesce(historico, '[]'::jsonb) || ${JSON.stringify([historyItem])}::jsonb, updated_at = now()
+            where id = ${existingLead.id}
+            returning *
+          `;
+          existingLead = leadRows[0] || existingLead;
+          interaction = await saveWhatsappInteraction(sql, { source, lead, payload, classification, leadId: existingLead.id });
+          await sql`update public.lead_inbox set lead_id = ${existingLead.id}, status = 'Lead existente' where id = ${inboxRows[0].id}`;
+        }
+      }
     }
 
     return json(202, {
