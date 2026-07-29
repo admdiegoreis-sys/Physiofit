@@ -8488,23 +8488,17 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
       const duplicate = state.students.find((s) => s.cpf && s.cpf.replace(/\D/g, "") === cpfVal);
       if (duplicate) {
         const cpfField = form.elements.cpf;
+        toast(`CPF já cadastrado para o cliente "${duplicate.name}".`);
         cpfField.setCustomValidity(`CPF já cadastrado para o cliente "${duplicate.name}".`);
         cpfField.reportValidity();
         cpfField.setCustomValidity("");
         return;
       }
     }
-    if (_pendingStudentLeadId && (!form.elements.modalityId?.value || !form.elements.planId?.value)) {
-      const planField = form.elements.planId || form.elements.modalityId;
-      if (planField) {
-        planField.setCustomValidity("Cadastre uma matrícula para salvar o novo cliente.");
-        planField.reportValidity();
-        planField.setCustomValidity("");
-      } else {
-        toast("Cadastre uma matrícula para salvar o novo cliente.");
-      }
-      return;
-    }
+    // Matrícula é opcional ao cadastrar cliente a partir de um lead — fica "Pendente" até
+    // alguém vincular o plano depois (aba Matrícula ou o alerta "Vincular matrícula" na
+    // tela de Leads). Essa trava antiga exigia plano na hora, num campo de outra aba
+    // (invisível), travando o salvar sem nenhum aviso visível pro operador.
   }
   const schema = modalSchemas[form.dataset.type];
   const values = Object.fromEntries(new FormData(form).entries());
