@@ -581,7 +581,7 @@ const menuGroupByView = {
   settings: "settings",
 };
 
-const leadStatuses = ["Novo lead", "Contato iniciado", "Respondido", "Visita agendada", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
+const leadStatuses = ["Novo lead", "Contato iniciado", "Respondido", "Visita agendada", "Falta - Reengajar", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
 const leadChannels = ["WhatsApp", "Instagram", "E-mail", "Web Site", "Anúncio", "Presencial", "Atendimento presencial", "Outro"];
 const leadOrigins = ["WhatsApp", "Instagram", "Google", "Indicação", "Web Site", "Anúncio", "Presencial", "Parceria", "Outro"];
 
@@ -3374,7 +3374,9 @@ function renderCrmDashboard(activeLeads) {
     "Visita agendada": "Vis. agend.", "Visita realizada": "Vis. realiz.",
     "Proposta enviada": "Proposta", "Matriculado": "Matriculado",
   };
-  const funnelStages = leadStatuses.filter((s) => s !== "Perdido");
+  // "Falta - Reengajar" é um alerta pontual (não-show da experimental), não uma etapa
+  // sequencial do funil — fica fora do gráfico de barras pra não distorcer a leitura.
+  const funnelStages = leadStatuses.filter((s) => s !== "Perdido" && s !== "Falta - Reengajar");
   const funnelData = funnelStages.map((s) => ({ s, n: all.filter((l) => l.status === s).length }));
   // Leads currently sitting at a later stage already passed through every earlier one, so the
   // funnel's shape/percentages must use "reached at least this stage" (cumulative from the bottom
@@ -3629,6 +3631,7 @@ function leadStatusClass(status) {
     "Contato iniciado": "lead-status-contato",
     "Respondido": "lead-status-respondido",
     "Visita agendada": "lead-status-visita-agendada",
+    "Falta - Reengajar": "lead-status-falta",
     "Visita realizada": "lead-status-visita-realizada",
     "Proposta enviada": "lead-status-proposta",
     "Matriculado": "lead-status-matriculado",
@@ -3645,6 +3648,7 @@ function leadStatusOptionColor(status) {
     "Contato iniciado": "#ede9fe",
     "Respondido": "#fff0ca",
     "Visita agendada": "#dbeafe",
+    "Falta - Reengajar": "#fecdd3",
     "Visita realizada": "#cffafe",
     "Proposta enviada": "#fde4cb",
     "Matriculado": "#dff2e8",
@@ -3909,6 +3913,36 @@ async function mergePrecadastroSubmissions() {
   }
 }
 
+// Mensagem de aluno já matriculado não vira lead nenhum (correto — não é venda), mas fica
+// invisível pra equipe. Isso cobre a lacuna sinalizando na Central de Leads que existe
+// atendimento pendente de um cliente ativo, sem misturar isso com o funil comercial.
+async function checkAlunoExistenteAlerts() {
+  const badge = document.querySelector("#crmAlunoAlertBadge");
+  if (!badge) return;
+  try {
+    const res = await fetch("/.netlify/functions/records?table=whatsapp_interactions&limit=200&columns=classification,created_at");
+    if (!res.ok) return;
+    const rows = await res.json();
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const count = (Array.isArray(rows) ? rows : []).filter(
+      (r) => r.classification === "Aluno existente" && new Date(r.created_at).getTime() >= cutoff
+    ).length;
+    badge.textContent = String(count);
+    badge.hidden = count === 0;
+  } catch (e) {
+    console.warn("Não foi possível checar alertas de aluno existente:", e);
+  }
+}
+
+// Sem WebSocket/infra de tempo real disponível nesta stack (Netlify Functions + Neon
+// serverless) — esse polling é o equivalente prático: a cada 45s, busca leads/pré-cadastros/
+// alertas novos sem precisar recarregar a página.
+window.setInterval(() => {
+  mergeLeadsFromApi();
+  mergePrecadastroSubmissions();
+  checkAlunoExistenteAlerts();
+}, 45000);
+
 function convertLead(leadId) {
   const lead = state.leads.find((item) => item.id === leadId);
   if (!lead) return;
@@ -4014,6 +4048,20 @@ function renderCalendarGrid(days) {
       })
       .join("")}
   `;
+}
+
+// Sinaliza que a visita experimental do lead não aconteceu (falta injustificada), pra ele não
+// ficar preso em "Visita agendada" sem ninguém perceber que precisa reengajar o contato.
+function flagLeadNoShow(appointment) {
+  if (!appointment?.id) return;
+  state.leads = state.leads.map((lead) => {
+    const byAppointmentId = lead.linkedAppointmentId && lead.linkedAppointmentId === appointment.id;
+    const byLeadId = appointment.leadId && appointment.leadId === lead.id;
+    const byStudent = appointment.sessionKind === "Experimental" && appointment.studentId && appointment.studentId === lead.linkedStudentId;
+    if (!byAppointmentId && !byLeadId && !byStudent) return lead;
+    if (["Matriculado", "Perdido"].includes(lead.status)) return lead;
+    return { ...lead, status: "Falta - Reengajar" };
+  });
 }
 
 function updateLeadAfterVisit(appointment) {
@@ -8195,6 +8243,7 @@ document.addEventListener("click", (event) => {
     if (scheduleAction.dataset.action === "missed" && appointment) {
       appointment.status = "Faltou";
       appointment.replacementCredit = false;
+      flagLeadNoShow(appointment);
     }
     if (scheduleAction.dataset.action === "cancel" && appointment) {
       appointment.status = "Cancelada";
@@ -8260,6 +8309,7 @@ document.querySelector("#apptActionMainGrid").addEventListener("click", (e) => {
   if (action === "missed") {
     appt.status = "Faltou";
     appt.replacementCredit = false;
+    flagLeadNoShow(appt);
     closeApptActionPanel();
     saveState(); render(); toast("Falta injustificada registrada.");
     return;
@@ -8377,6 +8427,11 @@ document.querySelector("#apptJustifySaveBtn").addEventListener("click", () => {
     const newAppt = { ...appt, id: uid("a"), date: newDate, time: newStart, endTime: newEnd, status: "Agendada", wasRescheduled: false, justifyReason: "", notes: `Reposição de ${dateLabel(appt.date)}` };
     state.appointments.push(newAppt);
     appt.wasRescheduled = true;
+    // Reaponta o vínculo do lead para a NOVA aula — senão o gatilho automático de
+    // "Visita realizada" continuaria observando a aula antiga (já marcada Falta justificada).
+    if (appt.leadId) {
+      state.leads = state.leads.map((lead) => (lead.id === appt.leadId ? { ...lead, linkedAppointmentId: newAppt.id } : lead));
+    }
     toast("Falta justificada registrada. Nova aula agendada.");
   } else {
     toast("Falta justificada registrada.");
@@ -9149,6 +9204,7 @@ async function mergeLeadsFromApi() {
 hydrateStateFromNeon().finally(() => {
   mergeLeadsFromApi();
   mergePrecadastroSubmissions();
+  checkAlunoExistenteAlerts();
 });
 
 // Roteamento por URL

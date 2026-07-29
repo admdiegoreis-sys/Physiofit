@@ -90,10 +90,17 @@ export async function processLeadWebhook(event, sourceOverride = "") {
         event: `Mensagem recebida via ${source}`,
         message: lead.mensagem_inicial || "",
       };
+      // Reengajamento: se o lead ainda estava numa etapa "de espera" (nunca respondeu, ou
+      // respondeu e ficou sem retorno até enviarmos proposta), uma nova mensagem dele já é
+      // sinal suficiente pra avançar sozinho para "Respondido" — sem mexer em etapas mais
+      // adiantadas (visita/matrícula/perdido), que exigem confirmação humana.
+      const reengageFrom = ["Novo lead", "Contato iniciado", "Proposta enviada"];
+      const shouldAdvance = reengageFrom.includes(existingLead.status);
       const leadRows = await sql`
         update public.leads
         set
           historico = coalesce(historico, '[]'::jsonb) || ${JSON.stringify([historyItem])}::jsonb,
+          status = case when ${shouldAdvance} then 'Respondido' else status end,
           updated_at = now()
         where id = ${existingLead.id}
         returning *

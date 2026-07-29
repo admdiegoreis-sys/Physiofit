@@ -2219,6 +2219,11 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
   background-color: #dbeafe;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d4ed8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
+.status-pill-select.lead-status-falta {
+  color: #9f1239;
+  background-color: #fecdd3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239f1239' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
 .status-pill-select.lead-status-visita-realizada {
   color: #0e7490;
   background-color: #cffafe;
@@ -3912,6 +3917,20 @@ td.row-actions .row-action-button:last-child {
   white-space: nowrap;
 }
 .lead-pending-enroll-alert:hover { background: #fdecc2; }
+.crm-alunos-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 8px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
 .form-source-badge {
   display: inline-block;
   padding: 1px 7px;

@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=59" />
+    <link rel="stylesheet" href="styles.css?v=60" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -311,7 +311,7 @@
                 <h2>Central de Captação de Leads</h2>
               </div>
               <div class="module-actions">
-                <button class="ghost-button" id="crmWhatsappLogButton" type="button">Log de mensagens</button>
+                <button class="ghost-button" id="crmWhatsappLogButton" type="button">Log de mensagens<span class="crm-alunos-badge" id="crmAlunoAlertBadge" hidden>0</span></button>
                 <button class="primary-button success-button" data-open-modal="lead" type="button">Novo Lead</button>
               </div>
             </div>
@@ -325,6 +325,7 @@
                 <option>Contato iniciado</option>
                 <option>Respondido</option>
                 <option>Visita agendada</option>
+                <option>Falta - Reengajar</option>
                 <option>Visita realizada</option>
                 <option>Proposta enviada</option>
                 <option>Matriculado</option>
@@ -2094,7 +2095,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=93"></script>
+    <script src="app.js?v=94"></script>
   </body>
 </html>
 
