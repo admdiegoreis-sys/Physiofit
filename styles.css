@@ -2245,6 +2245,17 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2385313a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
 
+/* Versão fixa (não editável) do pill de status do lead — mesmas cores, sem seta de select */
+.status-pill.lead-status-novo { color: #075985; background: #e0f2fe; }
+.status-pill.lead-status-contato { color: #5b21b6; background: #ede9fe; }
+.status-pill.lead-status-respondido { color: #765416; background: #fff0ca; }
+.status-pill.lead-status-visita-agendada { color: #1d4ed8; background: #dbeafe; }
+.status-pill.lead-status-falta { color: #9f1239; background: #fecdd3; }
+.status-pill.lead-status-visita-realizada { color: #0e7490; background: #cffafe; }
+.status-pill.lead-status-proposta { color: #9a5b1f; background: #fde4cb; }
+.status-pill.lead-status-matriculado { color: #174a3b; background: #dff2e8; }
+.status-pill.lead-status-perdido { color: #85313a; background: #ffe0e3; }
+
 .toolbar {
   flex-wrap: wrap;
   justify-content: space-between;
@@ -4652,6 +4663,12 @@ table small,
   height: 32px;
   min-height: 32px;
   font-size: 0.88rem;
+}
+
+.lead-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .accounts-table-wrap .row-action-button {
