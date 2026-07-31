@@ -3293,14 +3293,13 @@ function renderCrm() {
                 <span class="status-pill ${leadStatusClass(lead.status)}">${lead.status}</span>
                 ${lead.linkedStudentId && lead.status !== "Matriculado" ? `<button class="lead-pending-enroll-alert" data-convert-lead="${lead.id}" type="button" title="Cliente cadastrado — falta vincular a matrícula">⚠ Vincular matrícula</button>` : ""}
               </td>
-              <td>${professionalName(lead.ownerId)}</td>
               <td>${dateLabel(lead.entryDate)}${lead.visitDate ? ` / ${dateLabel(lead.visitDate)}` : ""}</td>
               <td>${lead.lossReason || "-"}</td>
             </tr>
           `,
         )
         .join("")
-    : `<tr><td colspan="9"><div class="empty-state">Nenhum lead encontrado.</div></td></tr>`;
+    : `<tr><td colspan="8"><div class="empty-state">Nenhum lead encontrado.</div></td></tr>`;
 
 }
 
