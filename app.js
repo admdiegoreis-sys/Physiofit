@@ -595,7 +595,6 @@ const modalSchemas = {
       { name: "origin", label: "Origem do lead", type: "select", options: ["", ...leadOrigins], value: "" },
       { name: "entryChannel", label: "Canal de entrada", type: "select", options: ["", ...leadChannels], value: "" },
       { name: "interest", label: "Interesse", type: "select", options: ["", "Pilates", "Fisioterapia", "RPG", "Funcional", "Avaliação", "Outro"], value: "" },
-      { name: "nextFollowUpDate", label: "Próximo follow-up", type: "date", value: demoToday },
       { name: "notes", label: "Informações gerais", type: "textarea", value: "", required: false },
     ],
     handler: (values) => {
