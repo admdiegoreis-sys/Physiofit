@@ -3905,6 +3905,12 @@ td.row-actions .row-action-button:last-child {
   border: 1px solid #c3d4f8;
   border-radius: 12px;
 }
+/* Sem isso, o [hidden] nativo do navegador (mesma especificidade do seletor de classe acima,
+   mas de origem CSS de autor x user-agent) perde a briga e o banner fica visível mesmo com
+   o atributo "hidden" true — precisa declarar explicitamente pra vencer. */
+.precadastro-link-banner[hidden] {
+  display: none;
+}
 .precadastro-link-banner div { display: flex; flex-direction: column; gap: 2px; }
 .precadastro-link-banner strong { font-size: 0.88rem; color: #1a3fa8; }
 .precadastro-link-banner span { font-size: 0.78rem; color: #4b5f8f; }
