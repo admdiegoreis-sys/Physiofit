@@ -8536,20 +8536,10 @@ document.querySelector("#modalForm").addEventListener("submit", (event) => {
       return;
     }
   }
-  const savedLeadId = form.dataset.type === "lead" ? editingLeadId : null;
   schema.handler(values);
   saveState();
   closeModal();
   render();
-  if (savedLeadId) {
-    const savedLead = state.leads.find((l) => l.id === savedLeadId);
-    if (savedLead?.visitDate && savedLead?.linkedAppointmentId) {
-      currentWeekStart = toMonday(parseLocalDate(savedLead.visitDate));
-      switchView("agenda");
-      toast("Lead salvo. Exibindo semana do agendamento.");
-      return;
-    }
-  }
   toast(form.dataset.type === "accountSettlement" ? "Baixa registrada com sucesso." : "Cadastro salvo com sucesso.");
 });
 
