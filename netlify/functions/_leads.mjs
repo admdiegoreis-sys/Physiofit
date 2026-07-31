@@ -1,4 +1,4 @@
-export const leadStatuses = ["Novo lead", "Contato iniciado", "Respondido", "Visita agendada", "Falta - Reengajar", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
+export const leadStatuses = ["Novo lead", "Contato iniciado", "Visita agendada", "Falta - Reengajar", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
 
 export function phoneDigits(value = "") {
   return String(value).replace(/\D/g, "");

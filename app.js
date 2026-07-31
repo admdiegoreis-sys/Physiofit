@@ -581,7 +581,7 @@ const menuGroupByView = {
   settings: "settings",
 };
 
-const leadStatuses = ["Novo lead", "Contato iniciado", "Respondido", "Visita agendada", "Falta - Reengajar", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
+const leadStatuses = ["Novo lead", "Contato iniciado", "Visita agendada", "Falta - Reengajar", "Visita realizada", "Proposta enviada", "Matriculado", "Perdido"];
 const leadChannels = ["WhatsApp", "Instagram", "E-mail", "Web Site", "Anúncio", "Presencial", "Atendimento presencial", "Outro"];
 const leadOrigins = ["WhatsApp", "Instagram", "Google", "Indicação", "Web Site", "Anúncio", "Presencial", "Parceria", "Outro"];
 
@@ -3421,15 +3421,13 @@ function renderCrmDashboard(activeLeads) {
   const active = all.filter((l) => l.status !== "Perdido");
 
   const statusShort = {
-    "Novo lead": "Novo", "Contato iniciado": "Contato", "Respondido": "Respondido",
+    "Novo lead": "Novo", "Contato iniciado": "Contato",
     "Visita agendada": "Vis. agend.", "Visita realizada": "Vis. realiz.",
     "Proposta enviada": "Proposta", "Matriculado": "Matriculado",
   };
   // "Falta - Reengajar" é um alerta pontual (não-show da experimental), não uma etapa
   // sequencial do funil — fica fora do gráfico de barras pra não distorcer a leitura.
-  // "Respondido" saiu do funil e não tem mais gatilho automático (não é mais gerado por
-  // nenhuma ação) — fica só como status legado, ainda visível/editável em leads antigos.
-  const funnelStages = leadStatuses.filter((s) => s !== "Perdido" && s !== "Falta - Reengajar" && s !== "Respondido");
+  const funnelStages = leadStatuses.filter((s) => s !== "Perdido" && s !== "Falta - Reengajar");
   const funnelData = funnelStages.map((s) => ({ s, n: all.filter((l) => l.status === s).length }));
   // Leads currently sitting at a later stage already passed through every earlier one, so the
   // funnel's shape/percentages must use "reached at least this stage" (cumulative from the bottom
@@ -3504,34 +3502,33 @@ function renderCrmDashboard(activeLeads) {
     return { key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), n: 0 };
   });
   all.forEach((l) => { const slot = months.find((m) => m.key === String(l.entryDate || "").slice(0, 7)); if (slot) slot.n++; });
+  // Barras em vez de linha: com meses zerados intercalados com um único pico, uma área/linha
+  // fica achatada no chão e "explode" no fim — barras deixam cada mês legível por si só.
   const maxM = Math.max(...months.map((m) => m.n), 1);
-  const W = 300, H = 90, pL = 18, pR = 18, pT = 18, pB = 24;
+  const W = 300, H = 90, pL = 18, pR = 10, pT = 18, pB = 16;
   const iW = W - pL - pR, iH = H - pT - pB;
-  const step = iW / (months.length - 1);
-  const pts = months.map((m, i) => `${pL + i * step},${pT + iH - (m.n / maxM) * iH}`);
-  const area = `${pL},${pT + iH} ${pts.join(" ")} ${pL + (months.length - 1) * step},${pT + iH}`;
+  const slot = iW / months.length;
+  const barW = Math.min(26, slot * 0.5);
   const timeBlock = `
     <div class="crm-dash-block crm-dash-time">
       <p class="crm-dash-title">Entradas por Mês</p>
       <svg viewBox="0 0 ${W} ${H}" class="crm-time-svg">
-        <defs><linearGradient id="crmAreaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#0ea5a4" stop-opacity="0.28"/>
-          <stop offset="100%" stop-color="#0ea5a4" stop-opacity="0.02"/>
+        <defs><linearGradient id="crmBarGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#14b8a6"/>
+          <stop offset="100%" stop-color="#0ea5a4"/>
         </linearGradient></defs>
         ${Array.from({ length: 4 }, (_, i) => {
           const y = pT + (iH / 3) * i;
-          const val = Math.round(maxM - (maxM / 3) * i);
-          return `<line x1="${pL}" y1="${y}" x2="${W - pR}" y2="${y}" stroke="#e2e8f0" stroke-width="0.5"/>
-                  <text x="${pL - 4}" y="${y + 3}" text-anchor="end" font-size="7" fill="#cbd5e1">${val}</text>`;
+          return `<line x1="${pL}" y1="${y}" x2="${W - pR}" y2="${y}" stroke="#eef2f1" stroke-width="1"/>`;
         }).join("")}
-        <polygon points="${area}" fill="url(#crmAreaGrad)"/>
-        <polyline points="${pts.join(" ")}" fill="none" stroke="#0ea5a4" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <line x1="${pL}" y1="${pT + iH}" x2="${W - pR}" y2="${pT + iH}" stroke="#cbd5e1" stroke-width="1"/>
         ${months.map((m, i) => {
-          const x = pL + i * step;
-          const y = pT + iH - (m.n / maxM) * iH;
-          return `${m.n > 0 ? `<circle cx="${x}" cy="${y}" r="3" fill="#0ea5a4" stroke="#fff" stroke-width="1.5"/>
-                  <text x="${x}" y="${y - 7}" text-anchor="middle" font-size="8" fill="#0ea5a4" font-weight="700">${m.n}</text>` : ""}
-                  <text x="${x}" y="${H - 4}" text-anchor="middle" font-size="8" fill="#94a3b8">${m.label}</text>`;
+          const cx = pL + slot * i + slot / 2;
+          const barH = Math.max((m.n / maxM) * iH, m.n > 0 ? 4 : 0);
+          const y = pT + iH - barH;
+          return `${m.n > 0 ? `<rect x="${cx - barW / 2}" y="${y}" width="${barW}" height="${barH}" rx="4" fill="url(#crmBarGrad)"/>
+                  <text x="${cx}" y="${y - 5}" text-anchor="middle" font-size="9" fill="#0f766e" font-weight="700">${m.n}</text>` : ""}
+                  <text x="${cx}" y="${H - 3}" text-anchor="middle" font-size="8" fill="#94a3b8">${m.label}</text>`;
         }).join("")}
       </svg>
     </div>`;
@@ -3682,7 +3679,6 @@ function leadStatusClass(status) {
   const map = {
     "Novo lead": "lead-status-novo",
     "Contato iniciado": "lead-status-contato",
-    "Respondido": "lead-status-respondido",
     "Visita agendada": "lead-status-visita-agendada",
     "Falta - Reengajar": "lead-status-falta",
     "Visita realizada": "lead-status-visita-realizada",
@@ -3695,21 +3691,6 @@ function leadStatusClass(status) {
 
 // Cor de fundo de cada <option> na lista suspensa do select (navegadores aplicam
 // background-color em <option> de forma mais confiável via style inline do que via classe).
-function leadStatusOptionColor(status) {
-  const map = {
-    "Novo lead": "#e0f2fe",
-    "Contato iniciado": "#ede9fe",
-    "Respondido": "#fff0ca",
-    "Visita agendada": "#dbeafe",
-    "Falta - Reengajar": "#fecdd3",
-    "Visita realizada": "#cffafe",
-    "Proposta enviada": "#fde4cb",
-    "Matriculado": "#dff2e8",
-    "Perdido": "#ffe0e3",
-  };
-  return map[status] || "#eef2ef";
-}
-
 let _svLeadId = null;
 
 function openScheduleVisitOverlay(leadId) {
