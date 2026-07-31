@@ -7929,6 +7929,7 @@ function closeModal() {
   _pendingEnrollLeadId = null;
   _pendingStudentLeadId = null;
   document.querySelector("#modalBackdrop").hidden = true;
+  document.querySelector("#precadastroLinkBanner").hidden = true;
   // Resume a parked manual account entry after registering (or cancelling) a supplier/client
   const closedType = document.querySelector("#modalForm").dataset.type;
   if (_pendingAccountModalValues && (closedType === "supplier" || closedType === "student")) {
