@@ -3505,7 +3505,7 @@ function renderCrmDashboard(activeLeads) {
   // Barras em vez de linha: com meses zerados intercalados com um único pico, uma área/linha
   // fica achatada no chão e "explode" no fim — barras deixam cada mês legível por si só.
   const maxM = Math.max(...months.map((m) => m.n), 1);
-  const W = 300, H = 90, pL = 18, pR = 10, pT = 18, pB = 16;
+  const W = 300, H = 130, pL = 20, pR = 10, pT = 22, pB = 18;
   const iW = W - pL - pR, iH = H - pT - pB;
   const slot = iW / months.length;
   const barW = Math.min(26, slot * 0.5);
@@ -3526,9 +3526,9 @@ function renderCrmDashboard(activeLeads) {
           const cx = pL + slot * i + slot / 2;
           const barH = Math.max((m.n / maxM) * iH, m.n > 0 ? 4 : 0);
           const y = pT + iH - barH;
-          return `${m.n > 0 ? `<rect x="${cx - barW / 2}" y="${y}" width="${barW}" height="${barH}" rx="4" fill="url(#crmBarGrad)"/>
-                  <text x="${cx}" y="${y - 5}" text-anchor="middle" font-size="9" fill="#0f766e" font-weight="700">${m.n}</text>` : ""}
-                  <text x="${cx}" y="${H - 3}" text-anchor="middle" font-size="8" fill="#94a3b8">${m.label}</text>`;
+          return `${m.n > 0 ? `<rect x="${cx - barW / 2}" y="${y}" width="${barW}" height="${barH}" rx="5" fill="url(#crmBarGrad)"/>
+                  <text x="${cx}" y="${y - 7}" text-anchor="middle" font-size="12" fill="#0f766e" font-weight="700">${m.n}</text>` : ""}
+                  <text x="${cx}" y="${H - 4}" text-anchor="middle" font-size="10" fill="#94a3b8">${m.label}</text>`;
         }).join("")}
       </svg>
     </div>`;
