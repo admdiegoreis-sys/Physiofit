@@ -7202,3 +7202,33 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
 #sessionChip .session-avatar { border-radius: 50%; }
 #sessionChip button#logoutButton { border-radius: 999px; }
 
+.settings-hint {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 4px 0 14px;
+}
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px 16px;
+}
+.permission-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+}
+.permission-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent, #2454CC);
+  cursor: pointer;
+}
+

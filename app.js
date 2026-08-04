@@ -409,6 +409,11 @@ const seedData = {
     whatsapp: "(48) 99999-0101",
     classLimit: 6,
     reminder: "24 horas antes",
+    // Administrador sempre tem acesso total (não editável). Isso define quais grupos de
+    // tela (mesma chave usada em menuGroupByView) cada outro perfil pode acessar.
+    rolePermissions: {
+      Profissional: ["dashboard", "sessions", "records"],
+    },
   },
   students: importedArray("students", seedStudents),
   professionals: importedArray("professionals", seedProfessionals),
@@ -1171,6 +1176,13 @@ function normalizeState(data) {
     ...structuredClone(seedData),
     ...data,
     blocks: Array.isArray(data.blocks) ? data.blocks : structuredClone(seedData.blocks),
+  };
+  // Merge raso preserva configurações já salvas e ainda garante que chaves novas (ex:
+  // rolePermissions) tenham default mesmo em estados salvos antes dela existir.
+  normalized.settings = {
+    ...seedData.settings,
+    ...(data.settings || {}),
+    rolePermissions: { ...seedData.settings.rolePermissions, ...(data.settings?.rolePermissions || {}) },
   };
   normalized.deletedEntityIds = Array.isArray(data.deletedEntityIds) ? [...new Set(data.deletedEntityIds.filter(Boolean))] : [];
   normalized.students = filterDeletedEntities(normalized, "students", normalized.students).map((item, index) => normalizeStudent(normalizeTextFields(item), index));
@@ -7205,10 +7217,35 @@ function renderSettings() {
   const form = document.querySelector("#settingsForm");
   if (!form) return;
   Object.entries(state.settings).forEach(([key, value]) => {
-    if (form.elements[key]) form.elements[key].value = value;
+    if (form.elements[key] && typeof value !== "object") form.elements[key].value = value;
   });
   renderAccessUsers();
+  renderPermissionsPanel();
 }
+
+function renderPermissionsPanel() {
+  const grid = document.querySelector("#permissionsGrid");
+  if (!grid || !isAdminSession()) return;
+  const allowed = state.settings.rolePermissions?.Profissional || [];
+  grid.innerHTML = permissionGroups
+    .map(
+      (g) => `
+        <label class="permission-row">
+          <input type="checkbox" data-permission-group="${g.key}" ${allowed.includes(g.key) ? "checked" : ""} />
+          <span>${g.label}</span>
+        </label>
+      `,
+    )
+    .join("");
+}
+
+document.querySelector("#savePermissionsButton")?.addEventListener("click", () => {
+  if (!isAdminSession()) return;
+  const checked = [...document.querySelectorAll("#permissionsGrid [data-permission-group]:checked")].map((el) => el.dataset.permissionGroup);
+  state.settings.rolePermissions = { ...state.settings.rolePermissions, Profissional: checked };
+  saveState({ immediate: true });
+  toast("Permissões salvas.");
+});
 
 function currentUser() {
   return authSession?.user || null;
@@ -7218,10 +7255,23 @@ function isAdminSession() {
   return currentUser()?.role === "Administrador";
 }
 
+const permissionGroups = [
+  { key: "dashboard", label: "Início" },
+  { key: "crm", label: "Leads" },
+  { key: "sessions", label: "Agenda" },
+  { key: "registers", label: "Cadastros" },
+  { key: "finance", label: "Financeiro" },
+  { key: "management", label: "Gestão" },
+  { key: "records", label: "Prontuário" },
+  { key: "settings", label: "Configurações" },
+];
+
 function canAccessView(view) {
-  if (!currentUser()) return false;
+  const user = currentUser();
+  if (!user) return false;
   if (isAdminSession()) return true;
-  return ["dashboard", "agenda", "records"].includes(view);
+  const allowedGroups = state.settings.rolePermissions?.[user.role] || [];
+  return allowedGroups.includes(menuGroupByView[view]);
 }
 
 function applyAuthSession() {
