@@ -3285,7 +3285,7 @@ function renderDashboard() {
     ...state.appointments.filter((item) => item.status === "Faltou").slice(-1).map((item) => ({ icon: "×", title: "Falta registrada", detail: `${studentName(item.studentId)} · ${item.type}`, tone: "red" })),
   ].slice(0, 5);
   document.querySelector("#dashboardActivityList").innerHTML = recentActivities.length
-    ? recentActivities.map((item, index) => `<article><span class="activity-icon ${item.tone}">${item.icon}</span><div><strong>${item.title}</strong><small>${item.detail}</small></div><time>há ${index + 1} h</time></article>`).join("")
+    ? recentActivities.map((item, index) => `<article><span class="activity-icon ${item.tone}">${item.icon}</span><div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></div><time>há ${index + 1} h</time></article>`).join("")
     : `<div class="empty-state">Sem atividades recentes.</div>`;
 }
 
@@ -3328,16 +3328,16 @@ function renderCrm() {
                   <button class="row-action-button lead-menu-toggle" data-lead-menu-toggle="${lead.id}" type="button" title="Ações" aria-label="Ações"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
                 </div>
               </td>
-              <td><div class="patient-name"><strong>${lead.name.toUpperCase()}</strong><span>${lead.phone || "-"}${lead.instagram ? ` · ${lead.instagram}` : ""}</span></div></td>
-              <td>${lead.entryChannel || "-"}</td>
-              <td>${lead.origin}</td>
-              <td>${lead.interest}</td>
+              <td><div class="patient-name"><strong>${escapeHtml(lead.name.toUpperCase())}</strong><span>${escapeHtml(lead.phone || "-")}${lead.instagram ? ` · ${escapeHtml(lead.instagram)}` : ""}</span></div></td>
+              <td>${escapeHtml(lead.entryChannel || "-")}</td>
+              <td>${escapeHtml(lead.origin || "-")}</td>
+              <td>${escapeHtml(lead.interest || "-")}</td>
               <td>
-                <span class="status-pill ${leadStatusClass(lead.status)}">${lead.status}</span>
+                <span class="status-pill ${leadStatusClass(lead.status)}">${escapeHtml(lead.status)}</span>
                 ${lead.linkedStudentId && lead.status !== "Matriculado" ? `<button class="lead-pending-enroll-alert" data-convert-lead="${lead.id}" type="button" title="Cliente cadastrado — falta vincular a matrícula">⚠ Vincular matrícula</button>` : ""}
               </td>
               <td>${dateLabel(lead.entryDate)}${lead.visitDate ? ` / ${dateLabel(lead.visitDate)}` : ""}</td>
-              <td>${lead.lossReason || "-"}</td>
+              <td>${escapeHtml(lead.lossReason || "-")}</td>
             </tr>
           `,
         )
@@ -3613,7 +3613,9 @@ async function fetchWaLog() {
   const table = document.querySelector("#waLogTable");
   if (table) table.innerHTML = `<tr><td colspan="5"><div class="empty-state">Carregando...</div></td></tr>`;
   try {
-    const res = await fetch("/.netlify/functions/records?table=whatsapp_interactions&limit=500&columns=phone,contact_name,message,classification,created_at");
+    const res = await fetch("/.netlify/functions/records?table=whatsapp_interactions&limit=500&columns=phone,contact_name,message,classification,created_at", {
+      headers: window.PhysiofitData?.authHeaders() || {},
+    });
     waLogRows = res.ok ? await res.json() : [];
   } catch {
     waLogRows = [];
@@ -3636,10 +3638,10 @@ function renderWaLogTable() {
             ${r.phone ? `<button class="row-action-button lead-action-button" data-wa-restore-index="${i}" type="button" title="Restaurar como lead" aria-label="Restaurar como lead"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>` : ""}
           </td>
           <td>${r.created_at ? new Date(r.created_at).toLocaleString("pt-BR") : "-"}</td>
-          <td>${r.phone || "-"}</td>
-          <td>${r.contact_name || "-"}</td>
-          <td class="wa-log-msg">${(r.message || "-").replace(/</g, "&lt;")}</td>
-          <td><span class="wa-log-badge ${waLogBadgeClass(r.classification)}">${r.classification || "-"}</span></td>
+          <td>${escapeHtml(r.phone || "-")}</td>
+          <td>${escapeHtml(r.contact_name || "-")}</td>
+          <td class="wa-log-msg">${escapeHtml(r.message || "-")}</td>
+          <td><span class="wa-log-badge ${waLogBadgeClass(r.classification)}">${escapeHtml(r.classification || "-")}</span></td>
         </tr>
       `).join("")
     : `<tr><td colspan="6"><div class="empty-state">Nenhuma interação encontrada.</div></td></tr>`;
@@ -3996,7 +3998,9 @@ async function checkAlunoExistenteAlerts() {
   const badge = document.querySelector("#crmAlunoAlertBadge");
   if (!badge) return;
   try {
-    const res = await fetch("/.netlify/functions/records?table=whatsapp_interactions&limit=200&columns=classification,created_at");
+    const res = await fetch("/.netlify/functions/records?table=whatsapp_interactions&limit=200&columns=classification,created_at", {
+      headers: window.PhysiofitData?.authHeaders() || {},
+    });
     if (!res.ok) return;
     const rows = await res.json();
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
@@ -7420,6 +7424,8 @@ async function handleLogin(event) {
     authSession = await window.PhysiofitData.login(username, password);
     document.querySelector("#loginPassword").value = "";
     applyAuthSession();
+    await hydrateStateFromNeon();
+    render();
     const requestedView = pathToView[location.pathname] || "dashboard";
     switchView(canAccessView(requestedView) ? requestedView : "dashboard");
     toast(`Bem-vindo, ${currentUser().name}.`);
@@ -7516,7 +7522,14 @@ function checkResetTokenInUrl() {
 function logout() {
   authSession = null;
   window.PhysiofitData?.setSession(null);
+  // Evita que dados reais fiquem em cache local (localStorage) acessíveis a quem usar o
+  // mesmo navegador depois do logout — volta para os dados de demonstração até novo login.
+  localStorage.removeItem(storageKey);
+  remoteStateReady = false;
+  state = normalizeState(structuredClone(seedData));
   applyAuthSession();
+  render();
+  switchView("dashboard");
 }
 
 function currentView() {

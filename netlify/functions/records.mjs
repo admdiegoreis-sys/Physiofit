@@ -1,4 +1,5 @@
 import { assertAllowedTable, getSql, json, quoteIdentifier } from "./_db.mjs";
+import { requireAdmin } from "./_auth.mjs";
 
 function parseBody(event) {
   if (!event.body) return {};
@@ -20,6 +21,7 @@ export async function handler(event) {
   if (event.httpMethod === "OPTIONS") return json(204, {});
 
   try {
+    await requireAdmin(event);
     const sql = getSql();
 
     if (event.httpMethod === "GET") {
@@ -76,6 +78,6 @@ export async function handler(event) {
 
     return json(405, { error: "Metodo nao permitido." });
   } catch (error) {
-    return json(500, { error: error.message });
+    return json(error.statusCode || 500, { error: error.message });
   }
 }

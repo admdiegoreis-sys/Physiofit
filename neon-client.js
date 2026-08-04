@@ -81,7 +81,7 @@
     },
     async loadState(key = "production") {
       try {
-        const data = await request(`/app-state?key=${encodeURIComponent(key)}`);
+        const data = await request(`/app-state?key=${encodeURIComponent(key)}`, { headers: this.authHeaders() });
         return { data, error: null };
       } catch (error) {
         return { data: null, error };
@@ -91,6 +91,7 @@
       try {
         const result = await request(`/app-state?key=${encodeURIComponent(key)}`, {
           method: "PUT",
+          headers: this.authHeaders(),
           body: JSON.stringify({ data }),
         });
         return { data: result, error: null };
@@ -102,7 +103,7 @@
       const search = new URLSearchParams({ table, columns, ...params });
 
       try {
-        const data = await request(`/records?${search.toString()}`);
+        const data = await request(`/records?${search.toString()}`, { headers: this.authHeaders() });
         return { data, error: null };
       } catch (error) {
         return { data: null, error };
@@ -112,6 +113,7 @@
       try {
         const data = await request("/records", {
           method: "POST",
+          headers: this.authHeaders(),
           body: JSON.stringify({ table, data: payload }),
         });
         return { data, error: null };
@@ -123,6 +125,7 @@
       try {
         const data = await request("/records", {
           method: "PATCH",
+          headers: this.authHeaders(),
           body: JSON.stringify({ table, id, data: payload }),
         });
         return { data, error: null };
@@ -134,6 +137,7 @@
       try {
         const data = await request("/records", {
           method: "DELETE",
+          headers: this.authHeaders(),
           body: JSON.stringify({ table, id }),
         });
         return { data, error: null };

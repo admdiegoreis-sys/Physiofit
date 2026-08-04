@@ -137,6 +137,21 @@ export function verifyToken(token) {
   return payload;
 }
 
+export function requireUser(event) {
+  const token = event.headers.authorization?.replace(/^Bearer\s+/i, "");
+  const masterKey = process.env.PHYSIOFIT_MASTER_KEY;
+  if (masterKey && token === `master:${masterKey}`) {
+    return { id: "admin", name: "Administrador", role: "Administrador", professionalId: "" };
+  }
+  const user = verifyToken(token);
+  if (!user) {
+    const err = new Error("Sessão expirada. Faça login novamente.");
+    err.statusCode = 401;
+    throw err;
+  }
+  return user;
+}
+
 export async function requireAdmin(event) {
   const token = event.headers.authorization?.replace(/^Bearer\s+/i, "");
   const user = verifyToken(token);
