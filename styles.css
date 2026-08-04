@@ -175,28 +175,46 @@ button {
 .session-chip {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 7px 9px;
+  gap: 8px;
+  padding: 6px 8px 6px 6px;
   border: 1px solid #dbe3ed;
-  border-radius: 14px;
+  border-radius: 999px;
   background: #fff;
 }
 
-.session-chip span {
+.session-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 50%;
+  background: var(--accent, #2454CC);
+  color: #fff;
+}
+
+.session-chip span#sessionUserName {
   color: #1f2937;
   font-weight: 800;
   font-size: 0.82rem;
 }
 
 .session-chip button {
-  min-height: 22px;
-  padding: 0 8px;
+  min-height: 24px;
+  padding: 0 12px;
   border: 1px solid #cfd7e3;
-  border-radius: 8px;
+  border-radius: 999px;
   background: #f8fafc;
   font-size: 0.72rem;
+  font-weight: 700;
   color: #687386;
   cursor: pointer;
+}
+.session-chip button:hover {
+  background: #fef2f2;
+  border-color: #f8b4b4;
+  color: #b91c1c;
 }
 
 .top-menu-button--icon-only {
@@ -7172,4 +7190,9 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
 .appt-justify-actions {
   display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px;
 }
+
+/* Reforça o pill do chip de sessão por cima do reset genérico de botões (--button-radius) */
+#sessionChip.session-chip { border-radius: 999px; }
+#sessionChip .session-avatar { border-radius: 50%; }
+#sessionChip button#logoutButton { border-radius: 999px; }
 

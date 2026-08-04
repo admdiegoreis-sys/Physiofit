@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=64" />
+    <link rel="stylesheet" href="styles.css?v=65" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -165,10 +165,11 @@
               <span aria-hidden="true">⌕</span>
               <input id="globalSearch" type="search" placeholder="Buscar clientes, agenda, financeiro..." />
             </label>
-            <button class="quick-action primary-button" data-view-target="students" type="button"><span aria-hidden="true">+</span>Novo cliente</button>
-            <button class="quick-action ghost-button" data-view-target="records" type="button"><span aria-hidden="true">+</span>Nova avaliação</button>
           </div>
           <div class="session-chip" id="sessionChip" hidden>
+            <span class="session-avatar" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
             <span id="sessionUserName">Usuário</span>
             <button id="logoutButton" type="button">Sair</button>
           </div>
@@ -2108,7 +2109,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=105"></script>
+    <script src="app.js?v=106"></script>
   </body>
 </html>
 
