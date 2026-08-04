@@ -1,6 +1,7 @@
 import { getSql, json } from "./_db.mjs";
 import { ensurePrecadastroTable } from "./_precadastro.mjs";
 import { phoneMatchVariants } from "./_leads.mjs";
+import { requireUser } from "./_auth.mjs";
 
 async function findStudentByPhone(sql, phone) {
   const variants = phoneMatchVariants(phone);
@@ -25,6 +26,7 @@ export async function handler(event) {
 
     // Operador autenticado gera um novo link a partir do CRM/cadastro de cliente.
     if (event.httpMethod === "POST" && !token) {
+      requireUser(event);
       const body = JSON.parse(event.body || "{}");
       const rows = await sql`
         insert into public.precadastro_links (lead_id, name, phone)
@@ -36,6 +38,7 @@ export async function handler(event) {
 
     // App autenticado lista submissoes preenchidas ainda nao aplicadas ao cadastro local.
     if (event.httpMethod === "GET" && !token) {
+      requireUser(event);
       const status = event.queryStringParameters?.status || "Preenchido";
       const rows = await sql`select * from public.precadastro_links where status = ${status} order by submitted_at asc`;
       return json(200, rows);
@@ -76,12 +79,13 @@ export async function handler(event) {
 
     // App autenticado marca o registro como ja aplicado ao cadastro local.
     if (event.httpMethod === "PATCH" && token) {
+      requireUser(event);
       await sql`update public.precadastro_links set status = 'Aplicado', applied_at = now() where token = ${token}`;
       return json(200, { ok: true });
     }
 
     return json(405, { error: "Metodo nao permitido." });
   } catch (error) {
-    return json(500, { error: error.message });
+    return json(error.statusCode || 500, { error: error.message });
   }
 }

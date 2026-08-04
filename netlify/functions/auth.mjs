@@ -1,4 +1,4 @@
-import { createToken, getAuthSql, verifyPassword, hashPassword } from "./_auth.mjs";
+import { createToken, getAuthSql, verifyPassword, hashPassword, isLoginLocked, registerFailedLogin, registerSuccessfulLogin } from "./_auth.mjs";
 import { json } from "./_db.mjs";
 
 function parseBody(event) {
@@ -33,20 +33,27 @@ export async function handler(event) {
     }
 
     const rows = await sql`
-      select id, professional_id, name, username, email, role, status, password_hash, must_change_password
+      select id, professional_id, name, username, email, role, status, password_hash, must_change_password, failed_attempts, locked_until
       from public.auth_users
       where lower(username) = lower(${username}) or lower(coalesce(email, '')) = lower(${username})
       limit 1
     `;
     const user = rows[0];
 
+    if (user && isLoginLocked(user)) {
+      return json(429, { error: "Muitas tentativas de login. Tente novamente em alguns minutos." });
+    }
+
     // Emergency recovery: ADMIN_RECOVERY_PASSWORD bypasses hash check for admin user
     const recoveryPw = process.env.ADMIN_RECOVERY_PASSWORD;
     const isRecovery = user?.id === "admin" && recoveryPw && password === recoveryPw;
 
     if (!user || user.status !== "Ativo" || (!isRecovery && !verifyPassword(password, user.password_hash))) {
+      if (user) await registerFailedLogin(sql, user.id);
       return json(401, { error: "Usuario ou senha invalidos." });
     }
+
+    await registerSuccessfulLogin(sql, user.id);
 
     // Persist recovery password as the real hash so next login is normal
     if (isRecovery) {

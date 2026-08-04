@@ -30,6 +30,10 @@ export async function ensureAuthTables(sql) {
     )
   `;
 
+  // Protecao contra forca bruta no login (ver requireLoginNotLocked/registerLoginAttempt).
+  await sql`alter table public.auth_users add column if not exists failed_attempts integer not null default 0`;
+  await sql`alter table public.auth_users add column if not exists locked_until timestamptz`;
+
   const passwordHash = hashPassword("Admin@123");
   await sql`
     insert into public.auth_users (id, name, username, email, role, status, password_hash, must_change_password)
@@ -95,6 +99,30 @@ export async function syncProfessionalUsers(sql) {
         updated_at = now()
     `;
   }
+}
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_MINUTES = 15;
+
+export function isLoginLocked(user) {
+  return Boolean(user?.locked_until && new Date(user.locked_until) > new Date());
+}
+
+export async function registerFailedLogin(sql, userId) {
+  await sql`
+    update public.auth_users
+    set
+      failed_attempts = failed_attempts + 1,
+      locked_until = case
+        when failed_attempts + 1 >= ${MAX_LOGIN_ATTEMPTS} then now() + (${LOCKOUT_MINUTES} * interval '1 minute')
+        else locked_until
+      end
+    where id = ${userId}
+  `;
+}
+
+export async function registerSuccessfulLogin(sql, userId) {
+  await sql`update public.auth_users set failed_attempts = 0, locked_until = null where id = ${userId}`;
 }
 
 export function hashPassword(password) {

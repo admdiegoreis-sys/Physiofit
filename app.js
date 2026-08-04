@@ -3934,6 +3934,7 @@ async function sendPrecadastroLink() {
   try {
     const res = await fetch("/.netlify/functions/precadastro", {
       method: "POST",
+      headers: window.PhysiofitData?.authHeaders() || {},
       body: JSON.stringify({ name, phone, leadId: _pendingStudentLeadId || "" }),
     });
     if (!res.ok) throw new Error("Falha ao gerar link.");
@@ -3956,7 +3957,9 @@ document.querySelector("#precadastroLinkSendBtn")?.addEventListener("click", sen
 
 async function mergePrecadastroSubmissions() {
   try {
-    const res = await fetch("/.netlify/functions/precadastro?status=Preenchido");
+    const res = await fetch("/.netlify/functions/precadastro?status=Preenchido", {
+      headers: window.PhysiofitData?.authHeaders() || {},
+    });
     if (!res.ok) return;
     const rows = await res.json();
     if (!Array.isArray(rows) || rows.length === 0) return;
@@ -3978,7 +3981,10 @@ async function mergePrecadastroSubmissions() {
       }
       changed = true;
 
-      await fetch(`/.netlify/functions/precadastro?token=${row.token}`, { method: "PATCH" }).catch(() => {});
+      await fetch(`/.netlify/functions/precadastro?token=${row.token}`, {
+        method: "PATCH",
+        headers: window.PhysiofitData?.authHeaders() || {},
+      }).catch(() => {});
     }
 
     if (changed) {

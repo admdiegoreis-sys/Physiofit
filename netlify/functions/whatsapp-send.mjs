@@ -1,4 +1,5 @@
 import { json } from "./_db.mjs";
+import { requireAdmin } from "./_auth.mjs";
 
 function parseBody(event) {
   if (!event.body) return {};
@@ -27,6 +28,7 @@ export async function handler(event) {
   }
 
   try {
+    await requireAdmin(event);
     const body = parseBody(event);
     const phone = normalizePhone(body.phone || body.telefone || body.chatId || "");
     const message = body.message || body.mensagem || body.text || "";
@@ -60,6 +62,6 @@ export async function handler(event) {
       response: payload,
     });
   } catch (error) {
-    return json(500, { error: error.message });
+    return json(error.statusCode || 500, { error: error.message });
   }
 }
