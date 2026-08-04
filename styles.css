@@ -7220,27 +7220,48 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
 }
 .permissions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 8px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px 16px;
+  align-items: start;
+}
+.permission-section {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  overflow: hidden;
 }
 .permission-row {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #f8fafc;
   font-size: 0.86rem;
   font-weight: 600;
   color: #334155;
   cursor: pointer;
+}
+.permission-row--section {
+  background: #eef2ff;
 }
 .permission-row input[type="checkbox"] {
   width: 16px;
   height: 16px;
   accent-color: var(--accent, #2454CC);
   cursor: pointer;
+}
+.permission-section-views {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #e2e8f0;
+}
+.permission-row--child {
+  padding: 6px 10px 6px 26px;
+  font-weight: 500;
+  font-size: 0.82rem;
+  color: #475569;
+}
+.permission-row--child:hover {
+  background: #f1f5f9;
 }
 
 .settings-form {

@@ -409,11 +409,12 @@ const seedData = {
     whatsapp: "(48) 99999-0101",
     classLimit: 6,
     reminder: "24 horas antes",
-    // Administrador sempre tem acesso total (não editável). Isso define quais grupos de
-    // tela (mesma chave usada em menuGroupByView) cada outro perfil pode acessar.
+    // Administrador sempre tem acesso total (não editável). Isso define quais telas
+    // (mesma chave usada em viewTitles/menuGroupByView) cada outro perfil pode acessar.
     rolePermissions: {
-      Profissional: ["dashboard", "sessions", "records"],
+      Profissional: ["dashboard", "agenda", "records"],
     },
+    rolePermissionsVersion: 2,
   },
   students: importedArray("students", seedStudents),
   professionals: importedArray("professionals", seedProfessionals),
@@ -1187,6 +1188,29 @@ function normalizeState(data) {
     ...(data.settings || {}),
     rolePermissions: { ...seedData.settings.rolePermissions, ...(data.settings?.rolePermissions || {}) },
   };
+  // Migra permissoes salvas no formato antigo (por grupo de menu, ex: "finance", "registers")
+  // para o novo formato granular por tela (ex: "accountsPayable", "students"). Roda so uma vez
+  // por estado salvo, controlado por rolePermissionsVersion, para nao reprocessar toda hora.
+  if ((data.settings?.rolePermissionsVersion || 1) < 2) {
+    const legacyGroupViews = {
+      dashboard: ["dashboard"],
+      crm: ["crm"],
+      sessions: ["agenda"],
+      registers: ["students", "enrollments", "professionals", "suppliers", "modalities", "plans"],
+      finance: ["monthlyPayments", "fiscal", "contracts", "accountsPayable", "accountsReceivable", "ofxImport", "bankReconciliation", "chartAccounts"],
+      management: ["cashFlow", "dre", "finance"],
+      records: ["records"],
+      settings: ["settings"],
+    };
+    const migrated = {};
+    Object.entries(normalized.settings.rolePermissions).forEach(([role, groups]) => {
+      const expanded = new Set();
+      (Array.isArray(groups) ? groups : []).forEach((key) => (legacyGroupViews[key] || [key]).forEach((v) => expanded.add(v)));
+      migrated[role] = [...expanded];
+    });
+    normalized.settings.rolePermissions = migrated;
+  }
+  normalized.settings.rolePermissionsVersion = 2;
   normalized.deletedEntityIds = Array.isArray(data.deletedEntityIds) ? [...new Set(data.deletedEntityIds.filter(Boolean))] : [];
   normalized.students = filterDeletedEntities(normalized, "students", normalized.students).map((item, index) => normalizeStudent(normalizeTextFields(item), index));
   normalized.leads = filterDeletedEntities(normalized, "leads", Array.isArray(data.leads) ? data.leads : structuredClone(seedData.leads)).map((item, index) => normalizeLead(normalizeTextFields(item), index, false));
@@ -7360,21 +7384,45 @@ function renderPermissionsPanel() {
   const grid = document.querySelector("#permissionsGrid");
   if (!grid || !isAdminSession()) return;
   const allowed = state.settings.rolePermissions?.Profissional || [];
-  grid.innerHTML = permissionGroups
-    .map(
-      (g) => `
-        <label class="permission-row">
-          <input type="checkbox" data-permission-group="${g.key}" ${allowed.includes(g.key) ? "checked" : ""} />
-          <span>${g.label}</span>
-        </label>
-      `,
-    )
+  grid.innerHTML = permissionSections
+    .map((section) => {
+      const allChecked = section.views.every((v) => allowed.includes(v.key));
+      const rows = section.views
+        .map(
+          (v) => `
+            <label class="permission-row permission-row--child">
+              <input type="checkbox" data-permission-view="${v.key}" ${allowed.includes(v.key) ? "checked" : ""} />
+              <span>${v.label}</span>
+            </label>
+          `,
+        )
+        .join("");
+      return `
+        <div class="permission-section">
+          <label class="permission-row permission-row--section">
+            <input type="checkbox" data-permission-section="${section.key}" ${allChecked ? "checked" : ""} />
+            <strong>${section.label}</strong>
+          </label>
+          ${section.views.length > 1 ? `<div class="permission-section-views">${rows}</div>` : ""}
+        </div>
+      `;
+    })
     .join("");
 }
 
+document.querySelector("#permissionsGrid")?.addEventListener("change", (event) => {
+  const sectionToggle = event.target.closest("[data-permission-section]");
+  if (!sectionToggle) return;
+  const section = permissionSections.find((s) => s.key === sectionToggle.dataset.permissionSection);
+  section?.views.forEach((v) => {
+    const checkbox = document.querySelector(`#permissionsGrid [data-permission-view="${v.key}"]`);
+    if (checkbox) checkbox.checked = sectionToggle.checked;
+  });
+});
+
 document.querySelector("#savePermissionsButton")?.addEventListener("click", () => {
   if (!isAdminSession()) return;
-  const checked = [...document.querySelectorAll("#permissionsGrid [data-permission-group]:checked")].map((el) => el.dataset.permissionGroup);
+  const checked = [...document.querySelectorAll("#permissionsGrid [data-permission-view]:checked")].map((el) => el.dataset.permissionView);
   state.settings.rolePermissions = { ...state.settings.rolePermissions, Profissional: checked };
   saveState({ immediate: true });
   toast("Permissões salvas.");
@@ -7388,23 +7436,64 @@ function isAdminSession() {
   return currentUser()?.role === "Administrador";
 }
 
-const permissionGroups = [
-  { key: "dashboard", label: "Início" },
-  { key: "crm", label: "Leads" },
-  { key: "sessions", label: "Agenda" },
-  { key: "registers", label: "Cadastros" },
-  { key: "finance", label: "Financeiro" },
-  { key: "management", label: "Gestão" },
-  { key: "records", label: "Prontuário" },
-  { key: "settings", label: "Configurações" },
+const permissionSections = [
+  { key: "dashboard", label: "Início", views: [{ key: "dashboard", label: "Início" }] },
+  { key: "crm", label: "Leads", views: [{ key: "crm", label: "Leads" }] },
+  { key: "sessions", label: "Agenda", views: [{ key: "agenda", label: "Agenda" }] },
+  {
+    key: "registers",
+    label: "Cadastros",
+    views: [
+      { key: "students", label: "Clientes" },
+      { key: "enrollments", label: "Matrículas" },
+      { key: "professionals", label: "Profissionais" },
+      { key: "suppliers", label: "Fornecedores" },
+      { key: "modalities", label: "Modalidades" },
+      { key: "plans", label: "Planos" },
+    ],
+  },
+  {
+    key: "finance",
+    label: "Financeiro",
+    views: [
+      { key: "monthlyPayments", label: "Mensalidades" },
+      { key: "fiscal", label: "NFS-e" },
+      { key: "contracts", label: "Contratos" },
+      { key: "accountsPayable", label: "Contas a Pagar" },
+      { key: "accountsReceivable", label: "Contas a Receber" },
+      { key: "ofxImport", label: "Importar OFX" },
+      { key: "bankReconciliation", label: "Conciliação Bancária" },
+      { key: "chartAccounts", label: "Plano de Contas" },
+    ],
+  },
+  {
+    key: "management",
+    label: "Gestão",
+    views: [
+      { key: "cashFlow", label: "Fluxo de Caixa" },
+      { key: "dre", label: "DRE" },
+      { key: "finance", label: "Cobranças" },
+    ],
+  },
+  { key: "records", label: "Prontuário", views: [{ key: "records", label: "Prontuário" }] },
+  { key: "settings", label: "Configurações", views: [{ key: "settings", label: "Configurações" }] },
 ];
+
+// Telas de edição/subtela não têm checkbox próprio — herdam a permissão da tela-base.
+const editorViewParent = {
+  patientEditor: "students",
+  professionalEditor: "professionals",
+  modalityEditor: "modalities",
+  planEditor: "plans",
+  fiscalSettings: "fiscal",
+};
 
 function canAccessView(view) {
   const user = currentUser();
   if (!user) return false;
   if (isAdminSession()) return true;
-  const allowedGroups = state.settings.rolePermissions?.[user.role] || [];
-  return allowedGroups.includes(menuGroupByView[view]);
+  const allowedViews = state.settings.rolePermissions?.[user.role] || [];
+  return allowedViews.includes(editorViewParent[view] || view);
 }
 
 function applyAuthSession() {
