@@ -95,6 +95,6 @@ export async function handler(event) {
     return json(200, { link: inviteUrl, sentByEmail, userName: user.name, email: user.email || null });
   } catch (error) {
     console.error("auth-invite error:", error.message);
-    return json(error.message.includes("restrito") ? 403 : 500, { error: error.message });
+    return json(error.statusCode || (error.message.includes("restrito") ? 403 : 500), { error: error.message });
   }
 }

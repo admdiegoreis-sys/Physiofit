@@ -140,8 +140,20 @@ export function verifyToken(token) {
 export async function requireAdmin(event) {
   const token = event.headers.authorization?.replace(/^Bearer\s+/i, "");
   const user = verifyToken(token);
-  if (!user || user.role !== "Administrador") {
-    throw new Error("Acesso restrito ao administrador.");
+  // Distinguir "sem sessão válida" (token ausente/expirado/inválido) de "logado mas sem
+  // permissão" — sem isso, um token expirado cai no mesmo erro genérico de permissão e o
+  // app nunca dispara o fluxo de "sessão expirada, faça login de novo" (que já existe e
+  // depende do status 401), deixando o usuário preso vendo "acesso restrito" achando que
+  // ainda está logado como admin.
+  if (!user) {
+    const err = new Error("Sessão expirada. Faça login novamente.");
+    err.statusCode = 401;
+    throw err;
+  }
+  if (user.role !== "Administrador") {
+    const err = new Error("Acesso restrito ao administrador.");
+    err.statusCode = 403;
+    throw err;
   }
   return user;
 }

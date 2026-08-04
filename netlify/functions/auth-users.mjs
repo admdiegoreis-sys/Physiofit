@@ -79,6 +79,6 @@ export async function handler(event) {
 
     return json(405, { error: "Metodo nao permitido." });
   } catch (error) {
-    return json(error.message.includes("restrito") ? 403 : 500, { error: error.message });
+    return json(error.statusCode || (error.message.includes("restrito") ? 403 : 500), { error: error.message });
   }
 }
