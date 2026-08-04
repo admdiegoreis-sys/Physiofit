@@ -178,5 +178,11 @@
         body: JSON.stringify(payload),
       });
     },
+    async fiscalCertificateTest() {
+      return request("/fiscal-certificate-test", {
+        method: "POST",
+        headers: this.authHeaders(),
+      });
+    },
   };
 })();

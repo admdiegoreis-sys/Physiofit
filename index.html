@@ -1168,7 +1168,9 @@
               <label>Senha do certificado<input id="fiscalCertificatePassword" type="password" /></label>
               <label>Válido até<input id="fiscalCertificateExpiry" type="date" /></label>
               <button class="primary-button" id="uploadFiscalCertificateButton" type="button">Enviar certificado</button>
+              <button class="ghost-button" id="testFiscalCertificateButton" type="button">Testar conexão com o governo (mTLS)</button>
             </form>
+            <div class="settings-hint" id="fiscalCertificateTestResult"></div>
           </div>
         </section>
 
@@ -2163,7 +2165,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=110"></script>
+    <script src="app.js?v=111"></script>
   </body>
 </html>
 

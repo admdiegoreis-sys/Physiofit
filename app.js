@@ -5132,6 +5132,19 @@ document.querySelector("#uploadFiscalCertificateButton")?.addEventListener("clic
   }
 });
 
+document.querySelector("#testFiscalCertificateButton")?.addEventListener("click", async () => {
+  const resultBox = document.querySelector("#fiscalCertificateTestResult");
+  if (resultBox) resultBox.textContent = "Testando conexão mTLS com o ambiente do governo...";
+  try {
+    const result = await window.PhysiofitData.fiscalCertificateTest();
+    if (resultBox) resultBox.textContent = result.motivo || (result.ok ? "Conexão OK." : "Falha na conexão.");
+    toast(result.ok ? "Certificado autenticou com o governo." : result.motivo || "Falha ao conectar.");
+  } catch (error) {
+    if (resultBox) resultBox.textContent = error.message || "Não foi possível testar a conexão.";
+    toast(error.message || "Não foi possível testar a conexão.");
+  }
+});
+
 const accountViewConfigs = {
   payable: {
     direction: "Pagar",
