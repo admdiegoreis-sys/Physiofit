@@ -5122,11 +5122,14 @@ document.querySelector("#uploadFiscalCertificateButton")?.addEventListener("clic
   try {
     const buffer = await file.arrayBuffer();
     const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-    await window.PhysiofitData.fiscalCertificateUpload({ pfxBase64: base64, senha, fileName: file.name, validoAte: validoAte || null });
+    const uploaded = await window.PhysiofitData.fiscalCertificateUpload({ pfxBase64: base64, senha, fileName: file.name, validoAte: validoAte || null });
     toast("Certificado enviado com sucesso.");
     fileInput.value = "";
     document.querySelector("#fiscalCertificatePassword").value = "";
-    renderFiscalSettingsPanel();
+    const certStatus = document.querySelector("#fiscalCertificateStatus");
+    if (certStatus) {
+      certStatus.textContent = `Certificado digital configurado (${uploaded?.fileName || file.name}).${validoAte ? ` Válido até ${dateLabel(validoAte)}.` : ""}`;
+    }
   } catch (error) {
     toast(error.message || "Não foi possível enviar o certificado.");
   }
