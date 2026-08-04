@@ -5082,10 +5082,10 @@ async function renderFiscalSettingsPanel() {
   if (!form) return;
   try {
     const config = await window.PhysiofitData.fiscalConfig();
-    ["municipio", "razaoSocial", "cnpj", "inscricaoMunicipal", "regimeTributario", "cnae", "itemLc116", "aliquotaIss", "serieRps"].forEach((field) => {
+    ["municipio", "razaoSocial", "cnpj", "inscricaoMunicipal", "regimeTributario", "cnae", "itemLc116", "aliquotaIss", "serieRps", "proximoRps"].forEach((field) => {
       const input = form.querySelector(`[name="${field}"]`);
       if (!input) return;
-      const dbField = { razaoSocial: "razao_social", inscricaoMunicipal: "inscricao_municipal", regimeTributario: "regime_tributario", itemLc116: "item_lc116", aliquotaIss: "aliquota_iss", serieRps: "serie_rps" }[field] || field;
+      const dbField = { razaoSocial: "razao_social", inscricaoMunicipal: "inscricao_municipal", regimeTributario: "regime_tributario", itemLc116: "item_lc116", aliquotaIss: "aliquota_iss", serieRps: "serie_rps", proximoRps: "proximo_rps" }[field] || field;
       input.value = config?.[dbField] ?? "";
     });
     if (certStatus) {

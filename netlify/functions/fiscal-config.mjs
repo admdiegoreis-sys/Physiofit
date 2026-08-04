@@ -40,6 +40,7 @@ export async function handler(event) {
           item_lc116 = coalesce(${body.itemLc116 ?? null}, item_lc116),
           aliquota_iss = coalesce(${body.aliquotaIss ?? null}, aliquota_iss),
           serie_rps = coalesce(${body.serieRps ?? null}, serie_rps),
+          proximo_rps = coalesce(${body.proximoRps != null ? Number(body.proximoRps) : null}, proximo_rps),
           ambiente = coalesce(${body.ambiente ?? null}, ambiente),
           updated_at = now()
         where id = 'default'
