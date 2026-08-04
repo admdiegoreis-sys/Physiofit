@@ -3491,19 +3491,24 @@ function renderCrmDashboard(activeLeads) {
   const now = new Date();
   const months = Array.from({ length: 6 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
-    return { key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), n: 0 };
+    return { key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, label: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), n: 0, matriculado: 0 };
   });
-  all.forEach((l) => { const slot = months.find((m) => m.key === String(l.entryDate || "").slice(0, 7)); if (slot) slot.n++; });
+  all.forEach((l) => {
+    const slot = months.find((m) => m.key === String(l.entryDate || "").slice(0, 7));
+    if (!slot) return;
+    slot.n++;
+    if (l.status === "Matriculado") slot.matriculado++;
+  });
   // Barras em vez de linha: com meses zerados intercalados com um único pico, uma área/linha
   // fica achatada no chão e "explode" no fim — barras deixam cada mês legível por si só.
   const maxM = Math.max(...months.map((m) => m.n), 1);
-  const W = 300, H = 130, pL = 20, pR = 10, pT = 22, pB = 18;
+  const W = 300, H = 130, pL = 20, pR = 10, pT = 22, pB = 26;
   const iW = W - pL - pR, iH = H - pT - pB;
   const slot = iW / months.length;
   const barW = Math.min(26, slot * 0.5);
   const timeBlock = `
     <div class="crm-dash-block crm-dash-time">
-      <p class="crm-dash-title">Entradas por Mês</p>
+      <p class="crm-dash-title">Entradas por Mês <span class="crm-dash-title-sub">· % convertido em Matriculado</span></p>
       <svg viewBox="0 0 ${W} ${H}" class="crm-time-svg">
         <defs><linearGradient id="crmBarGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#14b8a6"/>
@@ -3518,9 +3523,11 @@ function renderCrmDashboard(activeLeads) {
           const cx = pL + slot * i + slot / 2;
           const barH = Math.max((m.n / maxM) * iH, m.n > 0 ? 4 : 0);
           const y = pT + iH - barH;
+          const pct = m.n > 0 ? Math.round((m.matriculado / m.n) * 100) : null;
           return `${m.n > 0 ? `<rect x="${cx - barW / 2}" y="${y}" width="${barW}" height="${barH}" rx="5" fill="url(#crmBarGrad)"/>
                   <text x="${cx}" y="${y - 7}" text-anchor="middle" font-size="12" fill="#0f766e" font-weight="700">${m.n}</text>` : ""}
-                  <text x="${cx}" y="${H - 4}" text-anchor="middle" font-size="10" fill="#94a3b8">${m.label}</text>`;
+                  <text x="${cx}" y="${H - 16}" text-anchor="middle" font-size="10" fill="#94a3b8">${m.label}</text>
+                  ${pct !== null ? `<text x="${cx}" y="${H - 4}" text-anchor="middle" font-size="9" font-weight="700" fill="${pct > 0 ? "#16a34a" : "#cbd5e1"}">${pct}%</text>` : ""}`;
         }).join("")}
       </svg>
     </div>`;

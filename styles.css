@@ -1411,6 +1411,12 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
   letter-spacing: .06em;
   color: #64748b;
 }
+.crm-dash-title-sub {
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: #94a3b8;
+}
 .crm-dash-empty { font-size: 0.8rem; color: #94a3b8; margin: 0; }
 
 /* funil + prof bars */
