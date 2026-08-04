@@ -141,5 +141,42 @@
         return { data: null, error };
       }
     },
+    async fiscalList() {
+      return request("/fiscal-queue", { headers: this.authHeaders() });
+    },
+    async fiscalEnqueue(payload) {
+      return request("/fiscal-queue", {
+        method: "POST",
+        headers: this.authHeaders(),
+        body: JSON.stringify({ action: "enqueue", ...payload }),
+      });
+    },
+    async fiscalAction(action, payload = {}) {
+      return request("/fiscal-queue", {
+        method: "POST",
+        headers: this.authHeaders(),
+        body: JSON.stringify({ action, ...payload }),
+      });
+    },
+    async fiscalConfig() {
+      return request("/fiscal-config", { headers: this.authHeaders() });
+    },
+    async fiscalConfigUpdate(payload) {
+      return request("/fiscal-config", {
+        method: "PATCH",
+        headers: this.authHeaders(),
+        body: JSON.stringify(payload),
+      });
+    },
+    async fiscalCertificateStatus() {
+      return request("/fiscal-certificate", { headers: this.authHeaders() });
+    },
+    async fiscalCertificateUpload(payload) {
+      return request("/fiscal-certificate", {
+        method: "POST",
+        headers: this.authHeaders(),
+        body: JSON.stringify(payload),
+      });
+    },
   };
 })();

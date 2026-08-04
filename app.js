@@ -513,6 +513,7 @@ const viewTitles = {
   planEditor: "Cadastro de plano",
   monthlyPayments: "Mensalidades",
   fiscal: "NFS-e",
+  fiscalSettings: "Configurações fiscais",
   contracts: "Contratos",
   accountsPayable: "Contas a Pagar",
   accountsReceivable: "Contas a Receber",
@@ -542,6 +543,7 @@ const viewPaths = {
   planEditor: "/plano",
   monthlyPayments: "/mensalidades",
   fiscal: "/fiscal",
+  fiscalSettings: "/fiscal/configuracoes",
   contracts: "/contratos",
   accountsPayable: "/contas-pagar",
   accountsReceivable: "/contas-receber",
@@ -573,6 +575,7 @@ const menuGroupByView = {
   planEditor: "registers",
   monthlyPayments: "finance",
   fiscal: "finance",
+  fiscalSettings: "finance",
   contracts: "finance",
   accountsPayable: "finance",
   accountsReceivable: "finance",
@@ -2803,6 +2806,34 @@ function syncEnrollmentPaymentFromAccount(account = {}) {
     relatedStudent.plan = planName(enrollment.planId) || relatedStudent.plan;
     relatedStudent.membership = "Matriculado";
   }
+
+  enqueueFiscalInvoiceForAccount(account, enrollment, relatedStudent);
+}
+
+// Entra na fila de emissão de NFS-e assim que um título de mensalidade é totalmente pago.
+// O backend deduplica por monthlyId (accountId), então é seguro chamar isso toda vez que
+// o pagamento é sincronizado (edição de conta, baixa manual, etc.).
+function enqueueFiscalInvoiceForAccount(account = {}, enrollment = {}, relatedStudent = null) {
+  if (!window.PhysiofitData?.enabled) return;
+  const amount = Number(account.paidAmount || account.amount || 0);
+  if (!amount) return;
+  const service = modalityName(enrollment.modalityId) || "Serviço";
+  window.PhysiofitData
+    .fiscalEnqueue({
+      monthlyId: account.id,
+      studentId: relatedStudent?.id || enrollment.studentId || "",
+      payload: {
+        patient: relatedStudent?.name || account.person || "",
+        cpf: relatedStudent?.cpf || account.document || "",
+        email: relatedStudent?.email || "",
+        service,
+        serviceCode: "8.02",
+        description: `Mensalidade ${service}`,
+        competenceDate: account.paidDate || account.competenceDate || demoToday,
+        amount,
+      },
+    })
+    .catch(() => {});
 }
 
 function normalizedText(value = "") {
@@ -4874,82 +4905,97 @@ function renderMonthlyPayments() {
 }
 
 function invoiceByMonthlyId(monthlyId) {
-  return state.fiscalInvoices.find((item) => item.monthlyId === monthlyId && item.status !== "Cancelada");
+  const queueItem = fiscalQueueItems.find((item) => item.monthly_id === monthlyId && item.status !== "Cancelada");
+  return queueItem ? { number: queueItem.invoice_numero || queueItem.status } : null;
+}
+
+let fiscalQueueItems = [];
+let fiscalQueueLoading = false;
+let fiscalSelectedIds = new Set();
+
+async function loadFiscalQueue() {
+  if (!window.PhysiofitData?.enabled || fiscalQueueLoading) return;
+  fiscalQueueLoading = true;
+  try {
+    fiscalQueueItems = await window.PhysiofitData.fiscalList();
+  } catch (error) {
+    console.error("loadFiscalQueue error:", error.message);
+  } finally {
+    fiscalQueueLoading = false;
+    renderFiscalInvoices();
+  }
 }
 
 function fiscalRows() {
-  const issuedByMonthlyId = new Map(state.fiscalInvoices.map((invoice) => [invoice.monthlyId, invoice]));
-  const receivables = monthlyRows()
-    .filter((item) => item.status === "Pago" || item.status === "Cortesia")
-    .map((item) => {
-      const invoice = issuedByMonthlyId.get(item.id);
-      const studentItem = student(item.studentId) ?? {};
-      return {
-        id: invoice?.id || item.id,
-        monthlyId: item.id,
-        studentId: item.studentId,
-        patient: item.patient,
-        cpf: studentItem.cpf || "",
-        email: studentItem.email || "",
-        address: studentItem.address || "",
-        service: modalityName(item.modalityId) || "Serviço",
-        serviceCode: invoice?.serviceCode || "8.02",
-        description: invoice?.description || `Mensalidade ${modalityName(item.modalityId) || "serviço"}`,
-        competenceDate: item.paymentDate || item.dueDate,
-        amount: item.received || item.amount,
-        status: invoice?.status || "Pendente",
-        number: invoice?.number || "",
-        rps: invoice?.rps || "",
-        rejectionReason: invoice?.rejectionReason || "",
-        xmlUrl: invoice?.xmlUrl || "",
-        pdfUrl: invoice?.pdfUrl || "",
-        publicLink: invoice?.publicLink || "",
-        modalityId: item.modalityId,
-      };
-    });
-  return receivables;
+  const term = normalizedText(document.querySelector("#fiscalSearch")?.value.trim() ?? "");
+  const statusFilter = document.querySelector("#fiscalStatusFilter")?.value ?? "all";
+  return fiscalQueueItems
+    .map((item) => ({
+      id: item.id,
+      monthlyId: item.monthly_id,
+      studentId: item.student_id,
+      patient: item.payload?.patient || "",
+      cpf: item.payload?.cpf || "",
+      email: item.payload?.email || "",
+      service: item.payload?.service || "Serviço",
+      serviceCode: item.payload?.serviceCode || "8.02",
+      competenceDate: item.payload?.competenceDate || "",
+      amount: Number(item.payload?.amount || 0),
+      status: item.status,
+      number: item.invoice_numero || "",
+      rps: item.invoice_rps || "",
+      protocolo: item.protocolo || "",
+      motivo: item.erro_mensagem || item.motivo_cancelamento || "",
+      xml: item.xml_enviado || "",
+      pdfUrl: item.pdf_url || "",
+    }))
+    .filter((item) => statusFilter === "all" || item.status === statusFilter)
+    .filter((item) => !term || normalizedText(`${item.patient} ${item.cpf} ${item.service} ${item.number} ${item.status}`).includes(term))
+    .sort((a, b) => a.patient.localeCompare(b.patient, "pt-BR"));
 }
 
 function renderFiscalInvoices() {
   const table = document.querySelector("#fiscalTable");
   if (!table) return;
-  const statusFilter = document.querySelector("#fiscalStatusFilter")?.value ?? "all";
-  const modalityFilter = document.querySelector("#fiscalModalityFilter")?.value ?? "all";
-  const term = normalizedText(document.querySelector("#fiscalSearch")?.value.trim() ?? "");
-  const rows = fiscalRows()
-    .filter((item) => statusFilter === "all" || item.status === statusFilter)
-    .filter((item) => modalityFilter === "all" || item.modalityId === modalityFilter)
-    .filter((item) => !term || normalizedText(`${item.patient} ${item.cpf} ${item.service} ${item.number} ${item.status}`).includes(term))
-    .sort((a, b) => a.patient.localeCompare(b.patient, "pt-BR"));
-  const authorized = fiscalRows().filter((item) => item.status === "Autorizada");
-  const pending = fiscalRows().filter((item) => item.status === "Pendente");
-  const rejected = fiscalRows().filter((item) => item.status === "Rejeitada");
+  const rows = fiscalRows();
+  const emitidas = rows.filter((item) => item.status === "Emitida");
+  const pendentes = rows.filter((item) => item.status === "Pendente");
+  const erros = rows.filter((item) => item.status === "Erro");
   document.querySelector("#fiscalSummary").innerHTML = `
-    <article class="summary-item"><span>Autorizadas</span><strong>${authorized.length}</strong></article>
-    <article class="summary-item"><span>Pendentes</span><strong>${pending.length}</strong></article>
-    <article class="summary-item"><span>Rejeitadas</span><strong>${rejected.length}</strong></article>
-    <article class="summary-item"><span>Valor autorizado</span><strong>${currency(authorized.reduce((sum, item) => sum + Number(item.amount || 0), 0))}</strong></article>
+    <article class="summary-item"><span>Emitidas</span><strong>${emitidas.length}</strong></article>
+    <article class="summary-item"><span>Pendentes</span><strong>${pendentes.length}</strong></article>
+    <article class="summary-item"><span>Com erro</span><strong>${erros.length}</strong></article>
+    <article class="summary-item"><span>Valor emitido</span><strong>${currency(emitidas.reduce((sum, item) => sum + Number(item.amount || 0), 0))}</strong></article>
   `;
 
   table.innerHTML = rows.length
-    ? rows.map((item) => `
+    ? rows.map((item) => {
+        const canEmit = item.status === "Pendente" || item.status === "Erro";
+        const canCancel = item.status === "Emitida";
+        const canConsult = item.status === "Em Processamento" || item.status === "Emitida";
+        return `
       <tr>
+        <td><input type="checkbox" data-fiscal-select="${item.id}" ${item.status === "Pendente" ? "" : "disabled"} ${fiscalSelectedIds.has(item.id) ? "checked" : ""} /></td>
         <td>
           <div class="row-actions">
-            <button class="row-action-button edit-icon-button" data-issue-invoice="${item.monthlyId}" type="button" title="Emitir ou reenviar NFS-e" aria-label="Emitir ou reenviar NFS-e"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></button>
-            <button class="row-action-button delete-icon-button" data-cancel-invoice="${item.monthlyId}" type="button" title="Cancelar NFS-e" aria-label="Cancelar NFS-e"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+            ${canEmit ? `<button class="row-action-button edit-icon-button" data-issue-invoice="${item.id}" type="button" title="Emitir NFS-e" aria-label="Emitir NFS-e"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></button>` : ""}
+            ${canConsult ? `<button class="row-action-button" data-consult-invoice="${item.id}" type="button" title="Consultar">🔍</button>` : ""}
+            ${canCancel ? `<button class="row-action-button delete-icon-button" data-cancel-invoice="${item.id}" type="button" title="Cancelar NFS-e" aria-label="Cancelar NFS-e"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>` : ""}
+            ${item.xml ? `<button class="row-action-button" data-view-xml="${item.id}" type="button" title="Ver XML">XML</button>` : ""}
+            ${item.pdfUrl ? `<a class="row-action-button" href="${item.pdfUrl}" target="_blank" rel="noreferrer" title="Ver PDF">PDF</a>` : ""}
           </div>
         </td>
-        <td><div class="patient-name"><strong>${item.patient.toUpperCase()}</strong><span>${item.cpf || "CPF pendente"} · ${item.email || "email pendente"}</span></div></td>
+        <td><div class="patient-name"><strong>${(item.patient || "Sem nome").toUpperCase()}</strong><span>${item.cpf || "CPF pendente"} · ${item.email || "email pendente"}</span></div></td>
         <td>${item.service}<br><small>Código ${item.serviceCode}</small></td>
-        <td>${dateLabel(item.competenceDate)}</td>
+        <td>${item.competenceDate ? dateLabel(item.competenceDate) : "-"}</td>
         <td><strong>${currency(item.amount)}</strong></td>
         <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
         <td>${item.number || "-"}<br><small>${item.rps || "-"}</small></td>
-        <td>${item.rejectionReason || (item.publicLink ? `<a href="${item.publicLink}" target="_blank" rel="noreferrer">XML/PDF</a>` : "-")}</td>
+        <td>${item.motivo || "-"}</td>
       </tr>
-    `).join("")
-    : `<tr><td colspan="8"><div class="empty-state">Nenhuma NFS-e encontrada neste filtro.</div></td></tr>`;
+    `;
+      }).join("")
+    : `<tr><td colspan="9"><div class="empty-state">Nenhuma NFS-e na fila. Notas entram automaticamente quando uma mensalidade é paga.</div></td></tr>`;
 }
 
 function renderFiscalOptions() {
@@ -4960,70 +5006,131 @@ function renderFiscalOptions() {
   modalityFilter.value = selected === "all" || activeModalities().some((item) => item.id === selected) ? selected : "all";
 }
 
-function issueFiscalInvoice(monthlyId, options = {}) {
-  const row = fiscalRows().find((item) => item.monthlyId === monthlyId);
-  if (!row) return;
-  const missing = [];
-  if (!row.patient) missing.push("nome");
-  if (!row.cpf) missing.push("CPF");
-  if (!row.service) missing.push("serviço");
-  if (!Number(row.amount)) missing.push("valor");
-  const existing = invoiceByMonthlyId(monthlyId);
-  const base = {
-    id: existing?.id || uid("nf"),
-    monthlyId,
-    studentId: row.studentId,
-    rps: existing?.rps || `RPS-${String(state.fiscalInvoices.length + 1).padStart(4, "0")}`,
-    service: row.service,
-    serviceCode: row.serviceCode,
-    description: row.description,
-    amount: Number(row.amount || 0),
-    iss: Number(row.amount || 0) * 0.02,
-    competenceDate: row.competenceDate,
-    issueDate: demoToday,
-  };
-  const invoice = missing.length
-    ? normalizeFiscalInvoice({ ...base, status: "Rejeitada", rejectionReason: `Dados obrigatórios incompletos: ${missing.join(", ")}.` }, state.fiscalInvoices.length)
-    : normalizeFiscalInvoice({
-        ...base,
-        status: "Autorizada",
-        number: existing?.number || `NFS-${String(1200 + state.fiscalInvoices.length).padStart(6, "0")}`,
-        xmlUrl: "#",
-        pdfUrl: "#",
-        publicLink: "#",
-        rejectionReason: "",
-      }, state.fiscalInvoices.length);
-  if (existing) state.fiscalInvoices = state.fiscalInvoices.map((item) => (item.id === existing.id ? invoice : item));
-  else state.fiscalInvoices.push(invoice);
-  if (options.silent) return invoice;
-  saveState();
-  render();
-  toast(invoice.status === "Autorizada" ? "NFS-e autorizada." : "NFS-e rejeitada: revise os dados do cliente.");
-  return invoice;
+async function issueFiscalInvoice(queueId) {
+  try {
+    await window.PhysiofitData.fiscalAction("emit", { queueId });
+    await loadFiscalQueue();
+    const item = fiscalQueueItems.find((row) => row.id === queueId);
+    toast(item?.status === "Emitida" ? "NFS-e emitida." : `Falha ao emitir: ${item?.erro_mensagem || "verifique a configuração fiscal."}`);
+  } catch (error) {
+    toast(error.message || "Não foi possível emitir a NFS-e.");
+  }
 }
 
-function cancelFiscalInvoice(monthlyId) {
-  const existing = invoiceByMonthlyId(monthlyId);
-  if (!existing) {
-    toast("Não há NFS-e autorizada para cancelar.");
+async function resendFiscalInvoice(queueId) {
+  try {
+    await window.PhysiofitData.fiscalAction("resend", { queueId });
+    await loadFiscalQueue();
+    toast("Reenvio processado.");
+  } catch (error) {
+    toast(error.message || "Não foi possível reenviar a NFS-e.");
+  }
+}
+
+async function consultFiscalInvoice(queueId) {
+  try {
+    const result = await window.PhysiofitData.fiscalAction("consult", { queueId });
+    toast(result.motivo || "Consulta realizada.");
+  } catch (error) {
+    toast(error.message || "Não foi possível consultar a NFS-e.");
+  }
+}
+
+async function cancelFiscalInvoice(queueId) {
+  const motivo = prompt("Motivo do cancelamento da NFS-e:");
+  if (motivo === null) return;
+  if (!motivo.trim()) {
+    toast("Informe o motivo do cancelamento.");
     return;
   }
-  existing.status = "Cancelada";
-  existing.rejectionReason = "Cancelada manualmente.";
-  saveState();
-  render();
-  toast("NFS-e cancelada.");
+  try {
+    const result = await window.PhysiofitData.fiscalAction("cancel", { queueId, motivo: motivo.trim() });
+    await loadFiscalQueue();
+    toast(result.ok !== false ? "NFS-e cancelada." : result.motivo || "Não foi possível cancelar.");
+  } catch (error) {
+    toast(error.message || "Não foi possível cancelar a NFS-e.");
+  }
 }
 
-function issuePendingFiscalInvoices() {
-  const issued = fiscalRows()
-    .filter((item) => item.status === "Pendente" || item.status === "Rejeitada")
-    .slice(0, 20)
-    .map((item) => issueFiscalInvoice(item.monthlyId, { silent: true }));
-  saveState();
-  render();
-  toast(`${issued.filter((item) => item?.status === "Autorizada").length} NFS-e autorizadas; ${issued.filter((item) => item?.status === "Rejeitada").length} rejeitadas.`);
+function viewFiscalXml(queueId) {
+  const item = fiscalQueueItems.find((row) => row.id === queueId);
+  if (!item?.xml_enviado) return;
+  const win = window.open("", "_blank");
+  if (win) win.document.write(`<pre>${item.xml_enviado.replace(/</g, "&lt;")}</pre>`);
 }
+
+async function issuePendingFiscalInvoices() {
+  const ids = fiscalSelectedIds.size ? [...fiscalSelectedIds] : fiscalRows().filter((item) => item.status === "Pendente").map((item) => item.id);
+  if (!ids.length) {
+    toast("Nenhuma NFS-e pendente selecionada.");
+    return;
+  }
+  try {
+    const results = await window.PhysiofitData.fiscalAction("emit-batch", { queueIds: ids });
+    fiscalSelectedIds.clear();
+    await loadFiscalQueue();
+    const emitidas = results.filter((item) => item.status === "Emitida").length;
+    toast(`${emitidas} NFS-e emitidas de ${results.length} processadas.`);
+  } catch (error) {
+    toast(error.message || "Não foi possível emitir as NFS-e selecionadas.");
+  }
+}
+
+async function renderFiscalSettingsPanel() {
+  const form = document.querySelector("#fiscalConfigForm");
+  const certStatus = document.querySelector("#fiscalCertificateStatus");
+  if (!form) return;
+  try {
+    const config = await window.PhysiofitData.fiscalConfig();
+    ["municipio", "razaoSocial", "cnpj", "inscricaoMunicipal", "regimeTributario", "cnae", "itemLc116", "aliquotaIss", "serieRps"].forEach((field) => {
+      const input = form.querySelector(`[name="${field}"]`);
+      if (!input) return;
+      const dbField = { razaoSocial: "razao_social", inscricaoMunicipal: "inscricao_municipal", regimeTributario: "regime_tributario", itemLc116: "item_lc116", aliquotaIss: "aliquota_iss", serieRps: "serie_rps" }[field] || field;
+      input.value = config?.[dbField] ?? "";
+    });
+    if (certStatus) {
+      certStatus.textContent = config?.certificateReady
+        ? `Certificado digital configurado.${config.certificateExpiresAt ? ` Válido até ${dateLabel(config.certificateExpiresAt)}.` : ""}`
+        : "Nenhum certificado digital A1 configurado. Envie o arquivo .pfx abaixo para habilitar a emissão real de NFS-e.";
+    }
+  } catch (error) {
+    if (certStatus) certStatus.textContent = "Não foi possível carregar as configurações fiscais.";
+  }
+}
+
+document.querySelector("#saveFiscalConfigButton")?.addEventListener("click", async () => {
+  const form = document.querySelector("#fiscalConfigForm");
+  if (!form) return;
+  const values = Object.fromEntries(new FormData(form).entries());
+  try {
+    await window.PhysiofitData.fiscalConfigUpdate(values);
+    toast("Configurações fiscais salvas.");
+  } catch (error) {
+    toast(error.message || "Não foi possível salvar as configurações fiscais.");
+  }
+});
+
+document.querySelector("#uploadFiscalCertificateButton")?.addEventListener("click", async () => {
+  const fileInput = document.querySelector("#fiscalCertificateFile");
+  const senha = document.querySelector("#fiscalCertificatePassword")?.value || "";
+  const validoAte = document.querySelector("#fiscalCertificateExpiry")?.value || "";
+  const file = fileInput?.files?.[0];
+  if (!file || !senha) {
+    toast("Selecione o arquivo .pfx e informe a senha do certificado.");
+    return;
+  }
+  try {
+    const buffer = await file.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    await window.PhysiofitData.fiscalCertificateUpload({ pfxBase64: base64, senha, fileName: file.name, validoAte: validoAte || null });
+    toast("Certificado enviado com sucesso.");
+    fileInput.value = "";
+    document.querySelector("#fiscalCertificatePassword").value = "";
+    renderFiscalSettingsPanel();
+  } catch (error) {
+    toast(error.message || "Não foi possível enviar o certificado.");
+  }
+});
 
 const accountViewConfigs = {
   payable: {
@@ -7593,7 +7700,11 @@ function switchView(view, { pushState = true } = {}) {
     modalities: renderModalities,
     plans: renderPlans,
     monthlyPayments: renderMonthlyPayments,
-    fiscal: renderFiscalInvoices,
+    fiscal: () => {
+      renderFiscalInvoices();
+      loadFiscalQueue();
+    },
+    fiscalSettings: renderFiscalSettingsPanel,
     contracts: renderContracts,
     accountsPayable: renderAccounts,
     accountsReceivable: renderAccounts,
@@ -8236,6 +8347,15 @@ document.addEventListener("click", (event) => {
 
   const cancelInvoiceButton = event.target.closest("[data-cancel-invoice]");
   if (cancelInvoiceButton) cancelFiscalInvoice(cancelInvoiceButton.dataset.cancelInvoice);
+
+  const resendInvoiceButton = event.target.closest("[data-resend-invoice]");
+  if (resendInvoiceButton) resendFiscalInvoice(resendInvoiceButton.dataset.resendInvoice);
+
+  const consultInvoiceButton = event.target.closest("[data-consult-invoice]");
+  if (consultInvoiceButton) consultFiscalInvoice(consultInvoiceButton.dataset.consultInvoice);
+
+  const viewXmlButton = event.target.closest("[data-view-xml]");
+  if (viewXmlButton) viewFiscalXml(viewXmlButton.dataset.viewXml);
 
   const confirmOfxButton = event.target.closest("[data-confirm-ofx-draft]");
   if (confirmOfxButton) {
@@ -8982,6 +9102,12 @@ document.querySelector("#nextMonthlyPeriod")?.addEventListener("click", () => {
 document.querySelector("#fiscalSearchButton")?.addEventListener("click", renderFiscalInvoices);
 document.querySelector("#fiscalClearFiltersButton")?.addEventListener("click", clearFiscalFilters);
 document.querySelector("#issueSelectedInvoicesButton")?.addEventListener("click", issuePendingFiscalInvoices);
+document.querySelector("#fiscalTable")?.addEventListener("change", (event) => {
+  const checkbox = event.target.closest("[data-fiscal-select]");
+  if (!checkbox) return;
+  if (checkbox.checked) fiscalSelectedIds.add(checkbox.dataset.fiscalSelect);
+  else fiscalSelectedIds.delete(checkbox.dataset.fiscalSelect);
+});
 
 Object.values(accountViewConfigs).forEach((config) => {
   [config.searchId, config.monthId, config.dateFromId, config.dateToId, config.statusId, config.reconciliationId, config.chartId].forEach((id) => {

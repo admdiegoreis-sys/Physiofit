@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=67" />
+    <link rel="stylesheet" href="styles.css?v=68" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -1086,8 +1086,8 @@
                 <h2>Emissão de NFS-e</h2>
               </div>
               <div class="module-actions">
-                <button class="primary-button" id="issueSelectedInvoicesButton" type="button">Emitir pendentes</button>
-                <button class="ghost-button" type="button">Exportar</button>
+                <button class="primary-button" id="issueSelectedInvoicesButton" type="button">Emitir selecionadas/pendentes</button>
+                <button class="ghost-button" data-view="fiscalSettings" type="button">Configurações fiscais</button>
               </div>
             </div>
               <div class="fiscal-summary" id="fiscalSummary"></div>
@@ -1095,9 +1095,9 @@
                 <select id="fiscalStatusFilter">
                   <option value="all">Todos os status</option>
                   <option>Pendente</option>
-                  <option>Enviada</option>
-                  <option>Autorizada</option>
-                  <option>Rejeitada</option>
+                  <option>Em Processamento</option>
+                  <option>Emitida</option>
+                  <option>Erro</option>
                   <option>Cancelada</option>
                 </select>
                 <select id="fiscalModalityFilter">
@@ -1113,6 +1113,7 @@
                 <table>
                   <thead>
                     <tr>
+                      <th></th>
                       <th>Ações</th>
                       <th>Tomador</th>
                       <th>Serviço</th>
@@ -1120,12 +1121,53 @@
                       <th>Valor</th>
                       <th>Status</th>
                       <th>Número / RPS</th>
-                      <th>Retorno</th>
+                      <th>Retorno / Erro</th>
                     </tr>
                   </thead>
                   <tbody id="fiscalTable"></tbody>
                 </table>
               </div>
+          </div>
+        </section>
+
+        <section class="view" id="fiscalSettingsView" aria-labelledby="viewTitle">
+          <div class="page-module">
+            <div class="module-header compact-header">
+              <div>
+                <p class="eyebrow">Financeiro</p>
+                <h2>Configurações fiscais (NFS-e)</h2>
+              </div>
+              <div class="module-actions">
+                <button class="ghost-button" data-view="fiscal" type="button">Voltar para NFS-e</button>
+              </div>
+            </div>
+            <div class="settings-hint" id="fiscalConfigHint">Dados usados para emissão de NFS-e no padrão nacional (Goiânia aderiu em out/2025). O certificado A1 é armazenado de forma criptografada e nunca é exibido novamente.</div>
+            <form id="fiscalConfigForm" class="settings-form">
+              <label>Município<input name="municipio" type="text" placeholder="Goiania-GO" /></label>
+              <label>Razão social<input name="razaoSocial" type="text" /></label>
+              <label>CNPJ<input name="cnpj" type="text" /></label>
+              <label>Inscrição Municipal<input name="inscricaoMunicipal" type="text" /></label>
+              <label>Regime tributário
+                <select name="regimeTributario">
+                  <option value="">Selecione</option>
+                  <option value="Simples Nacional">Simples Nacional</option>
+                  <option value="Lucro Presumido">Lucro Presumido</option>
+                  <option value="Lucro Real">Lucro Real</option>
+                </select>
+              </label>
+              <label>CNAE<input name="cnae" type="text" placeholder="9313-1/00" /></label>
+              <label>Item LC116/2003<input name="itemLc116" type="text" placeholder="8.02" /></label>
+              <label>Alíquota ISS (%)<input name="aliquotaIss" type="number" step="0.01" /></label>
+              <label>Série RPS<input name="serieRps" type="text" placeholder="A" /></label>
+              <button class="primary-button" id="saveFiscalConfigButton" type="button">Salvar configurações</button>
+            </form>
+            <div class="settings-hint" id="fiscalCertificateStatus">Verificando certificado digital...</div>
+            <form id="fiscalCertificateForm" class="settings-form">
+              <label>Certificado digital A1 (.pfx)<input id="fiscalCertificateFile" type="file" accept=".pfx,.p12" /></label>
+              <label>Senha do certificado<input id="fiscalCertificatePassword" type="password" /></label>
+              <label>Válido até<input id="fiscalCertificateExpiry" type="date" /></label>
+              <button class="primary-button" id="uploadFiscalCertificateButton" type="button">Enviar certificado</button>
+            </form>
           </div>
         </section>
 
@@ -2120,7 +2162,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=108"></script>
+    <script src="app.js?v=109"></script>
   </body>
 </html>
 

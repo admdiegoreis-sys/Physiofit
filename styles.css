@@ -2181,9 +2181,20 @@ body.sidebar-collapsed .top-menu-panel { display: none !important; }
 }
 
 .status-pill.rejeitada,
-.status-pill.cancelada {
+.status-pill.cancelada,
+.status-pill.erro {
   color: #85313a;
   background: #ffe0e3;
+}
+
+.status-pill.emitida {
+  color: #174a3b;
+  background: #dff2e8;
+}
+
+.status-pill.em-processamento {
+  color: #1d4b73;
+  background: #e0f2fe;
 }
 
 .status-pill-select {
@@ -7230,5 +7241,32 @@ body.sidebar-collapsed .powered-by-operafit { padding: 10px 0 2px; }
   height: 16px;
   accent-color: var(--accent, #2454CC);
   cursor: pointer;
+}
+
+.settings-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px 18px;
+  margin-bottom: 22px;
+  align-items: end;
+}
+.settings-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+.settings-form input,
+.settings-form select {
+  padding: 9px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.86rem;
+}
+.settings-form button {
+  align-self: end;
+  height: fit-content;
 }
 
