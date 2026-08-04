@@ -8796,6 +8796,25 @@ document.querySelector("#todayButton").addEventListener("click", () => {
   setAgendaMode("day");
 });
 
+function performGlobalSearch(rawTerm) {
+  const query = normalizedText(rawTerm.trim());
+  if (!query) return;
+  const match = state.students.find((s) => normalizedText(s.name).includes(query));
+  if (!match) { toast("Nenhum cliente encontrado com esse nome."); return; }
+  switchView("students");
+  const searchInput = document.querySelector("#studentSearch");
+  if (searchInput) searchInput.value = match.name;
+  const statusFilter = document.querySelector("#studentStatusFilter");
+  if (statusFilter) statusFilter.value = "all";
+  renderStudents();
+}
+
+document.querySelector("#globalSearch")?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  performGlobalSearch(event.target.value);
+  event.target.blur();
+});
+
 document.querySelector("#agendaSearchButton").addEventListener("click", renderSchedule);
 document.querySelector("#agendaClearFiltersButton")?.addEventListener("click", clearScheduleFilters);
 document.querySelector("#agendaListToggle").addEventListener("click", () => {
