@@ -189,6 +189,15 @@ export async function ensureLeadTables(sql) {
   `;
 }
 
+// Os webhooks (WhatsApp/Instagram/e-mail) nao exigem autenticacao nem validam a origem da
+// mensagem — qualquer um pode enviar um payload arbitrario. O texto livre (nome, mensagem,
+// observacoes) e renderizado depois via innerHTML em varias telas do CRM, entao removemos
+// qualquer coisa parecida com tag HTML aqui, na entrada, em vez de depender de escapar
+// certinho em cada tela que exibe esse dado.
+export function stripHtml(value = "") {
+  return String(value || "").replace(/<[^>]*>/g, "").trim();
+}
+
 export function normalizeLeadPayload(payload = {}) {
   const zapiPayload = zapiLeadPayload(payload);
   if (zapiPayload?.skip) return zapiPayload;
@@ -201,18 +210,18 @@ export function normalizeLeadPayload(payload = {}) {
   const status = leadStatuses.includes(payload.status) ? payload.status : "Novo lead";
 
   return {
-    nome: payload.nome || payload.name || "",
-    telefone: payload.telefone || payload.phone || "",
-    email: payload.email || "",
-    instagram: payload.instagram || "",
-    origem_lead: payload.origem_lead || payload.origin || payload.origem || "Outro",
-    canal_entrada: payload.canal_entrada || payload.entryChannel || payload.canal || "Manual",
-    mensagem_inicial: payload.mensagem_inicial || payload.initialMessage || payload.message || "",
-    interesse: payload.interesse || payload.interest || "",
+    nome: stripHtml(payload.nome || payload.name || ""),
+    telefone: stripHtml(payload.telefone || payload.phone || ""),
+    email: stripHtml(payload.email || ""),
+    instagram: stripHtml(payload.instagram || ""),
+    origem_lead: stripHtml(payload.origem_lead || payload.origin || payload.origem || "Outro"),
+    canal_entrada: stripHtml(payload.canal_entrada || payload.entryChannel || payload.canal || "Manual"),
+    mensagem_inicial: stripHtml(payload.mensagem_inicial || payload.initialMessage || payload.message || ""),
+    interesse: stripHtml(payload.interesse || payload.interest || ""),
     status,
     data_entrada: payload.data_entrada || payload.entryDate || new Date().toISOString().slice(0, 10),
     data_visita: payload.data_visita || payload.visitDate || null,
-    responsavel: payload.responsavel || payload.ownerId || payload.owner || "",
-    observacoes: payload.observacoes || payload.notes || "",
+    responsavel: stripHtml(payload.responsavel || payload.ownerId || payload.owner || ""),
+    observacoes: stripHtml(payload.observacoes || payload.notes || ""),
   };
 }

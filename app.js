@@ -2021,6 +2021,22 @@ function displayName(value = "") {
     .replace(/(^|\s|\/|-)(\p{L})/gu, (match, prefix, letter) => `${prefix}${letter.toLocaleUpperCase("pt-BR")}`);
 }
 
+// O formulario publico de pre-cadastro (link enviado por WhatsApp) nao exige login — qualquer
+// pessoa com o link (ou um token adivinhado) pode enviar qualquer texto nesses campos, que
+// depois e mesclado direto no cadastro do cliente e renderizado em varias telas via innerHTML.
+// Removemos tags HTML na entrada, igual ja fazemos nos webhooks de lead do lado do servidor.
+function stripHtmlTags(value = "") {
+  return String(value ?? "").replace(/<[^>]*>/g, "").trim();
+}
+
+function sanitizePayloadStrings(payload = {}) {
+  const clean = {};
+  Object.entries(payload || {}).forEach(([key, value]) => {
+    clean[key] = typeof value === "string" ? stripHtmlTags(value) : value;
+  });
+  return clean;
+}
+
 function escapeHtml(value = "") {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -3990,7 +4006,7 @@ async function mergePrecadastroSubmissions() {
 
     let changed = false;
     for (const row of rows) {
-      const payload = row.payload || {};
+      const payload = sanitizePayloadStrings(row.payload || {});
       const existingLead = row.lead_id ? state.leads.find((l) => l.id === row.lead_id) : null;
       const existingStudentId = existingLead?.linkedStudentId;
       const existingStudent = existingStudentId ? state.students.find((s) => s.id === existingStudentId) : null;
