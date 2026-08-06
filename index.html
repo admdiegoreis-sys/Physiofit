@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=70" />
+    <link rel="stylesheet" href="styles.css?v=71" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -242,6 +242,36 @@
               <strong id="monthSalesMetric">R$ 0</strong>
               <small id="monthSalesDetail">Vendas do mês (matrículas)</small>
               <span class="metric-sparkline" id="monthSalesTrend" aria-hidden="true"></span>
+            </article>
+            <article class="metric metric-canceled">
+              <span class="metric-icon" aria-hidden="true"></span>
+              <strong id="monthCanceledMetric">0</strong>
+              <small>Matrículas encerradas (mês)</small>
+              <span class="metric-sparkline" id="monthCanceledTrend" aria-hidden="true"></span>
+            </article>
+            <article class="metric metric-delinquency">
+              <span class="metric-icon" aria-hidden="true"></span>
+              <strong id="delinquencyRateMetric">0%</strong>
+              <small>Inadimplência</small>
+              <span class="metric-sparkline" id="delinquencyRateTrend" aria-hidden="true"></span>
+            </article>
+            <article class="metric metric-ticket">
+              <span class="metric-icon" aria-hidden="true"></span>
+              <strong id="avgTicketMetric">R$ 0</strong>
+              <small>Ticket médio por aluno</small>
+              <span class="metric-sparkline" id="avgTicketTrend" aria-hidden="true"></span>
+            </article>
+            <article class="metric metric-conversion">
+              <span class="metric-icon" aria-hidden="true"></span>
+              <strong id="conversionRateMetric">0%</strong>
+              <small>Conversão de leads</small>
+              <span class="metric-sparkline" id="conversionRateTrend" aria-hidden="true"></span>
+            </article>
+            <article class="metric metric-noshow">
+              <span class="metric-icon" aria-hidden="true"></span>
+              <strong id="noShowRateMetric">0%</strong>
+              <small>Taxa de faltas</small>
+              <span class="metric-sparkline" id="noShowRateTrend" aria-hidden="true"></span>
             </article>
           </div>
 
@@ -2171,7 +2201,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=120"></script>
+    <script src="app.js?v=121"></script>
   </body>
 </html>
 

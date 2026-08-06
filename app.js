@@ -3203,6 +3203,53 @@ function renderDashboard() {
   document.querySelector("#monthSalesDetail").textContent = `${monthEnrollmentsClosed.length} ${monthEnrollmentsClosed.length === 1 ? "matrícula fechada" : "matrículas fechadas"} no mês`;
   setMetricTrend("#monthSalesTrend", monthlySalesTrend, "#d9822b");
 
+  // Matrículas encerradas: não existe uma data de "cancelamento" registrada, só o status
+  // atual. Usamos o fim do contrato (endDate) como aproximação de quando a matrícula deixou
+  // de estar ativa — é o dado mais próximo disponível hoje.
+  const monthCanceledEnrollments = state.enrollments.filter((en) => en.endDate && en.endDate.slice(0, 7) === demoToday.slice(0, 7) && en.status !== "Ativa");
+  const monthlyCanceledTrend = dashboardMonths.map((month) =>
+    state.enrollments.filter((en) => en.endDate && en.endDate.slice(0, 7) === month && en.status !== "Ativa").length,
+  );
+  document.querySelector("#monthCanceledMetric").textContent = monthCanceledEnrollments.length;
+  setMetricTrend("#monthCanceledTrend", monthlyCanceledTrend, "#c8464e");
+
+  const delinquencyRate = monthRevenue + openInvoices > 0 ? Math.round((openInvoices / (monthRevenue + openInvoices)) * 100) : 0;
+  const monthlyDelinquencyTrend = dashboardMonths.map((month) => {
+    const monthPayments = state.payments.filter((p) => monthKey(p.dueDate) === month);
+    const paid = monthPayments.filter((p) => p.status === "Pago").reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    const open = monthPayments.filter((p) => p.status !== "Pago").reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    return paid + open > 0 ? Math.round((open / (paid + open)) * 100) : 0;
+  });
+  document.querySelector("#delinquencyRateMetric").textContent = `${delinquencyRate}%`;
+  setMetricTrend("#delinquencyRateTrend", monthlyDelinquencyTrend, "#e0575b");
+
+  const avgTicket = activeStudentTotal > 0 ? monthRevenue / activeStudentTotal : 0;
+  const monthlyAvgTicketTrend = dashboardMonths.map((month, i) => (activeStudentsTrend[i] > 0 ? monthlyRevenueTrend[i] / activeStudentsTrend[i] : 0));
+  document.querySelector("#avgTicketMetric").textContent = currency(avgTicket);
+  setMetricTrend("#avgTicketTrend", monthlyAvgTicketTrend, "#0f9692");
+
+  // Conversao geral (todo o historico de leads) como numero principal — a taxa de um unico
+  // mes fica ruidosa com poucos leads e ainda nao deu tempo de converter os mais recentes.
+  // A tendencia por mes usa a safra de entrada (entryDate) de cada lead.
+  const totalLeadsAll = state.leads.length;
+  const convertedLeadsAll = state.leads.filter((l) => l.status === "Matriculado").length;
+  const conversionRate = totalLeadsAll > 0 ? Math.round((convertedLeadsAll / totalLeadsAll) * 100) : 0;
+  const monthlyConversionTrend = dashboardMonths.map((month) => {
+    const monthLeads = state.leads.filter((l) => l.entryDate && l.entryDate.slice(0, 7) === month);
+    return monthLeads.length ? Math.round((monthLeads.filter((l) => l.status === "Matriculado").length / monthLeads.length) * 100) : 0;
+  });
+  document.querySelector("#conversionRateMetric").textContent = `${conversionRate}%`;
+  setMetricTrend("#conversionRateTrend", monthlyConversionTrend, "#3a9eb8");
+
+  const monthAppointmentsAll = state.appointments.filter((item) => item.date && item.date.slice(0, 7) === demoToday.slice(0, 7));
+  const noShowRate = monthAppointmentsAll.length ? Math.round((monthAppointmentsAll.filter((item) => item.status === "Faltou").length / monthAppointmentsAll.length) * 100) : 0;
+  const monthlyNoShowTrend = dashboardMonths.map((month) => {
+    const monthAppts = state.appointments.filter((item) => item.date && item.date.slice(0, 7) === month);
+    return monthAppts.length ? Math.round((monthAppts.filter((item) => item.status === "Faltou").length / monthAppts.length) * 100) : 0;
+  });
+  document.querySelector("#noShowRateMetric").textContent = `${noShowRate}%`;
+  setMetricTrend("#noShowRateTrend", monthlyNoShowTrend, "#8057d8");
+
   setMetricTrend("#activeStudentsTrend", activeStudentsTrend, "#0f9692");
   setMetricTrend("#todayClassesTrend", monthlyClassesTrend, "#48b962");
   setMetricTrend("#monthRevenueTrend", monthlyRevenueTrend, "#3a9eb8");
