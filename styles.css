@@ -5109,7 +5109,7 @@ body {
   font-size: 0.74rem;
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1150px) {
   .metric-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
