@@ -946,6 +946,9 @@ const modalSchemas = {
         if (enrolledStudent) enrolledStudent.membership = "Ativo";
         _pendingEnrollLeadId = null;
       }
+      if (normalized.status === "Cancelada" && !normalized.canceledAt) {
+        normalized.canceledAt = demoToday;
+      }
       ensureEnrollmentFinancialTitles(normalized);
       ensureEnrollmentAppointments(normalized);
       if (normalized.status === "Cancelada" && previousStatus && previousStatus !== "Cancelada") {
@@ -3203,12 +3206,19 @@ function renderDashboard() {
   document.querySelector("#monthSalesDetail").textContent = `${monthEnrollmentsClosed.length} ${monthEnrollmentsClosed.length === 1 ? "matrícula fechada" : "matrículas fechadas"} no mês`;
   setMetricTrend("#monthSalesTrend", monthlySalesTrend, "#d9822b");
 
-  // Matrículas encerradas: não existe uma data de "cancelamento" registrada, só o status
-  // atual. Usamos o fim do contrato (endDate) como aproximação de quando a matrícula deixou
-  // de estar ativa — é o dado mais próximo disponível hoje.
-  const monthCanceledEnrollments = state.enrollments.filter((en) => en.endDate && en.endDate.slice(0, 7) === demoToday.slice(0, 7) && en.status !== "Ativa");
+  // Matrículas encerradas: usa a data real do cancelamento (canceledAt, registrada pela ação
+  // "Cancelar matrícula"). Para matrículas canceladas antes dessa data existir, cai de volta
+  // no fim do contrato (endDate) como aproximação.
+  const enrollmentEndReference = (en) => en.canceledAt || (en.status !== "Ativa" ? en.endDate : "");
+  const monthCanceledEnrollments = state.enrollments.filter((en) => {
+    const ref = enrollmentEndReference(en);
+    return ref && ref.slice(0, 7) === demoToday.slice(0, 7);
+  });
   const monthlyCanceledTrend = dashboardMonths.map((month) =>
-    state.enrollments.filter((en) => en.endDate && en.endDate.slice(0, 7) === month && en.status !== "Ativa").length,
+    state.enrollments.filter((en) => {
+      const ref = enrollmentEndReference(en);
+      return ref && ref.slice(0, 7) === month;
+    }).length,
   );
   document.querySelector("#monthCanceledMetric").textContent = monthCanceledEnrollments.length;
   setMetricTrend("#monthCanceledTrend", monthlyCanceledTrend, "#c8464e");
@@ -4032,6 +4042,49 @@ function saveLoseLead() {
   toast("Lead marcado como perdido.");
 }
 
+let _cancelEnrollmentId = null;
+
+function openCancelEnrollmentOverlay(enrollmentId) {
+  const enrollment = state.enrollments.find((item) => item.id === enrollmentId);
+  if (!enrollment) return;
+  _cancelEnrollmentId = enrollmentId;
+  document.querySelector("#cancelEnrollmentName").textContent = studentName(enrollment.studentId);
+  document.querySelector("#cancelEnrollmentDate").value = demoToday;
+  document.querySelector("#cancelEnrollmentReason").value = "";
+  document.querySelector("#cancelEnrollmentOverlay").hidden = false;
+  document.querySelector("#cancelEnrollmentReason").focus();
+}
+
+function closeCancelEnrollmentOverlay() {
+  document.querySelector("#cancelEnrollmentOverlay").hidden = true;
+  _cancelEnrollmentId = null;
+}
+
+function saveCancelEnrollment() {
+  const enrollment = state.enrollments.find((item) => item.id === _cancelEnrollmentId);
+  if (!enrollment) return;
+  const reason = document.querySelector("#cancelEnrollmentReason").value.trim();
+  if (!reason) { document.querySelector("#cancelEnrollmentReason").focus(); return; }
+  const canceledAt = document.querySelector("#cancelEnrollmentDate").value || demoToday;
+  const previousStatus = enrollment.status;
+  enrollment.status = "Cancelada";
+  enrollment.canceledAt = canceledAt;
+  enrollment.cancelReason = reason;
+  ensureEnrollmentFinancialTitles(enrollment);
+  ensureEnrollmentAppointments(enrollment);
+  if (previousStatus !== "Cancelada") cancelEnrollmentFutureItems(enrollment);
+  closeCancelEnrollmentOverlay();
+  saveState();
+  render();
+  toast("Matrícula cancelada.");
+}
+
+document.querySelector("#cancelEnrollmentSave")?.addEventListener("click", saveCancelEnrollment);
+document.querySelector("#cancelEnrollmentCancelBtn")?.addEventListener("click", closeCancelEnrollmentOverlay);
+document.querySelector("#cancelEnrollmentOverlay")?.addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) closeCancelEnrollmentOverlay();
+});
+
 function registerStudentFromLead(leadId) {
   const lead = state.leads.find((l) => l.id === leadId);
   if (!lead) return;
@@ -4597,6 +4650,7 @@ function renderEnrollments() {
               <td>
                 <div class="row-actions">
                   <button class="row-action-button edit-icon-button" data-edit-enrollment="${item.id}" type="button" title="Editar matrícula" aria-label="Editar matrícula"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  ${item.status !== "Cancelada" ? `<button class="row-action-button delete-icon-button" data-cancel-enrollment="${item.id}" type="button" title="Cancelar matrícula" aria-label="Cancelar matrícula"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg></button>` : ""}
                   <button class="row-action-button delete-icon-button" data-delete-enrollment="${item.id}" type="button" title="Excluir matrícula" aria-label="Excluir matrícula"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
                 </div>
               </td>
@@ -4619,7 +4673,7 @@ function renderEnrollments() {
                 ["Sex", item.fridayTime],
               ].filter(([, t]) => t).map(([d, t]) => `<span class="schedule-pill">${d} ${t}</span>`).join("")|| "-"}</div></td>
               <td><span class="status-pill ${paymentSummary.label === "Pago" ? paymentSummary.className : financialGenerated ? "ativo" : "pendente"}">${paymentSummary.label === "Pago" ? paymentSummary.label : financialGenerated ? "Gerado" : "Pendente"}</span></td>
-              <td><span class="status-pill ${statusClass(item.status)}">${item.status}</span></td>
+              <td><span class="status-pill ${statusClass(item.status)}" ${item.status === "Cancelada" && (item.canceledAt || item.cancelReason) ? `title="${escapeHtml(`Cancelada em ${dateLabel(item.canceledAt)}${item.cancelReason ? ` — ${item.cancelReason}` : ""}`)}"` : ""}>${item.status}</span></td>
             </tr>
           `;
           },
@@ -8500,6 +8554,9 @@ document.addEventListener("click", (event) => {
 
   const deleteEnrollmentButton = event.target.closest("[data-delete-enrollment]");
   if (deleteEnrollmentButton) deleteEnrollment(deleteEnrollmentButton.dataset.deleteEnrollment);
+
+  const cancelEnrollmentButton = event.target.closest("[data-cancel-enrollment]");
+  if (cancelEnrollmentButton) openCancelEnrollmentOverlay(cancelEnrollmentButton.dataset.cancelEnrollment);
 
   const deleteAccountButton = event.target.closest("[data-delete-account]");
   if (deleteAccountButton) deleteAccount(deleteAccountButton.dataset.deleteAccount);
