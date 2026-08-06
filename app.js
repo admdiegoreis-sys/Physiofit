@@ -1927,6 +1927,15 @@ function currency(value) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+function currencyCompact(value) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 function recentMonthKeys(total = 6) {
   const base = parseLocalDate(demoToday);
   return Array.from({ length: total }, (_, index) => {
@@ -3154,8 +3163,8 @@ function renderDashboard() {
 
   document.querySelector("#activeStudentsMetric").textContent = state.students.filter((item) => item.status === "Ativo").length;
   document.querySelector("#todayClassesMetric").textContent = todayClasses.length;
-  document.querySelector("#monthRevenueMetric").textContent = currency(monthRevenue);
-  document.querySelector("#openInvoicesMetric").textContent = currency(openInvoices);
+  document.querySelector("#monthRevenueMetric").textContent = currencyCompact(monthRevenue);
+  document.querySelector("#openInvoicesMetric").textContent = currencyCompact(openInvoices);
   document.querySelector("#occupancyMetric").textContent = `${occupancyRate}%`;
   document.querySelector("#activeProfessionalsMetric").textContent = activeProfessionals().length;
   document.querySelector("#activePlansMetric").textContent = activePlans().length;
@@ -3202,7 +3211,7 @@ function renderDashboard() {
       .filter((en) => en.startDate && en.startDate.slice(0, 7) === month)
       .reduce((sum, en) => sum + Number(en.monthlyValue || planById(en.planId)?.value || 0), 0),
   );
-  document.querySelector("#monthSalesMetric").textContent = currency(monthSalesValue);
+  document.querySelector("#monthSalesMetric").textContent = currencyCompact(monthSalesValue);
   document.querySelector("#monthSalesDetail").textContent = `${monthEnrollmentsClosed.length} ${monthEnrollmentsClosed.length === 1 ? "matrícula fechada" : "matrículas fechadas"} no mês`;
   setMetricTrend("#monthSalesTrend", monthlySalesTrend, "#d9822b");
 
@@ -3235,7 +3244,7 @@ function renderDashboard() {
 
   const avgTicket = activeStudentTotal > 0 ? monthRevenue / activeStudentTotal : 0;
   const monthlyAvgTicketTrend = dashboardMonths.map((month, i) => (activeStudentsTrend[i] > 0 ? monthlyRevenueTrend[i] / activeStudentsTrend[i] : 0));
-  document.querySelector("#avgTicketMetric").textContent = currency(avgTicket);
+  document.querySelector("#avgTicketMetric").textContent = currencyCompact(avgTicket);
   setMetricTrend("#avgTicketTrend", monthlyAvgTicketTrend, "#0f9692");
 
   // Conversao geral (todo o historico de leads) como numero principal — a taxa de um unico
