@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=69" />
+    <link rel="stylesheet" href="styles.css?v=70" />
   </head>
   <body class="auth-locked">
     <section class="login-screen" id="loginScreen" aria-label="Acesso ao sistema">
@@ -236,6 +236,12 @@
               <strong id="confirmedRateMetric">0%</strong>
               <small>Sessões confirmadas</small>
               <span class="metric-sparkline" id="confirmedRateTrend" aria-hidden="true"></span>
+            </article>
+            <article class="metric metric-sales">
+              <span class="metric-icon" aria-hidden="true"></span>
+              <strong id="monthSalesMetric">R$ 0</strong>
+              <small id="monthSalesDetail">Vendas do mês (matrículas)</small>
+              <span class="metric-sparkline" id="monthSalesTrend" aria-hidden="true"></span>
             </article>
           </div>
 
@@ -2165,7 +2171,7 @@
     <script src="env.js"></script>
     <script src="neon-client.js"></script>
     <script src="studio-data.js"></script>
-    <script src="app.js?v=119"></script>
+    <script src="app.js?v=120"></script>
   </body>
 </html>
 

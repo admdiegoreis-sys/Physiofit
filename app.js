@@ -3192,6 +3192,17 @@ function renderDashboard() {
       .forEach((s) => enrolled.add(s.id));
     return enrolled.size;
   });
+  const monthEnrollmentsClosed = state.enrollments.filter((en) => en.startDate && en.startDate.slice(0, 7) === demoToday.slice(0, 7));
+  const monthSalesValue = monthEnrollmentsClosed.reduce((sum, en) => sum + Number(en.monthlyValue || planById(en.planId)?.value || 0), 0);
+  const monthlySalesTrend = dashboardMonths.map((month) =>
+    state.enrollments
+      .filter((en) => en.startDate && en.startDate.slice(0, 7) === month)
+      .reduce((sum, en) => sum + Number(en.monthlyValue || planById(en.planId)?.value || 0), 0),
+  );
+  document.querySelector("#monthSalesMetric").textContent = currency(monthSalesValue);
+  document.querySelector("#monthSalesDetail").textContent = `${monthEnrollmentsClosed.length} ${monthEnrollmentsClosed.length === 1 ? "matrícula fechada" : "matrículas fechadas"} no mês`;
+  setMetricTrend("#monthSalesTrend", monthlySalesTrend, "#d9822b");
+
   setMetricTrend("#activeStudentsTrend", activeStudentsTrend, "#0f9692");
   setMetricTrend("#todayClassesTrend", monthlyClassesTrend, "#48b962");
   setMetricTrend("#monthRevenueTrend", monthlyRevenueTrend, "#3a9eb8");
