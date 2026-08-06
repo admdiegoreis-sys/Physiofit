@@ -2037,6 +2037,31 @@ function sanitizePayloadStrings(payload = {}) {
   return clean;
 }
 
+// Antes o Dashboard mostrava "há 1h, há 2h, há 3h..." fixo pela posição no array, sem
+// nenhuma relação com quando a atividade realmente aconteceu. Calcula o timestamp real
+// (data + hora quando disponível) para poder ordenar e exibir o tempo decorrido de verdade.
+function activityTimestamp(dateStr, timeStr) {
+  if (!dateStr) return 0;
+  const iso = timeStr ? `${dateStr}T${timeStr}:00` : `${dateStr}T00:00:00`;
+  const parsed = new Date(iso).getTime();
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function relativeTimeLabel(timestamp) {
+  if (!timestamp) return "";
+  const diffMs = Date.now() - timestamp;
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "agora";
+  if (diffMin < 60) return `há ${diffMin} min`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `há ${diffHours}h`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "ontem";
+  if (diffDays < 30) return `há ${diffDays} dias`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `há ${diffMonths} ${diffMonths === 1 ? "mês" : "meses"}`;
+}
+
 function escapeHtml(value = "") {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -3319,13 +3344,15 @@ function renderDashboard() {
     : `<div class="empty-state">Sem vencimentos em aberto.</div>`;
 
   const recentActivities = [
-    ...state.records.slice(-2).map((item) => ({ icon: "↗", title: "Nova avaliação realizada", detail: `${studentName(item.studentId)} · ${item.title}`, tone: "blue" })),
-    ...paidReceivables.slice(-2).map((item) => ({ icon: "$", title: "Pagamento recebido", detail: `${item.person || studentName(item.studentId)} - ${currency(accountPaidAmount(item))}`, tone: "green" })),
-    ...state.leads.slice(-2).map((item) => ({ icon: "+", title: "Lead registrado", detail: `${item.name} · ${item.interest}`, tone: "teal" })),
-    ...state.appointments.filter((item) => item.status === "Faltou").slice(-1).map((item) => ({ icon: "×", title: "Falta registrada", detail: `${studentName(item.studentId)} · ${item.type}`, tone: "red" })),
-  ].slice(0, 5);
+    ...state.records.slice(-2).map((item) => ({ icon: "↗", title: "Nova avaliação realizada", detail: `${studentName(item.studentId)} · ${item.title}`, tone: "blue", when: activityTimestamp(item.date) })),
+    ...paidReceivables.slice(-2).map((item) => ({ icon: "$", title: "Pagamento recebido", detail: `${item.person || studentName(item.studentId)} - ${currency(accountPaidAmount(item))}`, tone: "green", when: activityTimestamp(accountPaymentDate(item)) })),
+    ...state.leads.slice(-2).map((item) => ({ icon: "+", title: "Lead registrado", detail: `${item.name} · ${item.interest}`, tone: "teal", when: activityTimestamp(item.entryDate) })),
+    ...state.appointments.filter((item) => item.status === "Faltou").slice(-1).map((item) => ({ icon: "×", title: "Falta registrada", detail: `${studentName(item.studentId)} · ${item.type}`, tone: "red", when: activityTimestamp(item.date, item.time) })),
+  ]
+    .sort((a, b) => b.when - a.when)
+    .slice(0, 5);
   document.querySelector("#dashboardActivityList").innerHTML = recentActivities.length
-    ? recentActivities.map((item, index) => `<article><span class="activity-icon ${item.tone}">${item.icon}</span><div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></div><time>há ${index + 1} h</time></article>`).join("")
+    ? recentActivities.map((item) => `<article><span class="activity-icon ${item.tone}">${item.icon}</span><div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></div><time>${relativeTimeLabel(item.when)}</time></article>`).join("")
     : `<div class="empty-state">Sem atividades recentes.</div>`;
 }
 
