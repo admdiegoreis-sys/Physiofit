@@ -972,7 +972,7 @@ const modalSchemas = {
     submit: "Salvar contrato",
     fields: [
       { name: "description", label: "Descrição", type: "text", value: "" },
-      { name: "person", label: "Fornecedor", type: "text", value: "" },
+      { name: "person", label: "Fornecedor", type: "personLookup", value: "" },
       { name: "document", label: "CPF/CNPJ", type: "text", value: "", required: false },
       { name: "chartAccountId", label: "Plano de contas", type: "chartAccount" },
       { name: "amount", label: "Valor previsto (R$)", type: "number", value: 0 },
@@ -7976,7 +7976,7 @@ function refreshAccountChartOptions(keepIncompatible = false) {
 // Cliente/Fornecedor: fills CPF/CNPJ from the matching record; shows register button when unknown
 function applyAccountPersonAutofill() {
   const form = document.querySelector("#modalForm");
-  if (form.dataset.type !== "account") return;
+  if (!["account", "contract"].includes(form.dataset.type)) return;
   const personInput = form.querySelector("input[name='person']");
   const docInput = form.querySelector("input[name='document']");
   const registerBtn = form.querySelector("#accountPersonRegisterBtn");
@@ -8262,10 +8262,21 @@ function closeModal() {
   if (_pendingAccountModalValues && (closedType === "supplier" || closedType === "student")) {
     const pending = _pendingAccountModalValues;
     _pendingAccountModalValues = null;
-    editingAccountId = pending._editingAccountId || null;
-    delete pending._editingAccountId;
-    openModal("account", pending);
-    document.querySelector("#modalTitle").textContent = editingAccountId ? "Editar título" : "Adicionar título";
+    const kind = pending._modalKind || "account";
+    delete pending._modalKind;
+    if (kind === "contract") {
+      editingContractId = pending._editingContractId || null;
+      delete pending._editingAccountId;
+      delete pending._editingContractId;
+      openModal("contract", pending);
+      document.querySelector("#modalTitle").textContent = editingContractId ? "Editar contrato" : "Adicionar contrato";
+    } else {
+      editingAccountId = pending._editingAccountId || null;
+      delete pending._editingAccountId;
+      delete pending._editingContractId;
+      openModal("account", pending);
+      document.querySelector("#modalTitle").textContent = editingAccountId ? "Editar título" : "Adicionar título";
+    }
   }
 }
 
@@ -8907,7 +8918,9 @@ document.querySelector("#modalForm").addEventListener("click", (event) => {
   if (!event.target.closest("#accountPersonRegisterBtn")) return;
   const form = document.querySelector("#modalForm");
   const values = Object.fromEntries(new FormData(form).entries());
+  values._modalKind = form.dataset.type;
   values._editingAccountId = editingAccountId;
+  values._editingContractId = editingContractId;
   _pendingAccountModalValues = values;
   const direction = values.direction || "Pagar";
   const name = (values.person || "").trim();
