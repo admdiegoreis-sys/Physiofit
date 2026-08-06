@@ -9576,6 +9576,11 @@ async function mergeLeadsFromApi() {
       .map((item, i) => normalizeLead(item, state.leads.length + i, false));
     if (newLeads.length === 0) return;
     state.leads = [...newLeads, ...state.leads];
+    // Sem isso, o lead novo ficava só na memoria desta aba: outra sessao que abrisse o
+    // sistema (ou o mesmo poll de 45s em outra aba) redescobria o mesmo lead da tabela crua
+    // do webhook e mesclava de novo, cada uma na sua propria copia local — dando a impressao
+    // de leads "fantasmas" que aparecem numa tela e somem/duplicam em outra.
+    saveState({ immediate: true });
     renderCrm();
     renderDashboard();
   } catch (e) {
